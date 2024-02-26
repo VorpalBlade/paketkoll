@@ -1,0 +1,7 @@
+[build]
+# Needed on some targets (e.g. RISC-V) to build libz-ng-sys
+pre-build = [
+    "ln -fs /usr/share/zoneinfo/UTC /etc/localtime",
+    "dpkg --add-architecture $CROSS_DEB_ARCH",
+    "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes cmake",
+]
