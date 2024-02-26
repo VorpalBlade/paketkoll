@@ -62,7 +62,9 @@ jobs:
         uses: Swatinem/rust-cache@v2.7.3
         with:
           key: ${{ matrix.target }}-${{ matrix.rust }}
-      - name: Cross compile
+      - name: Cross compile binary
+        run: cross build --locked --target ${{ matrix.target }} --verbose
+      - name: Cross compile tests
         run: cross test --no-run --locked --target ${{ matrix.target }} --verbose
       - name: Cross test
         run: cross test --locked --target ${{ matrix.target }} --verbose
@@ -100,6 +102,10 @@ jobs:
         rust:
           - 1.76.0
           - stable
+        include:
+          # MSRV with default features too
+          - features:
+            rust: 1.76.0
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
