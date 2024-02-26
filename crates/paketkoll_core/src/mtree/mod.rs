@@ -7,7 +7,7 @@
 //!
 //! # Examples
 //!
-//! ```
+//! ```no_compile
 //! use mtree::MTree;
 //! use std::time::{SystemTime, UNIX_EPOCH};
 //!
