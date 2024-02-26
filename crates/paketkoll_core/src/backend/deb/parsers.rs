@@ -138,9 +138,10 @@ enum StatusParsingState {
 
 #[cfg(test)]
 mod tests {
-    use crate::types::FileFlags;
-
-    use super::*;
+    use super::{parse_md5sums, parse_paths, parse_status};
+    use crate::types::{
+        Checksum, FileEntry, FileFlags, PackageInterner, PackageRef, Properties, RegularFileBasic,
+    };
     use pretty_assertions::assert_eq;
 
     #[test]

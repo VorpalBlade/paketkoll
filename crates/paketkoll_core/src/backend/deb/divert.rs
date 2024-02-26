@@ -85,8 +85,10 @@ fn parse_diversions(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::types::PackageInterner;
+    use std::collections::BTreeMap;
+
+    use super::{parse_diversions, Diversion};
+    use crate::types::{PackageInterner, PackageRef};
     use pretty_assertions::assert_eq;
 
     #[test]
