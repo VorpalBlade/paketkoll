@@ -98,7 +98,7 @@ jobs:
           - --no-default-features --features=arch_linux
           - --no-default-features --features=debian
         rust:
-          - 1.75.0
+          - 1.76.0
           - stable
     steps:
       - uses: actions/checkout@v4
@@ -110,3 +110,6 @@ jobs:
         run: cargo test --locked ${{ matrix.features }} --verbose --no-run
       - name: Test
         run: cargo test --locked ${{ matrix.features }} --verbose
+    env:
+      # Warnings are ok for now here due to private APIs that will be public in the future.
+      RUSTFLAGS: ""
