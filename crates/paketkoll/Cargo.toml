@@ -1,0 +1,31 @@
+[package]
+description = "Check installed distro files for changes"
+edition = "2021"
+license = "MPL-2.0"
+name = "paketkoll"
+readme = "../../README.md"
+repository = "https://github.com/VorpalBlade/paketkoll"
+rust-version = "1.76.0"
+version = "0.1.0"
+
+[features]
+# Default features
+default = ["debian", "arch_linux"]
+
+# Include the Arch Linux backend
+arch_linux = ["paketkoll_core/arch_linux"]
+
+# Include support for the Debian backend
+debian = ["paketkoll_core/debian"]
+
+[dependencies]
+anyhow = { version = "1.0.79", features = ["backtrace"] }
+clap = { version = "4.5.1", features = ["derive"] }
+env_logger = "0.11.2"
+log = "0.4.20"
+os_info = { version = "3.7.0", default-features = false }
+paketkoll_core = { version = "0.1.0", path = "../paketkoll_core" }
+
+[build-dependencies]
+clap = { version = "4.5.1", features = ["derive"] }
+clap_complete = "4.5.1"

@@ -1,0 +1,112 @@
+name: Build
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+  CARGO_TERM_COLOR: always
+  PAKETKOLL_BUILDER: github-ci
+  RUST_BACKTRACE: 1
+  RUSTFLAGS: "-D warnings"
+  RUSTUP_MAX_RETRIES: 10
+
+jobs:
+  modern-default:
+    # Test modern compilers on standard platforms on Linux.
+    name: "${{ matrix.target }} - ${{ matrix.rust }} (default configuration)"
+    runs-on: ubuntu-latest
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 1
+      CARGO_PROFILE_DEV_SPLIT_DEBUGINFO: ${{ matrix.debug_info }}
+      RUSTFLAGS: -D warnings -Clink-arg=-Wl,--compress-debug-sections=zlib
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
+          - armv7-unknown-linux-gnueabihf
+          - armv7-unknown-linux-musleabihf
+          - i686-unknown-linux-gnu
+          - i686-unknown-linux-musl
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+        rust:
+          - stable
+          - nightly
+        debug_info:
+          - packed
+        include:
+          # RISCV doesn't work with split debug info (see rust-lang/rust#110224)
+          - target: riscv64gc-unknown-linux-gnu
+            rust: stable
+            debug_info: off
+          - target: riscv64gc-unknown-linux-gnu
+            rust: nightly
+            debug_info: off
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        run: rustup install --profile minimal ${{ matrix.rust }} && rustup default ${{ matrix.rust }}
+      - name: Install cross
+        uses: taiki-e/install-action@cross
+      - name: Cache builds
+        uses: Swatinem/rust-cache@v2.7.3
+        with:
+          key: ${{ matrix.target }}-${{ matrix.rust }}
+      - name: Cross compile
+        run: cross test --no-run --locked --target ${{ matrix.target }} --verbose
+      - name: Cross test
+        run: cross test --locked --target ${{ matrix.target }} --verbose
+      - name: Compress binary
+        if: matrix.rust == 'stable' && matrix.target != 'x86_64-pc-windows-gnu'
+        run: |
+          mkdir paketkoll
+          cp target/${{ matrix.target }}/debug/paketkoll paketkoll/
+          if [[ -f target/${{ matrix.target }}/debug/paketkoll.dwp ]]; then
+            # No split debug info for RISCV
+            cp target/${{ matrix.target }}/debug/paketkoll.dwp paketkoll/
+          fi
+          tar cf paketkoll.tar paketkoll
+          zstd -T0 -6 paketkoll.tar
+      - uses: actions/upload-artifact@v4
+        if: matrix.rust == 'stable' && matrix.target != 'x86_64-pc-windows-gnu'
+        with:
+          name: paketkoll_${{ matrix.target }}.zst
+          path: paketkoll.tar.zst
+          retention-days: 7
+      - name: Clean up temporary items
+        run: |
+          rm -rf paketkoll paketkoll.tar paketkoll.tar.zst
+
+  configurations:
+    # Test non-standard configurations, MSRV and Rust versions
+    name: "Test: \"${{ matrix.features }}\" (Linux), Rust ${{ matrix.rust }}"
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        features:
+          - --no-default-features --features=arch_linux
+          - --no-default-features --features=debian
+        rust:
+          - 1.75.0
+          - stable
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        run: rustup install --profile minimal  ${{ matrix.rust }} && rustup default ${{ matrix.rust }}
+      - name: Cache builds
+        uses: Swatinem/rust-cache@v2.7.3
+      - name: Compile
+        run: cargo test --locked ${{ matrix.features }} --verbose --no-run
+      - name: Test
+        run: cargo test --locked ${{ matrix.features }} --verbose

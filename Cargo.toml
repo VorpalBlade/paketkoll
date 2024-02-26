@@ -1,0 +1,21 @@
+[workspace]
+members = ["crates/*"]
+resolver = "2"
+
+[profile.dev]
+debug = 2
+split-debuginfo = "unpacked"
+
+[profile.release]
+lto = "fat"
+opt-level = 2
+
+[profile.profiling]
+debug = 2
+inherits = "release"
+
+[profile.dev.package.ring]
+opt-level = 2
+
+[profile.dev.package.md-5]
+opt-level = 2
