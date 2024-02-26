@@ -42,7 +42,10 @@ Note: CPU time is actually comparable to the original tools (slightly better in
 general). But due to parallelism the wall time is *way* better, especially
 without `--trust-mtime` (where the runtime is quite small to begin with).
 
-All of the runs were performed on warm disk cache.
+* All of the runs were performed on warm disk cache.
+* Distro-installed versions of paccheck and debsums were used.
+* Musl builds built using cross was used across the board for best portability.
+* The same build flags as used for binary releases in this were used (opt level 2, fat LTO)
 
 ### Arch Linux (x64-64 AMD desktop)
 
