@@ -8,10 +8,10 @@ use std::{
     path::PathBuf,
 };
 
+use crate::mtree::{self, MTree};
 use anyhow::Context;
 use dashmap::DashSet;
 use flate2::read::GzDecoder;
-use mtree::MTree;
 
 use crate::types::{
     Checksum, Directory, FileEntry, FileFlags, Gid, Mode, PackageRef, Properties, RegularFile,

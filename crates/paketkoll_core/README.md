@@ -22,3 +22,9 @@ What this library may one day become:
   specific state.
 * Get original unchanged files where possible (downloading the package to the package
   cache if missing and extracting the file in question from there).
+
+## Caveats
+
+This library currently vendors a patched version of [mtree-rs](https://github.com/derekdreery/mtree-rs).
+Hopefully the changes required will be merged upstream and a new release made, at
+which point the plan is to no longer vendor that dependency.

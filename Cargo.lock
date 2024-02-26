@@ -243,7 +243,7 @@ dependencies = [
  "cfg-if",
  "itoa",
  "ryu",
- "smallvec 1.13.1",
+ "smallvec",
  "static_assertions",
 ]
 
@@ -512,12 +512,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b5e6163cb8c49088c2c36f57875e58ccd8c87c7427f7fbd50ea6710b2f3f2e8f"
 
 [[package]]
-name = "maybe-uninit"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "60302e4db3a61da70c0cb7991976248362f30319e88850c487b9b95bbf059e00"
-
-[[package]]
 name = "md-5"
 version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -541,23 +535,6 @@ checksum = "9d811f3e15f28568be3407c8e7fdb6514c1cda3cb30683f15b6a1a1dc4ea14a7"
 dependencies = [
  "adler",
 ]
-
-[[package]]
-name = "mtree"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d2b64559cc18798f47b1617e4ab35940109e00e9dad9039070e1be65c48b93c"
-dependencies = [
- "bitflags 1.3.2",
- "newtype_array",
- "smallvec 0.6.14",
-]
-
-[[package]]
-name = "newtype_array"
-version = "0.1.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83e349a10d787d414a75dd08a14853797811ccaee263c0d5f6ede859fd943880"
 
 [[package]]
 name = "object"
@@ -623,14 +600,13 @@ dependencies = [
  "lasso",
  "log",
  "md-5",
- "mtree",
  "phf",
  "pretty_assertions",
  "rayon",
  "regex",
  "ring",
  "rust-ini",
- "smallvec 1.13.1",
+ "smallvec",
  "strum",
  "typed-builder",
 ]
@@ -644,7 +620,7 @@ dependencies = [
  "cfg-if",
  "libc",
  "redox_syscall",
- "smallvec 1.13.1",
+ "smallvec",
  "windows-targets 0.48.5",
 ]
 
@@ -865,15 +841,6 @@ name = "siphasher"
 version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "38b58827f4464d87d377d175e90bf58eb00fd8716ff0a62f80356b5e61555d0d"
-
-[[package]]
-name = "smallvec"
-version = "0.6.14"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b97fcaeba89edba30f044a10c6a3cc39df9c3f17d7cd829dd1446cab35f890e0"
-dependencies = [
- "maybe-uninit",
-]
 
 [[package]]
 name = "smallvec"

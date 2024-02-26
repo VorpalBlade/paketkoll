@@ -10,3 +10,9 @@ compile_error!("At least one backend must be enabled");
 pub mod backend;
 pub mod config;
 pub mod types;
+
+/// Vendored dependency due to upstream being slow to accept PRs
+///
+/// We also need to allow dead code, since we don't use all functions from it.
+#[allow(dead_code)]
+mod mtree;
