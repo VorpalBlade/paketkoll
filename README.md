@@ -147,7 +147,7 @@ Summary
 
 ## Future improvements
 
-Most future improvements will happen in the [`paccheck_core`](crates/paketkoll_core)
+Most future improvements will happen in the [`paketkoll_core`](crates/paketkoll_core)
 crate, to make it suitable for another project idea I have (basically that project
 needs this as a library).
 
