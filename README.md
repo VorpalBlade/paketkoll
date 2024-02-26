@@ -2,9 +2,9 @@
 
 [ [lib.rs] ] [ [crates.io] ]
 
-This is a Rust replacement for debsums (on Debian/Ubuntu/...) and paccheck (on
-Arch Linux and derivatives). It is much faster than those thanks to using all
-your CPU cores in parallel.
+This is a Rust replacement for `debsums` (on Debian/Ubuntu/...) and `paccheck`
+(on Arch Linux and derivatives). It is much faster than those thanks to using
+all your CPU cores in parallel.
 
 What it does is compare installed files to what the package manager installed and
 report any discrepancies.
@@ -30,11 +30,11 @@ Caveats:
 * This is not a drop-in replacement for either debsums nor paccheck, since
   command line flags and output format differs. Additionally, debsums have some
   extra features that this doesn't, such as filtering out files removed by localepurge.
-* This uses much more memory than paccheck (3x). This is largely unavoidable due
+* This uses much more memory than `paccheck` (3x). This is largely unavoidable due
   to memory-speed tradeoffs, though there is room for *some* improvements still.
-* paketkoll will not report quite the same errors as paccheck. For example, if it finds
-  that the size differs, it will not bother computing the checksums, since they can never
-  match.
+* paketkoll will not report quite the same errors as `paccheck`. For example, if
+  it finds that the size differs, it will not bother computing the checksums,
+  since they can never match.
 
 ## Benchmarks
 
