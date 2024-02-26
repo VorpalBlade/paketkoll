@@ -32,7 +32,7 @@ header = """
 All notable changes to this project will be documented in this file.
 Keep in mind that this is only updated when releases are made and the file
 is generated automatically from commit messages.\n
-For a possibly more edited message (for major changes) please see the github
+For a possibly more edited message focused on the binary please see the github
 releases.\n
 """
 protect_breaking_commits = true
@@ -47,7 +47,7 @@ commit_preprocessors = [
 commit_parsers = [
     { message = "^feat", group = "<!-- 0 -->🚀 Shiny new things (features)" },
     { message = "^fix", group = "<!-- 1 -->🐛 No longer broken (bug fixes)" },
-    { message = "^doc", group = "<!-- 3 -->📚 Things to read (documentation)" },
+    { message = "^docs?", group = "<!-- 3 -->📚 Things to read (documentation)" },
     { message = "^perf", group = "<!-- 4 -->⚡ Go faster! (performance)" },
     { message = "^refactor", group = "<!-- 2 -->🚜 Now more maintainable (refactor)" },
     { message = "^style", group = "<!-- 5 -->🎨 Now easier to read (styling)" },
