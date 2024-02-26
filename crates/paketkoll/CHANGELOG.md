@@ -7,6 +7,12 @@ is generated automatically from commit messages.
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.2] - 2024-02-26
+
+### 🚀 Shiny new things (features)
+
+- Report existance of issues with exit code
+
 ## [0.1.1] - 2024-02-26
 
 ### ⚙️ Other stuff
