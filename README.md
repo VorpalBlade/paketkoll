@@ -1,6 +1,6 @@
 # Paketkoll
 
-[ [lib.rs] ] [ [crates.io] ]
+[ [lib.rs] ] [ [crates.io] ] [ [AUR] ]
 
 This is a Rust replacement for `debsums` (on Debian/Ubuntu/...) and `paccheck`
 (on Arch Linux and derivatives). It is much faster than those thanks to using
@@ -165,3 +165,4 @@ paketkoll is Swedish for "package check", though the translation to English isn'
 
 [crates.io]: https://crates.io/crates/paketkoll
 [lib.rs]: https://lib.rs/crates/paketkoll
+[AUR]: https://aur.archlinux.org/packages/paketkoll
