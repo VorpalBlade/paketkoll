@@ -1,5 +1,7 @@
 # Paketkoll
 
+[ [lib.rs] ] [ [crates.io] ]
+
 This is a Rust replacement for debsums (on Debian/Ubuntu/...) and paccheck (on
 Arch Linux and derivatives). It is much faster than those thanks to using all
 your CPU cores in parallel.
@@ -157,3 +159,6 @@ bug fixes and possibly supporting additional Linux distributions and package man
 ## What does the name mean?
 
 paketkoll is Swedish for "package check", though the translation to English isn't perfect ("ha koll på" means "keep an eye on" for example).
+
+[crates.io]: https://crates.io/crates/paketkoll
+[lib.rs]: https://lib.rs/crates/paketkoll

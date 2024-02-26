@@ -1,7 +1,9 @@
 # paketkoll_core - Core functionality for paketkoll
 
+[ [lib.rs] ] [ [crates.io] ]
+
 This will be expanded into doing more in the future for another planned project,
-but right now this is only the backend library for paketkoll, and not really
+but right now this is only the backend library for [paketkoll], and not really
 usable standalone.
 
 The API is currently unstable.
@@ -28,3 +30,7 @@ What this library may one day become:
 This library currently vendors a patched version of [mtree-rs](https://github.com/derekdreery/mtree-rs).
 Hopefully the changes required will be merged upstream and a new release made, at
 which point the plan is to no longer vendor that dependency.
+
+[crates.io]: https://crates.io/crates/paketkoll_core
+[lib.rs]: https://lib.rs/crates/paketkoll_core
+[paketkoll]: https://github.com/VorpalBlade/paketkoll
