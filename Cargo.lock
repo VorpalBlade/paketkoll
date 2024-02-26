@@ -582,6 +582,7 @@ dependencies = [
  "log",
  "os_info",
  "paketkoll_core",
+ "proc-exit",
 ]
 
 [[package]]
@@ -675,6 +676,12 @@ dependencies = [
  "diff",
  "yansi",
 ]
+
+[[package]]
+name = "proc-exit"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dbd05acff31c8b626109e8e1db042b9bddb2b3ffba01ead93d15b78517a282ca"
 
 [[package]]
 name = "proc-macro2"

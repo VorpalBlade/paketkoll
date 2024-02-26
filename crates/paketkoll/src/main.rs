@@ -5,8 +5,9 @@ mod cli;
 use clap::Parser;
 use cli::{Backend, Cli};
 use paketkoll_core::{backend, config};
+use proc_exit::{Code, Exit};
 
-fn main() -> anyhow::Result<()> {
+fn main() -> anyhow::Result<Exit> {
     let mut builder =
         env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("warn"));
     builder.init();
@@ -22,6 +23,8 @@ fn main() -> anyhow::Result<()> {
         )
     });
 
+    let has_issues = !found_issues.is_empty();
+
     for (pkg, issue) in found_issues.into_iter() {
         let pkg = pkg
             .and_then(|e| interner.try_resolve(&e.as_interner_ref()))
@@ -30,7 +33,11 @@ fn main() -> anyhow::Result<()> {
             println!("{pkg}: {:?} {kind}", issue.path());
         }
     }
-    Ok(())
+    Ok(if has_issues {
+        Exit::new(Code::FAILURE)
+    } else {
+        Exit::new(Code::SUCCESS)
+    })
 }
 
 impl TryFrom<Backend> for paketkoll_core::config::Backend {

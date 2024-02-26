@@ -25,6 +25,7 @@ env_logger = "0.11.2"
 log = "0.4.20"
 os_info = { version = "3.7.0", default-features = false }
 paketkoll_core = { version = "0.1.1", path = "../paketkoll_core" }
+proc-exit = "2.0.1"
 
 [build-dependencies]
 clap = { version = "4.5.1", features = ["derive"] }
