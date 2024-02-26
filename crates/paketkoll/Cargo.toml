@@ -6,7 +6,7 @@ name = "paketkoll"
 readme = "../../README.md"
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.76.0"
-version = "0.1.0"
+version = "0.1.1"
 
 [features]
 # Default features
@@ -24,7 +24,7 @@ clap = { version = "4.5.1", features = ["derive"] }
 env_logger = "0.11.2"
 log = "0.4.20"
 os_info = { version = "3.7.0", default-features = false }
-paketkoll_core = { version = "0.1.0", path = "../paketkoll_core" }
+paketkoll_core = { version = "0.1.1", path = "../paketkoll_core" }
 
 [build-dependencies]
 clap = { version = "4.5.1", features = ["derive"] }

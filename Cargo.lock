@@ -573,7 +573,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -586,7 +586,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "bitflags 2.4.2",
