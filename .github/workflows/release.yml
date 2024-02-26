@@ -1,0 +1,55 @@
+name: Release
+
+permissions:
+  contents: write
+
+on:
+  release:
+    types: [published]
+
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
+  CARGO_NET_RETRY: 10
+  CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 1
+  CARGO_PROFILE_RELEASE_LTO: true
+  CARGO_PROFILE_RELEASE_OPT_LEVEL: "s"
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  CC: clang
+  RUSTFLAGS: -D warnings -Clink-arg=-Wl,--compress-debug-sections=zlib
+  RUSTUP_MAX_RETRIES: 10
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  upload-assets:
+    name: ${{ matrix.target }}
+    if: github.repository_owner == 'VorpalBlade' && startsWith(github.event.release.name, 'paketkoll-v')
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-unknown-linux-musl
+          - target: armv7-unknown-linux-musleabihf
+          - target: i686-unknown-linux-musl
+          - target: riscv64gc-unknown-linux-gnu
+          - target: x86_64-unknown-linux-musl
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@cross
+      - uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: paketkoll
+          target: ${{ matrix.target }}
+          # Include version number.
+          archive: $bin-$tag-$target
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+# TODO: Add AUR package build and upload (copy chezmoi_modify_manager)

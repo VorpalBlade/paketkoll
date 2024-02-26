@@ -15,6 +15,7 @@ env:
   CARGO_TERM_COLOR: always
   PAKETKOLL_BUILDER: github-ci
   RUST_BACKTRACE: 1
+  CC: clang
   RUSTFLAGS: "-D warnings"
   RUSTUP_MAX_RETRIES: 10
 
