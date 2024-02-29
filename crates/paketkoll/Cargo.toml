@@ -1,6 +1,8 @@
 [package]
+categories = ["command-line-utilities", "filesystem", "os::linux-apis"]
 description = "Check installed distro files for changes"
 edition = "2021"
+keywords = ["apt", "arch-linux", "debian", "pacman", "package-management"]
 license = "MPL-2.0"
 name = "paketkoll"
 readme = "../../README.md"
