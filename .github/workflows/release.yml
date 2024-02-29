@@ -52,4 +52,25 @@ jobs:
           archive: $bin-$tag-$target
           token: ${{ secrets.GITHUB_TOKEN }}
 
-# TODO: Add AUR package build and upload (copy chezmoi_modify_manager)
+  upload-aur:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get AUR repo
+        run: git clone https://aur.archlinux.org/paketkoll.git aur
+      - name: Update PKGBUILD
+        run: |
+          sed -i '/^_pkgver/s/=.*$/='${RELEASE_TAG#refs/tags/paketkoll-v}'/' "aur/PKGBUILD"
+          sed -i '/^pkgrel/s/=.*$/=1/' "aur/PKGBUILD"
+        env:
+          RELEASE_TAG: ${{ github.ref }}
+      - name: Publish AUR package
+        uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
+        with:
+          pkgname: paketkoll
+          pkgbuild: aur/PKGBUILD
+          updpkgsums: true
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: New upstream release (automatic update from GitHub Actions)
