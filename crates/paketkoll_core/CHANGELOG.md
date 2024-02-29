@@ -7,6 +7,20 @@ is generated automatically from commit messages.
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.0] - 2024-02-29
+
+### 🚀 Shiny new things (features)
+
+- Ability to limit which crates to scan
+
+### 📚 Things to read (documentation)
+
+- Add categories & keywords
+
+### ⚙️ Other stuff
+
+- Update dependencies
+
 ## [0.1.1] - 2024-02-26
 
 ### 🐛 No longer broken (bug fixes)
