@@ -4,7 +4,8 @@
 
 This is a Rust replacement for `debsums` (on Debian/Ubuntu/...) and `paccheck`
 (on Arch Linux and derivatives). It is much faster than those thanks to using
-all your CPU cores in parallel.
+all your CPU cores in parallel. (It is also much much faster than `pacman -Qkk`
+which is much slower than `paccheck` even.)
 
 What it does is compare installed files to what the package manager installed and
 report any discrepancies.
