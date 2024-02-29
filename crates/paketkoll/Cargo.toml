@@ -22,10 +22,10 @@ debian = ["paketkoll_core/debian"]
 
 [dependencies]
 ahash = "0.8.10"
-anyhow = { version = "1.0.79", features = ["backtrace"] }
+anyhow = { version = "1.0.80", features = ["backtrace"] }
 clap = { version = "4.5.1", features = ["derive"] }
 env_logger = "0.11.2"
-log = "0.4.20"
+log = "0.4.21"
 os_info = { version = "3.7.0", default-features = false }
 paketkoll_core = { version = "0.1.1", path = "../paketkoll_core" }
 proc-exit = "2.0.1"
