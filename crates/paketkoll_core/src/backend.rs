@@ -22,7 +22,7 @@ pub fn check(
 )> {
     let backend = config
         .backend
-        .create()
+        .create(config)
         .with_context(|| format!("Failed to create backend for {}", config.backend))?;
     let interner = PackageInterner::new();
     // Get distro specific file list

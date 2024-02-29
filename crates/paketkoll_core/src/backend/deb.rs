@@ -12,6 +12,7 @@ use bstr::ByteVec;
 use dashmap::DashMap;
 use rayon::prelude::*;
 
+use crate::config::PackageFilter;
 use crate::types::{FileEntry, PackageInterner, PackageRef, Properties};
 
 use super::{Files, Name};
@@ -30,14 +31,27 @@ const DB_PATH: &str = "/var/lib/dpkg/info";
 const STATUS_PATH: &str = "/var/lib/dpkg/status";
 
 #[derive(Debug)]
-pub(crate) struct Debian;
+pub(crate) struct Debian {
+    package_filter: &'static PackageFilter,
+}
 
 #[derive(Debug, Default)]
-pub(crate) struct DebianBuilder {}
+pub(crate) struct DebianBuilder {
+    package_filter: Option<&'static PackageFilter>,
+}
 
 impl DebianBuilder {
+    pub fn package_filter(&mut self, filter: &'static PackageFilter) -> &mut Self {
+        self.package_filter = Some(filter);
+        self
+    }
+
     pub fn build(self) -> Debian {
-        Debian
+        Debian {
+            package_filter: self
+                .package_filter
+                .unwrap_or_else(|| &PackageFilter::Everything),
+        }
     }
 }
 
@@ -77,6 +91,18 @@ impl Files for Debian {
         // The config files must be merged into the results
         log::debug!(target: "paketkoll_core::backend::deb", "Merging config files");
         merge_deb_fileentries(&merged, config_files, &diversions);
+
+        // For Debian we apply the filter here at the end, since multiple steps
+        // needs filter otherwise. The fast path is not filtering.
+        match self.package_filter {
+            PackageFilter::Everything => (),
+            PackageFilter::FilterFunction(_) => {
+                merged.retain(|_, file| match file.package {
+                    Some(pkg) => self.package_filter.should_include_interned(pkg, interner),
+                    None => true,
+                });
+            }
+        }
 
         // Finally extract just the file entries
         Ok(merged.into_iter().map(|(_, v)| v).collect())

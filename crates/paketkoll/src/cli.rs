@@ -14,6 +14,8 @@ pub(crate) struct Cli {
     /// Which package manager backend to use
     #[arg(short, long, default_value_t = Backend::Auto)]
     pub(crate) backend: Backend,
+    /// Packages to check (default: all of them)
+    pub(crate) packages: Vec<String>,
 }
 
 /// Determine which package manager backend to use

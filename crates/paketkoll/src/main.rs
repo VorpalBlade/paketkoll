@@ -2,9 +2,13 @@
 
 mod cli;
 
+use ahash::AHashSet;
 use clap::Parser;
 use cli::{Backend, Cli};
-use paketkoll_core::{backend, config};
+use paketkoll_core::{
+    backend,
+    config::{self, PackageFilter},
+};
 use proc_exit::{Code, Exit};
 
 fn main() -> anyhow::Result<Exit> {
@@ -86,6 +90,26 @@ impl TryFrom<Cli> for config::CheckConfiguration {
             .trust_mtime(value.trust_mtime)
             .config_files(value.config_files.into())
             .backend(value.backend.try_into()?)
+            .package_filter(convert_filter(value.packages))
             .build())
     }
+}
+
+/// Produce a 'static reference to a package filter that will live long enough.
+///
+/// We intentionally "leak" memory here, it will live as long as the program runs, which is fine.
+fn convert_filter(packages: Vec<String>) -> &'static config::PackageFilter {
+    let packages: AHashSet<String> = AHashSet::from_iter(packages);
+    let boxed = Box::new(if packages.is_empty() {
+        config::PackageFilter::Everything
+    } else {
+        config::PackageFilter::FilterFunction(Box::new(move |pkg| {
+            if packages.contains(pkg) {
+                config::FilterAction::Include
+            } else {
+                config::FilterAction::Exclude
+            }
+        }))
+    });
+    Box::<PackageFilter>::leak(boxed)
 }

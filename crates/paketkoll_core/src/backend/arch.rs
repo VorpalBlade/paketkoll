@@ -11,7 +11,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::types::{FileEntry, Package, PackageInterner, PackageRef};
+use crate::{
+    config::PackageFilter,
+    types::{FileEntry, Package, PackageInterner, PackageRef},
+};
 use anyhow::{Context, Result};
 use dashmap::DashSet;
 use either::Either;
@@ -23,11 +26,13 @@ use super::{Files, Name, Packages};
 #[derive(Debug)]
 pub(crate) struct ArchLinux {
     pacman_config: pacman_conf::PacmanConfig,
+    package_filter: &'static PackageFilter,
 }
 
 #[derive(Debug, Default)]
 pub(crate) struct ArchLinuxBuilder {
     pacman_config: Option<pacman_conf::PacmanConfig>,
+    package_filter: Option<&'static PackageFilter>,
 }
 
 impl ArchLinuxBuilder {
@@ -49,10 +54,18 @@ impl ArchLinuxBuilder {
         Ok(())
     }
 
+    pub fn package_filter(&mut self, filter: &'static PackageFilter) -> &mut Self {
+        self.package_filter = Some(filter);
+        self
+    }
+
     pub fn build(mut self) -> anyhow::Result<ArchLinux> {
         self.load_config().context("Failed to load pacman.conf")?;
         Ok(ArchLinux {
             pacman_config: self.pacman_config.unwrap(),
+            package_filter: self
+                .package_filter
+                .unwrap_or_else(|| &PackageFilter::Everything),
         })
     }
 }
@@ -72,12 +85,12 @@ impl Files for ArchLinux {
 
         // Load packages
         log::debug!(target: "paketkoll_core::backend::arch", "Loading packages");
-        let pkgs_and_paths = get_mtree_paths(db_path, interner)?;
+        let pkgs_and_paths = get_mtree_paths(db_path, interner, self.package_filter)?;
 
         // Load mtrees
         log::debug!(target: "paketkoll_core::backend::arch", "Loading mtrees");
         // Directories are duplicated across packages, we deduplicate them here
-        let seen_directories: DashSet<_> = DashSet::new();
+        let seen_directories = DashSet::new();
         // It is counter-intuitive, but we are faster if we collect into a vec here and start
         // over later on with a new parallel iteration. No idea why. (241 ms vs 264 ms according
         // to hyperfine on my machine, stdev < 4 ms in both cases).
@@ -136,17 +149,18 @@ struct PackageData {
     backup_files: BTreeSet<Vec<u8>>,
 }
 
-fn get_mtree_paths<'interner>(
+fn get_mtree_paths<'borrows>(
     db_path: &Path,
-    interner: &'interner PackageInterner,
-) -> Result<impl ParallelIterator<Item = Result<PackageData>> + 'interner> {
+    interner: &'borrows PackageInterner,
+    package_filter: &'borrows PackageFilter,
+) -> Result<impl ParallelIterator<Item = Result<PackageData>> + 'borrows> {
     let db_root = db_path.join("local");
     Ok(std::fs::read_dir(db_root)
         .context("Failed to read pacman database directory")?
         .par_bridge()
         .filter_map(|entry| {
             let entry = entry.ok()?;
-            load_pkg_for_file_listing(&entry, interner)
+            load_pkg_for_file_listing(&entry, interner, package_filter)
                 .with_context(|| format!("Failed to load package data for {:?}", entry.file_name()))
                 .transpose()
         }))
@@ -157,12 +171,12 @@ fn get_mtree_paths<'interner>(
 fn load_pkg_for_file_listing(
     entry: &std::fs::DirEntry,
     interner: &PackageInterner,
+    package_filter: &PackageFilter,
 ) -> Result<Option<PackageData>> {
     if !entry.file_type()?.is_dir() {
         return Ok(None);
     }
     let desc_path = entry.path().join("desc");
-    let files_path = entry.path().join("files");
     let pkg_data = {
         let readable = BufReader::new(
             std::fs::File::open(&desc_path)
@@ -171,6 +185,13 @@ fn load_pkg_for_file_listing(
         Package::from_arch_linux_desc(readable, interner)?
     };
 
+    // We need to read the desc file to know the package name, so it is only now
+    // that we can decide if we should include it or not
+    if !package_filter.should_include_interned(pkg_data.name, interner) {
+        return Ok(None);
+    }
+
+    let files_path = entry.path().join("files");
     let backup_files = {
         let readable = BufReader::new(
             std::fs::File::open(&files_path)
