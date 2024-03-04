@@ -35,26 +35,40 @@ impl Issue {
 }
 
 /// Type of issue found
+///
+/// When the word "entity" is used below that can refer to any type
+/// of file system entity (e.g. file, directory, symlink, device node, ...)
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum IssueKind {
-    FileMissing,
+    /// Missing entity from file system
+    Missing,
+    /// Failed to check for (or check contents of) entity due to permissions
     PermissionDenied,
+    /// Type of entity was not as expected (e.g. file vs symlink)
     TypeIncorrect,
+    /// The file was not of the expected size
     SizeIncorrect,
+    /// The contents of the file differ (different checksums)
     ChecksumIncorrect,
+    /// Both entity are symlinks, but point to different places
     SymlinkTarget { actual: PathBuf, expected: PathBuf },
+    /// Ownership of file system entity differs
     WrongOwner { actual: Uid, expected: Uid },
+    /// Group of file system entity differs
     WrongGroup { actual: Gid, expected: Gid },
+    /// Incorrect mode for file system entity
     WrongMode { actual: Mode, expected: Mode },
+    /// Some sort of parsing error for this entry (from the package manager backend)
     MetadataError(Box<anyhow::Error>),
-    FileCheckError(Box<anyhow::Error>),
+    /// Some sort of unexpected error when processing the file system
+    FsCheckError(Box<anyhow::Error>),
 }
 
 impl std::fmt::Display for IssueKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            IssueKind::FileMissing => write!(f, "missing file")?,
+            IssueKind::Missing => write!(f, "missing file/directory/...")?,
             IssueKind::PermissionDenied => write!(f, "read error (Permission denied)")?,
             IssueKind::TypeIncorrect => write!(f, "type mismatch")?,
             IssueKind::SizeIncorrect => write!(f, "size mismatch")?,
@@ -77,7 +91,7 @@ impl std::fmt::Display for IssueKind {
                 write!(f, "error with metadata parsing")?;
                 format_error(f, err)?;
             }
-            IssueKind::FileCheckError(err) => {
+            IssueKind::FsCheckError(err) => {
                 write!(f, "error when checking file")?;
                 format_error(f, err)?;
             }

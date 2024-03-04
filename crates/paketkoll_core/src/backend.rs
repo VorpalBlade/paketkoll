@@ -46,7 +46,7 @@ pub fn check(
                 Ok(Some(inner)) => Some((file_entry.package, inner)),
                 Ok(None) => None,
                 Err(err) => {
-                    let issues = smallvec::smallvec![IssueKind::FileCheckError(Box::new(err))];
+                    let issues = smallvec::smallvec![IssueKind::FsCheckError(Box::new(err))];
                     Some((file_entry.package, Issue::new(file_entry.path, issues)))
                 }
             },

@@ -30,7 +30,7 @@ fn should_process(file: &FileEntry, config: &CheckConfiguration) -> bool {
 }
 
 /// Check a single file entry from a package database against the file system
-pub fn check_file(file: &FileEntry, config: &CheckConfiguration) -> Result<Option<Issue>> {
+pub(crate) fn check_file(file: &FileEntry, config: &CheckConfiguration) -> Result<Option<Issue>> {
     let mut issues = IssueVec::new();
     match std::fs::symlink_metadata(&file.path) {
         Ok(metadata) => match &file.properties {
@@ -119,7 +119,7 @@ pub fn check_file(file: &FileEntry, config: &CheckConfiguration) -> Result<Optio
         },
         Err(err) => match err.kind() {
             ErrorKind::NotFound => {
-                issues.push(IssueKind::FileMissing);
+                issues.push(IssueKind::Missing);
             }
             ErrorKind::PermissionDenied => {
                 issues.push(IssueKind::PermissionDenied);
