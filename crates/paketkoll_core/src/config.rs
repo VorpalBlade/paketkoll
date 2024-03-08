@@ -2,8 +2,6 @@
 
 use std::fmt::Debug;
 
-use typed_builder::TypedBuilder;
-
 use crate::types::{PackageInterner, PackageRef};
 
 /// Which backend to use for the system package manager
@@ -21,7 +19,7 @@ impl Backend {
     /// Create a backend instance
     pub(crate) fn create(
         self,
-        configuration: &CheckConfiguration,
+        configuration: &CommonConfiguration,
     ) -> anyhow::Result<Box<dyn crate::backend::Files>> {
         match self {
             #[cfg(feature = "arch_linux")]
@@ -84,22 +82,41 @@ impl Debug for PackageFilter {
     }
 }
 
+#[derive(Debug, derive_builder::Builder)]
+#[non_exhaustive]
+pub struct CheckUnexpectedConfiguration {
+    /// Ignored paths (globs). Only appliccable to some operations.
+    #[builder(default = "vec![]")]
+    pub ignored_paths: Vec<String>,
+    /// Should paths be canonicalized before checking? (This is needed on Debian
+    /// for example)
+    #[builder(default = "false")]
+    pub canonicalize_paths: bool,
+}
+
 /// Describes what we want to check. Not all backends may support all features,
 /// in which case an error should be returned.
-#[derive(Debug, TypedBuilder)]
+#[derive(Debug, derive_builder::Builder)]
 #[non_exhaustive]
-pub struct CheckConfiguration {
+pub struct CommonConfiguration {
     /// Distro backend to use
     pub backend: Backend,
     /// Should we trust modification time and skip timestamp if mtime matches?
-    #[builder(default = false)]
+    #[builder(default = "false")]
     pub trust_mtime: bool,
     /// Should configuration files be included
-    #[builder(default = ConfigFiles::Include)]
+    #[builder(default = "ConfigFiles::Include")]
     pub config_files: ConfigFiles,
     /// Which packages to include
-    #[builder(default = &PackageFilter::Everything)]
+    #[builder(default = "&PackageFilter::Everything")]
     pub package_filter: &'static PackageFilter,
+}
+
+impl CommonConfiguration {
+    /// Get a builder for this class
+    pub fn builder() -> CommonConfigurationBuilder {
+        Default::default()
+    }
 }
 
 /// Describe how to check config files

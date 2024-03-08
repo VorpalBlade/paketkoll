@@ -1,9 +1,10 @@
 use std::fmt::Display;
 
-use clap::Parser;
+use clap::{Parser, Subcommand};
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
+#[command(propagate_version = true)]
 pub(crate) struct Cli {
     /// Trust mtime (don't check checksum if it matches)
     #[arg(long)]
@@ -14,8 +15,29 @@ pub(crate) struct Cli {
     /// Which package manager backend to use
     #[arg(short, long, default_value_t = Backend::Auto)]
     pub(crate) backend: Backend,
-    /// Packages to check (default: all of them)
-    pub(crate) packages: Vec<String>,
+    /// Operation to perform
+    #[command(subcommand)]
+    pub(crate) command: Commands,
+}
+
+#[derive(Debug, Subcommand)]
+pub(crate) enum Commands {
+    /// Check package files
+    Check {
+        /// Packages to check (default: all of them)
+        packages: Vec<String>,
+    },
+    /// Check package files and search for unexpected files
+    CheckUnexpected {
+        /// Paths to ignore (apart from built in ones). Basic globs are supported.
+        /// Use ** to match any number of path components.
+        #[arg(long)]
+        ignore: Vec<String>,
+        /// Should paths be canonicalized before checking? If you get many false positives, try this.
+        /// Required on Debian due to lack of /usr merge.
+        #[arg(long)]
+        canonicalize: bool,
+    },
 }
 
 /// Determine which package manager backend to use

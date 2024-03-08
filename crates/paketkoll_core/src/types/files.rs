@@ -1,6 +1,6 @@
 //! Common types for representing data about files
 
-use std::{path::PathBuf, time::SystemTime};
+use std::{path::PathBuf, sync::atomic::AtomicBool, time::SystemTime};
 
 use super::PackageRef;
 
@@ -48,7 +48,7 @@ pub(crate) struct Special;
 pub(crate) struct Unknown;
 
 /// A file entry from the package database
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug)]
 #[non_exhaustive]
 pub(crate) struct FileEntry {
     /// Package this file belongs to
@@ -56,7 +56,30 @@ pub(crate) struct FileEntry {
     pub path: PathBuf,
     pub properties: Properties,
     pub flags: FileFlags,
-    // Has two bytes of padding, usable by niches
+    /// Used to handle finding missing files when checking for unexpected files
+    pub(crate) seen: AtomicBool,
+    // Has one byte of padding left over for something else
+}
+
+impl Clone for FileEntry {
+    fn clone(&self) -> Self {
+        Self {
+            package: self.package,
+            path: self.path.clone(),
+            properties: self.properties.clone(),
+            flags: self.flags,
+            seen: self.seen.load(std::sync::atomic::Ordering::Relaxed).into(),
+        }
+    }
+}
+
+impl PartialEq for FileEntry {
+    fn eq(&self, other: &Self) -> bool {
+        self.package == other.package
+            && self.path == other.path
+            && self.properties == other.properties
+            && self.flags == other.flags
+    }
 }
 
 bitflags::bitflags! {
@@ -80,6 +103,19 @@ pub(crate) enum Properties {
     /// If the package management system doesn't give us enough info,
     /// all we know is that it should exist.
     Unknown,
+}
+
+impl Properties {
+    pub(crate) fn is_dir(&self) -> Option<bool> {
+        match self {
+            Properties::RegularFileBasic(_) => Some(false),
+            Properties::RegularFile(_) => Some(false),
+            Properties::Symlink(_) => Some(false),
+            Properties::Directory(_) => Some(true),
+            Properties::Special => Some(false),
+            Properties::Unknown => None,
+        }
+    }
 }
 
 /// Unix file mode (permissions)

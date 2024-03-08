@@ -83,7 +83,7 @@ impl Files for Debian {
         .context(format!("Failed to parse {}", STATUS_PATH))?;
 
         log::debug!(target: "paketkoll_core::backend::deb", "Merging packages files into one map");
-        let merged = DashMap::new();
+        let merged = DashMap::with_hasher(ahash::RandomState::new());
         packages_files.into_par_iter().for_each(|files| {
             merge_deb_fileentries(&merged, files, &diversions);
         });
@@ -110,7 +110,7 @@ impl Files for Debian {
 }
 
 fn merge_deb_fileentries(
-    acc: &DashMap<PathBuf, FileEntry>,
+    acc: &DashMap<PathBuf, FileEntry, ahash::RandomState>,
     files: Vec<FileEntry>,
     diversions: &divert::Diversions,
 ) {

@@ -2,14 +2,21 @@
 
 mod cli;
 
+use std::{
+    io::{stdout, BufWriter, Write},
+    os::unix::ffi::OsStrExt,
+};
+
 use ahash::AHashSet;
 use clap::Parser;
 use cli::{Backend, Cli};
 use paketkoll_core::{
     backend,
-    config::{self, PackageFilter},
+    config::{self, CheckUnexpectedConfigurationBuilder, PackageFilter},
+    types::{Issue, PackageRef},
 };
 use proc_exit::{Code, Exit};
+use rayon::slice::ParallelSliceMut;
 
 fn main() -> anyhow::Result<Exit> {
     let mut builder =
@@ -17,24 +24,47 @@ fn main() -> anyhow::Result<Exit> {
     builder.init();
     let cli = Cli::parse();
 
-    let (interner, found_issues) = backend::check(&cli.try_into()?)?;
+    let (interner, mut found_issues) = match cli.command {
+        cli::Commands::Check { .. } => backend::check(&(&cli).try_into()?)?,
+        cli::Commands::CheckUnexpected {
+            ref ignore,
+            canonicalize,
+        } => backend::check_unexpected(&(&cli).try_into()?, &{
+            let mut builder = CheckUnexpectedConfigurationBuilder::default();
+            builder.ignored_paths(ignore.clone());
+            builder.canonicalize_paths(canonicalize);
+            builder.build()?
+        })?,
+    };
 
-    let mut found_issues: Vec<_> = found_issues.collect();
-    found_issues.sort_by_key(|(pkg, issue)| {
+    let key_extractor = |(pkg, issue): &(Option<PackageRef>, Issue)| {
         (
             pkg.and_then(|e| interner.try_resolve(&e.as_interner_ref())),
             issue.path().to_path_buf(),
         )
-    });
+    };
+
+    if found_issues.len() > 1000 {
+        found_issues.par_sort_by_key(key_extractor);
+    } else {
+        found_issues.sort_by_key(key_extractor);
+    }
 
     let has_issues = !found_issues.is_empty();
 
-    for (pkg, issue) in found_issues.into_iter() {
-        let pkg = pkg
-            .and_then(|e| interner.try_resolve(&e.as_interner_ref()))
-            .unwrap_or("UNKNOWN_PKG");
-        for kind in issue.kinds() {
-            println!("{pkg}: {:?} {kind}", issue.path());
+    {
+        let mut stdout = BufWriter::new(stdout().lock());
+        for (pkg, issue) in found_issues.iter() {
+            let pkg = pkg.and_then(|e| interner.try_resolve(&e.as_interner_ref()));
+            for kind in issue.kinds() {
+                if let Some(pkg) = pkg {
+                    write!(stdout, "{pkg}: ")?;
+                }
+                // Prefer to not do any escaping. This doesn't assume unicode.
+                // Also it is faster.
+                stdout.write_all(issue.path().as_os_str().as_bytes())?;
+                writeln!(stdout, " {kind}")?;
+            }
         }
     }
     Ok(if has_issues {
@@ -82,16 +112,26 @@ impl From<cli::ConfigFiles> for config::ConfigFiles {
     }
 }
 
-impl TryFrom<Cli> for config::CheckConfiguration {
+impl TryFrom<&Cli> for config::CommonConfiguration {
     type Error = anyhow::Error;
 
-    fn try_from(value: Cli) -> Result<Self, Self::Error> {
-        Ok(Self::builder()
-            .trust_mtime(value.trust_mtime)
-            .config_files(value.config_files.into())
-            .backend(value.backend.try_into()?)
-            .package_filter(convert_filter(value.packages))
-            .build())
+    fn try_from(value: &Cli) -> Result<Self, Self::Error> {
+        let mut builder = Self::builder();
+
+        builder.trust_mtime(value.trust_mtime);
+        builder.config_files(value.config_files.into());
+        builder.backend(value.backend.try_into()?);
+
+        match value.command {
+            cli::Commands::Check { ref packages } => {
+                builder.package_filter(convert_filter(packages.clone()));
+            }
+            cli::Commands::CheckUnexpected {
+                ignore: _,
+                canonicalize: _,
+            } => {}
+        }
+        Ok(builder.build()?)
     }
 }
 

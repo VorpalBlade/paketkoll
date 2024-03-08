@@ -17,11 +17,22 @@ pub(super) fn parse_paths(
     let lines: anyhow::Result<Vec<_>> = input
         .byte_lines()
         .map(|e| match e {
+            Ok(inner) if inner.as_slice() == b"/." => {
+                // Adjust path of root directory
+                Ok(FileEntry {
+                    package: Some(package),
+                    path: "/".into(),
+                    properties: Properties::Unknown,
+                    flags: FileFlags::empty(),
+                    seen: Default::default(),
+                })
+            }
             Ok(inner) => Ok(FileEntry {
                 package: Some(package),
                 path: inner.into_path_buf().context("Failed to convert")?,
                 properties: Properties::Unknown,
                 flags: FileFlags::empty(),
+                seen: Default::default(),
             }),
             Err(err) => Err(err).context("Failed to parse"),
         })
@@ -53,6 +64,7 @@ pub(super) fn parse_md5sums(
                         checksum: Checksum::Md5(checksum),
                     }),
                     flags: FileFlags::empty(),
+                    seen: Default::default(),
                 })
             }
             Err(err) => Err(err).context("Failed to parse"),
@@ -119,6 +131,7 @@ pub(super) fn parse_status(
                         checksum: Checksum::Md5(checksum),
                     }),
                     flags: FileFlags::CONFIG,
+                    seen: Default::default(),
                 })
             } else {
                 state = StatusParsingState::InPackage(pkg)
@@ -163,24 +176,28 @@ mod tests {
                     path: "/usr/share/doc/libc6/README".into(),
                     properties: Properties::Unknown,
                     flags: FileFlags::empty(),
+                    seen: Default::default(),
                 },
                 FileEntry {
                     package: Some(package_ref),
                     path: "/usr/share/doc/libc6/changelog.Debian.gz".into(),
                     properties: Properties::Unknown,
                     flags: FileFlags::empty(),
+                    seen: Default::default(),
                 },
                 FileEntry {
                     package: Some(package_ref),
                     path: "/usr/share/doc/libc6/copyright".into(),
                     properties: Properties::Unknown,
                     flags: FileFlags::empty(),
+                    seen: Default::default(),
                 },
                 FileEntry {
                     package: Some(package_ref),
                     path: "/usr/share/doc/libc6/NEWS.gz".into(),
                     properties: Properties::Unknown,
                     flags: FileFlags::empty(),
+                    seen: Default::default(),
                 },
             ]
         );
@@ -212,6 +229,7 @@ mod tests {
                         )
                     }),
                     flags: FileFlags::empty(),
+                    seen: Default::default(),
                 },
                 FileEntry {
                     package: Some(package_ref),
@@ -225,6 +243,7 @@ mod tests {
                         )
                     }),
                     flags: FileFlags::empty(),
+                    seen: Default::default(),
                 },
                 FileEntry {
                     package: Some(package_ref),
@@ -238,6 +257,7 @@ mod tests {
                         )
                     }),
                     flags: FileFlags::empty(),
+                    seen: Default::default(),
                 },
                 FileEntry {
                     package: Some(package_ref),
@@ -251,6 +271,7 @@ mod tests {
                         )
                     }),
                     flags: FileFlags::empty(),
+                    seen: Default::default(),
                 },
             ]
         );
@@ -299,6 +320,7 @@ mod tests {
                         )
                     }),
                     flags: FileFlags::CONFIG,
+                    seen: Default::default(),
                 },
                 FileEntry {
                     package: Some(PackageRef(interner.get_or_intern("libc6"))),
@@ -312,6 +334,7 @@ mod tests {
                         )
                     }),
                     flags: FileFlags::CONFIG,
+                    seen: Default::default(),
                 },
                 FileEntry {
                     package: Some(PackageRef(interner.get_or_intern("libc6"))),
@@ -325,6 +348,7 @@ mod tests {
                         )
                     }),
                     flags: FileFlags::CONFIG,
+                    seen: Default::default(),
                 },
                 FileEntry {
                     package: Some(PackageRef(interner.get_or_intern("libc6"))),
@@ -338,6 +362,7 @@ mod tests {
                         )
                     }),
                     flags: FileFlags::CONFIG,
+                    seen: Default::default(),
                 },
             ]
         );

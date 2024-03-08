@@ -90,6 +90,7 @@ fn convert_mtree(
                     path,
                     properties: Properties::Directory(dir),
                     flags: FileFlags::empty(),
+                    seen: Default::default(),
                 })
             } else {
                 None
@@ -111,6 +112,7 @@ fn convert_mtree(
             } else {
                 FileFlags::empty()
             },
+            seen: Default::default(),
         }),
         Some(mtree::FileType::SymbolicLink) => Some(FileEntry {
             package: Some(pkg),
@@ -121,6 +123,7 @@ fn convert_mtree(
                 target: item.link().context("No target for link")?.into(),
             }),
             flags: FileFlags::empty(),
+            seen: Default::default(),
         }),
         Some(mtree::FileType::BlockDevice)
         | Some(mtree::FileType::CharacterDevice)
@@ -131,6 +134,7 @@ fn convert_mtree(
             path: extract_path(&item),
             properties: Properties::Special {},
             flags: FileFlags::empty(),
+            seen: Default::default(),
         }),
     })
 }

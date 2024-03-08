@@ -8,7 +8,7 @@ pub(crate) use files::{
     Checksum, Directory, FileEntry, FileFlags, Gid, Mode, Properties, RegularFile,
     RegularFileBasic, Symlink, Uid,
 };
-pub(crate) use issue::{Issue, IssueKind, IssueVec};
+pub use issue::{Issue, IssueKind, IssueVec, PackageIssue};
 
 pub(crate) use package::InstallReason;
 pub use package::PackageInterner;

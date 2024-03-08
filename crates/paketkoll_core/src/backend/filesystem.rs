@@ -8,7 +8,7 @@ use std::{
 };
 
 use crate::{
-    config::{CheckConfiguration, ConfigFiles},
+    config::{CommonConfiguration, ConfigFiles},
     types::{Directory, FileFlags, Properties, RegularFile, RegularFileBasic, Symlink},
 };
 
@@ -20,7 +20,7 @@ use anyhow::{Context, Result};
 const MODE_MASK: u32 = 0o7777;
 
 /// Determine if a given file should be processed
-fn should_process(file: &FileEntry, config: &CheckConfiguration) -> bool {
+fn should_process(file: &FileEntry, config: &CommonConfiguration) -> bool {
     match (config.config_files, file.flags.contains(FileFlags::CONFIG)) {
         (ConfigFiles::Include, _) | (ConfigFiles::Only, true) | (ConfigFiles::Exclude, false) => {
             true
@@ -30,7 +30,7 @@ fn should_process(file: &FileEntry, config: &CheckConfiguration) -> bool {
 }
 
 /// Check a single file entry from a package database against the file system
-pub(crate) fn check_file(file: &FileEntry, config: &CheckConfiguration) -> Result<Option<Issue>> {
+pub(crate) fn check_file(file: &FileEntry, config: &CommonConfiguration) -> Result<Option<Issue>> {
     let mut issues = IssueVec::new();
     match std::fs::symlink_metadata(&file.path) {
         Ok(metadata) => match &file.properties {
@@ -138,7 +138,7 @@ pub(crate) fn check_file(file: &FileEntry, config: &CheckConfiguration) -> Resul
 /// Check the contents of a regular file against the expected values
 fn check_contents(
     issues: &mut IssueVec,
-    config: &CheckConfiguration,
+    config: &CommonConfiguration,
     path: &PathBuf,
     actual_metadata: &std::fs::Metadata,
     expected_mtime: Option<&std::time::SystemTime>,

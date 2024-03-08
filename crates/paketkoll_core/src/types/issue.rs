@@ -11,6 +11,9 @@ use super::{Gid, Mode, Uid};
 /// Optimised for almost always being empty or having at most one item.
 pub type IssueVec = SmallVec<[IssueKind; 1]>;
 
+/// A package reference and an associated issue
+pub type PackageIssue = (Option<super::PackageRef>, Issue);
+
 /// A found difference between the file system and the package database
 #[derive(Debug)]
 pub struct Issue {
@@ -43,6 +46,8 @@ impl Issue {
 pub enum IssueKind {
     /// Missing entity from file system
     Missing,
+    /// Extra unexpected entity on file system
+    Unexpected,
     /// Failed to check for (or check contents of) entity due to permissions
     PermissionDenied,
     /// Type of entity was not as expected (e.g. file vs symlink)
@@ -68,7 +73,8 @@ pub enum IssueKind {
 impl std::fmt::Display for IssueKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            IssueKind::Missing => write!(f, "missing file/directory/...")?,
+            IssueKind::Missing => write!(f, "missing or inaccessible file/directory/...")?,
+            IssueKind::Unexpected => write!(f, "unexpected file")?,
             IssueKind::PermissionDenied => write!(f, "read error (Permission denied)")?,
             IssueKind::TypeIncorrect => write!(f, "type mismatch")?,
             IssueKind::SizeIncorrect => write!(f, "size mismatch")?,
