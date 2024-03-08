@@ -119,7 +119,7 @@ fn merge_deb_fileentries(
         if let Some(diversion) = diversions.get(&file.path) {
             if Some(diversion.by_package) != file.package {
                 // This file is diverted
-                file.path = diversion.new_path.clone();
+                file.path.clone_from(&diversion.new_path);
             }
         }
         // Drop mutability
