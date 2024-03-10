@@ -25,6 +25,11 @@ Additional features:
   database. We do our own parsing. This makes it possible to be way faster
   (parallelism!) and also to make a cross platform binary that will run on either
   distro without any dependencies apart from libc.
+* You can also use this to find unmanaged files (not installed by the package
+  manager) using `paketkoll check-unexpected`, though some work is required,
+  since there are many legitimately unmanaged files. You may need to find a set
+  of `--ignore` flags suitable for your system. Only some simple basics ignores
+  are built in (`/proc`, `/sys`, `/home`, etc).
 
 Caveats:
 
@@ -59,7 +64,7 @@ without `--trust-mtime` (where the runtime is quite small to begin with).
 When only checking file properties and trusting mtime (these should be the most similar options):
 
 ```console
-$ hyperfine -i -N --warmup 1 "paketkoll --trust-mtime" "paccheck --file-properties --quiet"
+$ hyperfine -i -N --warmup 1 "paketkoll --trust-mtime check" "paccheck --file-properties --quiet"
 Benchmark 1: paketkoll --trust-mtime
   Time (mean ± σ):     249.4 ms ±   4.8 ms    [User: 1194.5 ms, System: 1216.2 ms]
   Range (min … max):   242.1 ms … 259.7 ms    12 runs
@@ -78,7 +83,7 @@ Summary
 The speedup isn't quite as impressive when checking the checksums also, but it is still large:
 
 ```console
-$ hyperfine -i -N --warmup 1 "paketkoll" "paccheck --sha256sum --quiet"
+$ hyperfine -i -N --warmup 1 "paketkoll  check" "paccheck --sha256sum --quiet"
 Benchmark 1: paketkoll
   Time (mean ± σ):      9.986 s ±  1.329 s    [User: 17.368 s, System: 19.087 s]
   Range (min … max):    8.196 s … 11.872 s    10 runs
@@ -107,7 +112,7 @@ Summary
 * `dpkg-query -l | grep ii | wc -l` indicates 749 packages installed
 
 ```console
-$ hyperfine -i -N --warmup 1 "paketkoll" "debsums -c"
+$ hyperfine -i -N --warmup 1 "paketkoll  check" "debsums -c"
 Benchmark 1: paketkoll
   Time (mean ± σ):      2.664 s ±  0.102 s    [User: 3.937 s, System: 1.116 s]
   Range (min … max):    2.543 s …  2.813 s    10 runs
@@ -135,7 +140,7 @@ Summary
 * `dpkg-query -l | grep ii | wc -l` indicates 4012 packages installed
 
 ```console
-$ hyperfine -i -N --warmup 1 "paketkoll" "debsums -c"
+$ hyperfine -i -N --warmup 1 "paketkoll  check" "debsums -c"
 Benchmark 1: paketkoll
   Time (mean ± σ):      5.341 s ±  0.174 s    [User: 42.553 s, System: 33.049 s]
   Range (min … max):    5.082 s …  5.586 s    10 runs
