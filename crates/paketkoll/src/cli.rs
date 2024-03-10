@@ -5,6 +5,7 @@ use clap::{Parser, Subcommand};
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
 #[command(propagate_version = true)]
+#[clap(disable_help_subcommand = true)]
 pub(crate) struct Cli {
     /// Trust mtime (don't check checksum if it matches)
     #[arg(long)]

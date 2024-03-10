@@ -15,10 +15,7 @@ fn main() -> Result<(), Error> {
         generate_to(shell, &mut cmd, "paketkoll", &outdir)?;
     }
 
-    let man = clap_mangen::Man::new(cmd);
-    let mut buffer: Vec<u8> = Default::default();
-    man.render(&mut buffer)?;
-    std::fs::write(PathBuf::from(outdir).join(man.get_filename()), buffer)?;
+    clap_mangen::generate_to(cmd, PathBuf::from(outdir))?;
 
     // Outputs will be in a directory like target/release/build/paketkoll-<some-hash>/out/
     // That is unfortunate, but there doesn't seem to be a way to get a stable output directory
