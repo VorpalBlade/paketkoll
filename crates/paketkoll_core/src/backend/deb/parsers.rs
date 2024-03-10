@@ -55,13 +55,14 @@ pub(super) fn parse_md5sums(
                 let (checksum, path) = inner.split_at_mut(32);
                 path[1] = b'/';
                 let path = path[1..].to_path()?.to_owned();
-                let checksum = hex::decode(checksum)?.as_slice().try_into()?;
+                let mut decoded: [u8; 16] = [0; 16];
+                faster_hex::hex_decode(checksum.as_bytes(), &mut decoded)?;
 
                 Ok(FileEntry {
                     package: Some(package),
                     path,
                     properties: Properties::RegularFileBasic(RegularFileBasic {
-                        checksum: Checksum::Md5(checksum),
+                        checksum: Checksum::Md5(decoded),
                     }),
                     flags: FileFlags::empty(),
                     seen: Default::default(),
@@ -119,16 +120,13 @@ pub(super) fn parse_status(
                 }
                 let file = &line_fragments[1];
                 let checksum = line_fragments[2];
-                let checksum = hex::decode(checksum)
-                    .with_context(ctx)?
-                    .as_slice()
-                    .try_into()
-                    .with_context(ctx)?;
+                let mut decoded: [u8; 16] = [0; 16];
+                faster_hex::hex_decode(checksum.as_bytes(), &mut decoded).with_context(ctx)?;
                 results.push(FileEntry {
                     package: Some(pkg),
                     path: file.into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
-                        checksum: Checksum::Md5(checksum),
+                        checksum: Checksum::Md5(decoded),
                     }),
                     flags: FileFlags::CONFIG,
                     seen: Default::default(),
@@ -203,6 +201,12 @@ mod tests {
         );
     }
 
+    fn hex_to_md5(hex: &[u8]) -> Checksum {
+        let mut decoded: [u8; 16] = [0; 16];
+        faster_hex::hex_decode(hex, &mut decoded).unwrap();
+        Checksum::Md5(decoded)
+    }
+
     #[test]
     fn test_parse_md5sums() {
         let input = indoc::indoc! {"
@@ -221,12 +225,7 @@ mod tests {
                     package: Some(package_ref),
                     path: "/usr/share/doc/libc6/README".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
-                        checksum: Checksum::Md5(
-                            hex::decode(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9a")
-                                .unwrap()
-                                .try_into()
-                                .unwrap()
-                        )
+                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9a")
                     }),
                     flags: FileFlags::empty(),
                     seen: Default::default(),
@@ -235,12 +234,7 @@ mod tests {
                     package: Some(package_ref),
                     path: "/usr/share/doc/libc6/changelog.Debian.gz".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
-                        checksum: Checksum::Md5(
-                            hex::decode(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9b")
-                                .unwrap()
-                                .try_into()
-                                .unwrap()
-                        )
+                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9b")
                     }),
                     flags: FileFlags::empty(),
                     seen: Default::default(),
@@ -249,12 +243,7 @@ mod tests {
                     package: Some(package_ref),
                     path: "/usr/share/doc/libc6/copyright".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
-                        checksum: Checksum::Md5(
-                            hex::decode(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9c")
-                                .unwrap()
-                                .try_into()
-                                .unwrap()
-                        )
+                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9c")
                     }),
                     flags: FileFlags::empty(),
                     seen: Default::default(),
@@ -263,12 +252,7 @@ mod tests {
                     package: Some(package_ref),
                     path: "/usr/share/doc/libc6/NEWS.gz".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
-                        checksum: Checksum::Md5(
-                            hex::decode(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9d")
-                                .unwrap()
-                                .try_into()
-                                .unwrap()
-                        )
+                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9d")
                     }),
                     flags: FileFlags::empty(),
                     seen: Default::default(),
@@ -312,12 +296,7 @@ mod tests {
                     package: Some(PackageRef(interner.get_or_intern("libc6"))),
                     path: "/etc/ld.so.conf".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
-                        checksum: Checksum::Md5(
-                            hex::decode(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9a")
-                                .unwrap()
-                                .try_into()
-                                .unwrap()
-                        )
+                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9a")
                     }),
                     flags: FileFlags::CONFIG,
                     seen: Default::default(),
@@ -326,12 +305,7 @@ mod tests {
                     package: Some(PackageRef(interner.get_or_intern("libc6"))),
                     path: "/etc/ld.so.conf.d/1.conf".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
-                        checksum: Checksum::Md5(
-                            hex::decode(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9b")
-                                .unwrap()
-                                .try_into()
-                                .unwrap()
-                        )
+                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9b")
                     }),
                     flags: FileFlags::CONFIG,
                     seen: Default::default(),
@@ -340,12 +314,7 @@ mod tests {
                     package: Some(PackageRef(interner.get_or_intern("libc6"))),
                     path: "/etc/ld.so.conf.d/2.conf".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
-                        checksum: Checksum::Md5(
-                            hex::decode(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9c")
-                                .unwrap()
-                                .try_into()
-                                .unwrap()
-                        )
+                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9c")
                     }),
                     flags: FileFlags::CONFIG,
                     seen: Default::default(),
@@ -354,12 +323,7 @@ mod tests {
                     package: Some(PackageRef(interner.get_or_intern("libc6"))),
                     path: "/etc/ld.so.conf.d/3.conf".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
-                        checksum: Checksum::Md5(
-                            hex::decode(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9d")
-                                .unwrap()
-                                .try_into()
-                                .unwrap()
-                        )
+                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9d")
                     }),
                     flags: FileFlags::CONFIG,
                     seen: Default::default(),

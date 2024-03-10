@@ -45,9 +45,9 @@ compact_str = { version = "0.7.1", features = ["smallvec"] }
 dashmap = { version = "5.5.3", optional = true }
 derive_builder = "0.20.0"
 either = "1.10.0"
+faster-hex = { version = "0.9.0", default-features = false, features = ["std"] }
 flate2 = { version = "1.0.28", features = ["zlib-ng"], optional = true }
 flume = { version = "0.11.0", default-features = false }
-hex = "0.4.3"
 ignore = { version = "0.4.22", features = ["simd-accel"] }
 lasso = { version = "0.7.2", features = [
     "ahasher",
