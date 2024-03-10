@@ -7,6 +7,17 @@ is generated automatically from commit messages.
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.3.0] - 2024-03-10
+
+### 🚀 Shiny new things (features)
+
+- [**breaking**] Add scanning for unmanaged files
+
+### ⚙️ Other stuff
+
+- Fix nightly clippy lint
+- Code cleanup
+
 ## [0.2.0] - 2024-02-29
 
 ### 🚀 Shiny new things (features)

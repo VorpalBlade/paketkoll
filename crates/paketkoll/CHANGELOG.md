@@ -7,6 +7,18 @@ is generated automatically from commit messages.
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.0] - 2024-03-10
+
+### 🚀 Shiny new things (features)
+
+- Generate man pages for all sub-commands
+- [**breaking**] Add scanning for unmanaged files
+- Generate man page from command line parser
+
+### 📚 Things to read (documentation)
+
+- Add note about pacman -Qkk
+
 ## [0.1.3] - 2024-02-29
 
 ### 🚀 Shiny new things (features)

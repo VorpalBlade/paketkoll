@@ -7,7 +7,7 @@ license = "MPL-2.0"
 name = "paketkoll_core"
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.76.0"
-version = "0.2.0"
+version = "0.3.0"
 
     [package.metadata.docs.rs]
     default-target = "x86_64-unknown-linux-gnu"
