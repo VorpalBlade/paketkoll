@@ -68,7 +68,7 @@ smallvec = { version = "1.13.1", features = [
     "const_new",
     "union",
 ] }
-strum = { version = "0.26.1", features = ["derive"] }
+strum = { version = "0.26.2", features = ["derive"] }
 
 [dev-dependencies]
 indoc = "2.0.4"
