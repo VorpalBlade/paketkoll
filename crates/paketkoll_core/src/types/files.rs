@@ -38,15 +38,6 @@ pub(crate) struct Directory {
     pub group: Gid,
 }
 
-/// Handles weird cases we don't support (device nodes for example).
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct Special;
-
-/// If the package management system doesn't give us enough info,
-/// all we know is that it should exist.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct Unknown;
-
 /// A file entry from the package database
 #[derive(Debug)]
 #[non_exhaustive]
