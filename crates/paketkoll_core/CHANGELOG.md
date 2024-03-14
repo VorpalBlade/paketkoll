@@ -7,6 +7,16 @@ is generated automatically from commit messages.
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.3.1] - 2024-03-14
+
+### ⚡ Go faster! (performance)
+
+- Save 20 ms on Arch Linux by switching to faster hex parsing
+
+### ⚙️ Other stuff
+
+- Fix new warning on nightly
+
 ## [0.3.0] - 2024-03-10
 
 ### 🚀 Shiny new things (features)

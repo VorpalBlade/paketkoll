@@ -7,6 +7,16 @@ is generated automatically from commit messages.
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.1] - 2024-03-14
+
+### 🚀 Shiny new things (features)
+
+- Speed up MUSL builds by 4x by switching allocators
+
+### 📚 Things to read (documentation)
+
+- Document new `check-unexpected` sub-command
+
 ## [0.2.0] - 2024-03-10
 
 ### 🚀 Shiny new things (features)

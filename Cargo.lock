@@ -735,7 +735,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "ahash",
  "anyhow",
@@ -753,7 +753,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_core"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "ahash",
  "anyhow",
