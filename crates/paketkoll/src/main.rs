@@ -18,6 +18,13 @@ use paketkoll_core::{
 use proc_exit::{Code, Exit};
 use rayon::slice::ParallelSliceMut;
 
+#[cfg(target_env = "musl")]
+use mimalloc::MiMalloc;
+
+#[cfg(target_env = "musl")]
+#[cfg_attr(target_env = "musl", global_allocator)]
+static GLOBAL: MiMalloc = MiMalloc;
+
 fn main() -> anyhow::Result<Exit> {
     let mut builder =
         env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("warn"));

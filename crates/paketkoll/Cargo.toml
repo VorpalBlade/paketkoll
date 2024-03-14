@@ -31,6 +31,12 @@ paketkoll_core = { version = "0.3.0", path = "../paketkoll_core" }
 proc-exit = "2.0.1"
 rayon = "1.9.0"
 
+[target.'cfg(target_env = "musl")'.dependencies]
+# The allocator on musl is attrociously slow, so we use a custom one.
+# Jemalloc doesn't work reliably on Aarch64 due to varying page size, so use
+# the slightly slower mimalloc instead.
+mimalloc = "0.1.39"
+
 [build-dependencies]
 clap = { version = "4.5.2", features = ["derive"] }
 clap_complete = "4.5.1"
