@@ -40,7 +40,6 @@
 //!
 //! [mtree(5)]: https://www.freebsd.org/cgi/man.cgi?mtree(5)
 
-use smallvec::SmallVec;
 use std::env;
 use std::ffi::OsStr;
 use std::fmt;
@@ -261,7 +260,7 @@ impl Entry {
     /// `rmd160|rmd160digest|ripemd160digest` The RIPEMD160 message digest of
     /// the file.
     pub fn rmd160(&self) -> Option<&[u8; 20]> {
-        self.params.rmd160.as_ref()
+        self.params.rmd160.as_ref().map(|v| v.as_ref())
     }
 
     /// `sha1|sha1digest` The FIPS 160-1 ("SHA-1") message digest of the file.
@@ -326,13 +325,13 @@ struct Params {
     /// `contents` The full pathname of a file that holds the contents of this file.
     pub contents: Option<PathBuf>,
     /// `flags` The file flags as a symbolic name.
-    pub flags: Option<Vec<u8>>,
+    pub flags: Option<Box<[u8]>>,
     /// `gid` The file group as a numeric value.
     pub gid: Option<u32>,
     /// `gname` The file group as a symbolic name.
     ///
     /// The name can be up to 32 chars and must match regex `[a-z_][a-z0-9_-]*[$]?`.
-    pub gname: Option<SmallVec<[u8; 8]>>,
+    pub gname: Option<Box<[u8]>>,
     /// `ignore` Ignore any file hierarchy below this line.
     pub ignore: bool,
     /// `inode` The inode number.
@@ -357,7 +356,7 @@ struct Params {
     pub resident_device: Option<Device>,
     /// `rmd160|rmd160digest|ripemd160digest` The RIPEMD160 message digest of
     /// the file.
-    pub rmd160: Option<[u8; 20]>,
+    pub rmd160: Option<Box<[u8; 20]>>,
     /// `sha1|sha1digest` The FIPS 160-1 ("SHA-1") message digest of the file.
     pub sha1: Option<Box<[u8; 20]>>,
     /// `sha256|sha256digest` The FIPS 180-2 ("SHA-256") message digest of the file.
@@ -377,7 +376,7 @@ struct Params {
     /// The file owner as a symbolic name.
     ///
     /// The name can be up to 32 chars and must match regex `[a-z_][a-z0-9_-]*[$]?`.
-    pub uname: Option<SmallVec<[u8; 8]>>,
+    pub uname: Option<Box<[u8]>>,
 }
 
 impl Params {
@@ -396,15 +395,9 @@ impl Params {
             Keyword::Contents(contents) => {
                 self.contents = Some(Path::new(OsStr::from_bytes(contents)).to_owned())
             }
-            Keyword::Flags(flags) => self.flags = Some(flags.to_owned()),
+            Keyword::Flags(flags) => self.flags = Some(flags.into()),
             Keyword::Gid(gid) => self.gid = Some(gid),
-            Keyword::Gname(gname) => {
-                self.gname = Some({
-                    let mut vec = SmallVec::new();
-                    vec.extend_from_slice(gname);
-                    vec
-                })
-            }
+            Keyword::Gname(gname) => self.gname = Some(gname.into()),
             Keyword::Ignore => self.ignore = true,
             Keyword::Inode(inode) => self.inode = Some(inode),
             Keyword::Link(link) => {
@@ -416,7 +409,7 @@ impl Params {
             Keyword::NoChange => self.no_change = false,
             Keyword::Optional => self.optional = false,
             Keyword::ResidentDeviceRef(device) => self.resident_device = Some(device.to_device()),
-            Keyword::Rmd160(rmd160) => self.rmd160 = Some(rmd160),
+            Keyword::Rmd160(rmd160) => self.rmd160 = Some(Box::new(rmd160)),
             Keyword::Sha1(sha1) => self.sha1 = Some(Box::new(sha1)),
             Keyword::Sha256(sha256) => self.sha256 = Some(sha256),
             Keyword::Sha384(sha384) => self.sha384 = Some(Box::new(sha384)),
@@ -425,13 +418,7 @@ impl Params {
             Keyword::Time(time) => self.time = Some(UNIX_EPOCH + time),
             Keyword::Type(ty) => self.file_type = Some(ty),
             Keyword::Uid(uid) => self.uid = Some(uid),
-            Keyword::Uname(uname) => {
-                self.uname = Some({
-                    let mut vec = SmallVec::new();
-                    vec.extend_from_slice(uname);
-                    vec
-                })
-            }
+            Keyword::Uname(uname) => self.uname = Some(uname.into()),
         }
     }
 
@@ -518,7 +505,7 @@ impl fmt::Display for Params {
         }
         if let Some(ref v) = self.rmd160 {
             write!(f, "rmd160: ")?;
-            for ch in v {
+            for ch in v.iter() {
                 write!(f, "{:x}", ch)?;
             }
             writeln!(f)?;
