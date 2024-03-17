@@ -771,6 +771,7 @@ dependencies = [
  "lasso",
  "log",
  "md-5",
+ "memchr",
  "num_cpus",
  "phf",
  "pretty_assertions",

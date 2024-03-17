@@ -158,8 +158,10 @@ pub fn decode_escapes_path(path: std::path::PathBuf) -> Option<std::path::PathBu
 
 /// Spaces and other special characters are escaped, take care of that
 pub fn decode_escapes(buf: &mut [u8]) -> Option<&mut [u8]> {
-    let mut read_idx = 0;
-    let mut write_idx = 0;
+    // Skip forward to the first escape character using a fast search.
+    // Hopefully there will be nothing to do in the majority of cases
+    let mut read_idx = memchr::memchr(b'\\', buf).unwrap_or(buf.len());
+    let mut write_idx = read_idx;
     while read_idx < buf.len() {
         if buf[read_idx] == b'\\' {
             let ch = (from_oct_ch(buf[read_idx + 1])? << 6)
