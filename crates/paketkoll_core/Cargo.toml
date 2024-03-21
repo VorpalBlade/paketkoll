@@ -37,40 +37,32 @@ __md5 = ["dep:md-5"]
 __sha256 = ["dep:ring"]
 
 [dependencies]
-ahash = "0.8.11"
-anyhow = { version = "1.0.81", features = ["backtrace"] }
-bitflags = "2.4.2"
-bstr = "1.9.1"
-compact_str = { version = "0.7.1", features = ["smallvec"] }
-dashmap = { version = "5.5.3", optional = true }
-derive_builder = "0.20.0"
-either = "1.10.0"
-faster-hex = { version = "0.9.0", default-features = false, features = ["std"] }
-flate2 = { version = "1.0.28", features = ["zlib-ng"], optional = true }
-flume = { version = "0.11.0", default-features = false }
-ignore = { version = "0.4.22", features = ["simd-accel"] }
-lasso = { version = "0.7.2", features = [
-    "ahasher",
-    "inline-more",
-    "multi-threaded",
-] }
-log = "0.4.21"
-md-5 = { version = "0.10.6", optional = true }
-memchr = "2.7.1"
-num_cpus = "1.16.0"
+ahash = { workspace = true }
+anyhow = { workspace = true, features = ["backtrace"] }
+bitflags = { workspace = true }
+bstr = { workspace = true }
+compact_str = { workspace = true, features = ["smallvec"] }
+dashmap = { workspace = true, optional = true }
+derive_builder = { workspace = true }
+either = { workspace = true }
+faster-hex = { workspace = true, features = ["std"] }
+flate2 = { workspace = true, features = ["zlib-ng"], optional = true }
+flume = { workspace = true }
+ignore = { workspace = true, features = ["simd-accel"] }
+lasso = { workspace = true, features = ["ahasher", "inline-more", "multi-threaded"] }
+log = { workspace = true }
+md-5 = { workspace = true, optional = true }
+memchr = { workspace = true }
+num_cpus = { workspace = true }
 #mtree = { version = "0.5.0", optional = true }
-phf = { version = "0.11.2", features = ["macros"] }
-rayon = "1.9.0"
-regex = "1.10.3"
-ring = { version = "0.17.8", optional = true }
-rust-ini = { version = "0.21.0", optional = true }
-smallvec = { version = "1.13.1", features = [
-    "const_generics",
-    "const_new",
-    "union",
-] }
-strum = { version = "0.26.2", features = ["derive"] }
+phf = { workspace = true, features = ["macros"] }
+rayon = { workspace = true }
+regex = { workspace = true }
+ring = { workspace = true, optional = true }
+rust-ini = { workspace = true, optional = true }
+smallvec = { workspace = true, features = ["const_generics", "const_new", "union"] }
+strum = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
-indoc = "2.0.4"
-pretty_assertions = "1.4.0"
+indoc = { workspace = true }
+pretty_assertions = { workspace = true }
