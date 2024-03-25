@@ -33,7 +33,7 @@ rayon = "1.9.0"
 regex = "1.10.3"
 ring = "0.17.8"
 rust-ini = "0.21.0"
-smallvec = "1.13.1"
+smallvec = "1.13.2"
 strum = "0.26.2"
 
 [profile.dev]
