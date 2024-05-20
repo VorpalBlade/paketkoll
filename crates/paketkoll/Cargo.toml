@@ -35,7 +35,7 @@ rayon = { workspace = true }
 # The allocator on musl is attrociously slow, so we use a custom one.
 # Jemalloc doesn't work reliably on Aarch64 due to varying page size, so use
 # the slightly slower mimalloc instead.
-mimalloc = "0.1.41"
+mimalloc = "0.1.42"
 
 [build-dependencies]
 clap = { workspace = true, features = ["derive"] }
