@@ -4,7 +4,7 @@ resolver = "2"
 
 [workspace.dependencies]
 ahash = "0.8.11"
-anyhow = "1.0.83"
+anyhow = "1.0.86"
 bitflags = "2.5.0"
 bstr = "1.9.1"
 clap = "4.5.4"
