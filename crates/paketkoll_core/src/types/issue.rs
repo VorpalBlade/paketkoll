@@ -84,10 +84,10 @@ impl std::fmt::Display for IssueKind {
                 "symlink target mismatch (expected {expected:?}, actual {actual:?})"
             )?,
             IssueKind::WrongOwner { actual, expected } => {
-                write!(f, "UID mismatch (expected {expected}, actual {actual})")?
+                write!(f, "UID mismatch (expected {expected}, actual {actual})")?;
             }
             IssueKind::WrongGroup { actual, expected } => {
-                write!(f, "GID mismatch (expected {expected}, actual {actual})")?
+                write!(f, "GID mismatch (expected {expected}, actual {actual})")?;
             }
             IssueKind::WrongMode { actual, expected } => write!(
                 f,

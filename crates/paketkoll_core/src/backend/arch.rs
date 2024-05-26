@@ -99,7 +99,7 @@ impl Files for ArchLinux {
                 }) => {
                     let result = match mtree::extract_mtree(
                         pkg,
-                        mtree_path,
+                        &mtree_path,
                         backup_files,
                         &seen_directories,
                     ) {

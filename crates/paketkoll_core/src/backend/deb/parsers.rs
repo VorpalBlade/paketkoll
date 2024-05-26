@@ -9,7 +9,7 @@ use crate::types::{
     Checksum, FileEntry, FileFlags, PackageInterner, PackageRef, Properties, RegularFileBasic,
 };
 
-/// Load lines from a readable as PathBufs
+/// Load lines from a readable as `PathBufs`
 pub(super) fn parse_paths(
     package: PackageRef,
     input: &mut impl BufRead,
@@ -130,9 +130,9 @@ pub(super) fn parse_status(
                     }),
                     flags: FileFlags::CONFIG,
                     seen: Default::default(),
-                })
+                });
             } else {
-                state = StatusParsingState::InPackage(pkg)
+                state = StatusParsingState::InPackage(pkg);
             }
         }
     }

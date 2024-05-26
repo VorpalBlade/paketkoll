@@ -79,7 +79,7 @@ impl<R> MTree<R>
 where
     R: Read,
 {
-    /// The constructor function for an MTree instance.
+    /// The constructor function for an `MTree` instance.
     pub fn from_reader(reader: R) -> MTree<R> {
         MTree {
             inner: BufReader::new(reader).split(b'\n'),
@@ -188,12 +188,12 @@ impl Entry {
 
     /// `contents` The full pathname of a file that holds the contents of this file.
     pub fn contents(&self) -> Option<&Path> {
-        self.params.contents.as_ref().map(|v| v.as_ref())
+        self.params.contents.as_ref().map(std::convert::AsRef::as_ref)
     }
 
     /// `flags` The file flags as a symbolic name.
     pub fn flags(&self) -> Option<&[u8]> {
-        self.params.flags.as_ref().map(|v| v.as_ref())
+        self.params.flags.as_ref().map(std::convert::AsRef::as_ref)
     }
 
     /// `gid` The file group as a numeric value.
@@ -205,7 +205,7 @@ impl Entry {
     ///
     /// The name can be up to 32 chars and must match regex `[a-z_][a-z0-9_-]*[$]?`.
     pub fn gname(&self) -> Option<&[u8]> {
-        self.params.gname.as_ref().map(|v| v.as_ref())
+        self.params.gname.as_ref().map(std::convert::AsRef::as_ref)
     }
 
     /// `ignore` Ignore any file hierarchy below this line.
@@ -220,7 +220,7 @@ impl Entry {
 
     /// `link` The target of the symbolic link when type=link.
     pub fn link(&self) -> Option<&Path> {
-        self.params.link.as_ref().map(|v| v.as_ref())
+        self.params.link.as_ref().map(std::convert::AsRef::as_ref)
     }
 
     /// `md5|md5digest` The MD5 message digest of the file.
@@ -260,12 +260,12 @@ impl Entry {
     /// `rmd160|rmd160digest|ripemd160digest` The RIPEMD160 message digest of
     /// the file.
     pub fn rmd160(&self) -> Option<&[u8; 20]> {
-        self.params.rmd160.as_ref().map(|v| v.as_ref())
+        self.params.rmd160.as_ref().map(std::convert::AsRef::as_ref)
     }
 
     /// `sha1|sha1digest` The FIPS 160-1 ("SHA-1") message digest of the file.
     pub fn sha1(&self) -> Option<&[u8; 20]> {
-        self.params.sha1.as_ref().map(|v| v.as_ref())
+        self.params.sha1.as_ref().map(std::convert::AsRef::as_ref)
     }
 
     /// `sha256|sha256digest` The FIPS 180-2 ("SHA-256") message digest of the file.
@@ -275,12 +275,12 @@ impl Entry {
 
     /// `sha384|sha384digest` The FIPS 180-2 ("SHA-384") message digest of the file.
     pub fn sha384(&self) -> Option<&[u8; 48]> {
-        self.params.sha384.as_ref().map(|v| v.as_ref())
+        self.params.sha384.as_ref().map(std::convert::AsRef::as_ref)
     }
 
     /// `sha512|sha512digest` The FIPS 180-2 ("SHA-512") message digest of the file.
     pub fn sha512(&self) -> Option<&[u8; 64]> {
-        self.params.sha512.as_ref().map(|v| v.as_ref())
+        self.params.sha512.as_ref().map(std::convert::AsRef::as_ref)
     }
 
     /// `size` The size, in bytes, of the file.
@@ -307,7 +307,7 @@ impl Entry {
     ///
     /// The name can be up to 32 chars and must match regex `[a-z_][a-z0-9_-]*[$]?`.
     pub fn uname(&self) -> Option<&[u8]> {
-        self.params.uname.as_ref().map(|v| v.as_ref())
+        self.params.uname.as_ref().map(std::convert::AsRef::as_ref)
     }
 }
 
@@ -393,7 +393,7 @@ impl Params {
             Keyword::Checksum(cksum) => self.checksum = Some(cksum),
             Keyword::DeviceRef(device) => self.device = Some(device.to_device()),
             Keyword::Contents(contents) => {
-                self.contents = Some(Path::new(OsStr::from_bytes(contents)).to_owned())
+                self.contents = Some(Path::new(OsStr::from_bytes(contents)).to_owned());
             }
             Keyword::Flags(flags) => self.flags = Some(flags.into()),
             Keyword::Gid(gid) => self.gid = Some(gid),
@@ -401,7 +401,7 @@ impl Params {
             Keyword::Ignore => self.ignore = true,
             Keyword::Inode(inode) => self.inode = Some(inode),
             Keyword::Link(link) => {
-                self.link = decode_escapes_path(Path::new(OsStr::from_bytes(link)).to_owned())
+                self.link = decode_escapes_path(Path::new(OsStr::from_bytes(link)).to_owned());
             }
             Keyword::Md5(md5) => self.md5 = Some(md5),
             Keyword::Mode(mode) => self.mode = Some(mode),

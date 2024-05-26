@@ -246,7 +246,7 @@ impl<'a> DeviceRef<'a> {
             format: self.format,
             major: self.major.to_owned(),
             minor: self.minor.to_owned(),
-            subunit: self.subunit.map(|val| val.to_owned()),
+            subunit: self.subunit.map(std::borrow::ToOwned::to_owned),
         }
     }
 

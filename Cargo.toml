@@ -40,7 +40,12 @@ strum = "0.26.2"
 rust-2018-idioms = "warn"
 
 [workspace.lints.clippy]
+doc_markdown = "warn"
+needless_pass_by_value = "warn"
+redundant_closure_for_method_calls = "warn"
+semicolon_if_nothing_returned = "warn"
 unwrap_used = "warn"
+wildcard_imports = "warn"
 
 [profile.dev]
 debug = 2

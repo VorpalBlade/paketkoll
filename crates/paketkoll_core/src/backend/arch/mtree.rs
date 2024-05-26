@@ -1,11 +1,11 @@
-//! Logic to take mtree data to FileEntry
+//! Logic to take mtree data to `FileEntry`
 
 use std::{
     collections::BTreeSet,
     ffi::OsStr,
     fs::File,
     io::{BufReader, Read},
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
 use crate::mtree::{self, MTree};
@@ -29,13 +29,13 @@ const SPECIAL_FILES: phf::Set<&'static [u8]> = phf::phf_set! {
 };
 
 /// Extract data from compressed mtree file
-pub(super) fn extract_mtree(
+pub(super) fn extract_mtree<'seen>(
     pkg: PackageRef,
-    path: PathBuf,
+    path: &Path,
     backup_files: BTreeSet<Vec<u8>>,
-    seen_directories: &DashSet<(PathBuf, Directory)>,
-) -> anyhow::Result<impl Iterator<Item = anyhow::Result<FileEntry>> + '_> {
-    let file = BufReader::new(File::open(&path)?);
+    seen_directories: &'seen DashSet<(PathBuf, Directory)>,
+) -> anyhow::Result<impl Iterator<Item = anyhow::Result<FileEntry>> + 'seen> {
+    let file = BufReader::new(File::open(path)?);
     let decoder = GzDecoder::new(file);
     if decoder.header().is_none() {
         anyhow::bail!(
@@ -61,7 +61,7 @@ fn parse_mtree<'input_data>(
             if SPECIAL_FILES.contains(raw) {
                 None
             } else {
-                convert_mtree(pkg, inner, seen_directories, &backup_files).transpose()
+                convert_mtree(pkg, &inner, seen_directories, &backup_files).transpose()
             }
         }
         Err(err) => Some(Err(err).context("Error while parsing package")),
@@ -72,7 +72,7 @@ fn parse_mtree<'input_data>(
 /// Convert a single entry from mtree to a [`FileEntry`]
 fn convert_mtree(
     pkg: PackageRef,
-    item: mtree::Entry,
+    item: &mtree::Entry,
     seen_directories: &DashSet<(PathBuf, Directory)>,
     backup_files: &BTreeSet<Vec<u8>>,
 ) -> Result<Option<FileEntry>, anyhow::Error> {
@@ -83,7 +83,7 @@ fn convert_mtree(
                 group: Gid::new(item.gid().context("No gid for dir")?),
                 mode: Mode(item.mode().context("Missing mode")?.into()),
             };
-            let path = extract_path(&item);
+            let path = extract_path(item);
             if seen_directories.insert((path.clone(), dir.clone())) {
                 Some(FileEntry {
                     package: Some(pkg),
@@ -98,7 +98,7 @@ fn convert_mtree(
         }
         Some(mtree::FileType::File) => Some(FileEntry {
             package: Some(pkg),
-            path: extract_path(&item),
+            path: extract_path(item),
             properties: Properties::RegularFile(RegularFile {
                 owner: Uid::new(item.uid().context("No uid for file")?),
                 group: Gid::new(item.gid().context("No gid for file")?),
@@ -116,7 +116,7 @@ fn convert_mtree(
         }),
         Some(mtree::FileType::SymbolicLink) => Some(FileEntry {
             package: Some(pkg),
-            path: extract_path(&item),
+            path: extract_path(item),
             properties: Properties::Symlink(Symlink {
                 owner: Uid::new(item.uid().context("No uid for link")?),
                 group: Gid::new(item.gid().context("No gid for link")?),
@@ -131,7 +131,7 @@ fn convert_mtree(
         | Some(mtree::FileType::Socket)
         | None => Some(FileEntry {
             package: Some(pkg),
-            path: extract_path(&item),
+            path: extract_path(item),
             properties: Properties::Special {},
             flags: FileFlags::empty(),
             seen: Default::default(),
