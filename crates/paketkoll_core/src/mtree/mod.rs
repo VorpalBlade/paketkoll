@@ -188,7 +188,10 @@ impl Entry {
 
     /// `contents` The full pathname of a file that holds the contents of this file.
     pub fn contents(&self) -> Option<&Path> {
-        self.params.contents.as_ref().map(std::convert::AsRef::as_ref)
+        self.params
+            .contents
+            .as_ref()
+            .map(std::convert::AsRef::as_ref)
     }
 
     /// `flags` The file flags as a symbolic name.
