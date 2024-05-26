@@ -31,17 +31,12 @@ pub(crate) struct ArchLinux {
 
 #[derive(Debug, Default)]
 pub(crate) struct ArchLinuxBuilder {
-    pacman_config: Option<pacman_conf::PacmanConfig>,
     package_filter: Option<&'static PackageFilter>,
 }
 
 impl ArchLinuxBuilder {
     /// Load pacman config
-    fn load_config(&mut self) -> anyhow::Result<()> {
-        assert!(
-            self.pacman_config.is_none(),
-            "Config should only be loaded once"
-        );
+    fn load_config(&mut self) -> anyhow::Result<pacman_conf::PacmanConfig> {
         log::debug!(target: "paketkoll_core::backend::arch", "Loading pacman config");
         let mut readable = BufReader::new(std::fs::File::open("/etc/pacman.conf")?);
         let pacman_config: pacman_conf::PacmanConfig =
@@ -50,8 +45,7 @@ impl ArchLinuxBuilder {
         if pacman_config.root != "/" {
             anyhow::bail!("Pacman root other than \"/\" not supported");
         }
-        self.pacman_config = Some(pacman_config);
-        Ok(())
+        Ok(pacman_config)
     }
 
     pub fn package_filter(&mut self, filter: &'static PackageFilter) -> &mut Self {
@@ -60,9 +54,10 @@ impl ArchLinuxBuilder {
     }
 
     pub fn build(mut self) -> anyhow::Result<ArchLinux> {
-        self.load_config().context("Failed to load pacman.conf")?;
+        let pacman_config = self.load_config().context("Failed to load pacman.conf")?;
         Ok(ArchLinux {
-            pacman_config: self.pacman_config.unwrap(),
+            // Impossible unwrap: We just loaded it
+            pacman_config,
             package_filter: self
                 .package_filter
                 .unwrap_or_else(|| &PackageFilter::Everything),

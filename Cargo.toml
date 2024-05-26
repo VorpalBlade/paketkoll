@@ -36,6 +36,12 @@ rust-ini = "0.21.0"
 smallvec = "1.13.2"
 strum = "0.26.2"
 
+[workspace.lints.rust]
+rust-2018-idioms = "warn"
+
+[workspace.lints.clippy]
+unwrap_used = "warn"
+
 [profile.dev]
 debug = 2
 split-debuginfo = "unpacked"

@@ -162,12 +162,16 @@ pub enum Keyword<'a> {
 }
 impl<'a> Keyword<'a> {
     /// Parse a keyword with optional value.
+    ///
+    /// Input must be a non-empty slice
     fn from_bytes(input: &'a [u8]) -> ParserResult<Keyword<'a>> {
         fn next<'a>(field: &'static str, val: Option<&'a [u8]>) -> ParserResult<&'a [u8]> {
             val.ok_or_else(|| format!(r#""{}" requires a parameter, none found"#, field).into())
         }
+        debug_assert!(!input.len() > 0, "Input must be non-empty");
         let mut iter = input.splitn(2, |ch| *ch == b'=');
-        let key = iter.next().unwrap(); // cannot fail
+        // Unwrap cannot fail, as long as input is non-empty, guaranteed by the caller.
+        let key = iter.next().expect("cannot fail");
         Ok(match key {
             b"cksum" => Keyword::Checksum(u64::from_dec(next("cksum", iter.next())?)?),
             b"device" => Keyword::DeviceRef(DeviceRef::from_bytes(next("devices", iter.next())?)?),
@@ -408,7 +412,7 @@ impl FileType {
 }
 
 impl fmt::Display for FileType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.as_str())
     }
 }
@@ -443,7 +447,7 @@ bitflags::bitflags! {
 }
 
 impl fmt::Display for Perms {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if self.contains(Perms::READ) {
             f.write_str("r")?;
         } else {
@@ -533,13 +537,13 @@ impl From<FileMode> for u32 {
 }
 
 impl fmt::Display for FileMode {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}{}{}", self.owner(), self.group(), self.other())
     }
 }
 
 impl fmt::Octal for FileMode {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:o}{:o}{:o}", self.owner(), self.group(), self.other())
     }
 }
@@ -559,7 +563,7 @@ impl From<String> for ParserError {
 }
 
 impl fmt::Display for ParserError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.0)
     }
 }

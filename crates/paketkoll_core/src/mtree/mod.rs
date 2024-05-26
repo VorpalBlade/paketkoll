@@ -163,7 +163,7 @@ pub struct Entry {
 }
 
 impl fmt::Display for Entry {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, r#"mtree entry for "{}""#, self.path.display())?;
         write!(f, "{}", self.params)
     }
@@ -455,7 +455,7 @@ impl Params {
 }
 
 impl fmt::Display for Params {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(v) = self.checksum {
             writeln!(f, "checksum: {}", v)?;
         }
@@ -587,7 +587,7 @@ pub enum Error {
 }
 
 impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(match self {
             Error::Io(..) => "an i/o error occured while reading the mtree",
             Error::Parser(..) => "an error occured while parsing the mtree",

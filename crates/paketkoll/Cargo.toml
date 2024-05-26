@@ -41,3 +41,6 @@ mimalloc = "0.1.42"
 clap = { workspace = true, features = ["derive"] }
 clap_complete = { workspace = true }
 clap_mangen = { workspace = true }
+
+[lints]
+workspace = true

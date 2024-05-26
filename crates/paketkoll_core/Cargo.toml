@@ -66,3 +66,6 @@ strum = { workspace = true, features = ["derive"] }
 [dev-dependencies]
 indoc = { workspace = true }
 pretty_assertions = { workspace = true }
+
+[lints]
+workspace = true
