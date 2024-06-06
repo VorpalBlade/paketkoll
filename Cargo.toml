@@ -52,6 +52,7 @@ debug = 2
 split-debuginfo = "unpacked"
 
 [profile.release]
+codegen-units = 1
 lto = "fat"
 opt-level = 2
 
