@@ -1,7 +1,9 @@
 name: Release
 
 permissions:
+  attestations: write
   contents: write
+  id-token: write
 
 on:
   release:
@@ -48,13 +50,18 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - uses: taiki-e/install-action@cross
-      - uses: taiki-e/upload-rust-binary-action@v1
+      - uses: taiki-e/upload-rust-binary-action@v1.21.0
+        id: upload-rust-binary-action
         with:
           bin: paketkoll
           target: ${{ matrix.target }}
           # Include version number.
           archive: $bin-$tag-$target
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: "${{ steps.upload-rust-binary-action.outputs.archive }}.*"
 
   upload-aur:
     runs-on: ubuntu-latest
