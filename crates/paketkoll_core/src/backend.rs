@@ -20,20 +20,39 @@ pub(crate) mod deb;
 
 pub(crate) mod filesystem;
 
+pub fn installed_packages(
+    config: &crate::config::PackageListConfiguration,
+) -> anyhow::Result<(crate::types::PackageInterner, Vec<crate::types::Package>)> {
+    let backend = config
+        .common
+        .backend
+        .create_packages(&config.common)
+        .with_context(|| format!("Failed to create backend for {}", config.common.backend))?;
+    let interner = PackageInterner::new();
+    let packages = backend.packages(&interner).with_context(|| {
+        format!(
+            "Failed to collect information from backend {}",
+            config.common.backend
+        )
+    })?;
+    Ok((interner, packages))
+}
+
 /// Check file system for differences using the given configuration
-pub fn check(
-    config: &crate::config::CommonConfiguration,
+pub fn check_installed_files(
+    config: &crate::config::CommonFileCheckConfiguration,
 ) -> anyhow::Result<(crate::types::PackageInterner, Vec<PackageIssue>)> {
     let backend = config
+        .common
         .backend
-        .create(config)
-        .with_context(|| format!("Failed to create backend for {}", config.backend))?;
+        .create_files(&config.common)
+        .with_context(|| format!("Failed to create backend for {}", config.common.backend))?;
     let interner = PackageInterner::new();
     // Get distro specific file list
     let results = backend.files(&interner).with_context(|| {
         format!(
             "Failed to collect information from backend {}",
-            config.backend
+            config.common.backend
         )
     })?;
 
@@ -61,21 +80,22 @@ pub fn check(
 }
 
 /// Check file system for differences (including unexpected files) using the given configuration
-pub fn check_unexpected(
-    common_cfg: &crate::config::CommonConfiguration,
-    unexpected_cfg: &crate::config::CheckUnexpectedConfiguration,
+pub fn check_all_files(
+    common_cfg: &crate::config::CommonFileCheckConfiguration,
+    unexpected_cfg: &crate::config::CheckAllFilesConfiguration,
 ) -> anyhow::Result<(crate::types::PackageInterner, Vec<PackageIssue>)> {
     // Collect distro files
     let backend = common_cfg
+        .common
         .backend
-        .create(common_cfg)
-        .with_context(|| format!("Failed to create backend for {}", common_cfg.backend))?;
+        .create_files(&common_cfg.common)
+        .with_context(|| format!("Failed to create backend for {}", common_cfg.common.backend))?;
     let interner = PackageInterner::new();
     // Get distro specific file list
     let mut results = backend.files(&interner).with_context(|| {
         format!(
             "Failed to collect information from backend {}",
-            common_cfg.backend
+            common_cfg.common.backend
         )
     })?;
 

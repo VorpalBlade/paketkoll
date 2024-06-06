@@ -16,6 +16,9 @@ pub(crate) struct Cli {
     /// Which package manager backend to use
     #[arg(short, long, default_value_t = Backend::Auto)]
     pub(crate) backend: Backend,
+    /// Output format to use
+    #[arg(short, long, default_value_t = Format::Human, hide = true)]
+    pub(crate) format: Format,
     /// Operation to perform
     #[command(subcommand)]
     pub(crate) command: Commands,
@@ -39,6 +42,26 @@ pub(crate) enum Commands {
         #[arg(long)]
         canonicalize: bool,
     },
+    /// Get a list of installed packages
+    InstalledPackages,
+}
+
+/// Output format to use
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, clap::ValueEnum)]
+pub(crate) enum Format {
+    /// Human readable output
+    Human,
+    /// JSON formatted output
+    Json,
+}
+
+impl std::fmt::Display for Format {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Format::Human => write!(f, "human"),
+            Format::Json => write!(f, "json"),
+        }
+    }
 }
 
 /// Determine which package manager backend to use

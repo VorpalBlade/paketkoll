@@ -12,7 +12,7 @@ use clap::Parser;
 use cli::{Backend, Cli};
 use paketkoll_core::{
     backend,
-    config::{self, CheckUnexpectedConfigurationBuilder, PackageFilter},
+    config::{self, CheckAllFilesConfiguration, PackageFilter},
     types::{Issue, PackageRef},
 };
 use proc_exit::{Code, Exit};
@@ -31,17 +31,44 @@ fn main() -> anyhow::Result<Exit> {
     builder.init();
     let cli = Cli::parse();
 
+    match cli.command {
+        cli::Commands::Check { .. } | cli::Commands::CheckUnexpected { .. } => {
+            run_file_checks(&cli)
+        }
+        cli::Commands::InstalledPackages => {
+            let (interner, packages) = backend::installed_packages(&(&cli).try_into()?)?;
+            let mut stdout = BufWriter::new(stdout().lock());
+            for pkg in packages {
+                let pkg_name = interner
+                    .try_resolve(&pkg.name.as_interner_ref())
+                    .ok_or_else(|| anyhow::anyhow!("No package name for package"))?;
+                match pkg.reason {
+                    paketkoll_core::types::InstallReason::Explicit => {
+                        writeln!(stdout, "{} {}", pkg_name, pkg.version)?
+                    }
+                    paketkoll_core::types::InstallReason::Dependency => {
+                        writeln!(stdout, "{} {} (as dep)", pkg_name, pkg.version)?
+                    }
+                }
+            }
+            Ok(Exit::new(Code::SUCCESS))
+        }
+    }
+}
+
+fn run_file_checks(cli: &Cli) -> Result<Exit, anyhow::Error> {
     let (interner, mut found_issues) = match cli.command {
-        cli::Commands::Check { .. } => backend::check(&(&cli).try_into()?)?,
+        cli::Commands::Check { .. } => backend::check_installed_files(&(cli).try_into()?)?,
         cli::Commands::CheckUnexpected {
             ref ignore,
             canonicalize,
-        } => backend::check_unexpected(&(&cli).try_into()?, &{
-            let mut builder = CheckUnexpectedConfigurationBuilder::default();
+        } => backend::check_all_files(&(cli).try_into()?, &{
+            let mut builder = CheckAllFilesConfiguration::builder();
             builder.ignored_paths(ignore.clone());
             builder.canonicalize_paths(canonicalize);
             builder.build()?
         })?,
+        _ => unreachable!(),
     };
 
     let key_extractor = |(pkg, issue): &(Option<PackageRef>, Issue)| {
@@ -125,8 +152,6 @@ impl TryFrom<&Cli> for config::CommonConfiguration {
     fn try_from(value: &Cli) -> Result<Self, Self::Error> {
         let mut builder = Self::builder();
 
-        builder.trust_mtime(value.trust_mtime);
-        builder.config_files(value.config_files.into());
         builder.backend(value.backend.try_into()?);
 
         match value.command {
@@ -137,7 +162,34 @@ impl TryFrom<&Cli> for config::CommonConfiguration {
                 ignore: _,
                 canonicalize: _,
             } => {}
+            cli::Commands::InstalledPackages => {}
         }
+        Ok(builder.build()?)
+    }
+}
+
+impl TryFrom<&Cli> for config::CommonFileCheckConfiguration {
+    type Error = anyhow::Error;
+
+    fn try_from(value: &Cli) -> Result<Self, Self::Error> {
+        let mut builder = Self::builder();
+
+        builder.trust_mtime(value.trust_mtime);
+        builder.config_files(value.config_files.into());
+        builder.common(value.try_into()?);
+
+        Ok(builder.build()?)
+    }
+}
+
+impl TryFrom<&Cli> for config::PackageListConfiguration {
+    type Error = anyhow::Error;
+
+    fn try_from(value: &Cli) -> Result<Self, Self::Error> {
+        let mut builder = Self::builder();
+
+        builder.common(value.try_into()?);
+
         Ok(builder.build()?)
     }
 }

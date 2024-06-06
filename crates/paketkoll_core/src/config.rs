@@ -17,7 +17,7 @@ pub enum Backend {
 
 impl Backend {
     /// Create a backend instance
-    pub(crate) fn create(
+    pub(crate) fn create_files(
         self,
         configuration: &CommonConfiguration,
     ) -> anyhow::Result<Box<dyn crate::backend::Files>> {
@@ -34,6 +34,30 @@ impl Backend {
                 builder.package_filter(configuration.package_filter);
                 builder.build()
             })),
+        }
+    }
+
+    /// Create a backend instance
+    pub(crate) fn create_packages(
+        self,
+        configuration: &CommonConfiguration,
+    ) -> anyhow::Result<Box<dyn crate::backend::Packages>> {
+        match self {
+            #[cfg(feature = "arch_linux")]
+            Backend::ArchLinux => Ok(Box::new({
+                let mut builder = crate::backend::arch::ArchLinuxBuilder::default();
+                builder.package_filter(configuration.package_filter);
+                builder.build()?
+            })),
+            #[cfg(feature = "debian")]
+            Backend::Debian => {
+                anyhow::bail!("Debian backend not implemented yet for packages");
+                //Ok(Box::new({
+                //    let mut builder = crate::backend::deb::DebianBuilder::default();
+                //    builder.package_filter(configuration.package_filter);
+                //    builder.build()
+                //}))
+            }
         }
     }
 }
@@ -82,9 +106,36 @@ impl Debug for PackageFilter {
     }
 }
 
+/// Describes shared configuration for all operations
+#[derive(Debug, Clone, derive_builder::Builder)]
+#[non_exhaustive]
+pub struct CommonConfiguration {
+    /// Distro backend to use
+    pub backend: Backend,
+    /// Which packages to include
+    #[builder(default = "&PackageFilter::Everything")]
+    pub package_filter: &'static PackageFilter,
+}
+
+impl CommonConfiguration {
+    /// Get a builder for this class
+    pub fn builder() -> CommonConfigurationBuilder {
+        Default::default()
+    }
+}
+
+impl Default for CommonConfiguration {
+    fn default() -> Self {
+        Self {
+            backend: Backend::ArchLinux,
+            package_filter: &PackageFilter::Everything,
+        }
+    }
+}
+
 #[derive(Debug, derive_builder::Builder)]
 #[non_exhaustive]
-pub struct CheckUnexpectedConfiguration {
+pub struct CheckAllFilesConfiguration {
     /// Ignored paths (globs). Only appliccable to some operations.
     #[builder(default = "vec![]")]
     pub ignored_paths: Vec<String>,
@@ -94,27 +145,31 @@ pub struct CheckUnexpectedConfiguration {
     pub canonicalize_paths: bool,
 }
 
+impl CheckAllFilesConfiguration {
+    /// Get a builder for this class
+    pub fn builder() -> CheckAllFilesConfigurationBuilder {
+        Default::default()
+    }
+}
+
 /// Describes what we want to check. Not all backends may support all features,
 /// in which case an error should be returned.
 #[derive(Debug, derive_builder::Builder)]
 #[non_exhaustive]
-pub struct CommonConfiguration {
-    /// Distro backend to use
-    pub backend: Backend,
+pub struct CommonFileCheckConfiguration {
+    /// Common configuration
+    pub common: CommonConfiguration,
     /// Should we trust modification time and skip timestamp if mtime matches?
     #[builder(default = "false")]
     pub trust_mtime: bool,
     /// Should configuration files be included
     #[builder(default = "ConfigFiles::Include")]
     pub config_files: ConfigFiles,
-    /// Which packages to include
-    #[builder(default = "&PackageFilter::Everything")]
-    pub package_filter: &'static PackageFilter,
 }
 
-impl CommonConfiguration {
+impl CommonFileCheckConfiguration {
     /// Get a builder for this class
-    pub fn builder() -> CommonConfigurationBuilder {
+    pub fn builder() -> CommonFileCheckConfigurationBuilder {
         Default::default()
     }
 }
@@ -128,4 +183,19 @@ pub enum ConfigFiles {
     Exclude,
     /// Only check config files
     Only,
+}
+
+/// Describes how to list packages
+#[derive(Debug, derive_builder::Builder)]
+#[non_exhaustive]
+pub struct PackageListConfiguration {
+    /// Common configuration
+    pub common: CommonConfiguration,
+}
+
+impl PackageListConfiguration {
+    /// Get a builder for this class
+    pub fn builder() -> PackageListConfigurationBuilder {
+        Default::default()
+    }
 }

@@ -26,7 +26,6 @@ impl PackageRef {
 
 /// The reason a package is installed
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[non_exhaustive]
 pub enum InstallReason {
     Explicit,
     Dependency,
