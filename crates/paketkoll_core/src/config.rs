@@ -15,6 +15,20 @@ pub enum Backend {
     Debian,
 }
 
+// Clippy is wrong, this cannot be derived due to the cfg_if
+#[allow(clippy::derivable_impls)]
+impl Default for Backend {
+    fn default() -> Self {
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "arch_linux")] {
+                Backend::ArchLinux
+            } else if #[cfg(feature = "debian")] {
+                Backend::Debian
+            }
+        }
+    }
+}
+
 impl Backend {
     /// Create a backend instance
     pub(crate) fn create_files(
@@ -120,7 +134,7 @@ impl CommonConfiguration {
 impl Default for CommonConfiguration {
     fn default() -> Self {
         Self {
-            backend: Backend::ArchLinux,
+            backend: Backend::default(),
             package_filter: &PackageFilter::Everything,
         }
     }

@@ -760,6 +760,7 @@ dependencies = [
  "anyhow",
  "bitflags",
  "bstr",
+ "cfg-if",
  "compact_str",
  "dashmap",
  "derive_builder",
