@@ -43,12 +43,17 @@ fn main() -> anyhow::Result<Exit> {
                     .try_resolve(&pkg.name.as_interner_ref())
                     .ok_or_else(|| anyhow::anyhow!("No package name for package"))?;
                 match pkg.reason {
-                    paketkoll_core::types::InstallReason::Explicit => {
-                        writeln!(stdout, "{} {}", pkg_name, pkg.version)?
+                    Some(paketkoll_core::types::InstallReason::Explicit) => {
+                        writeln!(stdout, "{} {}", pkg_name, pkg.version)?;
                     }
-                    paketkoll_core::types::InstallReason::Dependency => {
-                        writeln!(stdout, "{} {} (as dep)", pkg_name, pkg.version)?
+                    Some(paketkoll_core::types::InstallReason::Dependency) => {
+                        writeln!(stdout, "{} {} (as dep)", pkg_name, pkg.version)?;
                     }
+                    None => writeln!(
+                        stdout,
+                        "{} {} (unknown install reason)",
+                        pkg_name, pkg.version
+                    )?,
                 }
             }
             Ok(Exit::new(Code::SUCCESS))

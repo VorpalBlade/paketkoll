@@ -13,7 +13,7 @@ use std::{
 
 use crate::{
     config::PackageFilter,
-    types::{FileEntry, Package, PackageInterner, PackageRef},
+    types::{FileEntry, Interner, Package, PackageRef},
 };
 use anyhow::{Context, Result};
 use dashmap::DashSet;
@@ -74,7 +74,7 @@ impl Name for ArchLinux {
 impl Files for ArchLinux {
     fn files(
         &self,
-        interner: &crate::types::PackageInterner,
+        interner: &crate::types::Interner,
     ) -> anyhow::Result<Vec<crate::types::FileEntry>> {
         let db_path: &Path = Path::new(&self.pacman_config.db_path);
 
@@ -118,7 +118,7 @@ impl Files for ArchLinux {
 impl Packages for ArchLinux {
     fn packages(
         &self,
-        interner: &crate::types::PackageInterner,
+        interner: &crate::types::Interner,
     ) -> anyhow::Result<Vec<crate::types::Package>> {
         let db_root = Path::new(&self.pacman_config.db_path).join("local");
         let results: anyhow::Result<Vec<Package>> = std::fs::read_dir(db_root)
@@ -146,7 +146,7 @@ struct PackageData {
 
 fn get_mtree_paths<'borrows>(
     db_path: &Path,
-    interner: &'borrows PackageInterner,
+    interner: &'borrows Interner,
     package_filter: &'borrows PackageFilter,
 ) -> Result<impl ParallelIterator<Item = Result<PackageData>> + 'borrows> {
     let db_root = db_path.join("local");
@@ -165,7 +165,7 @@ fn get_mtree_paths<'borrows>(
 #[inline]
 fn load_pkg_for_file_listing(
     entry: &std::fs::DirEntry,
-    interner: &PackageInterner,
+    interner: &Interner,
     package_filter: &PackageFilter,
 ) -> Result<Option<PackageData>> {
     if !entry.file_type()?.is_dir() {
@@ -208,7 +208,7 @@ fn load_pkg_for_file_listing(
 #[inline]
 // Temporary, this will get exposed
 #[allow(dead_code)]
-fn load_pkg(entry: &std::fs::DirEntry, interner: &PackageInterner) -> Result<Option<Package>> {
+fn load_pkg(entry: &std::fs::DirEntry, interner: &Interner) -> Result<Option<Package>> {
     if !entry.file_type()?.is_dir() {
         return Ok(None);
     }

@@ -4,7 +4,7 @@ use std::{collections::BTreeMap, io::BufRead, path::PathBuf};
 
 use anyhow::Context;
 
-use crate::types::{PackageInterner, PackageRef};
+use crate::types::{Interner, PackageRef};
 
 /// Describes a diversion by dpkg-divert
 ///
@@ -19,7 +19,7 @@ pub(super) struct Diversion {
 pub(super) type Diversions = BTreeMap<PathBuf, Diversion>;
 
 /// Get all diversions from dpkg-divert --list
-pub(super) fn get_diverions(interner: &PackageInterner) -> anyhow::Result<Diversions> {
+pub(super) fn get_diverions(interner: &Interner) -> anyhow::Result<Diversions> {
     let mut cmd = std::process::Command::new("dpkg-divert");
     cmd.arg("--list");
     let output = cmd.output().context("Failed to run dpkg-divert")?;
@@ -28,10 +28,7 @@ pub(super) fn get_diverions(interner: &PackageInterner) -> anyhow::Result<Divers
 }
 
 /// Parse output from dpkg-divert --list
-fn parse_diversions(
-    mut input: impl BufRead,
-    interner: &PackageInterner,
-) -> anyhow::Result<Diversions> {
+fn parse_diversions(mut input: impl BufRead, interner: &Interner) -> anyhow::Result<Diversions> {
     let mut results = BTreeMap::new();
 
     let re = regex::Regex::new(r"^diversion of (?<orig>.+) to (?<new>.+) by (?<pkg>.+)$")?;
@@ -88,7 +85,7 @@ mod tests {
     use std::collections::BTreeMap;
 
     use super::{parse_diversions, Diversion};
-    use crate::types::{PackageInterner, PackageRef};
+    use crate::types::{Interner, PackageRef};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -102,7 +99,7 @@ mod tests {
             diversion of /bin/sh to /bin/sh.distrib by dash
             "#};
 
-        let interner = PackageInterner::new();
+        let interner = Interner::new();
         let parsed = parse_diversions(input.as_bytes(), &interner).unwrap();
 
         let expected = BTreeMap::from_iter(vec![

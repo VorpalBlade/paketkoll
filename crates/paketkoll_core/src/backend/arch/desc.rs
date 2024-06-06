@@ -15,14 +15,17 @@ use std::io::BufRead;
 
 use compact_str::CompactString;
 
-use crate::types::{InstallReason, PackageInterner, PackageRef};
+use crate::types::{
+    ArchitectureRef, Dependency, InstallReason, Interner, PackageInstallStatus, PackageRef,
+};
 
 impl crate::types::Package {
     pub(super) fn from_arch_linux_desc(
         mut readable: impl std::io::BufRead,
-        interner: &PackageInterner,
+        interner: &Interner,
     ) -> anyhow::Result<Self> {
         let mut name: Option<PackageRef> = None;
+        let mut arch: Option<ArchitectureRef> = None;
         let mut version: Option<CompactString> = None;
         let mut desc: Option<CompactString> = None;
         let mut depends: Vec<PackageRef> = Vec::new();
@@ -39,6 +42,10 @@ impl crate::types::Package {
                 line.clear();
                 readable.read_line(&mut line)?;
                 version = Some(line.trim_end().into());
+            } else if line == "%ARCH%\n" {
+                line.clear();
+                readable.read_line(&mut line)?;
+                arch = Some(ArchitectureRef(interner.get_or_intern(line.trim_end())));
             } else if line == "%DESC%\n" {
                 line.clear();
                 readable.read_line(&mut line)?;
@@ -61,11 +68,13 @@ impl crate::types::Package {
 
         Ok(Self {
             name: name.ok_or_else(|| anyhow::anyhow!("No name"))?,
+            architecture: arch,
             version: version.ok_or_else(|| anyhow::anyhow!("No version"))?,
             desc: desc.ok_or_else(|| anyhow::anyhow!("No desc"))?,
-            depends,
+            depends: depends.into_iter().map(Dependency::Single).collect(),
             provides,
-            reason: reason.unwrap_or(InstallReason::Explicit),
+            reason: Some(reason.unwrap_or(InstallReason::Explicit)),
+            status: PackageInstallStatus::Installed,
         })
     }
 }
@@ -88,7 +97,7 @@ pub(super) fn backup_files(mut readable: impl BufRead) -> Result<Vec<String>, an
 fn parse_package_list(
     readable: &mut impl BufRead,
     to_fill: &mut Vec<PackageRef>,
-    interner: &PackageInterner,
+    interner: &Interner,
 ) -> Result<(), anyhow::Error> {
     let mut line = String::new();
     while readable.read_line(&mut line)? > 0 {
@@ -185,7 +194,7 @@ mod tests {
             libfoo.so=1.2.3
             "};
 
-        let interner = PackageInterner::default();
+        let interner = Interner::default();
         let desc = Package::from_arch_linux_desc(input.as_bytes(), &interner).unwrap();
 
         assert_eq!(
@@ -194,14 +203,16 @@ mod tests {
                 name: PackageRef(interner.get_or_intern("library-subpackage")),
                 version: "1.2.3-4".into(),
                 desc: "Some library".into(),
+                architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                 depends: vec![
-                    PackageRef(interner.get_or_intern("gcc-libs")),
-                    PackageRef(interner.get_or_intern("glibc")),
-                    PackageRef(interner.get_or_intern("somelib")),
-                    PackageRef(interner.get_or_intern("some-other-lib.so")),
+                    Dependency::Single(PackageRef(interner.get_or_intern("gcc-libs"))),
+                    Dependency::Single(PackageRef(interner.get_or_intern("glibc"))),
+                    Dependency::Single(PackageRef(interner.get_or_intern("somelib"))),
+                    Dependency::Single(PackageRef(interner.get_or_intern("some-other-lib.so"))),
                 ],
                 provides: vec![PackageRef(interner.get_or_intern("libfoo.so")),],
-                reason: InstallReason::Dependency,
+                reason: Some(InstallReason::Dependency),
+                status: PackageInstallStatus::Installed,
             }
         );
     }

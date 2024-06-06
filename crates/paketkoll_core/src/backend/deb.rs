@@ -13,9 +13,9 @@ use dashmap::DashMap;
 use rayon::prelude::*;
 
 use crate::config::PackageFilter;
-use crate::types::{FileEntry, PackageInterner, PackageRef, Properties};
+use crate::types::{FileEntry, Interner, PackageRef, Properties};
 
-use super::{Files, Name};
+use super::{Files, Name, Packages};
 
 // Each package has a set of files in DB_PATH:
 // *.list (all installed paths, one per line, including directories)
@@ -29,6 +29,7 @@ use super::{Files, Name};
 
 const DB_PATH: &str = "/var/lib/dpkg/info";
 const STATUS_PATH: &str = "/var/lib/dpkg/status";
+const EXTENDED_STATUS_PATH: &str = "/var/lib/apt/extended_states";
 
 #[derive(Debug)]
 pub(crate) struct Debian {
@@ -64,7 +65,7 @@ impl Name for Debian {
 impl Files for Debian {
     fn files(
         &self,
-        interner: &crate::types::PackageInterner,
+        interner: &crate::types::Interner,
     ) -> anyhow::Result<Vec<crate::types::FileEntry>> {
         log::debug!(target: "paketkoll_core::backend::deb", "Loading packages");
         let packages_files: Vec<_> = get_package_files(interner)?.collect();
@@ -76,7 +77,7 @@ impl Files for Debian {
 
         // Load config files.
         log::debug!(target: "paketkoll_core::backend::deb", "Loading status to get config files");
-        let config_files = {
+        let (config_files, _) = {
             let mut status = BufReader::new(File::open(STATUS_PATH)?);
             parsers::parse_status(interner, &mut status)
         }
@@ -143,9 +144,7 @@ fn merge_deb_fileentries(
     }
 }
 
-fn get_package_files(
-    interner: &PackageInterner,
-) -> anyhow::Result<impl Iterator<Item = Vec<FileEntry>>> {
+fn get_package_files(interner: &Interner) -> anyhow::Result<impl Iterator<Item = Vec<FileEntry>>> {
     let files: Vec<_> = std::fs::read_dir(DB_PATH)?.collect();
     let results: anyhow::Result<Vec<_>> = files
         .into_par_iter()
@@ -160,10 +159,7 @@ fn get_package_files(
     Ok(results?.into_iter())
 }
 
-fn process_file(
-    interner: &PackageInterner,
-    entry: &DirEntry,
-) -> anyhow::Result<Option<Vec<FileEntry>>> {
+fn process_file(interner: &Interner, entry: &DirEntry) -> anyhow::Result<Option<Vec<FileEntry>>> {
     let file_name = <Vec<u8> as ByteVec>::from_os_string(entry.file_name())
         .expect("Package names really should be valid Unicode on your platform");
 
@@ -192,4 +188,41 @@ fn process_file(
         }
     };
     Ok(result)
+}
+
+impl Packages for Debian {
+    fn packages(
+        &self,
+        interner: &crate::types::Interner,
+    ) -> anyhow::Result<Vec<crate::types::Package>> {
+        // Parse status
+        log::debug!(target: "paketkoll_core::backend::deb", "Loading status to installed packages");
+        let (_, mut packages) = {
+            let mut status = BufReader::new(File::open(STATUS_PATH)?);
+            parsers::parse_status(interner, &mut status)
+        }
+        .context(format!("Failed to parse {}", STATUS_PATH))?;
+
+        // Parse extended status
+        log::debug!(target: "paketkoll_core::backend::deb", "Loading extended status to get auto installed packages");
+        let extended_packages = {
+            let mut status = BufReader::new(File::open(EXTENDED_STATUS_PATH)?);
+            parsers::parse_extended_status(interner, &mut status)?
+        };
+
+        // We now need to update with auto installed status
+        for package in packages.as_mut_slice() {
+            let pkg_id = (
+                package.name,
+                package
+                    .architecture
+                    .ok_or_else(|| anyhow::anyhow!("No architecture"))?,
+            );
+            if let Some(Some(auto_installed)) = extended_packages.get(&pkg_id) {
+                package.reason = Some(*auto_installed);
+            }
+        }
+
+        Ok(packages)
+    }
 }

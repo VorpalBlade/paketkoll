@@ -10,7 +10,11 @@ pub(crate) use files::{
 };
 pub use issue::{Issue, IssueKind, IssueVec, PackageIssue};
 
+pub use package::ArchitectureRef;
+pub use package::Dependency;
 pub use package::InstallReason;
+pub use package::Interner;
 pub use package::Package;
-pub use package::PackageInterner;
+pub(crate) use package::PackageBuilder;
+pub use package::PackageInstallStatus;
 pub use package::PackageRef;

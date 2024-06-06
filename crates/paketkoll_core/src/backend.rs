@@ -10,7 +10,7 @@ use dashmap::DashMap;
 use ignore::{overrides::OverrideBuilder, Match, WalkBuilder, WalkState};
 use rayon::prelude::*;
 
-use crate::types::{FileEntry, Issue, IssueKind, PackageInterner, PackageIssue};
+use crate::types::{FileEntry, Interner, Issue, IssueKind, PackageIssue};
 
 #[cfg(feature = "arch_linux")]
 pub(crate) mod arch;
@@ -22,13 +22,13 @@ pub(crate) mod filesystem;
 
 pub fn installed_packages(
     config: &crate::config::PackageListConfiguration,
-) -> anyhow::Result<(crate::types::PackageInterner, Vec<crate::types::Package>)> {
+) -> anyhow::Result<(crate::types::Interner, Vec<crate::types::Package>)> {
     let backend = config
         .common
         .backend
         .create_packages(&config.common)
         .with_context(|| format!("Failed to create backend for {}", config.common.backend))?;
-    let interner = PackageInterner::new();
+    let interner = Interner::new();
     let packages = backend.packages(&interner).with_context(|| {
         format!(
             "Failed to collect information from backend {}",
@@ -41,13 +41,13 @@ pub fn installed_packages(
 /// Check file system for differences using the given configuration
 pub fn check_installed_files(
     config: &crate::config::CommonFileCheckConfiguration,
-) -> anyhow::Result<(crate::types::PackageInterner, Vec<PackageIssue>)> {
+) -> anyhow::Result<(crate::types::Interner, Vec<PackageIssue>)> {
     let backend = config
         .common
         .backend
         .create_files(&config.common)
         .with_context(|| format!("Failed to create backend for {}", config.common.backend))?;
-    let interner = PackageInterner::new();
+    let interner = Interner::new();
     // Get distro specific file list
     let results = backend.files(&interner).with_context(|| {
         format!(
@@ -83,14 +83,14 @@ pub fn check_installed_files(
 pub fn check_all_files(
     common_cfg: &crate::config::CommonFileCheckConfiguration,
     unexpected_cfg: &crate::config::CheckAllFilesConfiguration,
-) -> anyhow::Result<(crate::types::PackageInterner, Vec<PackageIssue>)> {
+) -> anyhow::Result<(crate::types::Interner, Vec<PackageIssue>)> {
     // Collect distro files
     let backend = common_cfg
         .common
         .backend
         .create_files(&common_cfg.common)
         .with_context(|| format!("Failed to create backend for {}", common_cfg.common.backend))?;
-    let interner = PackageInterner::new();
+    let interner = Interner::new();
     // Get distro specific file list
     let mut results = backend.files(&interner).with_context(|| {
         format!(
@@ -320,7 +320,7 @@ pub(crate) trait Files: Name {
     /// any available metadata such as checksums or timestamps about those files
     fn files(
         &self,
-        interner: &crate::types::PackageInterner,
+        interner: &crate::types::Interner,
     ) -> anyhow::Result<Vec<crate::types::FileEntry>>;
 }
 
@@ -331,7 +331,7 @@ pub(crate) trait Packages: Name {
     /// Collect a list of all installed packages
     fn packages(
         &self,
-        interner: &crate::types::PackageInterner,
+        interner: &crate::types::Interner,
     ) -> anyhow::Result<Vec<crate::types::Package>>;
 }
 

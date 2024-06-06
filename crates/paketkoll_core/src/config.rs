@@ -2,7 +2,7 @@
 
 use std::fmt::Debug;
 
-use crate::types::{PackageInterner, PackageRef};
+use crate::types::{Interner, PackageRef};
 
 /// Which backend to use for the system package manager
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display)]
@@ -50,14 +50,11 @@ impl Backend {
                 builder.build()?
             })),
             #[cfg(feature = "debian")]
-            Backend::Debian => {
-                anyhow::bail!("Debian backend not implemented yet for packages");
-                //Ok(Box::new({
-                //    let mut builder = crate::backend::deb::DebianBuilder::default();
-                //    builder.package_filter(configuration.package_filter);
-                //    builder.build()
-                //}))
-            }
+            Backend::Debian => Ok(Box::new({
+                let mut builder = crate::backend::deb::DebianBuilder::default();
+                builder.package_filter(configuration.package_filter);
+                builder.build()
+            })),
         }
     }
 }
@@ -80,11 +77,7 @@ impl PackageFilter {
     /// Should we include this package?
     ///
     /// We do de-interning here, since the fast path is to just include everything.
-    pub(crate) fn should_include_interned(
-        &self,
-        package: PackageRef,
-        interner: &PackageInterner,
-    ) -> bool {
+    pub(crate) fn should_include_interned(&self, package: PackageRef, interner: &Interner) -> bool {
         match self {
             PackageFilter::Everything => true,
             PackageFilter::FilterFunction(f) => {
