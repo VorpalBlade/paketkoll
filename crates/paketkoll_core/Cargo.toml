@@ -47,7 +47,7 @@ dashmap = { workspace = true, optional = true }
 derive_builder = { workspace = true }
 either = { workspace = true }
 faster-hex = { workspace = true, features = ["std"] }
-flate2 = { workspace = true, features = ["zlib-ng"], optional = true }
+flate2 = { workspace = true, optional = true }
 flume = { workspace = true }
 ignore = { workspace = true, features = ["simd-accel"] }
 lasso = { workspace = true, features = ["ahasher", "inline-more", "multi-threaded"] }
