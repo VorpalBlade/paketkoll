@@ -206,8 +206,6 @@ fn load_pkg_for_file_listing(
 
 /// Process a single packaging, parsing the desc and files entries
 #[inline]
-// Temporary, this will get exposed
-#[allow(dead_code)]
 fn load_pkg(entry: &std::fs::DirEntry, interner: &Interner) -> Result<Option<Package>> {
     if !entry.file_type()?.is_dir() {
         return Ok(None);

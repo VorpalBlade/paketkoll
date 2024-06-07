@@ -325,8 +325,6 @@ pub(crate) trait Files: Name {
 }
 
 /// A package manager backend
-// Temporary, this will get exposed
-#[allow(dead_code)]
 pub(crate) trait Packages: Name {
     /// Collect a list of all installed packages
     fn packages(
