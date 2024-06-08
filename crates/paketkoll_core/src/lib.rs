@@ -7,8 +7,10 @@
 #[cfg(not(any(feature = "arch_linux", feature = "debian")))]
 compile_error!("At least one backend must be enabled");
 
-pub mod backend;
+pub(crate) mod backend;
 pub mod config;
+pub mod file_ops;
+pub mod package_ops;
 pub mod types;
 
 /// Vendored dependency due to upstream being slow to accept PRs

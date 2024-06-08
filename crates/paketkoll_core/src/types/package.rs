@@ -2,6 +2,8 @@
 
 use compact_str::CompactString;
 
+use super::FileEntry;
+
 /// Type of interner
 pub type Interner = lasso::ThreadedRodeo;
 
@@ -47,6 +49,13 @@ pub enum PackageInstallStatus {
     Installed,
     /// Some sort of partial install (not fully removed, error during install etc)
     Partial,
+}
+
+#[derive(Debug)]
+#[allow(dead_code)]
+pub(crate) struct BackendData {
+    pub(crate) files: Vec<FileEntry>,
+    pub(crate) packages: Vec<Package>,
 }
 
 /// Describes a package as needed by paketkoll & related future tools

@@ -20,7 +20,7 @@ use dashmap::DashSet;
 use either::Either;
 use rayon::prelude::*;
 
-use super::{Files, Name, Packages};
+use super::{Files, FullBackend, Name, Packages};
 
 /// Arch Linux backend
 #[derive(Debug)]
@@ -136,6 +136,8 @@ impl Packages for ArchLinux {
         results
     }
 }
+
+impl FullBackend for ArchLinux {}
 
 #[derive(Debug)]
 struct PackageData {

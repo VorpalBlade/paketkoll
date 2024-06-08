@@ -15,7 +15,7 @@ use rayon::prelude::*;
 use crate::config::PackageFilter;
 use crate::types::{FileEntry, Interner, PackageRef, Properties};
 
-use super::{Files, Name, Packages};
+use super::{Files, FullBackend, Name, Packages};
 
 // Each package has a set of files in DB_PATH:
 // *.list (all installed paths, one per line, including directories)
@@ -226,3 +226,5 @@ impl Packages for Debian {
         Ok(packages)
     }
 }
+
+impl FullBackend for Debian {}

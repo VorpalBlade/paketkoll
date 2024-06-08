@@ -18,3 +18,4 @@ pub use package::Package;
 pub(crate) use package::PackageBuilder;
 pub use package::PackageInstallStatus;
 pub use package::PackageRef;
+pub(crate) use package::BackendData;

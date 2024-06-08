@@ -11,8 +11,8 @@ use ahash::AHashSet;
 use clap::Parser;
 use cli::{Backend, Cli};
 use paketkoll_core::{
-    backend,
     config::{self, CheckAllFilesConfiguration, PackageFilter},
+    file_ops, package_ops,
     types::{Issue, PackageRef},
 };
 use proc_exit::{Code, Exit};
@@ -36,7 +36,7 @@ fn main() -> anyhow::Result<Exit> {
             run_file_checks(&cli)
         }
         cli::Commands::InstalledPackages => {
-            let (interner, packages) = backend::installed_packages(&(&cli).try_into()?)?;
+            let (interner, packages) = package_ops::installed_packages(&(&cli).try_into()?)?;
             let mut stdout = BufWriter::new(stdout().lock());
             for pkg in packages {
                 let pkg_name = interner
@@ -63,11 +63,11 @@ fn main() -> anyhow::Result<Exit> {
 
 fn run_file_checks(cli: &Cli) -> Result<Exit, anyhow::Error> {
     let (interner, mut found_issues) = match cli.command {
-        cli::Commands::Check { .. } => backend::check_installed_files(&(cli).try_into()?)?,
+        cli::Commands::Check { .. } => file_ops::check_installed_files(&(cli).try_into()?)?,
         cli::Commands::CheckUnexpected {
             ref ignore,
             canonicalize,
-        } => backend::check_all_files(&(cli).try_into()?, &{
+        } => file_ops::check_all_files(&(cli).try_into()?, &{
             let mut builder = CheckAllFilesConfiguration::builder();
             builder.ignored_paths(ignore.clone());
             builder.canonicalize_paths(canonicalize);
