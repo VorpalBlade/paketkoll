@@ -41,7 +41,7 @@ ahash = { workspace = true }
 anyhow = { workspace = true, features = ["backtrace"] }
 bitflags = { workspace = true }
 bstr = { workspace = true }
-cfg-if = "1.0.0"
+cfg-if = { workspace = true }
 compact_str = { workspace = true, features = ["smallvec"] }
 dashmap = { workspace = true, optional = true }
 derive_builder = { workspace = true }
@@ -50,7 +50,11 @@ faster-hex = { workspace = true, features = ["std"] }
 flate2 = { workspace = true, optional = true }
 flume = { workspace = true }
 ignore = { workspace = true, features = ["simd-accel"] }
-lasso = { workspace = true, features = ["ahasher", "inline-more", "multi-threaded"] }
+lasso = { workspace = true, features = [
+    "ahasher",
+    "inline-more",
+    "multi-threaded",
+] }
 log = { workspace = true }
 md-5 = { workspace = true, optional = true }
 memchr = { workspace = true }
@@ -61,7 +65,11 @@ rayon = { workspace = true }
 regex = { workspace = true }
 ring = { workspace = true, optional = true }
 rust-ini = { workspace = true, optional = true }
-smallvec = { workspace = true, features = ["const_generics", "const_new", "union"] }
+smallvec = { workspace = true, features = [
+    "const_generics",
+    "const_new",
+    "union",
+] }
 strum = { workspace = true, features = ["derive"] }
 
 [dev-dependencies]
