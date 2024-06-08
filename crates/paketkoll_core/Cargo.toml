@@ -31,6 +31,9 @@ arch_linux = [
 # Include support for the Debian backend
 debian = ["__md5", "dep:dashmap", "dashmap/rayon"]
 
+# Include support for serde on public datatypes
+serde = ["dep:serde", "bitflags/serde", "smallvec/serde", "compact_str/serde"]
+
 # Internal feature: Enable MD5 support
 __md5 = ["dep:md-5"]
 # Internal feature: Enable SHA-256 support
@@ -65,6 +68,7 @@ rayon = { workspace = true }
 regex = { workspace = true }
 ring = { workspace = true, optional = true }
 rust-ini = { workspace = true, optional = true }
+serde = { workspace = true, optional = true, features = ["derive"] }
 smallvec = { workspace = true, features = [
     "const_generics",
     "const_new",

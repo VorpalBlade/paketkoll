@@ -123,6 +123,9 @@ name = "bitflags"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cf4b9d6a944f767f8e5e0db018570623c85f3d925ac718db4e06d0187adb21c1"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "block-buffer"
@@ -249,6 +252,7 @@ dependencies = [
  "cfg-if",
  "itoa",
  "ryu",
+ "serde",
  "smallvec",
  "static_assertions",
 ]
@@ -750,6 +754,8 @@ dependencies = [
  "paketkoll_core",
  "proc-exit",
  "rayon",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -781,6 +787,7 @@ dependencies = [
  "regex",
  "ring",
  "rust-ini",
+ "serde",
  "smallvec",
  "strum",
 ]
@@ -1033,6 +1040,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_json"
+version = "1.0.117"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "455182ea6142b14f93f4bc5320a2b31c1f266b66a4a5c858b013302a5d8cbfc3"
+dependencies = [
+ "itoa",
+ "ryu",
+ "serde",
+]
+
+[[package]]
 name = "siphasher"
 version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1043,6 +1061,9 @@ name = "smallvec"
 version = "1.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "spin"

@@ -33,7 +33,7 @@ pub(crate) trait Packages: Name {
     fn packages(
         &self,
         interner: &crate::types::Interner,
-    ) -> anyhow::Result<Vec<crate::types::Package>>;
+    ) -> anyhow::Result<Vec<crate::types::PackageInterned>>;
 }
 
 // TODO: Operations to add

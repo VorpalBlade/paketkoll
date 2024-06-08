@@ -194,7 +194,7 @@ impl Packages for Debian {
     fn packages(
         &self,
         interner: &crate::types::Interner,
-    ) -> anyhow::Result<Vec<crate::types::Package>> {
+    ) -> anyhow::Result<Vec<crate::types::PackageInterned>> {
         // Parse status
         log::debug!(target: "paketkoll_core::backend::deb", "Loading status to installed packages");
         let (_, mut packages) = {

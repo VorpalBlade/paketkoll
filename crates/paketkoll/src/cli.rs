@@ -17,7 +17,7 @@ pub(crate) struct Cli {
     #[arg(short, long, default_value_t = Backend::Auto)]
     pub(crate) backend: Backend,
     /// Output format to use
-    #[arg(short, long, default_value_t = Format::Human, hide = true)]
+    #[arg(short, long, default_value_t = Format::Human)]
     pub(crate) format: Format,
     /// Operation to perform
     #[command(subcommand)]
@@ -52,6 +52,7 @@ pub(crate) enum Format {
     /// Human readable output
     Human,
     /// JSON formatted output
+    #[cfg(feature = "json")]
     Json,
 }
 
@@ -59,6 +60,7 @@ impl std::fmt::Display for Format {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Format::Human => write!(f, "human"),
+            #[cfg(feature = "json")]
             Format::Json => write!(f, "json"),
         }
     }

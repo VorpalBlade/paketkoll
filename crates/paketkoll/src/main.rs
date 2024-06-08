@@ -16,7 +16,7 @@ use paketkoll_core::{
     types::{Issue, PackageRef},
 };
 use proc_exit::{Code, Exit};
-use rayon::slice::ParallelSliceMut;
+use rayon::prelude::*;
 
 #[cfg(target_env = "musl")]
 use mimalloc::MiMalloc;
@@ -38,24 +38,38 @@ fn main() -> anyhow::Result<Exit> {
         cli::Commands::InstalledPackages => {
             let (interner, packages) = package_ops::installed_packages(&(&cli).try_into()?)?;
             let mut stdout = BufWriter::new(stdout().lock());
-            for pkg in packages {
-                let pkg_name = interner
-                    .try_resolve(&pkg.name.as_interner_ref())
-                    .ok_or_else(|| anyhow::anyhow!("No package name for package"))?;
-                match pkg.reason {
-                    Some(paketkoll_core::types::InstallReason::Explicit) => {
-                        writeln!(stdout, "{} {}", pkg_name, pkg.version)?;
+
+            match cli.format {
+                cli::Format::Human => {
+                    for pkg in packages {
+                        let pkg_name = interner
+                            .try_resolve(&pkg.name.as_interner_ref())
+                            .ok_or_else(|| anyhow::anyhow!("No package name for package"))?;
+                        match pkg.reason {
+                            Some(paketkoll_core::types::InstallReason::Explicit) => {
+                                writeln!(stdout, "{} {}", pkg_name, pkg.version)?;
+                            }
+                            Some(paketkoll_core::types::InstallReason::Dependency) => {
+                                writeln!(stdout, "{} {} (as dep)", pkg_name, pkg.version)?;
+                            }
+                            None => writeln!(
+                                stdout,
+                                "{} {} (unknown install reason)",
+                                pkg_name, pkg.version
+                            )?,
+                        }
                     }
-                    Some(paketkoll_core::types::InstallReason::Dependency) => {
-                        writeln!(stdout, "{} {} (as dep)", pkg_name, pkg.version)?;
-                    }
-                    None => writeln!(
-                        stdout,
-                        "{} {} (unknown install reason)",
-                        pkg_name, pkg.version
-                    )?,
+                }
+                #[cfg(feature = "json")]
+                cli::Format::Json => {
+                    let packages: Vec<_> = packages
+                        .into_par_iter()
+                        .map(|pkg| pkg.into_direct(&interner))
+                        .collect();
+                    serde_json::to_writer_pretty(&mut stdout, &packages)?;
                 }
             }
+
             Ok(Exit::new(Code::SUCCESS))
         }
     }
@@ -91,26 +105,48 @@ fn run_file_checks(cli: &Cli) -> Result<Exit, anyhow::Error> {
 
     let has_issues = !found_issues.is_empty();
 
-    {
-        let mut stdout = BufWriter::new(stdout().lock());
-        for (pkg, issue) in found_issues.iter() {
-            let pkg = pkg.and_then(|e| interner.try_resolve(&e.as_interner_ref()));
-            for kind in issue.kinds() {
-                if let Some(pkg) = pkg {
-                    write!(stdout, "{pkg}: ")?;
+    match cli.format {
+        cli::Format::Human => {
+            let mut stdout = BufWriter::new(stdout().lock());
+            for (pkg, issue) in found_issues.iter() {
+                let pkg = pkg.and_then(|e| interner.try_resolve(&e.as_interner_ref()));
+                for kind in issue.kinds() {
+                    if let Some(pkg) = pkg {
+                        write!(stdout, "{pkg}: ")?;
+                    }
+                    // Prefer to not do any escaping. This doesn't assume unicode.
+                    // Also it is faster.
+                    stdout.write_all(issue.path().as_os_str().as_bytes())?;
+                    writeln!(stdout, " {kind}")?;
                 }
-                // Prefer to not do any escaping. This doesn't assume unicode.
-                // Also it is faster.
-                stdout.write_all(issue.path().as_os_str().as_bytes())?;
-                writeln!(stdout, " {kind}")?;
             }
         }
+        #[cfg(feature = "json")]
+        cli::Format::Json => {
+            let mut stdout = BufWriter::new(stdout().lock());
+            let found_issues: Vec<_> = found_issues
+                .into_par_iter()
+                .map(|(package, issue)| {
+                    let package = package.and_then(|e| interner.try_resolve(&e.as_interner_ref()));
+                    IssueReport { package, issue }
+                })
+                .collect();
+            serde_json::to_writer_pretty(&mut stdout, &found_issues)?;
+        }
     }
+
     Ok(if has_issues {
         Exit::new(Code::FAILURE)
     } else {
         Exit::new(Code::SUCCESS)
     })
+}
+
+#[cfg(feature = "json")]
+#[derive(Debug, serde::Serialize)]
+struct IssueReport<'interner> {
+    package: Option<&'interner str>,
+    issue: Issue,
 }
 
 impl TryFrom<Backend> for paketkoll_core::config::Backend {

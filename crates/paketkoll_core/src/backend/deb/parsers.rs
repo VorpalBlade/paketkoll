@@ -7,8 +7,8 @@ use bstr::{io::BufReadExt, ByteSlice, ByteVec};
 use smallvec::SmallVec;
 
 use crate::types::{
-    ArchitectureRef, Checksum, Dependency, FileEntry, FileFlags, InstallReason, Interner, Package,
-    PackageBuilder, PackageRef, Properties, RegularFileBasic,
+    ArchitectureRef, Checksum, Dependency, FileEntry, FileFlags, InstallReason, Interner,
+    PackageBuilder, PackageInterned, PackageRef, Properties, RegularFileBasic,
 };
 
 /// Load lines from a readable as `PathBufs`
@@ -78,7 +78,7 @@ pub(super) fn parse_md5sums(
 
 /// Parse depends lines like:
 /// Depends: libc6 (>= 2.34), libice6 (>= 1:1.0.0), libx11-6, libxaw7 (>= 2:1.0.14), libxcursor1 (>> 1.1.2), libxext6, libxi6, libxmu6 (>= 2:1.1.3), libxmuu1 (>= 2:1.1.3), libxrandr2 (>= 2:1.5.0), libxt6, libxxf86vm1, cpp
-fn parse_depends(interner: &Interner, input: &str) -> Vec<Dependency> {
+fn parse_depends(interner: &Interner, input: &str) -> Vec<Dependency<PackageRef>> {
     let mut result = vec![];
     for segment in input.split(',') {
         let segment = segment.trim_start();
@@ -127,13 +127,13 @@ fn dependency_name(segment: &str, interner: &lasso::ThreadedRodeo) -> PackageRef
 pub(super) fn parse_status(
     interner: &Interner,
     input: &mut impl BufRead,
-) -> anyhow::Result<(Vec<FileEntry>, Vec<Package>)> {
+) -> anyhow::Result<(Vec<FileEntry>, Vec<PackageInterned>)> {
     let mut state = StatusParsingState::Start;
 
     let mut config_files = vec![];
     let mut packages = vec![];
 
-    let mut package_builder: Option<PackageBuilder> = None;
+    let mut package_builder: Option<PackageBuilder<PackageRef, ArchitectureRef>> = None;
 
     // This file is UTF-8 at least
     for line in input.lines() {
@@ -142,7 +142,7 @@ pub(super) fn parse_status(
             if let Some(builder) = package_builder {
                 packages.push(builder.build()?);
             }
-            package_builder = Some(Package::builder());
+            package_builder = Some(PackageInterned::builder());
             // This will be updated later with the correct reason when we parse extended status
             package_builder
                 .as_mut()

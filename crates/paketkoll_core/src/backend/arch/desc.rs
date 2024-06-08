@@ -19,7 +19,7 @@ use crate::types::{
     ArchitectureRef, Dependency, InstallReason, Interner, PackageInstallStatus, PackageRef,
 };
 
-impl crate::types::Package {
+impl crate::types::PackageInterned {
     pub(super) fn from_arch_linux_desc(
         mut readable: impl std::io::BufRead,
         interner: &Interner,

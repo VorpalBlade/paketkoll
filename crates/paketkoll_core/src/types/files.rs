@@ -6,12 +6,14 @@ use super::PackageRef;
 
 /// A regular file with just checksum info (as Debian gives us)
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct RegularFileBasic {
     pub checksum: Checksum,
 }
 
 /// A regular file with all info (as Arch Linux has)
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct RegularFile {
     pub mode: Mode,
     pub owner: Uid,
@@ -23,6 +25,7 @@ pub(crate) struct RegularFile {
 
 /// A symlink
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct Symlink {
     pub owner: Uid,
     pub group: Gid,
@@ -32,6 +35,7 @@ pub(crate) struct Symlink {
 
 /// A directory
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) struct Directory {
     pub mode: Mode,
     pub owner: Uid,
@@ -75,6 +79,7 @@ impl PartialEq for FileEntry {
 
 bitflags::bitflags! {
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
     pub(crate) struct FileFlags : u16 {
         const CONFIG = 0b0000_0000_0000_0001;
     }
@@ -82,6 +87,7 @@ bitflags::bitflags! {
 
 /// File properties from the package database
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) enum Properties {
     /// A regular file with just checksum info (as Debian gives us)
     RegularFileBasic(RegularFileBasic),
@@ -111,6 +117,7 @@ impl Properties {
 
 /// Unix file mode (permissions)
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Mode(pub u32);
 
 impl Mode {
@@ -127,6 +134,7 @@ impl std::fmt::Display for Mode {
 
 /// A POSIX UID
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Uid(pub u32);
 
 impl Uid {
@@ -143,6 +151,7 @@ impl std::fmt::Display for Uid {
 
 /// A POSIX GID
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Gid(pub u32);
 
 impl Gid {
@@ -158,6 +167,7 @@ impl std::fmt::Display for Gid {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub(crate) enum Checksum {
     #[cfg(feature = "__md5")]
     Md5([u8; 16]),

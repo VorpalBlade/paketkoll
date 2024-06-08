@@ -16,6 +16,7 @@ pub type PackageIssue = (Option<super::PackageRef>, Issue);
 
 /// A found difference between the file system and the package database
 #[derive(Debug)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub struct Issue {
     path: PathBuf,
     kinds: IssueVec,
@@ -43,6 +44,7 @@ impl Issue {
 /// of file system entity (e.g. file, directory, symlink, device node, ...)
 #[derive(Debug)]
 #[non_exhaustive]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
 pub enum IssueKind {
     /// Missing entity from file system
     Missing,
@@ -65,8 +67,10 @@ pub enum IssueKind {
     /// Incorrect mode for file system entity
     WrongMode { actual: Mode, expected: Mode },
     /// Some sort of parsing error for this entry (from the package manager backend)
+    #[cfg_attr(feature = "serde", serde(serialize_with = "serialize_error"))]
     MetadataError(Box<anyhow::Error>),
     /// Some sort of unexpected error when processing the file system
+    #[cfg_attr(feature = "serde", serde(serialize_with = "serialize_error"))]
     FsCheckError(Box<anyhow::Error>),
 }
 
@@ -117,4 +121,12 @@ fn format_error(f: &mut std::fmt::Formatter<'_>, err: &anyhow::Error) -> std::fm
         write!(f, "\n   Backtrace: {}", err.backtrace())?;
     }
     Ok(())
+}
+
+#[cfg(feature = "serde")]
+fn serialize_error<S>(err: &anyhow::Error, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
+{
+    serializer.serialize_str(&format!("{}", err))
 }

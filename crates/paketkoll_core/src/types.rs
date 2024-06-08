@@ -17,5 +17,7 @@ pub use package::InstallReason;
 pub use package::Interner;
 pub use package::Package;
 pub(crate) use package::PackageBuilder;
+pub use package::PackageDirect;
 pub use package::PackageInstallStatus;
+pub use package::PackageInterned;
 pub use package::PackageRef;

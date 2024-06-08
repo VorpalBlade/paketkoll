@@ -6,7 +6,7 @@ use crate::types::Interner;
 
 pub fn installed_packages(
     config: &crate::config::PackageListConfiguration,
-) -> anyhow::Result<(crate::types::Interner, Vec<crate::types::Package>)> {
+) -> anyhow::Result<(crate::types::Interner, Vec<crate::types::PackageInterned>)> {
     let backend = config
         .common
         .backend

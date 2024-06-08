@@ -31,7 +31,7 @@ impl Packages for Flatpak {
     fn packages(
         &self,
         interner: &crate::types::Interner,
-    ) -> anyhow::Result<Vec<crate::types::Package>> {
+    ) -> anyhow::Result<Vec<crate::types::PackageInterned>> {
         let cmd = Command::new("flatpak")
             .arg("list")
             .arg("--system")
@@ -58,7 +58,7 @@ impl Packages for Flatpak {
 fn parse_flatpak_output(
     output: &str,
     interner: &crate::types::Interner,
-) -> Result<Vec<crate::types::Package>, anyhow::Error> {
+) -> Result<Vec<crate::types::PackageInterned>, anyhow::Error> {
     let mut packages = Vec::new();
 
     for line in output.lines() {

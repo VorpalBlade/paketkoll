@@ -12,13 +12,17 @@ version = "0.2.1"
 
 [features]
 # Default features
-default = ["debian", "arch_linux"]
+default = ["debian", "arch_linux", "json"]
 
 # Include the Arch Linux backend
 arch_linux = ["paketkoll_core/arch_linux"]
 
 # Include support for the Debian backend
 debian = ["paketkoll_core/debian"]
+
+# Include support for exporting to JSON
+json = ["dep:serde_json", "paketkoll_core/serde", "serde"]
+serde = ["dep:serde"]
 
 [dependencies]
 ahash = { workspace = true }
@@ -30,6 +34,8 @@ os_info = { workspace = true }
 paketkoll_core = { version = "0.3.1", path = "../paketkoll_core" }
 proc-exit = { workspace = true }
 rayon = { workspace = true }
+serde = { workspace = true, optional = true, features = ["serde_derive"] }
+serde_json = { workspace = true, optional = true }
 
 [target.'cfg(target_env = "musl")'.dependencies]
 # The allocator on musl is attrociously slow, so we use a custom one.

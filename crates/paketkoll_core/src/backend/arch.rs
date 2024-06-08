@@ -13,7 +13,7 @@ use std::{
 
 use crate::{
     config::PackageFilter,
-    types::{FileEntry, Interner, Package, PackageRef},
+    types::{FileEntry, Interner, Package, PackageInterned, PackageRef},
 };
 use anyhow::{Context, Result};
 use dashmap::DashSet;
@@ -116,12 +116,9 @@ impl Files for ArchLinux {
 }
 
 impl Packages for ArchLinux {
-    fn packages(
-        &self,
-        interner: &crate::types::Interner,
-    ) -> anyhow::Result<Vec<crate::types::Package>> {
+    fn packages(&self, interner: &crate::types::Interner) -> anyhow::Result<Vec<PackageInterned>> {
         let db_root = Path::new(&self.pacman_config.db_path).join("local");
-        let results: anyhow::Result<Vec<Package>> = std::fs::read_dir(db_root)
+        let results: anyhow::Result<Vec<PackageInterned>> = std::fs::read_dir(db_root)
             .context("Failed to read pacman database directory")?
             .par_bridge()
             .filter_map(|entry| {
@@ -208,7 +205,7 @@ fn load_pkg_for_file_listing(
 
 /// Process a single packaging, parsing the desc and files entries
 #[inline]
-fn load_pkg(entry: &std::fs::DirEntry, interner: &Interner) -> Result<Option<Package>> {
+fn load_pkg(entry: &std::fs::DirEntry, interner: &Interner) -> Result<Option<PackageInterned>> {
     if !entry.file_type()?.is_dir() {
         return Ok(None);
     }
