@@ -1,6 +1,9 @@
 //! Contain file checking functionality
 
-use std::{os::unix::ffi::OsStrExt, path::{Path, PathBuf}};
+use std::{
+    os::unix::ffi::OsStrExt,
+    path::{Path, PathBuf},
+};
 
 use anyhow::Context;
 use dashmap::DashMap;
@@ -35,16 +38,16 @@ pub fn check_installed_files(
     let mismatches: Vec<_> = results
         .into_iter()
         .par_bridge()
-        .filter_map(
-            |file_entry| match crate::backend::filesystem::check_file(&file_entry, config) {
+        .filter_map(|file_entry| {
+            match crate::backend::filesystem::check_file(&file_entry, config) {
                 Ok(Some(inner)) => Some((file_entry.package, inner)),
                 Ok(None) => None,
                 Err(err) => {
                     let issues = smallvec::smallvec![IssueKind::FsCheckError(Box::new(err))];
                     Some((file_entry.package, Issue::new(file_entry.path, issues)))
                 }
-            },
-        )
+            }
+        })
         .collect();
 
     Ok((interner, mismatches))

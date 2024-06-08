@@ -518,6 +518,7 @@ mod tests {
                 provides: vec![],
                 reason: Some(crate::types::InstallReason::Explicit),
                 status: crate::types::PackageInstallStatus::Installed,
+                id: None,
             }]
         );
         assert_eq!(

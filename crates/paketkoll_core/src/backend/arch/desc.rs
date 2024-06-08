@@ -75,6 +75,7 @@ impl crate::types::Package {
             provides,
             reason: Some(reason.unwrap_or(InstallReason::Explicit)),
             status: PackageInstallStatus::Installed,
+            id: None,
         })
     }
 }
@@ -213,6 +214,7 @@ mod tests {
                 provides: vec![PackageRef(interner.get_or_intern("libfoo.so")),],
                 reason: Some(InstallReason::Dependency),
                 status: PackageInstallStatus::Installed,
+                id: None,
             }
         );
     }

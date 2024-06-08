@@ -6,9 +6,11 @@ pub(crate) mod arch;
 #[cfg(feature = "debian")]
 pub(crate) mod deb;
 
+pub(crate) mod flatpak;
+
 pub(crate) mod filesystem;
 
-pub(crate) trait Name {
+pub(crate) trait Name: Send + Sync {
     /// The name of the backend (for logging and debugging purposes)
     // Temporary, this will get exposed
     #[allow(dead_code)]
@@ -40,7 +42,7 @@ pub(crate) trait Packages: Name {
 //   cleaning as a separate tool?
 
 #[allow(dead_code)]
-pub(crate) trait FullBackend: Files + Packages + Send + Sync {
+pub(crate) trait FullBackend: Files + Packages {
     /// Collect all data from the backend in one go.
     ///
     /// This can be possibly be more efficient for some backends as some work can be shared.

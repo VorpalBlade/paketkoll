@@ -11,6 +11,7 @@ pub(crate) use files::{
 pub use issue::{Issue, IssueKind, IssueVec, PackageIssue};
 
 pub use package::ArchitectureRef;
+pub(crate) use package::BackendData;
 pub use package::Dependency;
 pub use package::InstallReason;
 pub use package::Interner;
@@ -18,4 +19,3 @@ pub use package::Package;
 pub(crate) use package::PackageBuilder;
 pub use package::PackageInstallStatus;
 pub use package::PackageRef;
-pub(crate) use package::BackendData;

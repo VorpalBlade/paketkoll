@@ -59,7 +59,7 @@ pub(crate) struct BackendData {
 }
 
 /// Describes a package as needed by paketkoll & related future tools
-#[derive(Debug, PartialEq, Eq, Hash, Clone, derive_builder::Builder)]
+#[derive(Debug, PartialEq, Eq, Clone, derive_builder::Builder)]
 #[non_exhaustive]
 pub struct Package {
     /// Name of package
@@ -81,6 +81,9 @@ pub struct Package {
     pub reason: Option<InstallReason>,
     /// Install status
     pub status: PackageInstallStatus,
+    /// ID for package (if not same as name)
+    #[builder(default = "None")]
+    pub id: Option<CompactString>,
 }
 
 impl Package {

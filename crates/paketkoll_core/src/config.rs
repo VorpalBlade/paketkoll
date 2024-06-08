@@ -13,6 +13,8 @@ pub enum Backend {
     /// Backend for Debian and derived distros (dpkg/apt)
     #[cfg(feature = "debian")]
     Debian,
+    /// Backend for flatpak (package list only)
+    Flatpak,
 }
 
 // Clippy is wrong, this cannot be derived due to the cfg_if
@@ -48,6 +50,9 @@ impl Backend {
                 builder.package_filter(configuration.package_filter);
                 builder.build()
             })),
+            Backend::Flatpak => Err(anyhow::anyhow!(
+                "Flatpak backend does not support file checks"
+            )),
         }
     }
 
@@ -67,6 +72,10 @@ impl Backend {
             Backend::Debian => Ok(Box::new({
                 let mut builder = crate::backend::deb::DebianBuilder::default();
                 builder.package_filter(configuration.package_filter);
+                builder.build()
+            })),
+            Backend::Flatpak => Ok(Box::new({
+                let builder = crate::backend::flatpak::FlatpakBuilder::default();
                 builder.build()
             })),
         }

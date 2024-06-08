@@ -137,6 +137,7 @@ impl TryFrom<Backend> for paketkoll_core::config::Backend {
             Backend::ArchLinux => Ok(Self::ArchLinux),
             #[cfg(feature = "debian")]
             Backend::Debian => Ok(Self::Debian),
+            Backend::Flatpak => Ok(Self::Flatpak),
         }
     }
 }

@@ -75,6 +75,8 @@ pub(crate) enum Backend {
     /// Backend for Debian and derived distros (dpkg/apt)
     #[cfg(feature = "debian")]
     Debian,
+    /// Backend for Flatpak
+    Flatpak,
 }
 
 impl std::fmt::Display for Backend {
@@ -85,6 +87,7 @@ impl std::fmt::Display for Backend {
             Backend::ArchLinux => write!(f, "arch-linux"),
             #[cfg(feature = "debian")]
             Backend::Debian => write!(f, "debian"),
+            Backend::Flatpak => write!(f, "flatpak"),
         }
     }
 }
