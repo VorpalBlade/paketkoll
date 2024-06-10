@@ -45,6 +45,7 @@ impl Issue {
 #[derive(Debug)]
 #[non_exhaustive]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum IssueKind {
     /// Missing entity from file system
     Missing,

@@ -38,6 +38,7 @@ intern_newtype!(ArchitectureRef);
 /// The reason a package is installed
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum InstallReason {
     Explicit,
     Dependency,
@@ -46,6 +47,7 @@ pub enum InstallReason {
 /// The status of the installed package
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub enum PackageInstallStatus {
     /// Fully installed, as expected
     Installed,

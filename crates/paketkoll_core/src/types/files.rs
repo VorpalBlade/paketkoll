@@ -88,6 +88,7 @@ bitflags::bitflags! {
 /// File properties from the package database
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub(crate) enum Properties {
     /// A regular file with just checksum info (as Debian gives us)
     RegularFileBasic(RegularFileBasic),
@@ -168,6 +169,7 @@ impl std::fmt::Display for Gid {
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 pub(crate) enum Checksum {
     #[cfg(feature = "__md5")]
     Md5([u8; 16]),
