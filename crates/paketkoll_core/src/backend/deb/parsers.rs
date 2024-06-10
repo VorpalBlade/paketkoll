@@ -136,8 +136,9 @@ pub(super) fn parse_status(
     let mut package_builder: Option<PackageBuilder<PackageRef, ArchitectureRef>> = None;
 
     // This file is UTF-8 at least
-    for line in input.lines() {
-        let line = line?;
+    let mut buffer = String::new();
+    while input.read_line(&mut buffer)? > 0 {
+        let line = buffer.trim_end();
         if let Some(stripped) = line.strip_prefix("Package: ") {
             if let Some(builder) = package_builder {
                 packages.push(builder.build()?);
@@ -243,6 +244,7 @@ pub(super) fn parse_status(
                 }
             }
         }
+        buffer.clear();
     }
 
     if let Some(builder) = package_builder {
@@ -268,8 +270,9 @@ pub(super) fn parse_extended_status(
 
     let mut result = ahash::AHashMap::new();
 
-    for line in input.lines() {
-        let line = line?;
+    let mut buffer = String::new();
+    while input.read_line(&mut buffer)? > 0 {
+        let line = buffer.trim();
         if let Some(stripped) = line.strip_prefix("Package: ") {
             let package = PackageRef(interner.get_or_intern(stripped));
             state = ExtendedStatusParsingState::Package { pkg: package };
@@ -292,6 +295,7 @@ pub(super) fn parse_extended_status(
                 state = ExtendedStatusParsingState::Start;
             }
         }
+        buffer.clear();
     }
 
     Ok(result)
