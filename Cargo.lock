@@ -787,6 +787,7 @@ dependencies = [
  "regex",
  "ring",
  "rust-ini",
+ "scopeguard",
  "serde",
  "smallvec",
  "strum",

@@ -138,7 +138,11 @@ pub(super) fn parse_status(
     // This file is UTF-8 at least
     let mut buffer = String::new();
     while input.read_line(&mut buffer)? > 0 {
-        let line = buffer.trim_end();
+        // Ensure that the buffer is cleared on every iteration regardless of where we exit the loop.
+        let guard = scopeguard::guard(&mut buffer, |buf| {
+            buf.clear();
+        });
+        let line = guard.trim_end();
         if let Some(stripped) = line.strip_prefix("Package: ") {
             if let Some(builder) = package_builder {
                 packages.push(builder.build()?);
@@ -244,7 +248,6 @@ pub(super) fn parse_status(
                 }
             }
         }
-        buffer.clear();
     }
 
     if let Some(builder) = package_builder {

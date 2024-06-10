@@ -68,6 +68,7 @@ rayon = { workspace = true }
 regex = { workspace = true }
 ring = { workspace = true, optional = true }
 rust-ini = { workspace = true, optional = true }
+scopeguard = { workspace = true }
 serde = { workspace = true, optional = true, features = ["derive"] }
 smallvec = { workspace = true, features = [
     "const_generics",
