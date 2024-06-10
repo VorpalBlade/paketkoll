@@ -75,7 +75,8 @@ where
     /// Version of package
     pub version: CompactString,
     /// Single line description
-    pub desc: CompactString,
+    #[builder(default = "None")]
+    pub desc: Option<CompactString>,
     /// Dependencies (non-optional ones only)
     #[builder(default = "vec![]")]
     pub depends: Vec<Dependency<PackageT>>,

@@ -70,7 +70,7 @@ impl crate::types::PackageInterned {
             name: name.ok_or_else(|| anyhow::anyhow!("No name"))?,
             architecture: arch,
             version: version.ok_or_else(|| anyhow::anyhow!("No version"))?,
-            desc: desc.ok_or_else(|| anyhow::anyhow!("No desc"))?,
+            desc: Some(desc.ok_or_else(|| anyhow::anyhow!("No desc"))?),
             depends: depends.into_iter().map(Dependency::Single).collect(),
             provides,
             reason: Some(reason.unwrap_or(InstallReason::Explicit)),
@@ -203,7 +203,7 @@ mod tests {
             Package {
                 name: PackageRef(interner.get_or_intern("library-subpackage")),
                 version: "1.2.3-4".into(),
-                desc: "Some library".into(),
+                desc: Some("Some library".into()),
                 architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                 depends: vec![
                     Dependency::Single(PackageRef(interner.get_or_intern("gcc-libs"))),

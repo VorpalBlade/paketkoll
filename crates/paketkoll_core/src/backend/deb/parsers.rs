@@ -208,7 +208,7 @@ pub(super) fn parse_status(
             package_builder
                 .as_mut()
                 .expect("Invalid internal state")
-                .desc(stripped.into());
+                .desc(Some(stripped.into()));
         } else if let Some(stripped) = line.strip_prefix("Depends: ") {
             package_builder
                 .as_mut()
@@ -510,7 +510,7 @@ mod tests {
                     interner.get_or_intern("arm64")
                 )),
                 version: "2.36-9+rpt2+deb12u4".into(),
-                desc: "Very important library".into(),
+                desc: Some("Very important library".into()),
                 depends: vec![
                     Dependency::Single(PackageRef(interner.get_or_intern("libgcc"))),
                     Dependency::Single(PackageRef(interner.get_or_intern("something-else"))),

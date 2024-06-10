@@ -76,12 +76,17 @@ fn parse_flatpak_output(
         };
 
         let version = parts[3];
+        let desc = if parts[4].is_empty() {
+            None
+        } else {
+            Some(parts[4].into())
+        };
 
         // Build package struct
         let package = crate::types::Package {
             name: PackageRef(interner.get_or_intern(parts[2])),
             version: version.into(),
-            desc: parts[4].into(),
+            desc,
             architecture: Some(ArchitectureRef(interner.get_or_intern(arch))),
             depends: vec![],
             provides: vec![],
@@ -129,7 +134,7 @@ mod tests {
                 Package {
                     name: PackageRef(interner.get_or_intern("Flatseal")),
                     version: "2.2.0".into(),
-                    desc: "Manage Flatpak permissions".into(),
+                    desc: Some("Manage Flatpak permissions".into()),
                     architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                     depends: vec![],
                     provides: vec![],
@@ -140,7 +145,9 @@ mod tests {
                 Package {
                     name: PackageRef(interner.get_or_intern("Fedora Media Writer")),
                     version: "5.1.1".into(),
-                    desc: "A tool to create a live USB drive with an edition of Fedora".into(),
+                    desc: Some(
+                        "A tool to create a live USB drive with an edition of Fedora".into()
+                    ),
                     architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                     depends: vec![],
                     provides: vec![],
@@ -151,7 +158,7 @@ mod tests {
                 Package {
                     name: PackageRef(interner.get_or_intern("Freedesktop Platform")),
                     version: "23.08.19".into(),
-                    desc: "Runtime platform for applications".into(),
+                    desc: Some("Runtime platform for applications".into()),
                     architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                     depends: vec![],
                     provides: vec![],
@@ -162,7 +169,7 @@ mod tests {
                 Package {
                     name: PackageRef(interner.get_or_intern("Mesa")),
                     version: "24.0.7".into(),
-                    desc: "Mesa - The 3D Graphics Library".into(),
+                    desc: Some("Mesa - The 3D Graphics Library".into()),
                     architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                     depends: vec![],
                     provides: vec![],
@@ -173,7 +180,7 @@ mod tests {
                 Package {
                     name: PackageRef(interner.get_or_intern("Mesa (Extra)")),
                     version: "24.0.7".into(),
-                    desc: "Mesa - The 3D Graphics Library".into(),
+                    desc: Some("Mesa - The 3D Graphics Library".into()),
                     architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                     depends: vec![],
                     provides: vec![],
@@ -184,7 +191,7 @@ mod tests {
                 Package {
                     name: PackageRef(interner.get_or_intern("nvidia-550-78")),
                     version: "".into(),
-                    desc: "".into(),
+                    desc: None,
                     architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                     depends: vec![],
                     provides: vec![],
@@ -195,7 +202,7 @@ mod tests {
                 Package {
                     name: PackageRef(interner.get_or_intern("Intel")),
                     version: "".into(),
-                    desc: "".into(),
+                    desc: None,
                     architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                     depends: vec![],
                     provides: vec![],
@@ -206,7 +213,7 @@ mod tests {
                 Package {
                     name: PackageRef(interner.get_or_intern("openh264")),
                     version: "2.1.0".into(),
-                    desc: "OpenH264 Video Codec provided by Cisco Systems, Inc.".into(),
+                    desc: Some("OpenH264 Video Codec provided by Cisco Systems, Inc.".into()),
                     architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                     depends: vec![],
                     provides: vec![],
@@ -217,7 +224,7 @@ mod tests {
                 Package {
                     name: PackageRef(interner.get_or_intern("openh264")),
                     version: "2.4.1".into(),
-                    desc: "OpenH264 Video Codec provided by Cisco Systems, Inc.".into(),
+                    desc: Some("OpenH264 Video Codec provided by Cisco Systems, Inc.".into()),
                     architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                     depends: vec![],
                     provides: vec![],
@@ -230,7 +237,7 @@ mod tests {
                         interner.get_or_intern("GNOME Application Platform version 46")
                     ),
                     version: "".into(),
-                    desc: "Shared libraries used by GNOME applications".into(),
+                    desc: Some("Shared libraries used by GNOME applications".into()),
                     architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                     depends: vec![],
                     provides: vec![],
@@ -241,7 +248,7 @@ mod tests {
                 Package {
                     name: PackageRef(interner.get_or_intern("Adwaita dark GTK theme")),
                     version: "".into(),
-                    desc: "Dark variant of the Adwaita GTK theme".into(),
+                    desc: Some("Dark variant of the Adwaita GTK theme".into()),
                     architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                     depends: vec![],
                     provides: vec![],
@@ -252,7 +259,7 @@ mod tests {
                 Package {
                     name: PackageRef(interner.get_or_intern("Breeze GTK theme")),
                     version: "6.0.5".into(),
-                    desc: "Breeze GTK theme matching the KDE Breeze theme".into(),
+                    desc: Some("Breeze GTK theme matching the KDE Breeze theme".into()),
                     architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                     depends: vec![],
                     provides: vec![],
@@ -263,7 +270,7 @@ mod tests {
                 Package {
                     name: PackageRef(interner.get_or_intern("Adwaita theme")),
                     version: "".into(),
-                    desc: "Adwaita widget theme matching the GNOME adwaita theme".into(),
+                    desc: Some("Adwaita widget theme matching the GNOME adwaita theme".into()),
                     architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                     depends: vec![],
                     provides: vec![],
@@ -274,7 +281,7 @@ mod tests {
                 Package {
                     name: PackageRef(interner.get_or_intern("KDE Application Platform")),
                     version: "".into(),
-                    desc: "Shared libraries used by KDE applications".into(),
+                    desc: Some("Shared libraries used by KDE applications".into()),
                     architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
                     depends: vec![],
                     provides: vec![],
