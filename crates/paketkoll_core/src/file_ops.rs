@@ -281,6 +281,7 @@ fn interpret_ignore_error(ignore_err: ignore::Error, context: Option<PathBuf>) -
     }
 }
 
+/// Built in ignores for [`check_all_files`]
 const BUILTIN_IGNORES: &[&str] = &[
     "!**/lost+found",
     "!/dev/",

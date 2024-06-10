@@ -10,6 +10,7 @@ pub(crate) mod flatpak;
 
 pub(crate) mod filesystem;
 
+/// Get the name of a backend (useful in dynamic dispatch for generating reports)
 pub(crate) trait Name: Send + Sync {
     /// The name of the backend (for logging and debugging purposes)
     // Temporary, this will get exposed
@@ -41,6 +42,7 @@ pub(crate) trait Packages: Name {
 // - Does a paccache equivalent exist for Debian or do we need to implement smart cache
 //   cleaning as a separate tool?
 
+/// A backend that implements all operations
 #[allow(dead_code)]
 pub(crate) trait FullBackend: Files + Packages {
     /// Collect all data from the backend in one go.

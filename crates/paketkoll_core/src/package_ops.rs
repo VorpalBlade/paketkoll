@@ -4,6 +4,7 @@ use anyhow::Context;
 
 use crate::types::Interner;
 
+/// Get a list of all installed packages
 pub fn installed_packages(
     config: &crate::config::PackageListConfiguration,
 ) -> anyhow::Result<(crate::types::Interner, Vec<crate::types::PackageInterned>)> {

@@ -149,6 +149,7 @@ impl Default for CommonConfiguration {
     }
 }
 
+/// Configuration for [`crate::file_ops::check_all_files`]
 #[derive(Debug, derive_builder::Builder)]
 #[non_exhaustive]
 pub struct CheckAllFilesConfiguration {
