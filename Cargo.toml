@@ -26,7 +26,7 @@ indoc = "2.0.5"
 lasso = "0.7.2"
 log = "0.4.21"
 md-5 = "0.10.6"
-memchr = "2.7.2"
+memchr = "2.7.4"
 num_cpus = "1.16.0"
 os_info = { version = "3.8.2", default-features = false }
 phf = "0.11.2"
