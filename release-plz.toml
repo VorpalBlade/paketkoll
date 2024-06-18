@@ -3,7 +3,7 @@ git_release_enable = false
 
 [[package]]
 name = "paketkoll_core"
-publish_no_verify = true
+publish_features = ["arch_linux", "debian", "serde"]
 
 [[package]]
 name = "paketkoll"
