@@ -49,7 +49,8 @@ impl Packages for Flatpak {
                 String::from_utf8(output.stderr).context("Failed to parse stderr")?
             );
         }
-        let output = String::from_utf8(output.stdout).context("Failed to parse flatpak list")?;
+        let output =
+            String::from_utf8(output.stdout).context("Failed to parse flatpak list as UTF-8")?;
 
         parse_flatpak_output(&output, interner)
     }

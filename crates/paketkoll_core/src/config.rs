@@ -15,6 +15,9 @@ pub enum Backend {
     Debian,
     /// Backend for flatpak (package list only)
     Flatpak,
+    /// Backend for systemd-tmpfiles (file list only)
+    #[cfg(feature = "systemd_tmpfiles")]
+    SystemdTmpfiles,
 }
 
 // Clippy is wrong, this cannot be derived due to the cfg_if
@@ -53,6 +56,11 @@ impl Backend {
             Backend::Flatpak => Err(anyhow::anyhow!(
                 "Flatpak backend does not support file checks"
             )),
+            #[cfg(feature = "systemd_tmpfiles")]
+            Backend::SystemdTmpfiles => Ok(Box::new({
+                let builder = crate::backend::systemd_tmpfiles::SystemdTmpfilesBuilder::default();
+                builder.build()
+            })),
         }
     }
 
@@ -78,6 +86,10 @@ impl Backend {
                 let builder = crate::backend::flatpak::FlatpakBuilder::default();
                 builder.build()
             })),
+            #[cfg(feature = "systemd_tmpfiles")]
+            Backend::SystemdTmpfiles => Err(anyhow::anyhow!(
+                "SystemdTmpfiles backend does not support package checks"
+            )),
         }
     }
 }

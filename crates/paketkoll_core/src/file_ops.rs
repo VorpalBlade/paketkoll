@@ -44,7 +44,10 @@ pub fn check_installed_files(
                 Ok(None) => None,
                 Err(err) => {
                     let issues = smallvec::smallvec![IssueKind::FsCheckError(Box::new(err))];
-                    Some((file_entry.package, Issue::new(file_entry.path, issues)))
+                    Some((
+                        file_entry.package,
+                        Issue::new(file_entry.path, issues, Some(file_entry.source)),
+                    ))
                 }
             }
         })
@@ -139,7 +142,11 @@ pub fn check_all_files(
                                 collector
                                     .send((
                                         file_entry.package,
-                                        Issue::new(file_entry.path.clone(), issues),
+                                        Issue::new(
+                                            file_entry.path.clone(),
+                                            issues,
+                                            Some(file_entry.source),
+                                        ),
                                     ))
                                     .expect("Unbounded queue");
                             }
@@ -152,6 +159,7 @@ pub fn check_all_files(
                                 Issue::new(
                                     path.to_path_buf(),
                                     smallvec::smallvec![IssueKind::Unexpected],
+                                    None,
                                 ),
                             ))
                             .expect("Unbounded queue");
@@ -184,6 +192,7 @@ pub fn check_all_files(
                 Issue::new(
                     file_entry.path.clone(),
                     smallvec::smallvec![IssueKind::Missing],
+                    Some(file_entry.source),
                 ),
             ))
             .expect("Unbounded queue");
@@ -264,6 +273,7 @@ fn interpret_ignore_error(ignore_err: ignore::Error, context: Option<PathBuf>) -
                 Issue::new(
                     context.unwrap_or_else(|| PathBuf::from("UNKNOWN_PATH")),
                     smallvec::smallvec![IssueKind::PermissionDenied],
+                    None,
                 ),
             ),
             _ => {
@@ -274,6 +284,7 @@ fn interpret_ignore_error(ignore_err: ignore::Error, context: Option<PathBuf>) -
                     Issue::new(
                         context.unwrap_or_else(|| PathBuf::from("UNKNOWN_PATH")),
                         issues,
+                        None,
                     ),
                 )
             }

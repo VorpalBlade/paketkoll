@@ -7,7 +7,7 @@ license = "MPL-2.0"
 name = "paketkoll"
 readme = "../../README.md"
 repository = "https://github.com/VorpalBlade/paketkoll"
-rust-version = "1.76.0"
+rust-version = "1.79.0"
 version = "0.2.1"
 
 [features]
@@ -19,6 +19,9 @@ arch_linux = ["paketkoll_core/arch_linux"]
 
 # Include support for the Debian backend
 debian = ["paketkoll_core/debian"]
+
+# Include support for the systemd-tmpfiles backend
+systemd_tmpfiles = ["paketkoll_core/systemd_tmpfiles"]
 
 # Include support for exporting to JSON
 json = ["dep:serde_json", "paketkoll_core/serde", "serde"]

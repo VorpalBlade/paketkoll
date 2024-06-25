@@ -3,21 +3,22 @@
 use std::{
     fs::File,
     io::{ErrorKind, Read},
-    os::unix::fs::MetadataExt,
+    os::unix::fs::{FileTypeExt, MetadataExt},
     path::PathBuf,
 };
 
 use crate::{
     config::{CommonFileCheckConfiguration, ConfigFiles},
-    types::{Directory, FileFlags, Properties, RegularFile, RegularFileBasic, Symlink},
+    types::{
+        DeviceNode, DeviceType, Directory, Fifo, FileFlags, Properties, RegularFile,
+        RegularFileBasic, RegularFileSystemd, Symlink,
+    },
+    utils::MODE_MASK,
 };
 
 use crate::types::{Checksum, FileEntry, Gid, Issue, IssueKind, IssueVec, Mode, Uid};
 
 use anyhow::{Context, Result};
-
-/// Mask out the bits of the mode that are actual permissions
-const MODE_MASK: u32 = 0o7777;
 
 /// Determine if a given file should be processed
 fn should_process(file: &FileEntry, config: &CommonFileCheckConfiguration) -> bool {
@@ -37,7 +38,7 @@ pub(crate) fn check_file(
     let mut issues = IssueVec::new();
     match std::fs::symlink_metadata(&file.path) {
         Ok(metadata) => match &file.properties {
-            Properties::RegularFileBasic(RegularFileBasic { checksum }) => {
+            Properties::RegularFileBasic(RegularFileBasic { size, checksum }) => {
                 if !metadata.is_file() {
                     issues.push(IssueKind::TypeIncorrect);
                 }
@@ -48,7 +49,30 @@ pub(crate) fn check_file(
                         &file.path,
                         &metadata,
                         None,
+                        *size,
+                        checksum,
+                    )?;
+                }
+            }
+            Properties::RegularFileSystemd(RegularFileSystemd {
+                mode,
+                owner,
+                group,
+                size,
+                checksum,
+            }) => {
+                if !metadata.is_file() {
+                    issues.push(IssueKind::TypeIncorrect);
+                }
+                if should_process(file, config) {
+                    check_permissions(&mut issues, &metadata, *owner, *group, *mode);
+                    check_contents(
+                        &mut issues,
+                        config,
+                        &file.path,
+                        &metadata,
                         None,
+                        Some(*size),
                         checksum,
                     )?;
                 }
@@ -82,22 +106,23 @@ pub(crate) fn check_file(
                 group,
                 target,
             }) => {
+                check_ownership(&mut issues, &metadata, *owner, *group);
                 if !metadata.is_symlink() {
                     issues.push(IssueKind::TypeIncorrect);
-                }
-                check_ownership(&mut issues, &metadata, *owner, *group);
-                match std::fs::read_link(&file.path) {
-                    Ok(actual_target) => {
-                        if *target != actual_target {
-                            issues.push(IssueKind::SymlinkTarget {
-                                actual: actual_target,
-                                expected: target.clone(),
-                            });
+                } else {
+                    match std::fs::read_link(&file.path) {
+                        Ok(actual_target) => {
+                            if *target != actual_target {
+                                issues.push(IssueKind::SymlinkTarget {
+                                    actual: actual_target,
+                                    expected: target.clone(),
+                                });
+                            }
                         }
+                        Err(err) => Err(err).with_context(|| {
+                            format!("Failed to read link target for {:?}", file.path)
+                        })?,
                     }
-                    Err(err) => Err(err).with_context(|| {
-                        format!("Failed to read link target for {:?}", file.path)
-                    })?,
                 }
             }
             Properties::Directory(Directory { mode, owner, group }) => {
@@ -107,11 +132,51 @@ pub(crate) fn check_file(
                 check_permissions(&mut issues, &metadata, *owner, *group, *mode);
                 // We don't do anything with mtime here currently
             }
+            Properties::Fifo(Fifo { mode, owner, group }) => {
+                if !metadata.file_type().is_fifo() {
+                    issues.push(IssueKind::TypeIncorrect);
+                }
+                check_permissions(&mut issues, &metadata, *owner, *group, *mode);
+            }
+            Properties::DeviceNode(DeviceNode {
+                mode,
+                owner,
+                group,
+                device_type,
+                major,
+                minor,
+            }) => {
+                let is_expected_type: bool = match device_type {
+                    DeviceType::Block => metadata.file_type().is_block_device(),
+                    DeviceType::Char => metadata.file_type().is_char_device(),
+                };
+                if !is_expected_type {
+                    issues.push(IssueKind::TypeIncorrect);
+                } else {
+                    // Only check major/minor if we have a device node
+                    let rdev = metadata.rdev();
+                    // SAFETY: As far as I can find out, these do not actually
+                    // have any safety invariants, as they just perform some simple bitwise arithmetics.
+                    let major_actual = unsafe { libc::major(rdev) } as u64;
+                    let minor_actual = unsafe { libc::minor(rdev) } as u64;
+                    if (major_actual, minor_actual) != (*major, *minor) {
+                        issues.push(IssueKind::WrongDeviceNodeId {
+                            actual: (major_actual, minor_actual),
+                            expected: (*major, *minor),
+                        });
+                    }
+                }
+                check_permissions(&mut issues, &metadata, *owner, *group, *mode);
+            }
             Properties::Special => {
                 // Should be something other than dir, symlink or file:
                 if metadata.is_dir() || metadata.is_file() || metadata.is_symlink() {
                     issues.push(IssueKind::TypeIncorrect);
                 }
+            }
+            Properties::Removed => {
+                // Should not exist
+                issues.push(IssueKind::Exists);
             }
             Properties::Unknown => {
                 // Should be something other than a file (but Debian doesn't tell us what)
@@ -119,8 +184,13 @@ pub(crate) fn check_file(
                     issues.push(IssueKind::TypeIncorrect);
                 }
             }
+            Properties::Permissions(crate::types::Permissions { mode, owner, group }) => {
+                check_permissions(&mut issues, &metadata, *owner, *group, *mode);
+            }
         },
         Err(err) => match err.kind() {
+            ErrorKind::NotFound if file.properties == Properties::Removed => (),
+            ErrorKind::NotFound if file.flags.contains(FileFlags::OK_IF_MISSING) => (),
             ErrorKind::NotFound => {
                 issues.push(IssueKind::Missing);
             }
@@ -134,7 +204,11 @@ pub(crate) fn check_file(
     if issues.is_empty() {
         Ok(None)
     } else {
-        Ok(Some(Issue::new(file.path.clone(), issues)))
+        Ok(Some(Issue::new(
+            file.path.clone(),
+            issues,
+            Some(file.source),
+        )))
     }
 }
 

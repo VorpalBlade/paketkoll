@@ -174,6 +174,8 @@ impl TryFrom<Backend> for paketkoll_core::config::Backend {
             #[cfg(feature = "debian")]
             Backend::Debian => Ok(Self::Debian),
             Backend::Flatpak => Ok(Self::Flatpak),
+            #[cfg(feature = "systemd_tmpfiles")]
+            Backend::SystemdTmpfiles => Ok(Self::SystemdTmpfiles),
         }
     }
 }

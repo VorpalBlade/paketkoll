@@ -20,11 +20,16 @@ pub type PackageIssue = (Option<super::PackageRef>, Issue);
 pub struct Issue {
     path: PathBuf,
     kinds: IssueVec,
+    source: Option<&'static str>,
 }
 
 impl Issue {
-    pub fn new(path: PathBuf, kinds: IssueVec) -> Self {
-        Self { path, kinds }
+    pub fn new(path: PathBuf, kinds: IssueVec, source: Option<&'static str>) -> Self {
+        Self {
+            path,
+            kinds,
+            source,
+        }
     }
 
     /// Path of file
@@ -35,6 +40,10 @@ impl Issue {
     /// Iterator over the kinds of issues
     pub fn kinds(&self) -> impl Iterator<Item = &IssueKind> {
         self.kinds.iter()
+    }
+
+    pub fn source(&self) -> Option<&'static str> {
+        self.source
     }
 }
 
@@ -49,6 +58,8 @@ impl Issue {
 pub enum IssueKind {
     /// Missing entity from file system
     Missing,
+    /// Entry on file system exists, but shouldn't
+    Exists,
     /// Extra unexpected entity on file system
     Unexpected,
     /// Failed to check for (or check contents of) entity due to permissions
@@ -67,6 +78,11 @@ pub enum IssueKind {
     WrongGroup { actual: Gid, expected: Gid },
     /// Incorrect mode for file system entity
     WrongMode { actual: Mode, expected: Mode },
+    /// Incorrect major or minor device node numbers
+    WrongDeviceNodeId {
+        actual: (u64, u64),
+        expected: (u64, u64),
+    },
     /// Some sort of parsing error for this entry (from the package manager backend)
     #[cfg_attr(feature = "serde", serde(serialize_with = "serialize_error"))]
     MetadataError(Box<anyhow::Error>),
@@ -79,6 +95,7 @@ impl std::fmt::Display for IssueKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             IssueKind::Missing => write!(f, "missing or inaccessible file/directory/...")?,
+            IssueKind::Exists => write!(f, "unexpected file/directory/... (should be removed)")?,
             IssueKind::Unexpected => write!(f, "unexpected file")?,
             IssueKind::PermissionDenied => write!(f, "read error (Permission denied)")?,
             IssueKind::TypeIncorrect => write!(f, "type mismatch")?,
@@ -97,6 +114,11 @@ impl std::fmt::Display for IssueKind {
             IssueKind::WrongMode { actual, expected } => write!(
                 f,
                 "permission mismatch (expected {expected}, actual {actual})"
+            )?,
+            IssueKind::WrongDeviceNodeId { actual, expected } => write!(
+                f,
+                "device node ID mismatch (expected {}:{}, actual {}:{})",
+                expected.0, expected.1, actual.0, actual.1
             )?,
             IssueKind::MetadataError(err) => {
                 write!(f, "error with metadata parsing")?;

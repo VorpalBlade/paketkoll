@@ -6,9 +6,11 @@ pub(crate) mod arch;
 #[cfg(feature = "debian")]
 pub(crate) mod deb;
 
+pub(crate) mod filesystem;
 pub(crate) mod flatpak;
 
-pub(crate) mod filesystem;
+#[cfg(feature = "systemd_tmpfiles")]
+pub(crate) mod systemd_tmpfiles;
 
 /// Get the name of a backend (useful in dynamic dispatch for generating reports)
 pub(crate) trait Name: Send + Sync {

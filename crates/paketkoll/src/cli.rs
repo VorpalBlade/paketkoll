@@ -77,8 +77,11 @@ pub(crate) enum Backend {
     /// Backend for Debian and derived distros (dpkg/apt)
     #[cfg(feature = "debian")]
     Debian,
-    /// Backend for Flatpak
+    /// Backend for Flatpak (EXPERIMENTAL)
     Flatpak,
+    /// Backend for systemd-tmpfiles (EXPERIMENTAL)
+    #[cfg(feature = "systemd_tmpfiles")]
+    SystemdTmpfiles,
 }
 
 impl std::fmt::Display for Backend {
@@ -90,6 +93,8 @@ impl std::fmt::Display for Backend {
             #[cfg(feature = "debian")]
             Backend::Debian => write!(f, "debian"),
             Backend::Flatpak => write!(f, "flatpak"),
+            #[cfg(feature = "systemd_tmpfiles")]
+            Backend::SystemdTmpfiles => write!(f, "systemd-tmpfiles"),
         }
     }
 }

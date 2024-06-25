@@ -6,7 +6,7 @@ keywords = ["apt", "arch-linux", "debian", "pacman", "package-management"]
 license = "MPL-2.0"
 name = "paketkoll_core"
 repository = "https://github.com/VorpalBlade/paketkoll"
-rust-version = "1.76.0"
+rust-version = "1.79.0"
 version = "0.3.1"
 
     [package.metadata.docs.rs]
@@ -27,6 +27,8 @@ arch_linux = [
     "dep:rust-ini",
     "dep:dashmap",
 ]
+
+systemd_tmpfiles = ["__sha256", "dep:systemd_tmpfiles"]
 
 # Include support for the Debian backend
 debian = ["__md5", "dep:dashmap", "dashmap/rayon"]
@@ -58,9 +60,11 @@ lasso = { workspace = true, features = [
     "inline-more",
     "multi-threaded",
 ] }
+libc = { workspace = true }
 log = { workspace = true }
 md-5 = { workspace = true, optional = true }
 memchr = { workspace = true }
+nix = { workspace = true, features = ["user"] }
 num_cpus = { workspace = true }
 #mtree = { version = "0.5.0", optional = true }
 phf = { workspace = true, features = ["macros"] }
@@ -76,6 +80,7 @@ smallvec = { workspace = true, features = [
     "union",
 ] }
 strum = { workspace = true, features = ["derive"] }
+systemd_tmpfiles = { version = "0.1.0", path = "../systemd_tmpfiles", optional = true }
 
 [dev-dependencies]
 indoc = { workspace = true }

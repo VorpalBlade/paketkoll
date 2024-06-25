@@ -104,13 +104,17 @@ jobs:
         features:
           - --no-default-features --features=arch_linux
           - --no-default-features --features=debian
+          - --all-features
         rust:
-          - 1.76.0
+          - 1.79.0
           - stable
         include:
           # MSRV with default features too
           - features:
-            rust: 1.76.0
+            rust: 1.79.0
+          # Nightly will all features
+          - features: --all-features
+            rust: nightly
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust

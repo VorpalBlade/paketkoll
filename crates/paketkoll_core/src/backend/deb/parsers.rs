@@ -26,6 +26,7 @@ pub(super) fn parse_paths(
                     path: "/".into(),
                     properties: Properties::Unknown,
                     flags: FileFlags::empty(),
+                    source: super::NAME,
                     seen: Default::default(),
                 })
             }
@@ -34,6 +35,7 @@ pub(super) fn parse_paths(
                 path: inner.into_path_buf().context("Failed to convert")?,
                 properties: Properties::Unknown,
                 flags: FileFlags::empty(),
+                source: super::NAME,
                 seen: Default::default(),
             }),
             Err(err) => Err(err).context("Failed to parse"),
@@ -64,9 +66,11 @@ pub(super) fn parse_md5sums(
                     package: Some(package),
                     path,
                     properties: Properties::RegularFileBasic(RegularFileBasic {
+                        size: None,
                         checksum: Checksum::Md5(decoded),
                     }),
                     flags: FileFlags::empty(),
+                    source: super::NAME,
                     seen: Default::default(),
                 })
             }
@@ -189,9 +193,11 @@ pub(super) fn parse_status(
                     package: Some(pkg),
                     path: file.into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
+                        size: None,
                         checksum: Checksum::Md5(decoded),
                     }),
                     flags: FileFlags::CONFIG,
+                    source: super::NAME,
                     seen: Default::default(),
                 });
             } else {
@@ -344,6 +350,7 @@ mod tests {
                     path: "/usr/share/doc/libc6/README".into(),
                     properties: Properties::Unknown,
                     flags: FileFlags::empty(),
+                    source: super::super::NAME,
                     seen: Default::default(),
                 },
                 FileEntry {
@@ -351,6 +358,7 @@ mod tests {
                     path: "/usr/share/doc/libc6/changelog.Debian.gz".into(),
                     properties: Properties::Unknown,
                     flags: FileFlags::empty(),
+                    source: super::super::NAME,
                     seen: Default::default(),
                 },
                 FileEntry {
@@ -358,6 +366,7 @@ mod tests {
                     path: "/usr/share/doc/libc6/copyright".into(),
                     properties: Properties::Unknown,
                     flags: FileFlags::empty(),
+                    source: super::super::NAME,
                     seen: Default::default(),
                 },
                 FileEntry {
@@ -365,6 +374,7 @@ mod tests {
                     path: "/usr/share/doc/libc6/NEWS.gz".into(),
                     properties: Properties::Unknown,
                     flags: FileFlags::empty(),
+                    source: super::super::NAME,
                     seen: Default::default(),
                 },
             ]
@@ -395,36 +405,44 @@ mod tests {
                     package: Some(package_ref),
                     path: "/usr/share/doc/libc6/README".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
+                        size: None,
                         checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9a")
                     }),
                     flags: FileFlags::empty(),
+                    source: super::super::NAME,
                     seen: Default::default(),
                 },
                 FileEntry {
                     package: Some(package_ref),
                     path: "/usr/share/doc/libc6/changelog.Debian.gz".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
+                        size: None,
                         checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9b")
                     }),
                     flags: FileFlags::empty(),
+                    source: super::super::NAME,
                     seen: Default::default(),
                 },
                 FileEntry {
                     package: Some(package_ref),
                     path: "/usr/share/doc/libc6/copyright".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
+                        size: None,
                         checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9c")
                     }),
                     flags: FileFlags::empty(),
+                    source: super::super::NAME,
                     seen: Default::default(),
                 },
                 FileEntry {
                     package: Some(package_ref),
                     path: "/usr/share/doc/libc6/NEWS.gz".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
+                        size: None,
                         checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9d")
                     }),
                     flags: FileFlags::empty(),
+                    source: super::super::NAME,
                     seen: Default::default(),
                 },
             ]
@@ -535,36 +553,44 @@ mod tests {
                     package: Some(PackageRef(interner.get_or_intern("libc6"))),
                     path: "/etc/ld.so.conf".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
+                        size: None,
                         checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9a")
                     }),
                     flags: FileFlags::CONFIG,
+                    source: super::super::NAME,
                     seen: Default::default(),
                 },
                 FileEntry {
                     package: Some(PackageRef(interner.get_or_intern("libc6"))),
                     path: "/etc/ld.so.conf.d/1.conf".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
+                        size: None,
                         checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9b")
                     }),
                     flags: FileFlags::CONFIG,
+                    source: super::super::NAME,
                     seen: Default::default(),
                 },
                 FileEntry {
                     package: Some(PackageRef(interner.get_or_intern("libc6"))),
                     path: "/etc/ld.so.conf.d/2.conf".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
+                        size: None,
                         checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9c")
                     }),
                     flags: FileFlags::CONFIG,
+                    source: super::super::NAME,
                     seen: Default::default(),
                 },
                 FileEntry {
                     package: Some(PackageRef(interner.get_or_intern("libc6"))),
                     path: "/etc/ld.so.conf.d/3.conf".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
+                        size: None,
                         checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9d")
                     }),
                     flags: FileFlags::CONFIG,
+                    source: super::super::NAME,
                     seen: Default::default(),
                 },
             ]

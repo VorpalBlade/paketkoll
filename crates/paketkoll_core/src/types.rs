@@ -5,8 +5,8 @@ mod issue;
 mod package;
 
 pub(crate) use files::{
-    Checksum, Directory, FileEntry, FileFlags, Gid, Mode, Properties, RegularFile,
-    RegularFileBasic, Symlink, Uid,
+    Checksum, DeviceNode, DeviceType, Directory, Fifo, FileEntry, FileFlags, Gid, Mode,
+    Permissions, Properties, RegularFile, RegularFileBasic, RegularFileSystemd, Symlink, Uid,
 };
 pub use issue::{Issue, IssueKind, IssueVec, PackageIssue};
 

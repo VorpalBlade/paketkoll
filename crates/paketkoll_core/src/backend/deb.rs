@@ -30,6 +30,7 @@ use super::{Files, FullBackend, Name, Packages};
 const DB_PATH: &str = "/var/lib/dpkg/info";
 const STATUS_PATH: &str = "/var/lib/dpkg/status";
 const EXTENDED_STATUS_PATH: &str = "/var/lib/apt/extended_states";
+const NAME: &str = "Debian";
 
 #[derive(Debug)]
 pub(crate) struct Debian {
@@ -58,7 +59,7 @@ impl DebianBuilder {
 
 impl Name for Debian {
     fn name(&self) -> &'static str {
-        "Debian"
+        NAME
     }
 }
 

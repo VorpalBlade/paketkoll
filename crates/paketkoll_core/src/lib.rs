@@ -12,6 +12,7 @@ pub mod config;
 pub mod file_ops;
 pub mod package_ops;
 pub mod types;
+pub(crate) mod utils;
 
 /// Vendored dependency due to upstream being slow to accept PRs
 ///

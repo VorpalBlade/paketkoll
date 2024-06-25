@@ -22,6 +22,8 @@ use rayon::prelude::*;
 
 use super::{Files, FullBackend, Name, Packages};
 
+const NAME: &str = "Arch Linux";
+
 /// Arch Linux backend
 #[derive(Debug)]
 pub(crate) struct ArchLinux {
@@ -67,7 +69,7 @@ impl ArchLinuxBuilder {
 
 impl Name for ArchLinux {
     fn name(&self) -> &'static str {
-        "Arch Linux"
+        NAME
     }
 }
 
