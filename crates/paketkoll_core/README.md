@@ -31,6 +31,12 @@ This library currently vendors a patched version of [mtree-rs](https://github.co
 Hopefully the changes required will be merged upstream and a new release made, at
 which point the plan is to no longer vendor that dependency.
 
+## MSRV (Minimum Supported Rust Version) policy
+
+The MSRV may be bumped as needed. It is guaranteed that this library will at
+least build on the current stable Rust release. An MSRV change is not considered
+a breaking change and as such may change even in a patch version.
+
 [crates.io]: https://crates.io/crates/paketkoll_core
 [lib.rs]: https://lib.rs/crates/paketkoll_core
 [paketkoll]: https://github.com/VorpalBlade/paketkoll

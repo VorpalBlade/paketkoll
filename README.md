@@ -165,6 +165,12 @@ needs this as a library).
 I consider the program itself mostly feature complete. The main changes would be
 bug fixes and possibly supporting additional Linux distributions and package managers.
 
+## MSRV (Minimum Supported Rust Version) policy
+
+The MSRV may be bumped as needed. It is guaranteed that this program will at
+least build on the current stable Rust release. An MSRV change is not considered
+a breaking change and as such may change even in a patch version.
+
 ## What does the name mean?
 
 paketkoll is Swedish for "package check", though the translation to English isn't perfect ("ha koll på" means "keep an eye on" for example).
