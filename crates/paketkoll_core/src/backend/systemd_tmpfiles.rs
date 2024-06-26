@@ -49,6 +49,7 @@ impl Files for SystemdTmpfiles {
         &self,
         _interner: &crate::types::Interner,
     ) -> anyhow::Result<Vec<crate::types::FileEntry>> {
+        // Get the entire config from sytemd-tmpfiles
         let cmd = std::process::Command::new("systemd-tmpfiles")
             .arg("--cat-config")
             .stdout(Stdio::piped())
@@ -67,10 +68,12 @@ impl Files for SystemdTmpfiles {
         let output = String::from_utf8(output.stdout)
             .context("Failed to parse systemd-tmpfiles --cat-config as UTF-8")?;
 
+        // Now parse it
         parse_systemd_tmpfiles_output(&output)
     }
 }
 
+/// Parse the systemd-tmpfiles output into [`crate::types::FileEntry`]s that are usable by the shared later stages.
 fn parse_systemd_tmpfiles_output(
     output: &str,
 ) -> Result<Vec<crate::types::FileEntry>, anyhow::Error> {
@@ -94,6 +97,7 @@ fn parse_systemd_tmpfiles_output(
     Ok(files.into_values().collect())
 }
 
+/// Process a single entry from the systemd-tmpfiles output, converting it to a [`crate::types::FileEntry`].
 fn process_entry<'entry>(
     entry: &'entry systemd_tmpfiles::Entry,
     files: &mut AHashMap<PathBuf, crate::types::FileEntry>,
@@ -312,6 +316,7 @@ fn process_entry<'entry>(
     do_insert(files, &path, props, flags)
 }
 
+/// Insert into the hash map, trying to update existing entries (if existing).
 fn do_insert(
     files: &mut AHashMap<PathBuf, crate::types::FileEntry>,
     path: &str,
@@ -392,6 +397,7 @@ fn do_insert(
     Ok(())
 }
 
+/// Helper to [`do_insert`] that inserts into an occupied entry.
 fn do_insert_inner(
     entry: &mut std::collections::hash_map::OccupiedEntry<'_, PathBuf, crate::types::FileEntry>,
     path: &str,
@@ -408,6 +414,7 @@ fn do_insert_inner(
     });
 }
 
+/// Handles the recursive copy instructions from systemd-tmpfiles
 fn recursive_copy(
     files: &mut AHashMap<PathBuf, crate::types::FileEntry>,
     source_path: &Path,
@@ -473,15 +480,18 @@ fn recursive_copy(
     do_insert(files, target_path, props, flags)
 }
 
+/// Generate a checksum from a path on the system (needed for copy directives)
 fn generate_checksum_from_file(path: &Path) -> anyhow::Result<Checksum> {
     let mut reader =
         std::fs::File::open(path).with_context(|| format!("IO error while reading {:?}", path))?;
     sha256_readable(&mut reader)
 }
 
+/// Cache for UID and GID lookups (they are slow when using glibc at least)
 #[derive(Default)]
 struct IdCache<'a>(AHashMap<IdCacheKey<'a>, u32>);
 
+/// Key for the ID cache
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 enum IdCacheKey<'a> {
     User(&'a str),
@@ -498,6 +508,7 @@ impl IdCacheKey<'_> {
 }
 
 impl<'a> IdCache<'a> {
+    /// Look up in ID cache, and if not found use the provided resolver to resolve and insert the ID
     fn lookup(
         &mut self,
         key: IdCacheKey<'a>,
@@ -515,6 +526,7 @@ impl<'a> IdCache<'a> {
     }
 }
 
+/// Resolve a group identifier to a GID
 fn resolve_gid<'entry>(
     group: &'entry systemd_tmpfiles::Id,
     id_cache: &mut IdCache<'entry>,
@@ -537,6 +549,7 @@ fn resolve_gid<'entry>(
     }
 }
 
+/// Resolve a user identifier to a UID
 fn resolve_uid<'entry>(
     user: &'entry systemd_tmpfiles::Id,
     id_cache: &mut IdCache<'entry>,
