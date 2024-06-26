@@ -7,6 +7,28 @@ is generated automatically from commit messages.
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.2] - 2024-06-26
+
+### 🚀 Shiny new things (features)
+
+- Add file backend for systemd-tmpfiles.d to paketkoll
+- Add JSON output (implements [#3](https://github.com/VorpalBlade/paketkoll/pull/3))
+- Add flatpak package listing backend
+- Add package backend for Debian
+- Add listing of installed packages
+
+### 🚜 Now more maintainable (refactor)
+
+- Refactor API of core crate
+
+### 📚 Things to read (documentation)
+
+- Add MSRV policy
+
+### ⚙️ Other stuff
+
+- *(lints)* Enable additional lints
+
 ## [0.2.1] - 2024-03-14
 
 ### 🚀 Shiny new things (features)

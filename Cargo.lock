@@ -825,7 +825,7 @@ checksum = "4030760ffd992bef45b0ae3f10ce1aba99e33464c90d14dd7c039884963ddc7a"
 
 [[package]]
 name = "paketkoll"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "ahash",
  "anyhow",
@@ -845,7 +845,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_core"
-version = "0.3.1"
+version = "0.4.0"
 dependencies = [
  "ahash",
  "anyhow",
