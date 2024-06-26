@@ -72,7 +72,7 @@ pub(crate) fn check_file(
                         &file.path,
                         &metadata,
                         None,
-                        Some(*size),
+                        *size,
                         checksum,
                     )?;
                 }

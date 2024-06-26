@@ -2,12 +2,13 @@
 
 use std::{
     borrow::Cow,
-    collections::HashMap,
+    collections::hash_map::Entry,
     os::unix::fs::MetadataExt,
     path::{Path, PathBuf},
     process::Stdio,
 };
 
+use ahash::AHashMap;
 use anyhow::Context;
 use compact_str::CompactString;
 use systemd_tmpfiles::specifier::Resolve;
@@ -15,7 +16,7 @@ use systemd_tmpfiles::specifier::Resolve;
 use crate::{
     types::{
         Checksum, DeviceNode, DeviceType, Directory, Fifo, FileFlags, Gid, Mode, Permissions,
-        Properties, RegularFileBasic, RegularFileSystemd, Symlink, Uid,
+        Properties, RegularFile, RegularFileBasic, RegularFileSystemd, Symlink, Uid,
     },
     utils::{sha256_buffer, sha256_readable, MODE_MASK},
 };
@@ -76,22 +77,27 @@ fn parse_systemd_tmpfiles_output(
     let parsed = systemd_tmpfiles::parser::parse_str(output)
         .context("Failed to parse systemd-tmpfiles output")?;
 
-    let mut files = HashMap::new();
+    let mut files = AHashMap::new();
+
+    let mut id_cache = IdCache::default();
 
     let resolver = systemd_tmpfiles::specifier::SystemResolver::new_from_running_system()
         .context("Failed to create systemd-tmpfiles specifier resolver")?;
 
-    for entry in parsed.into_iter() {
-        process_entry(&entry, &mut files, &resolver)
+    // Note! It may be tempting to parallelise this, but unfortunately it is "last item wins"
+    // (at least per file), including possibly modifying previous entries.
+    for entry in parsed.iter() {
+        process_entry(entry, &mut files, &mut id_cache, &resolver)
             .with_context(|| format!("Failed to process entry for {}", entry.path()))?;
     }
 
     Ok(files.into_values().collect())
 }
 
-fn process_entry(
-    entry: &systemd_tmpfiles::Entry,
-    files: &mut HashMap<PathBuf, crate::types::FileEntry>,
+fn process_entry<'entry>(
+    entry: &'entry systemd_tmpfiles::Entry,
+    files: &mut AHashMap<PathBuf, crate::types::FileEntry>,
+    id_cache: &mut IdCache<'entry>,
     resolver: &systemd_tmpfiles::specifier::SystemResolver,
 ) -> anyhow::Result<()> {
     // Figure out path
@@ -139,9 +145,9 @@ fn process_entry(
                     .as_ref()
                     .map(|m| Mode::new(m.mode()))
                     .unwrap_or(Mode::new(0o644)),
-                owner: resolve_uid(user)?,
-                group: resolve_gid(group)?,
-                size: contents.len() as u64,
+                owner: resolve_uid(user, id_cache)?,
+                group: resolve_gid(group, id_cache)?,
+                size: Some(contents.len() as u64),
                 checksum: sha256_buffer(contents.as_bytes())
                     .with_context(|| format!("Failed to generate checksum for {path:?}"))?,
             })
@@ -184,8 +190,8 @@ fn process_entry(
                 .as_ref()
                 .map(|m| Mode::new(m.mode()))
                 .unwrap_or(Mode::new(0o644)),
-            owner: resolve_uid(user)?,
-            group: resolve_gid(group)?,
+            owner: resolve_uid(user, id_cache)?,
+            group: resolve_gid(group, id_cache)?,
         }),
         systemd_tmpfiles::Directive::CreateFifo {
             replace_if_exists: _,
@@ -197,8 +203,8 @@ fn process_entry(
                 .as_ref()
                 .map(|m| Mode::new(m.mode()))
                 .unwrap_or(Mode::new(0o644)),
-            owner: resolve_uid(user)?,
-            group: resolve_gid(group)?,
+            owner: resolve_uid(user, id_cache)?,
+            group: resolve_gid(group, id_cache)?,
         }),
         systemd_tmpfiles::Directive::CreateSymlink {
             replace_if_exists: _,
@@ -227,8 +233,8 @@ fn process_entry(
                 .as_ref()
                 .map(|m| Mode::new(m.mode()))
                 .unwrap_or(Mode::new(0o644)),
-            owner: resolve_uid(user)?,
-            group: resolve_gid(group)?,
+            owner: resolve_uid(user, id_cache)?,
+            group: resolve_gid(group, id_cache)?,
             device_type: DeviceType::Char,
             major: device_specifier.major,
             minor: device_specifier.minor,
@@ -244,8 +250,8 @@ fn process_entry(
                 .as_ref()
                 .map(|m| Mode::new(m.mode()))
                 .unwrap_or(Mode::new(0o644)),
-            owner: resolve_uid(user)?,
-            group: resolve_gid(group)?,
+            owner: resolve_uid(user, id_cache)?,
+            group: resolve_gid(group, id_cache)?,
             device_type: DeviceType::Block,
             major: device_specifier.major,
             minor: device_specifier.minor,
@@ -276,8 +282,8 @@ fn process_entry(
                 .as_ref()
                 .map(|m| Mode::new(m.mode()))
                 .unwrap_or(Mode::new(0o644)),
-            owner: resolve_uid(user)?,
-            group: resolve_gid(group)?,
+            owner: resolve_uid(user, id_cache)?,
+            group: resolve_gid(group, id_cache)?,
         }),
         systemd_tmpfiles::Directive::AdjustAccess {
             recursive,
@@ -293,8 +299,8 @@ fn process_entry(
                     .as_ref()
                     .map(|m| Mode::new(m.mode()))
                     .unwrap_or(Mode::new(0o644)),
-                owner: resolve_uid(user)?,
-                group: resolve_gid(group)?,
+                owner: resolve_uid(user, id_cache)?,
+                group: resolve_gid(group, id_cache)?,
             })
         }
         systemd_tmpfiles::Directive::SetExtendedAttributes { .. } => return Ok(()),
@@ -303,22 +309,107 @@ fn process_entry(
         _ => todo!(),
     };
 
-    files.insert(
-        PathBuf::from(path.as_str()),
-        crate::types::FileEntry {
-            package: None,
-            path: PathBuf::from(path.as_str()),
-            properties: props,
-            flags,
-            source: NAME,
-            seen: Default::default(),
-        },
-    );
+    do_insert(files, &path, props, flags)
+}
+
+fn do_insert(
+    files: &mut AHashMap<PathBuf, crate::types::FileEntry>,
+    path: &str,
+    props: Properties,
+    flags: FileFlags,
+) -> anyhow::Result<()> {
+    let normalised_path = std::path::absolute(PathBuf::from(path))?;
+    match files.entry(normalised_path) {
+        Entry::Occupied(mut entry) => {
+            if let Properties::Permissions(crate::types::Permissions {
+                mode: new_mode,
+                owner: new_owner,
+                group: new_group,
+            }) = props
+            {
+                // Update existing permissions
+                match &mut entry.get_mut().properties {
+                    // Handle cases where we keep type but modify fields
+                    Properties::Permissions(crate::types::Permissions { mode, owner, group })
+                    | Properties::RegularFileSystemd(RegularFileSystemd {
+                        mode,
+                        owner,
+                        group,
+                        ..
+                    })
+                    | Properties::RegularFile(RegularFile {
+                        mode, owner, group, ..
+                    })
+                    | Properties::Directory(Directory { mode, owner, group })
+                    | Properties::Fifo(Fifo { mode, owner, group })
+                    | Properties::DeviceNode(DeviceNode {
+                        mode, owner, group, ..
+                    }) => {
+                        *mode = new_mode;
+                        *owner = new_owner;
+                        *group = new_group;
+                    }
+                    // Symlinks don't have permissions, but we can update owner and group
+                    Properties::Symlink(Symlink { owner, group, .. }) => {
+                        *owner = new_owner;
+                        *group = new_group;
+                    }
+                    // Basic files get an upgrade with more info
+                    Properties::RegularFileBasic(RegularFileBasic { size, checksum }) => {
+                        entry.get_mut().properties =
+                            Properties::RegularFileSystemd(RegularFileSystemd {
+                                mode: new_mode,
+                                owner: new_owner,
+                                group: new_group,
+                                size: *size,
+                                checksum: checksum.clone(),
+                            });
+                    }
+                    // Unknown gets upgraded to a replacement
+                    Properties::Unknown => {
+                        do_insert_inner(&mut entry, path, props, flags);
+                    }
+                    Properties::Special | Properties::Removed => {
+                        log::warn!("Tried to update permissions on non-permissions entry");
+                    }
+                }
+            } else {
+                // Just replace the entire entry
+                do_insert_inner(&mut entry, path, props, flags);
+            }
+        }
+        Entry::Vacant(entry) => {
+            entry.insert(crate::types::FileEntry {
+                package: None,
+                path: PathBuf::from(path),
+                properties: props,
+                flags,
+                source: NAME,
+                seen: Default::default(),
+            });
+        }
+    };
     Ok(())
 }
 
+fn do_insert_inner(
+    entry: &mut std::collections::hash_map::OccupiedEntry<'_, PathBuf, crate::types::FileEntry>,
+    path: &str,
+    props: Properties,
+    flags: FileFlags,
+) {
+    entry.insert(crate::types::FileEntry {
+        package: None,
+        path: PathBuf::from(path),
+        properties: props,
+        flags,
+        source: NAME,
+        seen: Default::default(),
+    });
+}
+
 fn recursive_copy(
-    files: &mut HashMap<PathBuf, crate::types::FileEntry>,
+    files: &mut AHashMap<PathBuf, crate::types::FileEntry>,
     source_path: &Path,
     target_path: &str,
     flags: FileFlags,
@@ -373,24 +464,13 @@ fn recursive_copy(
                 mode: Mode::new(source_metadata.mode() & MODE_MASK),
                 owner: Uid::new(source_metadata.uid()),
                 group: Gid::new(source_metadata.gid()),
-                size: source_metadata.len(),
+                size: Some(source_metadata.len()),
                 checksum,
             })
         }
     };
 
-    files.insert(
-        PathBuf::from(target_path),
-        crate::types::FileEntry {
-            package: None,
-            path: PathBuf::from(target_path),
-            properties: props,
-            flags,
-            source: NAME,
-            seen: Default::default(),
-        },
-    );
-    Ok(())
+    do_insert(files, target_path, props, flags)
 }
 
 fn generate_checksum_from_file(path: &Path) -> anyhow::Result<Checksum> {
@@ -399,30 +479,82 @@ fn generate_checksum_from_file(path: &Path) -> anyhow::Result<Checksum> {
     sha256_readable(&mut reader)
 }
 
-fn resolve_gid(group: &systemd_tmpfiles::Id) -> anyhow::Result<Gid> {
-    Ok(match group {
-        systemd_tmpfiles::Id::Caller { new_only: _ } => Gid::new(0),
-        systemd_tmpfiles::Id::Id { id, new_only: _ } => Gid::new(*id),
-        systemd_tmpfiles::Id::Name { name, new_only: _ } => {
-            let entry = nix::unistd::Group::from_name(name)
-                .with_context(|| format!("Failed to resolve GID for {name}"))?
-                .with_context(|| format!("Failed to resolve GID for {name}"))?;
-            Gid::new(entry.gid.as_raw())
-        }
-        _ => todo!(),
-    })
+#[derive(Default)]
+struct IdCache<'a>(AHashMap<IdCacheKey<'a>, u32>);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+enum IdCacheKey<'a> {
+    User(&'a str),
+    Group(&'a str),
 }
 
-fn resolve_uid(user: &systemd_tmpfiles::Id) -> anyhow::Result<Uid> {
-    Ok(match user {
-        systemd_tmpfiles::Id::Caller { new_only: _ } => Uid::new(0),
-        systemd_tmpfiles::Id::Id { id, new_only: _ } => Uid::new(*id),
-        systemd_tmpfiles::Id::Name { name, new_only: _ } => {
-            let entry = nix::unistd::User::from_name(name)
-                .with_context(|| format!("Failed to resolve UID for {name}"))?
-                .with_context(|| format!("Failed to resolve UID for {name}"))?;
-            Uid::new(entry.uid.as_raw())
+impl IdCacheKey<'_> {
+    fn as_str(&self) -> &str {
+        match self {
+            IdCacheKey::User(s) => s,
+            IdCacheKey::Group(s) => s,
         }
+    }
+}
+
+impl<'a> IdCache<'a> {
+    fn lookup(
+        &mut self,
+        key: IdCacheKey<'a>,
+        resolver: impl FnOnce(&'_ str) -> anyhow::Result<u32>,
+    ) -> anyhow::Result<u32> {
+        let cache_entry = self.0.entry(key);
+        match cache_entry {
+            std::collections::hash_map::Entry::Occupied(e) => Ok(*e.get()),
+            std::collections::hash_map::Entry::Vacant(v) => {
+                let id = resolver(key.as_str())?;
+                v.insert(id);
+                Ok(id)
+            }
+        }
+    }
+}
+
+fn resolve_gid<'entry>(
+    group: &'entry systemd_tmpfiles::Id,
+    id_cache: &mut IdCache<'entry>,
+) -> anyhow::Result<Gid> {
+    match group {
+        systemd_tmpfiles::Id::Caller { new_only: _ } => Ok(Gid::new(0)),
+        systemd_tmpfiles::Id::Id { id, new_only: _ } => Ok(Gid::new(*id)),
+        systemd_tmpfiles::Id::Name { name, new_only: _ } => id_cache
+            .lookup(
+                IdCacheKey::Group(name.as_str()),
+                |name: &str| -> anyhow::Result<u32> {
+                    let entry = nix::unistd::Group::from_name(name)
+                        .with_context(|| format!("Failed to resolve GID for {name}"))?
+                        .with_context(|| format!("Failed to resolve GID for {name}"))?;
+                    Ok(entry.gid.as_raw())
+                },
+            )
+            .map(Gid::new),
         _ => todo!(),
-    })
+    }
+}
+
+fn resolve_uid<'entry>(
+    user: &'entry systemd_tmpfiles::Id,
+    id_cache: &mut IdCache<'entry>,
+) -> anyhow::Result<Uid> {
+    match user {
+        systemd_tmpfiles::Id::Caller { new_only: _ } => Ok(Uid::new(0)),
+        systemd_tmpfiles::Id::Id { id, new_only: _ } => Ok(Uid::new(*id)),
+        systemd_tmpfiles::Id::Name { name, new_only: _ } => id_cache
+            .lookup(
+                IdCacheKey::User(name.as_str()),
+                |name: &str| -> anyhow::Result<u32> {
+                    let entry = nix::unistd::User::from_name(name)
+                        .with_context(|| format!("Failed to resolve UID for {name}"))?
+                        .with_context(|| format!("Failed to resolve UID for {name}"))?;
+                    Ok(entry.uid.as_raw())
+                },
+            )
+            .map(Uid::new),
+        _ => todo!(),
+    }
 }

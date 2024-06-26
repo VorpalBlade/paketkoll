@@ -31,7 +31,7 @@ pub(crate) struct RegularFileSystemd {
     pub mode: Mode,
     pub owner: Uid,
     pub group: Gid,
-    pub size: u64,
+    pub size: Option<u64>,
     pub checksum: Checksum,
 }
 
