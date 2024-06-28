@@ -93,7 +93,7 @@ where
         let line = line?;
         let line = MTreeLine::from_bytes(&line)?;
         Ok(match line {
-            MTreeLine::Blank | MTreeLine::Comment(_) => None,
+            MTreeLine::Blank | MTreeLine::Comment => None,
             MTreeLine::Special(SpecialKind::Set, keywords) => {
                 self.default_params.set_list(keywords.into_iter());
                 None

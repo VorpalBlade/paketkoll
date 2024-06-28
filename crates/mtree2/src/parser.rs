@@ -11,7 +11,7 @@ pub enum MTreeLine<'a> {
     /// Blank lines are ignored.
     Blank,
     /// Lines starting with a '#' are ignored.
-    Comment(&'a [u8]),
+    Comment,
     /// Special commands (starting with '/') alter the behavior of later entries.
     Special(SpecialKind, Vec<Keyword<'a>>),
     /// If the first word does not contain a '/', it is a file in the current
@@ -36,7 +36,7 @@ impl<'a> MTreeLine<'a> {
         };
         // Comment
         if first[0] == b'#' {
-            return Ok(MTreeLine::Comment(input));
+            return Ok(MTreeLine::Comment);
         }
         // DotDot
         if first == b".." {
