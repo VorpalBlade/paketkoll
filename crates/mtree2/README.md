@@ -16,7 +16,7 @@ A library for iterating through entries of an mtree.
 ## Examples
 
 ```rust
-use mtree::MTree;
+use mtree2::MTree;
 use std::time::SystemTime;
 
 // We're going to load data from a string so this example with pass doctest,
@@ -38,7 +38,7 @@ for entry in entries {
     // We can print out a human-readable copy of the entry
     println!("{}", entry);
     // Let's check that if there is a modification time, it's in the past
-    if let Some(time) = entry.params.time {
+    if let Some(time) = entry.time() {
         assert!(time < SystemTime::now());
     }
     // We might also want to take a checksum of the file, and compare it to the digests
