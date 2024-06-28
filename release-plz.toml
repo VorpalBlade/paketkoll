@@ -2,17 +2,20 @@
 git_release_enable = false
 
 [[package]]
-name = "paketkoll_core"
-publish_features = ["arch_linux", "debian", "serde"]
+name = "mtree2"
 
 [[package]]
-name = "systemd_tmpfiles"
+name = "paketkoll_core"
+publish_features = ["arch_linux", "debian", "serde"]
 
 [[package]]
 name = "paketkoll"
 # We only want GH releases for the binary
 git_release_enable = true
 git_release_type = "auto"
+
+[[package]]
+name = "systemd_tmpfiles"
 
 [changelog]
 body = """
@@ -48,13 +51,13 @@ commit_preprocessors = [
 ]
 
 commit_parsers = [
-    { message = "^feat", group = "<!-- 0 -->🚀 Shiny new things (features)" },
-    { message = "^fix", group = "<!-- 1 -->🐛 No longer broken (bug fixes)" },
-    { message = "^docs?", group = "<!-- 3 -->📚 Things to read (documentation)" },
-    { message = "^perf", group = "<!-- 4 -->⚡ Go faster! (performance)" },
-    { message = "^refactor", group = "<!-- 2 -->🚜 Now more maintainable (refactor)" },
-    { message = "^style", group = "<!-- 5 -->🎨 Now easier to read (styling)" },
-    { message = "^test", group = "<!-- 6 -->🧪 Now we know (testing)" },
+    { message = "^feat", group = "<!-- 0 -->🚀 Features" },
+    { message = "^fix", group = "<!-- 1 -->🐛 Bug fixes" },
+    { message = "^docs?", group = "<!-- 3 -->📚 Documentation" },
+    { message = "^perf", group = "<!-- 4 -->⚡ Performance improvements" },
+    { message = "^refactor", group = "<!-- 2 -->🚜 Refactoring" },
+    { message = "^style", group = "<!-- 5 -->🎨 Styling" },
+    { message = "^test", group = "<!-- 6 -->🧪 Testing" },
     { message = "^(churn|chore)\\(release\\): prepare for", skip = true },
     { message = "^(churn|chore)\\(deps.*\\)", skip = true },
     { message = "^(churn|chore)\\(pr\\)", skip = true },
