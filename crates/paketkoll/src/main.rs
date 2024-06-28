@@ -92,7 +92,7 @@ fn run_file_checks(cli: &Cli) -> Result<Exit, anyhow::Error> {
 
     let key_extractor = |(pkg, issue): &(Option<PackageRef>, Issue)| {
         (
-            pkg.and_then(|e| interner.try_resolve(&e.as_interner_ref())),
+            pkg.and_then(|e| e.try_to_str(&interner)),
             issue.path().to_path_buf(),
         )
     };

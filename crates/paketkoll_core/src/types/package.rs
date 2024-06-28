@@ -28,6 +28,14 @@ macro_rules! intern_newtype {
             pub fn to_str<'interner>(&self, interner: &'interner Interner) -> &'interner str {
                 interner.resolve(&self.as_interner_ref())
             }
+
+            /// Convert to a string
+            pub fn try_to_str<'interner>(
+                &self,
+                interner: &'interner Interner,
+            ) -> Option<&'interner str> {
+                interner.try_resolve(&self.as_interner_ref())
+            }
         }
     };
 }
@@ -115,10 +123,11 @@ impl PackageInterned {
     /// Convert to direct representation
     pub fn into_direct(self, interner: &Interner) -> PackageDirect {
         PackageDirect {
-            name: interner.resolve(&self.name.as_interner_ref()).into(),
+            name: self.name.to_str(interner).into(),
             architecture: self
                 .architecture
-                .map(|arch| interner.resolve(&arch.as_interner_ref()).into()),
+                .and_then(|arch| arch.try_to_str(interner))
+                .map(Into::into),
             version: self.version,
             desc: self.desc,
             depends: self
@@ -129,7 +138,7 @@ impl PackageInterned {
             provides: self
                 .provides
                 .into_iter()
-                .map(|pkg| interner.resolve(&pkg.as_interner_ref()).into())
+                .flat_map(|pkg| pkg.try_to_str(interner).map(Into::into))
                 .collect(),
             reason: self.reason,
             status: self.status,
@@ -175,14 +184,14 @@ impl Dependency<PackageRef> {
     /// Format using string interner
     pub fn format(&self, interner: &Interner) -> String {
         match self {
-            Dependency::Single(pkg) => interner.resolve(&pkg.as_interner_ref()).to_string(),
+            Dependency::Single(pkg) => pkg.to_str(interner).to_string(),
             Dependency::Disjunction(packages) => {
                 let mut out = String::new();
                 for (idx, pkg) in packages.iter().enumerate() {
                     if idx > 0 {
                         out.push_str(" | ");
                     }
-                    out.push_str(interner.resolve(&pkg.as_interner_ref()));
+                    out.push_str(pkg.to_str(interner));
                 }
                 out
             }
@@ -192,13 +201,11 @@ impl Dependency<PackageRef> {
     #[cfg(feature = "serde")]
     fn to_direct(&self, interner: &Interner) -> Dependency<CompactString> {
         match self {
-            Dependency::Single(pkg) => {
-                Dependency::Single(interner.resolve(&pkg.as_interner_ref()).into())
-            }
+            Dependency::Single(pkg) => Dependency::Single(pkg.to_str(interner).into()),
             Dependency::Disjunction(packages) => Dependency::Disjunction(
                 packages
                     .iter()
-                    .map(|pkg| interner.resolve(&pkg.as_interner_ref()).into())
+                    .map(|pkg| pkg.to_str(interner).into())
                     .collect(),
             ),
         }

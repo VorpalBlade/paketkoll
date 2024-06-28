@@ -115,12 +115,10 @@ impl PackageFilter {
     pub(crate) fn should_include_interned(&self, package: PackageRef, interner: &Interner) -> bool {
         match self {
             PackageFilter::Everything => true,
-            PackageFilter::FilterFunction(f) => {
-                match f(interner.resolve(&package.as_interner_ref())) {
-                    FilterAction::Include => true,
-                    FilterAction::Exclude => false,
-                }
-            }
+            PackageFilter::FilterFunction(f) => match f(package.to_str(interner)) {
+                FilterAction::Include => true,
+                FilterAction::Exclude => false,
+            },
         }
     }
 }

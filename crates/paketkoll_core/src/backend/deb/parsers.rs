@@ -167,8 +167,7 @@ pub(super) fn parse_status(
             let ctx = || {
                 format!(
                     "Error when processing package: {} (line: {line})",
-                    interner
-                        .try_resolve(&pkg.as_interner_ref())
+                    pkg.try_to_str(interner)
                         .expect("Package must be interned at this point")
                 )
             };
