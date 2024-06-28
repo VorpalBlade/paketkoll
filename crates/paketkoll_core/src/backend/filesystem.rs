@@ -16,9 +16,10 @@ use crate::{
     utils::MODE_MASK,
 };
 
-use crate::types::{Checksum, FileEntry, Gid, Issue, IssueKind, IssueVec, Mode, Uid};
+use crate::types::{FileEntry, Issue, IssueKind, IssueVec};
 
 use anyhow::{Context, Result};
+use paketkoll_types::files::{Checksum, Gid, Mode, Uid};
 
 /// Determine if a given file should be processed
 fn should_process(file: &FileEntry, config: &CommonFileCheckConfiguration) -> bool {
@@ -289,6 +290,7 @@ fn check_contents(
         #[cfg(feature = "__md5")]
         Checksum::Md5(ref expected) => {
             use md5::Digest;
+            use paketkoll_types::files::Checksum;
             let mut hasher = md5::Md5::new();
             loop {
                 match reader.read(&mut buffer) {
@@ -331,6 +333,12 @@ fn check_contents(
                     expected: expected_checksum.clone(),
                 });
             }
+        }
+        _ => {
+            log::error!("Checksum {expected_checksum} is of an unsupported type");
+            issues.push(IssueKind::FsCheckError(Box::new(anyhow::anyhow!(
+                "Unsupported checksum type"
+            ))));
         }
     }
 

@@ -34,7 +34,7 @@ systemd_tmpfiles = ["__sha256", "dep:systemd_tmpfiles", "dep:nix"]
 debian = ["__md5", "dep:dashmap", "dashmap/rayon"]
 
 # Include support for serde on public datatypes
-serde = ["dep:serde", "bitflags/serde", "smallvec/serde", "compact_str/serde"]
+serde = ["dep:serde", "bitflags/serde", "smallvec/serde", "compact_str/serde", "paketkoll_types/serde"]
 
 # Internal feature: Enable MD5 support
 __md5 = ["dep:md-5"]
@@ -66,6 +66,7 @@ md-5 = { workspace = true, optional = true }
 mtree2 = { version = "0.6.1", path = "../mtree2", optional = true }
 nix = { workspace = true, features = ["user"], optional = true }
 num_cpus = { workspace = true }
+paketkoll_types = { version = "0.1.0", path = "../paketkoll_types" }
 phf = { workspace = true, features = ["macros"] }
 rayon = { workspace = true }
 regex = { workspace = true }

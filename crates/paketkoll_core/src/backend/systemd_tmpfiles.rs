@@ -11,12 +11,13 @@ use std::{
 use ahash::AHashMap;
 use anyhow::Context;
 use compact_str::CompactString;
+use paketkoll_types::files::{Checksum, Gid, Mode, Uid};
 use systemd_tmpfiles::specifier::Resolve;
 
 use crate::{
     types::{
-        Checksum, DeviceNode, DeviceType, Directory, Fifo, FileFlags, Gid, Mode, Permissions,
-        Properties, RegularFile, RegularFileBasic, RegularFileSystemd, Symlink, Uid,
+        DeviceNode, DeviceType, Directory, Fifo, FileFlags, Permissions, Properties, RegularFile,
+        RegularFileBasic, RegularFileSystemd, Symlink,
     },
     utils::{sha256_buffer, sha256_readable, MODE_MASK},
 };
@@ -47,7 +48,7 @@ impl Name for SystemdTmpfiles {
 impl Files for SystemdTmpfiles {
     fn files(
         &self,
-        _interner: &crate::types::Interner,
+        _interner: &paketkoll_types::intern::Interner,
     ) -> anyhow::Result<Vec<crate::types::FileEntry>> {
         // Get the entire config from sytemd-tmpfiles
         let cmd = std::process::Command::new("systemd-tmpfiles")

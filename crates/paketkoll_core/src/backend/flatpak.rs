@@ -30,7 +30,7 @@ impl Name for Flatpak {
 impl Packages for Flatpak {
     fn packages(
         &self,
-        interner: &crate::types::Interner,
+        interner: &paketkoll_types::intern::Interner,
     ) -> anyhow::Result<Vec<crate::types::PackageInterned>> {
         let cmd = Command::new("flatpak")
             .arg("list")
@@ -58,7 +58,7 @@ impl Packages for Flatpak {
 
 fn parse_flatpak_output(
     output: &str,
-    interner: &crate::types::Interner,
+    interner: &paketkoll_types::intern::Interner,
 ) -> Result<Vec<crate::types::PackageInterned>, anyhow::Error> {
     let mut packages = Vec::new();
 
@@ -85,10 +85,10 @@ fn parse_flatpak_output(
 
         // Build package struct
         let package = crate::types::Package {
-            name: PackageRef(interner.get_or_intern(parts[2])),
+            name: PackageRef::get_or_intern(interner, parts[2]),
             version: version.into(),
             desc,
-            architecture: Some(ArchitectureRef(interner.get_or_intern(arch))),
+            architecture: Some(ArchitectureRef::get_or_intern(interner, arch)),
             depends: vec![],
             provides: vec![],
             reason: None,
@@ -110,7 +110,7 @@ mod tests {
 
     #[test]
     fn test_parse_flatpak_output() {
-        let interner = crate::types::Interner::default();
+        let interner = paketkoll_types::intern::Interner::default();
         let output = indoc::indoc! {
             "com.github.tchx84.Flatseal/x86_64/stable	flathub	Flatseal	2.2.0	Manage Flatpak permissions	current
             org.fedoraproject.MediaWriter/x86_64/stable	flathub	Fedora Media Writer	5.1.1	A tool to create a live USB drive with an edition of Fedora	current
@@ -133,10 +133,10 @@ mod tests {
             packages,
             vec![
                 Package {
-                    name: PackageRef(interner.get_or_intern("Flatseal")),
+                    name: PackageRef::get_or_intern(&interner, "Flatseal"),
                     version: "2.2.0".into(),
                     desc: Some("Manage Flatpak permissions".into()),
-                    architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
+                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
                     reason: None,
@@ -144,12 +144,12 @@ mod tests {
                     id: Some("com.github.tchx84.Flatseal/x86_64/stable".into()),
                 },
                 Package {
-                    name: PackageRef(interner.get_or_intern("Fedora Media Writer")),
+                    name: PackageRef::get_or_intern(&interner, "Fedora Media Writer"),
                     version: "5.1.1".into(),
                     desc: Some(
                         "A tool to create a live USB drive with an edition of Fedora".into()
                     ),
-                    architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
+                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
                     reason: None,
@@ -157,10 +157,10 @@ mod tests {
                     id: Some("org.fedoraproject.MediaWriter/x86_64/stable".into()),
                 },
                 Package {
-                    name: PackageRef(interner.get_or_intern("Freedesktop Platform")),
+                    name: PackageRef::get_or_intern(&interner, "Freedesktop Platform"),
                     version: "23.08.19".into(),
                     desc: Some("Runtime platform for applications".into()),
-                    architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
+                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
                     reason: None,
@@ -168,10 +168,10 @@ mod tests {
                     id: Some("org.freedesktop.Platform/x86_64/23.08".into()),
                 },
                 Package {
-                    name: PackageRef(interner.get_or_intern("Mesa")),
+                    name: PackageRef::get_or_intern(&interner, "Mesa"),
                     version: "24.0.7".into(),
                     desc: Some("Mesa - The 3D Graphics Library".into()),
-                    architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
+                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
                     reason: None,
@@ -179,10 +179,10 @@ mod tests {
                     id: Some("org.freedesktop.Platform.GL.default/x86_64/23.08".into()),
                 },
                 Package {
-                    name: PackageRef(interner.get_or_intern("Mesa (Extra)")),
+                    name: PackageRef::get_or_intern(&interner, "Mesa (Extra)"),
                     version: "24.0.7".into(),
                     desc: Some("Mesa - The 3D Graphics Library".into()),
-                    architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
+                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
                     reason: None,
@@ -190,10 +190,10 @@ mod tests {
                     id: Some("org.freedesktop.Platform.GL.default/x86_64/23.08-extra".into()),
                 },
                 Package {
-                    name: PackageRef(interner.get_or_intern("nvidia-550-78")),
+                    name: PackageRef::get_or_intern(&interner, "nvidia-550-78"),
                     version: "".into(),
                     desc: None,
-                    architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
+                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
                     reason: None,
@@ -201,10 +201,10 @@ mod tests {
                     id: Some("org.freedesktop.Platform.GL.nvidia-550-78/x86_64/1.4".into()),
                 },
                 Package {
-                    name: PackageRef(interner.get_or_intern("Intel")),
+                    name: PackageRef::get_or_intern(&interner, "Intel"),
                     version: "".into(),
                     desc: None,
-                    architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
+                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
                     reason: None,
@@ -212,10 +212,10 @@ mod tests {
                     id: Some("org.freedesktop.Platform.VAAPI.Intel/x86_64/23.08".into()),
                 },
                 Package {
-                    name: PackageRef(interner.get_or_intern("openh264")),
+                    name: PackageRef::get_or_intern(&interner, "openh264"),
                     version: "2.1.0".into(),
                     desc: Some("OpenH264 Video Codec provided by Cisco Systems, Inc.".into()),
-                    architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
+                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
                     reason: None,
@@ -223,10 +223,10 @@ mod tests {
                     id: Some("org.freedesktop.Platform.openh264/x86_64/2.2.0".into()),
                 },
                 Package {
-                    name: PackageRef(interner.get_or_intern("openh264")),
+                    name: PackageRef::get_or_intern(&interner, "openh264"),
                     version: "2.4.1".into(),
                     desc: Some("OpenH264 Video Codec provided by Cisco Systems, Inc.".into()),
-                    architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
+                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
                     reason: None,
@@ -234,12 +234,13 @@ mod tests {
                     id: Some("org.freedesktop.Platform.openh264/x86_64/2.4.1".into()),
                 },
                 Package {
-                    name: PackageRef(
-                        interner.get_or_intern("GNOME Application Platform version 46")
+                    name: PackageRef::get_or_intern(
+                        &interner,
+                        "GNOME Application Platform version 46"
                     ),
                     version: "".into(),
                     desc: Some("Shared libraries used by GNOME applications".into()),
-                    architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
+                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
                     reason: None,
@@ -247,10 +248,10 @@ mod tests {
                     id: Some("org.gnome.Platform/x86_64/46".into()),
                 },
                 Package {
-                    name: PackageRef(interner.get_or_intern("Adwaita dark GTK theme")),
+                    name: PackageRef::get_or_intern(&interner, "Adwaita dark GTK theme"),
                     version: "".into(),
                     desc: Some("Dark variant of the Adwaita GTK theme".into()),
-                    architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
+                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
                     reason: None,
@@ -258,10 +259,10 @@ mod tests {
                     id: Some("org.gtk.Gtk3theme.Adwaita-dark/x86_64/3.22".into()),
                 },
                 Package {
-                    name: PackageRef(interner.get_or_intern("Breeze GTK theme")),
+                    name: PackageRef::get_or_intern(&interner, "Breeze GTK theme"),
                     version: "6.0.5".into(),
                     desc: Some("Breeze GTK theme matching the KDE Breeze theme".into()),
-                    architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
+                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
                     reason: None,
@@ -269,10 +270,10 @@ mod tests {
                     id: Some("org.gtk.Gtk3theme.Breeze/x86_64/3.22".into()),
                 },
                 Package {
-                    name: PackageRef(interner.get_or_intern("Adwaita theme")),
+                    name: PackageRef::get_or_intern(&interner, "Adwaita theme"),
                     version: "".into(),
                     desc: Some("Adwaita widget theme matching the GNOME adwaita theme".into()),
-                    architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
+                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
                     reason: None,
@@ -280,10 +281,10 @@ mod tests {
                     id: Some("org.kde.KStyle.Adwaita/x86_64/6.6".into()),
                 },
                 Package {
-                    name: PackageRef(interner.get_or_intern("KDE Application Platform")),
+                    name: PackageRef::get_or_intern(&interner, "KDE Application Platform"),
                     version: "".into(),
                     desc: Some("Shared libraries used by KDE applications".into()),
-                    architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
+                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
                     reason: None,

@@ -9,13 +9,14 @@ use anyhow::Context;
 use dashmap::DashMap;
 use ignore::{overrides::OverrideBuilder, Match, WalkBuilder, WalkState};
 
-use crate::types::{FileEntry, Interner, Issue, IssueKind, PackageIssue};
+use crate::types::{FileEntry, Issue, IssueKind, PackageIssue};
+use paketkoll_types::intern::Interner;
 use rayon::prelude::*;
 
 /// Check file system for differences using the given configuration
 pub fn check_installed_files(
     config: &crate::config::CommonFileCheckConfiguration,
-) -> anyhow::Result<(crate::types::Interner, Vec<PackageIssue>)> {
+) -> anyhow::Result<(paketkoll_types::intern::Interner, Vec<PackageIssue>)> {
     let backend = config
         .common
         .backend
@@ -60,7 +61,7 @@ pub fn check_installed_files(
 pub fn check_all_files(
     common_cfg: &crate::config::CommonFileCheckConfiguration,
     unexpected_cfg: &crate::config::CheckAllFilesConfiguration,
-) -> anyhow::Result<(crate::types::Interner, Vec<PackageIssue>)> {
+) -> anyhow::Result<(paketkoll_types::intern::Interner, Vec<PackageIssue>)> {
     // Collect distro files
     let backend = common_cfg
         .common

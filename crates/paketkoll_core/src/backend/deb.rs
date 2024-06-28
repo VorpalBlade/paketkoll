@@ -6,14 +6,14 @@ use std::fs::{DirEntry, File};
 use std::io::BufReader;
 use std::path::PathBuf;
 
+use crate::config::PackageFilter;
+use crate::types::{FileEntry, PackageRef, Properties};
 use anyhow::Context;
 use bstr::ByteSlice;
 use bstr::ByteVec;
 use dashmap::DashMap;
+use paketkoll_types::intern::Interner;
 use rayon::prelude::*;
-
-use crate::config::PackageFilter;
-use crate::types::{FileEntry, Interner, PackageRef, Properties};
 
 use super::{Files, FullBackend, Name, Packages};
 
@@ -66,7 +66,7 @@ impl Name for Debian {
 impl Files for Debian {
     fn files(
         &self,
-        interner: &crate::types::Interner,
+        interner: &paketkoll_types::intern::Interner,
     ) -> anyhow::Result<Vec<crate::types::FileEntry>> {
         log::debug!(target: "paketkoll_core::backend::deb", "Loading packages");
         let packages_files: Vec<_> = get_package_files(interner)?.collect();
@@ -166,7 +166,7 @@ fn process_file(interner: &Interner, entry: &DirEntry) -> anyhow::Result<Option<
 
     let result = match file_name.rsplit_once_str(b".") {
         Some((package_name, extension)) => {
-            let package_ref = PackageRef(interner.get_or_intern(package_name.to_str_lossy()));
+            let package_ref = PackageRef::get_or_intern(interner, package_name.to_str_lossy());
 
             match extension {
                 b"list" => {
@@ -194,7 +194,7 @@ fn process_file(interner: &Interner, entry: &DirEntry) -> anyhow::Result<Option<
 impl Packages for Debian {
     fn packages(
         &self,
-        interner: &crate::types::Interner,
+        interner: &paketkoll_types::intern::Interner,
     ) -> anyhow::Result<Vec<crate::types::PackageInterned>> {
         // Parse status
         log::debug!(target: "paketkoll_core::backend::deb", "Loading status to installed packages");

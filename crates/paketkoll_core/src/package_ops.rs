@@ -2,12 +2,15 @@
 
 use anyhow::Context;
 
-use crate::types::Interner;
+use paketkoll_types::intern::Interner;
 
 /// Get a list of all installed packages
 pub fn installed_packages(
     config: &crate::config::PackageListConfiguration,
-) -> anyhow::Result<(crate::types::Interner, Vec<crate::types::PackageInterned>)> {
+) -> anyhow::Result<(
+    paketkoll_types::intern::Interner,
+    Vec<crate::types::PackageInterned>,
+)> {
     let backend = config
         .common
         .backend

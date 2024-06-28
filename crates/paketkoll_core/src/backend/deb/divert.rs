@@ -2,9 +2,9 @@
 
 use std::{collections::BTreeMap, io::BufRead, path::PathBuf};
 
+use crate::types::PackageRef;
 use anyhow::Context;
-
-use crate::types::{Interner, PackageRef};
+use paketkoll_types::intern::Interner;
 
 /// Describes a diversion by dpkg-divert
 ///
@@ -48,13 +48,12 @@ fn parse_diversions(mut input: impl BufRead, interner: &Interner) -> anyhow::Res
                 .context("Failed to extract new path")?
                 .as_str()
                 .into();
-            let by_package = PackageRef(
-                interner.get_or_intern(
-                    captures
-                        .name("pkg")
-                        .context("Failed to extract package")?
-                        .as_str(),
-                ),
+            let by_package = PackageRef::get_or_intern(
+                interner,
+                captures
+                    .name("pkg")
+                    .context("Failed to extract package")?
+                    .as_str(),
             );
 
             let had_entry = results
@@ -85,7 +84,8 @@ mod tests {
     use std::collections::BTreeMap;
 
     use super::{parse_diversions, Diversion};
-    use crate::types::{Interner, PackageRef};
+    use crate::types::PackageRef;
+    use paketkoll_types::intern::Interner;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -107,35 +107,35 @@ mod tests {
                 "/usr/lib/python3.11/EXTERNALLY-MANAGED".into(),
                 Diversion {
                     new_path: "/usr/lib/python3.11/EXTERNALLY-MANAGED.orig".into(),
-                    by_package: PackageRef(interner.get_or_intern("raspberrypi-sys-mods")),
+                    by_package: PackageRef::get_or_intern(&interner, "raspberrypi-sys-mods"),
                 },
             ),
             (
                 "/usr/share/man/man1/parallel.1.gz".into(),
                 Diversion {
                     new_path: "/usr/share/man/man1/parallel.moreutils.1.gz".into(),
-                    by_package: PackageRef(interner.get_or_intern("parallel")),
+                    by_package: PackageRef::get_or_intern(&interner, "parallel"),
                 },
             ),
             (
                 "/usr/share/man/man1/sh.1.gz".into(),
                 Diversion {
                     new_path: "/usr/share/man/man1/sh.distrib.1.gz".into(),
-                    by_package: PackageRef(interner.get_or_intern("dash")),
+                    by_package: PackageRef::get_or_intern(&interner, "dash"),
                 },
             ),
             (
                 "/usr/bin/parallel".into(),
                 Diversion {
                     new_path: "/usr/bin/parallel.moreutils".into(),
-                    by_package: PackageRef(interner.get_or_intern("parallel")),
+                    by_package: PackageRef::get_or_intern(&interner, "parallel"),
                 },
             ),
             (
                 "/bin/sh".into(),
                 Diversion {
                     new_path: "/bin/sh.distrib".into(),
-                    by_package: PackageRef(interner.get_or_intern("dash")),
+                    by_package: PackageRef::get_or_intern(&interner, "dash"),
                 },
             ),
         ]);

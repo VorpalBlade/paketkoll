@@ -11,16 +11,16 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use super::{Files, FullBackend, Name, Packages};
 use crate::{
     config::PackageFilter,
-    types::{FileEntry, Interner, Package, PackageInterned, PackageRef},
+    types::{FileEntry, Package, PackageInterned, PackageRef},
 };
 use anyhow::{Context, Result};
 use dashmap::DashSet;
 use either::Either;
+use paketkoll_types::intern::Interner;
 use rayon::prelude::*;
-
-use super::{Files, FullBackend, Name, Packages};
 
 const NAME: &str = "Arch Linux";
 
@@ -76,7 +76,7 @@ impl Name for ArchLinux {
 impl Files for ArchLinux {
     fn files(
         &self,
-        interner: &crate::types::Interner,
+        interner: &paketkoll_types::intern::Interner,
     ) -> anyhow::Result<Vec<crate::types::FileEntry>> {
         let db_path: &Path = Path::new(&self.pacman_config.db_path);
 
@@ -118,7 +118,10 @@ impl Files for ArchLinux {
 }
 
 impl Packages for ArchLinux {
-    fn packages(&self, interner: &crate::types::Interner) -> anyhow::Result<Vec<PackageInterned>> {
+    fn packages(
+        &self,
+        interner: &paketkoll_types::intern::Interner,
+    ) -> anyhow::Result<Vec<PackageInterned>> {
         let db_root = Path::new(&self.pacman_config.db_path).join("local");
         let results: anyhow::Result<Vec<PackageInterned>> = std::fs::read_dir(db_root)
             .context("Failed to read pacman database directory")?

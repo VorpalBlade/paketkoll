@@ -13,11 +13,9 @@
 
 use std::io::BufRead;
 
+use crate::types::{ArchitectureRef, Dependency, InstallReason, PackageInstallStatus, PackageRef};
 use compact_str::CompactString;
-
-use crate::types::{
-    ArchitectureRef, Dependency, InstallReason, Interner, PackageInstallStatus, PackageRef,
-};
+use paketkoll_types::intern::Interner;
 
 impl crate::types::PackageInterned {
     pub(super) fn from_arch_linux_desc(
@@ -37,7 +35,7 @@ impl crate::types::PackageInterned {
             if line == "%NAME%\n" {
                 line.clear();
                 readable.read_line(&mut line)?;
-                name = Some(PackageRef(interner.get_or_intern(line.trim_end())));
+                name = Some(PackageRef::get_or_intern(interner, line.trim_end()));
             } else if line == "%VERSION%\n" {
                 line.clear();
                 readable.read_line(&mut line)?;
@@ -45,7 +43,7 @@ impl crate::types::PackageInterned {
             } else if line == "%ARCH%\n" {
                 line.clear();
                 readable.read_line(&mut line)?;
-                arch = Some(ArchitectureRef(interner.get_or_intern(line.trim_end())));
+                arch = Some(ArchitectureRef::get_or_intern(interner, line.trim_end()));
             } else if line == "%DESC%\n" {
                 line.clear();
                 readable.read_line(&mut line)?;
@@ -110,7 +108,7 @@ fn parse_package_list(
             .split_once('=')
             .map(|(name, _)| name)
             .unwrap_or(trimmed_line);
-        to_fill.push(PackageRef(interner.get_or_intern(pkg)));
+        to_fill.push(PackageRef::get_or_intern(interner, pkg));
         line.clear();
     }
     Ok(())
@@ -141,6 +139,7 @@ mod tests {
     use crate::types::Package;
 
     use super::*;
+    use paketkoll_types::intern::Interner;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -201,17 +200,17 @@ mod tests {
         assert_eq!(
             desc,
             Package {
-                name: PackageRef(interner.get_or_intern("library-subpackage")),
+                name: PackageRef::get_or_intern(&interner, "library-subpackage"),
                 version: "1.2.3-4".into(),
                 desc: Some("Some library".into()),
-                architecture: Some(ArchitectureRef(interner.get_or_intern("x86_64"))),
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                 depends: vec![
-                    Dependency::Single(PackageRef(interner.get_or_intern("gcc-libs"))),
-                    Dependency::Single(PackageRef(interner.get_or_intern("glibc"))),
-                    Dependency::Single(PackageRef(interner.get_or_intern("somelib"))),
-                    Dependency::Single(PackageRef(interner.get_or_intern("some-other-lib.so"))),
+                    Dependency::Single(PackageRef::get_or_intern(&interner, "gcc-libs")),
+                    Dependency::Single(PackageRef::get_or_intern(&interner, "glibc")),
+                    Dependency::Single(PackageRef::get_or_intern(&interner, "somelib")),
+                    Dependency::Single(PackageRef::get_or_intern(&interner, "some-other-lib.so")),
                 ],
-                provides: vec![PackageRef(interner.get_or_intern("libfoo.so")),],
+                provides: vec![PackageRef::get_or_intern(&interner, "libfoo.so"),],
                 reason: Some(InstallReason::Dependency),
                 status: PackageInstallStatus::Installed,
                 id: None,

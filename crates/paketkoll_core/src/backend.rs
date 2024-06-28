@@ -26,8 +26,10 @@ pub(crate) trait Files: Name {
     /// any available metadata such as checksums or timestamps about those files
     fn files(
         &self,
-        interner: &crate::types::Interner,
+        interner: &paketkoll_types::intern::Interner,
     ) -> anyhow::Result<Vec<crate::types::FileEntry>>;
+
+    // TODO: Get original file contents
 }
 
 /// A package manager backend
@@ -35,8 +37,10 @@ pub(crate) trait Packages: Name {
     /// Collect a list of all installed packages
     fn packages(
         &self,
-        interner: &crate::types::Interner,
+        interner: &paketkoll_types::intern::Interner,
     ) -> anyhow::Result<Vec<crate::types::PackageInterned>>;
+
+    // TODO: install, uninstall
 }
 
 // TODO: Operations to add
@@ -50,7 +54,10 @@ pub(crate) trait FullBackend: Files + Packages {
     /// Collect all data from the backend in one go.
     ///
     /// This can be possibly be more efficient for some backends as some work can be shared.
-    fn data(&self, interner: &crate::types::Interner) -> anyhow::Result<crate::types::BackendData> {
+    fn data(
+        &self,
+        interner: &paketkoll_types::intern::Interner,
+    ) -> anyhow::Result<crate::types::BackendData> {
         let results = rayon::join(|| self.packages(interner), || self.files(interner));
         let results = (results.0?, results.1?);
         Ok(crate::types::BackendData {

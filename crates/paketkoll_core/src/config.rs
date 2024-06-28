@@ -1,8 +1,8 @@
 //! Configuration of backend checks
 
+use crate::types::PackageRef;
+use paketkoll_types::intern::Interner;
 use std::fmt::Debug;
-
-use crate::types::{Interner, PackageRef};
 
 /// Which backend to use for the system package manager
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display)]

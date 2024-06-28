@@ -1,0 +1,32 @@
+[package]
+categories = ["filesystem", "os::linux-apis"]
+description = "Check installed distro files for changes (types library)"
+edition = "2021"
+keywords = ["package-management"]
+license = "MPL-2.0"
+name = "paketkoll_types"
+repository = "https://github.com/VorpalBlade/paketkoll"
+rust-version = "1.79.0"
+version = "0.1.0"
+
+[features]
+# Include support for serde on public datatypes
+serde = ["dep:faster-hex", "dep:serde", "smallvec/serde"]
+
+[dependencies]
+anyhow.workspace = true
+faster-hex = { workspace = true, features = ["std"], optional = true }
+lasso = { workspace = true, features = [
+    "ahasher",
+    "inline-more",
+    "multi-threaded",
+] }
+serde = { workspace = true, optional = true, features = ["derive"] }
+smallvec = { workspace = true, features = [
+    "const_generics",
+    "const_new",
+    "union",
+] }
+
+[lints]
+workspace = true

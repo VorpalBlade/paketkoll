@@ -2,14 +2,15 @@
 
 use std::io::BufRead;
 
+use crate::types::{
+    ArchitectureRef, Dependency, FileEntry, FileFlags, InstallReason, PackageBuilder,
+    PackageInterned, PackageRef, Properties, RegularFileBasic,
+};
 use anyhow::{bail, Context};
 use bstr::{io::BufReadExt, ByteSlice, ByteVec};
+use paketkoll_types::files::Checksum;
+use paketkoll_types::intern::Interner;
 use smallvec::SmallVec;
-
-use crate::types::{
-    ArchitectureRef, Checksum, Dependency, FileEntry, FileFlags, InstallReason, Interner,
-    PackageBuilder, PackageInterned, PackageRef, Properties, RegularFileBasic,
-};
 
 /// Load lines from a readable as `PathBufs`
 pub(super) fn parse_paths(
@@ -124,7 +125,7 @@ fn dependency_name(segment: &str, interner: &lasso::ThreadedRodeo) -> PackageRef
         Some((name, _)) => name,
         None => name,
     };
-    PackageRef(interner.get_or_intern(name))
+    PackageRef::get_or_intern(interner, name)
 }
 
 /// Parse /var/lib/dpkg/status for config files
@@ -157,7 +158,7 @@ pub(super) fn parse_status(
                 .as_mut()
                 .expect("Invalid internal state")
                 .reason(Some(InstallReason::Explicit));
-            let package_name = PackageRef(interner.get_or_intern(stripped));
+            let package_name = PackageRef::get_or_intern(interner, stripped);
             state = StatusParsingState::InPackage(package_name);
             package_builder
                 .as_mut()
@@ -213,7 +214,7 @@ pub(super) fn parse_status(
             package_builder
                 .as_mut()
                 .expect("Invalid internal state")
-                .architecture(Some(ArchitectureRef(interner.get_or_intern(stripped))));
+                .architecture(Some(ArchitectureRef::get_or_intern(interner, stripped)));
         } else if let Some(stripped) = line.strip_prefix("Description: ") {
             package_builder
                 .as_mut()
@@ -282,11 +283,11 @@ pub(super) fn parse_extended_status(
     while input.read_line(&mut buffer)? > 0 {
         let line = buffer.trim();
         if let Some(stripped) = line.strip_prefix("Package: ") {
-            let package = PackageRef(interner.get_or_intern(stripped));
+            let package = PackageRef::get_or_intern(interner, stripped);
             state = ExtendedStatusParsingState::Package { pkg: package };
         } else if let ExtendedStatusParsingState::Package { pkg } = state {
             if let Some(stripped) = line.strip_prefix("Architecture: ") {
-                let arch = ArchitectureRef(interner.get_or_intern(stripped));
+                let arch = ArchitectureRef::get_or_intern(interner, stripped);
                 state = ExtendedStatusParsingState::Architecture { pkg, arch };
             }
         } else if let ExtendedStatusParsingState::Architecture { pkg, arch } = state {
@@ -325,9 +326,10 @@ enum ExtendedStatusParsingState {
 mod tests {
     use super::{parse_md5sums, parse_paths, parse_status};
     use crate::types::{
-        ArchitectureRef, Checksum, Dependency, FileEntry, FileFlags, Interner, PackageRef,
-        Properties, RegularFileBasic,
+        ArchitectureRef, Dependency, FileEntry, FileFlags, PackageRef, Properties, RegularFileBasic,
     };
+    use paketkoll_types::files::Checksum;
+    use paketkoll_types::intern::Interner;
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -339,7 +341,7 @@ mod tests {
             /usr/share/doc/libc6/NEWS.gz"};
         let mut input = input.as_bytes();
         let interner = Interner::default();
-        let package_ref = PackageRef(interner.get_or_intern("libc6"));
+        let package_ref = PackageRef::get_or_intern(&interner, "libc6");
         let result = parse_paths(package_ref, &mut input).unwrap();
         assert_eq!(
             result,
@@ -395,7 +397,7 @@ mod tests {
             1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9d  /usr/share/doc/libc6/NEWS.gz"};
         let mut input = input.as_bytes();
         let interner = Interner::default();
-        let package_ref = PackageRef(interner.get_or_intern("libc6"));
+        let package_ref = PackageRef::get_or_intern(&interner, "libc6");
         let result = parse_md5sums(package_ref, &mut input).unwrap();
         assert_eq!(
             result,
@@ -457,19 +459,19 @@ mod tests {
         assert_eq!(
             result,
             vec![
-                Dependency::Single(PackageRef(interner.get_or_intern("libc6"))),
-                Dependency::Single(PackageRef(interner.get_or_intern("libice6"))),
-                Dependency::Single(PackageRef(interner.get_or_intern("libx11-6"))),
-                Dependency::Single(PackageRef(interner.get_or_intern("libxaw7"))),
-                Dependency::Single(PackageRef(interner.get_or_intern("libxcursor1"))),
-                Dependency::Single(PackageRef(interner.get_or_intern("libxext6"))),
-                Dependency::Single(PackageRef(interner.get_or_intern("libxi6"))),
-                Dependency::Single(PackageRef(interner.get_or_intern("libxmu6"))),
-                Dependency::Single(PackageRef(interner.get_or_intern("libxmuu1"))),
-                Dependency::Single(PackageRef(interner.get_or_intern("libxrandr2"))),
-                Dependency::Single(PackageRef(interner.get_or_intern("libxt6"))),
-                Dependency::Single(PackageRef(interner.get_or_intern("libxxf86vm1"))),
-                Dependency::Single(PackageRef(interner.get_or_intern("cpp"))),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "libc6")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "libice6")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "libx11-6")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "libxaw7")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "libxcursor1")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "libxext6")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "libxi6")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "libxmu6")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "libxmuu1")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "libxrandr2")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "libxt6")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "libxxf86vm1")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "cpp")),
             ]
         );
 
@@ -479,21 +481,21 @@ mod tests {
         assert_eq!(
             result,
             vec![
-                Dependency::Single(PackageRef(interner.get_or_intern("python3-attr"))),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "python3-attr")),
                 Dependency::Disjunction(vec![
-                    PackageRef(interner.get_or_intern("python3-importlib-metadata")),
-                    PackageRef(interner.get_or_intern("python3"))
+                    PackageRef::get_or_intern(&interner, "python3-importlib-metadata"),
+                    PackageRef::get_or_intern(&interner, "python3")
                 ]),
                 Dependency::Disjunction(vec![
-                    PackageRef(interner.get_or_intern("python3-importlib-resources")),
-                    PackageRef(interner.get_or_intern("python3"))
+                    PackageRef::get_or_intern(&interner, "python3-importlib-resources"),
+                    PackageRef::get_or_intern(&interner, "python3")
                 ]),
-                Dependency::Single(PackageRef(interner.get_or_intern("python3-pyrsistent"))),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "python3-pyrsistent")),
                 Dependency::Disjunction(vec![
-                    PackageRef(interner.get_or_intern("python3-typing-extensions")),
-                    PackageRef(interner.get_or_intern("python3"))
+                    PackageRef::get_or_intern(&interner, "python3-typing-extensions"),
+                    PackageRef::get_or_intern(&interner, "python3")
                 ]),
-                Dependency::Single(PackageRef(interner.get_or_intern("python3"))),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "python3")),
             ]
         );
     }
@@ -529,15 +531,13 @@ mod tests {
         assert_eq!(
             packages,
             vec![crate::types::Package {
-                name: PackageRef(interner.get_or_intern("libc6")),
-                architecture: Some(crate::types::ArchitectureRef(
-                    interner.get_or_intern("arm64")
-                )),
+                name: PackageRef::get_or_intern(&interner, "libc6"),
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "arm64")),
                 version: "2.36-9+rpt2+deb12u4".into(),
                 desc: Some("Very important library".into()),
                 depends: vec![
-                    Dependency::Single(PackageRef(interner.get_or_intern("libgcc"))),
-                    Dependency::Single(PackageRef(interner.get_or_intern("something-else"))),
+                    Dependency::Single(PackageRef::get_or_intern(&interner, "libgcc")),
+                    Dependency::Single(PackageRef::get_or_intern(&interner, "something-else")),
                 ],
                 provides: vec![],
                 reason: Some(crate::types::InstallReason::Explicit),
@@ -549,7 +549,7 @@ mod tests {
             files,
             vec![
                 FileEntry {
-                    package: Some(PackageRef(interner.get_or_intern("libc6"))),
+                    package: Some(PackageRef::get_or_intern(&interner, "libc6")),
                     path: "/etc/ld.so.conf".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
                         size: None,
@@ -560,7 +560,7 @@ mod tests {
                     seen: Default::default(),
                 },
                 FileEntry {
-                    package: Some(PackageRef(interner.get_or_intern("libc6"))),
+                    package: Some(PackageRef::get_or_intern(&interner, "libc6")),
                     path: "/etc/ld.so.conf.d/1.conf".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
                         size: None,
@@ -571,7 +571,7 @@ mod tests {
                     seen: Default::default(),
                 },
                 FileEntry {
-                    package: Some(PackageRef(interner.get_or_intern("libc6"))),
+                    package: Some(PackageRef::get_or_intern(&interner, "libc6")),
                     path: "/etc/ld.so.conf.d/2.conf".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
                         size: None,
@@ -582,7 +582,7 @@ mod tests {
                     seen: Default::default(),
                 },
                 FileEntry {
-                    package: Some(PackageRef(interner.get_or_intern("libc6"))),
+                    package: Some(PackageRef::get_or_intern(&interner, "libc6")),
                     path: "/etc/ld.so.conf.d/3.conf".into(),
                     properties: Properties::RegularFileBasic(RegularFileBasic {
                         size: None,
@@ -631,43 +631,43 @@ mod tests {
         let expected = ahash::AHashMap::from_iter(vec![
             (
                 (
-                    PackageRef(interner.get_or_intern("ncal")),
-                    ArchitectureRef(interner.get_or_intern("arm64")),
+                    PackageRef::get_or_intern(&interner, "ncal"),
+                    ArchitectureRef::get_or_intern(&interner, "arm64"),
                 ),
                 Some(crate::types::InstallReason::Dependency),
             ),
             (
                 (
-                    PackageRef(interner.get_or_intern("libqrencode4")),
-                    ArchitectureRef(interner.get_or_intern("arm64")),
+                    PackageRef::get_or_intern(&interner, "libqrencode4"),
+                    ArchitectureRef::get_or_intern(&interner, "arm64"),
                 ),
                 Some(crate::types::InstallReason::Dependency),
             ),
             (
                 (
-                    PackageRef(interner.get_or_intern("linux-image-6.6.28+rpt-rpi-2712")),
-                    ArchitectureRef(interner.get_or_intern("arm64")),
+                    PackageRef::get_or_intern(&interner, "linux-image-6.6.28+rpt-rpi-2712"),
+                    ArchitectureRef::get_or_intern(&interner, "arm64"),
                 ),
                 Some(crate::types::InstallReason::Dependency),
             ),
             (
                 (
-                    PackageRef(interner.get_or_intern("linux-image-6.6.28+rpt-rpi-v8")),
-                    ArchitectureRef(interner.get_or_intern("arm64")),
+                    PackageRef::get_or_intern(&interner, "linux-image-6.6.28+rpt-rpi-v8"),
+                    ArchitectureRef::get_or_intern(&interner, "arm64"),
                 ),
                 Some(crate::types::InstallReason::Dependency),
             ),
             (
                 (
-                    PackageRef(interner.get_or_intern("linux-headers-6.6.28+rpt-common-rpi")),
-                    ArchitectureRef(interner.get_or_intern("arm64")),
+                    PackageRef::get_or_intern(&interner, "linux-headers-6.6.28+rpt-common-rpi"),
+                    ArchitectureRef::get_or_intern(&interner, "arm64"),
                 ),
                 Some(crate::types::InstallReason::Dependency),
             ),
             (
                 (
-                    PackageRef(interner.get_or_intern("linux-headers-6.6.28+rpt-rpi-v8")),
-                    ArchitectureRef(interner.get_or_intern("arm64")),
+                    PackageRef::get_or_intern(&interner, "linux-headers-6.6.28+rpt-rpi-v8"),
+                    ArchitectureRef::get_or_intern(&interner, "arm64"),
                 ),
                 Some(crate::types::InstallReason::Dependency),
             ),

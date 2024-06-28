@@ -1,4 +1,4 @@
-//! Issue describes the difference between the system and package manger
+//! Issue describes the difference between the system and package manager
 
 use std::{
     fmt::Display,
@@ -6,9 +6,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use crate::files::{Checksum, Gid, Mode, Uid};
+use crate::intern::PackageRef;
 use smallvec::SmallVec;
-
-use super::{Checksum, Gid, Mode, Uid};
 
 /// Type for vector of issues.
 ///
@@ -16,9 +16,9 @@ use super::{Checksum, Gid, Mode, Uid};
 pub type IssueVec = SmallVec<[IssueKind; 1]>;
 
 /// A package reference and an associated issue
-pub type PackageIssue = (Option<super::PackageRef>, Issue);
+pub type PackageIssue = (Option<PackageRef>, Issue);
 
-// Type of an entry (used to report mismatches)
+/// Type of entry (used to report mismatches)
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]

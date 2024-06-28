@@ -877,6 +877,7 @@ dependencies = [
  "mtree2",
  "nix",
  "num_cpus",
+ "paketkoll_types",
  "phf",
  "pretty_assertions",
  "rayon",
@@ -888,6 +889,17 @@ dependencies = [
  "smallvec",
  "strum",
  "systemd_tmpfiles",
+]
+
+[[package]]
+name = "paketkoll_types"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "faster-hex",
+ "lasso",
+ "serde",
+ "smallvec",
 ]
 
 [[package]]
