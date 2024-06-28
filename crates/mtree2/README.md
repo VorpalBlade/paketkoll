@@ -1,5 +1,7 @@
 # mtree2
 
+[ [lib.rs] ] [ [crates.io] ]
+
 This is a fork of [mtree-rs](https://github.com/derekdreery/mtree-rs) fixing some issues and improving performance. Unfortunately the upstream
 has been dead apart from one comment, so a fork was neccesary.
 
@@ -47,3 +49,5 @@ for entry in entries {
 ```
 
 [mtree(5)]: https://www.freebsd.org/cgi/man.cgi?mtree(5)
+[crates.io]: https://crates.io/crates/mtree2
+[lib.rs]: https://lib.rs/crates/mtree2

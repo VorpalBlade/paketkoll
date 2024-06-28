@@ -7,7 +7,7 @@ license = "MPL-2.0"
 name = "paketkoll_core"
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.79.0"
-version = "0.4.0"
+version = "0.4.1"
 
     [package.metadata.docs.rs]
     default-target = "x86_64-unknown-linux-gnu"
@@ -63,7 +63,7 @@ lasso = { workspace = true, features = [
 libc = { workspace = true }
 log = { workspace = true }
 md-5 = { workspace = true, optional = true }
-mtree2 = { version = "0.6.0", path = "../mtree2", optional = true }
+mtree2 = { version = "0.6.1", path = "../mtree2", optional = true }
 nix = { workspace = true, features = ["user"] }
 num_cpus = { workspace = true }
 phf = { workspace = true, features = ["macros"] }
@@ -79,7 +79,7 @@ smallvec = { workspace = true, features = [
     "union",
 ] }
 strum = { workspace = true, features = ["derive"] }
-systemd_tmpfiles = { version = "0.1.0", path = "../systemd_tmpfiles", optional = true }
+systemd_tmpfiles = { version = "0.1.1", path = "../systemd_tmpfiles", optional = true }
 
 [dev-dependencies]
 indoc = { workspace = true }

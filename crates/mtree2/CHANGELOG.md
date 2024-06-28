@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 Keep in mind that this is only updated when releases are made and the file
 is generated automatically from commit messages.
 
+For a possibly more edited message focused on the binary please see the github
+releases.
+
+## [0.6.1] - 2024-06-28
+
+### 📚 Documentation
+
+- Fix example in README
+- Fix incorrect SPDX license expression for mtree2
+
 ## [0.6.0] - 2024-06-28
 
 ### Features

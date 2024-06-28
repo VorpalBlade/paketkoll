@@ -7,9 +7,21 @@ is generated automatically from commit messages.
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.4.1] - 2024-06-28
+
+### 🚀 Features
+
+- Extract vendored mtree code into a new mtree2 library
+- Include more info in issues
+- Improve systemd-tmpfiles backend parsing on duplicated entry
+
+### 📚 Documentation
+
+- Document some of the non-public code
+
 ## [0.4.0] - 2024-06-26
 
-### 🚀 Shiny new things (features)
+### 🚀 Features
 
 - Add file backend for systemd-tmpfiles.d to paketkoll
 - Add JSON output (implements [#3](https://github.com/VorpalBlade/paketkoll/pull/3))
@@ -17,7 +29,7 @@ releases.
 - Add package backend for Debian
 - Add listing of installed packages
 
-### 🐛 No longer broken (bug fixes)
+### 🐛 Bug fixes
 
 - Fix broken Debian status parsing
 - Fix Debian status parser (not all packages has description)
@@ -27,12 +39,12 @@ releases.
 
 - Refactor API of core crate
 
-### 📚 Things to read (documentation)
+### 📚 Documentation
 
 - Add MSRV policy
 - Add missing API docs
 
-### ⚡ Go faster! (performance)
+### ⚡ Performance
 
 - Improve Debian status parsing speed
 - Optimise mtree library for actual observed data patterns
@@ -50,7 +62,7 @@ releases.
 
 ## [0.3.1] - 2024-03-14
 
-### ⚡ Go faster! (performance)
+### ⚡ Performance
 
 - Save 20 ms on Arch Linux by switching to faster hex parsing
 
@@ -60,7 +72,7 @@ releases.
 
 ## [0.3.0] - 2024-03-10
 
-### 🚀 Shiny new things (features)
+### 🚀 Features
 
 - [**breaking**] Add scanning for unmanaged files
 
@@ -71,11 +83,11 @@ releases.
 
 ## [0.2.0] - 2024-02-29
 
-### 🚀 Shiny new things (features)
+### 🚀 Features
 
 - Ability to limit which crates to scan
 
-### 📚 Things to read (documentation)
+### 📚 Documentation
 
 - Add categories & keywords
 
@@ -85,13 +97,12 @@ releases.
 
 ## [0.1.1] - 2024-02-26
 
-### 🐛 No longer broken (bug fixes)
+### 🐛 Bug fixes
 
 - Fix nightly warnings
 - Temporary allow dead code
 - Disable doctest on vendored mtree
 
-### 📚 Things to read (documentation)
+### 📚 Documentation
 
 - Add links to README
-
