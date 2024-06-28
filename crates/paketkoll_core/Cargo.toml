@@ -28,7 +28,7 @@ arch_linux = [
     "dep:mtree2",
 ]
 
-systemd_tmpfiles = ["__sha256", "dep:systemd_tmpfiles"]
+systemd_tmpfiles = ["__sha256", "dep:systemd_tmpfiles", "dep:nix"]
 
 # Include support for the Debian backend
 debian = ["__md5", "dep:dashmap", "dashmap/rayon"]
@@ -64,7 +64,7 @@ libc = { workspace = true }
 log = { workspace = true }
 md-5 = { workspace = true, optional = true }
 mtree2 = { version = "0.6.1", path = "../mtree2", optional = true }
-nix = { workspace = true, features = ["user"] }
+nix = { workspace = true, features = ["user"], optional = true }
 num_cpus = { workspace = true }
 phf = { workspace = true, features = ["macros"] }
 rayon = { workspace = true }
