@@ -175,8 +175,9 @@ impl Properties {
 }
 
 /// Unix file mode (permissions)
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[repr(transparent)]
 pub struct Mode(pub u32);
 
 impl Mode {
@@ -192,8 +193,9 @@ impl std::fmt::Display for Mode {
 }
 
 /// A POSIX UID
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[repr(transparent)]
 pub struct Uid(pub u32);
 
 impl Uid {
@@ -209,8 +211,9 @@ impl std::fmt::Display for Uid {
 }
 
 /// A POSIX GID
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[repr(transparent)]
 pub struct Gid(pub u32);
 
 impl Gid {

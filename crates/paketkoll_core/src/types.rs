@@ -5,9 +5,10 @@ mod issue;
 mod package;
 
 pub(crate) use files::{
-    Checksum, DeviceNode, DeviceType, Directory, Fifo, FileEntry, FileFlags, Gid, Mode,
-    Permissions, Properties, RegularFile, RegularFileBasic, RegularFileSystemd, Symlink, Uid,
+    Checksum, DeviceNode, DeviceType, Directory, Fifo, FileEntry, FileFlags, Permissions,
+    Properties, RegularFile, RegularFileBasic, RegularFileSystemd, Symlink,
 };
+pub use files::{Gid, Mode, Uid};
 pub use issue::{EntryType, Issue, IssueKind, IssueVec, PackageIssue};
 
 pub use package::ArchitectureRef;
