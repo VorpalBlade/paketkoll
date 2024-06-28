@@ -8,10 +8,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::mtree::{self, MTree};
 use anyhow::Context;
 use dashmap::DashSet;
 use flate2::read::GzDecoder;
+use mtree2::{self, MTree};
 
 use crate::types::{
     Checksum, Directory, FileEntry, FileFlags, Gid, Mode, PackageRef, Properties, RegularFile,
@@ -72,12 +72,12 @@ fn parse_mtree<'input_data>(
 /// Convert a single entry from mtree to a [`FileEntry`]
 fn convert_mtree(
     pkg: PackageRef,
-    item: &mtree::Entry,
+    item: &mtree2::Entry,
     seen_directories: &DashSet<(PathBuf, Directory)>,
     backup_files: &BTreeSet<Vec<u8>>,
 ) -> Result<Option<FileEntry>, anyhow::Error> {
     Ok(match item.file_type() {
-        Some(mtree::FileType::Directory) => {
+        Some(mtree2::FileType::Directory) => {
             let dir = Directory {
                 owner: Uid::new(item.uid().context("No uid for dir")?),
                 group: Gid::new(item.gid().context("No gid for dir")?),
@@ -97,7 +97,7 @@ fn convert_mtree(
                 None
             }
         }
-        Some(mtree::FileType::File) => Some(FileEntry {
+        Some(mtree2::FileType::File) => Some(FileEntry {
             package: Some(pkg),
             path: extract_path(item),
             properties: Properties::RegularFile(RegularFile {
@@ -116,7 +116,7 @@ fn convert_mtree(
             source: super::NAME,
             seen: Default::default(),
         }),
-        Some(mtree::FileType::SymbolicLink) => Some(FileEntry {
+        Some(mtree2::FileType::SymbolicLink) => Some(FileEntry {
             package: Some(pkg),
             path: extract_path(item),
             properties: Properties::Symlink(Symlink {
@@ -128,10 +128,10 @@ fn convert_mtree(
             source: super::NAME,
             seen: Default::default(),
         }),
-        Some(mtree::FileType::BlockDevice)
-        | Some(mtree::FileType::CharacterDevice)
-        | Some(mtree::FileType::Fifo)
-        | Some(mtree::FileType::Socket)
+        Some(mtree2::FileType::BlockDevice)
+        | Some(mtree2::FileType::CharacterDevice)
+        | Some(mtree2::FileType::Fifo)
+        | Some(mtree2::FileType::Socket)
         | None => Some(FileEntry {
             package: Some(pkg),
             path: extract_path(item),
@@ -144,7 +144,7 @@ fn convert_mtree(
 }
 
 /// Extract the path from an mtree entry, they start with a . which we want to remove
-fn extract_path(item: &mtree::Entry) -> PathBuf {
+fn extract_path(item: &mtree2::Entry) -> PathBuf {
     let path = item.path();
     let as_bytes = path.as_os_str().as_encoded_bytes();
     if as_bytes[0] == b'.' {

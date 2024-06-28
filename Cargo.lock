@@ -755,6 +755,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "mtree2"
+version = "0.6.0"
+dependencies = [
+ "bitflags",
+ "faster-hex",
+ "memchr",
+]
+
+[[package]]
 name = "nix"
 version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -865,7 +874,7 @@ dependencies = [
  "libc",
  "log",
  "md-5",
- "memchr",
+ "mtree2",
  "nix",
  "num_cpus",
  "phf",

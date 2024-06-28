@@ -1,5 +1,5 @@
 //! Utility misc stuff
-use super::parser::{ParserError, ParserResult};
+use crate::parser::{ParserError, ParserResult};
 use std::{ffi::OsStr, os::unix::ffi::OsStrExt, time::Duration};
 
 /// Helper to parse a number from a slice of u8 in hexadecimal.

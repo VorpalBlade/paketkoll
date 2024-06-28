@@ -7,8 +7,8 @@
 //!
 //! # Examples
 //!
-//! ```no_compile
-//! use mtree::MTree;
+//! ```
+//! use mtree2::MTree;
 //! use std::time::{SystemTime, UNIX_EPOCH};
 //!
 //! // We're going to load data from a string so this example with pass doctest,

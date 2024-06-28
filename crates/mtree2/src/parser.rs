@@ -1,5 +1,5 @@
 //! Stuff for parsing mtree files.
-use super::{
+use crate::{
     util::{parse_time, FromDec, FromHex},
     Device,
 };

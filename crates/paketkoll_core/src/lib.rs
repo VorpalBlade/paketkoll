@@ -13,9 +13,3 @@ pub mod file_ops;
 pub mod package_ops;
 pub mod types;
 pub(crate) mod utils;
-
-/// Vendored dependency due to upstream being slow to accept PRs
-///
-/// We also need to allow dead code, since we don't use all functions from it.
-#[allow(dead_code)]
-mod mtree;

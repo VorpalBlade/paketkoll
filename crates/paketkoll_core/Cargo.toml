@@ -21,11 +21,11 @@ default = []
 
 # Include the Arch Linux backend
 arch_linux = [
-    #"dep:mtree",
     "__sha256",
     "dep:flate2",
     "dep:rust-ini",
     "dep:dashmap",
+    "dep:mtree2",
 ]
 
 systemd_tmpfiles = ["__sha256", "dep:systemd_tmpfiles"]
@@ -63,10 +63,9 @@ lasso = { workspace = true, features = [
 libc = { workspace = true }
 log = { workspace = true }
 md-5 = { workspace = true, optional = true }
-memchr = { workspace = true }
+mtree2 = { version = "0.6.0", path = "../mtree2", optional = true }
 nix = { workspace = true, features = ["user"] }
 num_cpus = { workspace = true }
-#mtree = { version = "0.5.0", optional = true }
 phf = { workspace = true, features = ["macros"] }
 rayon = { workspace = true }
 regex = { workspace = true }
