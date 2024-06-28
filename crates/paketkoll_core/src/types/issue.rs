@@ -1,10 +1,14 @@
 //! Issue describes the difference between the system and package manger
 
-use std::path::{Path, PathBuf};
+use std::{
+    fmt::Display,
+    os::unix::fs::FileTypeExt,
+    path::{Path, PathBuf},
+};
 
 use smallvec::SmallVec;
 
-use super::{Gid, Mode, Uid};
+use super::{Checksum, Gid, Mode, Uid};
 
 /// Type for vector of issues.
 ///
@@ -13,6 +17,63 @@ pub type IssueVec = SmallVec<[IssueKind; 1]>;
 
 /// A package reference and an associated issue
 pub type PackageIssue = (Option<super::PackageRef>, Issue);
+
+// Type of an entry (used to report mismatches)
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
+#[non_exhaustive]
+pub enum EntryType {
+    RegularFile,
+    Directory,
+    Symlink,
+    BlockDevice,
+    CharDevice,
+    Fifo,
+    Socket,
+    /// Anything except file, directory or symlink
+    Special,
+    /// Anything except a normal file (Debian really doesn't report much info)
+    Unknown,
+}
+
+impl From<std::fs::FileType> for EntryType {
+    fn from(value: std::fs::FileType) -> Self {
+        if value.is_dir() {
+            Self::Directory
+        } else if value.is_file() {
+            Self::RegularFile
+        } else if value.is_symlink() {
+            Self::Symlink
+        } else if value.is_block_device() {
+            Self::BlockDevice
+        } else if value.is_char_device() {
+            Self::CharDevice
+        } else if value.is_fifo() {
+            Self::Fifo
+        } else if value.is_socket() {
+            Self::Socket
+        } else {
+            panic!("Unknown file type {value:?}")
+        }
+    }
+}
+
+impl Display for EntryType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            EntryType::RegularFile => write!(f, "file"),
+            EntryType::Directory => write!(f, "directory"),
+            EntryType::Symlink => write!(f, "symlink"),
+            EntryType::BlockDevice => write!(f, "block device"),
+            EntryType::CharDevice => write!(f, "character device"),
+            EntryType::Fifo => write!(f, "FIFO"),
+            EntryType::Socket => write!(f, "socket"),
+            EntryType::Special => write!(f, "special file"),
+            EntryType::Unknown => write!(f, "unknown non-regular file"),
+        }
+    }
+}
 
 /// A found difference between the file system and the package database
 #[derive(Debug)]
@@ -58,18 +119,24 @@ impl Issue {
 pub enum IssueKind {
     /// Missing entity from file system
     Missing,
-    /// Entry on file system exists, but shouldn't
+    /// Entry on file system exists, but shouldn't (it is being actively removed)
     Exists,
     /// Extra unexpected entity on file system
     Unexpected,
     /// Failed to check for (or check contents of) entity due to permissions
     PermissionDenied,
     /// Type of entity was not as expected (e.g. file vs symlink)
-    TypeIncorrect,
+    TypeIncorrect {
+        actual: EntryType,
+        expected: EntryType,
+    },
     /// The file was not of the expected size
-    SizeIncorrect,
+    SizeIncorrect { actual: u64, expected: u64 },
     /// The contents of the file differ (different checksums)
-    ChecksumIncorrect,
+    ChecksumIncorrect {
+        actual: Checksum,
+        expected: Checksum,
+    },
     /// Both entity are symlinks, but point to different places
     SymlinkTarget { actual: PathBuf, expected: PathBuf },
     /// Ownership of file system entity differs
@@ -98,9 +165,16 @@ impl std::fmt::Display for IssueKind {
             IssueKind::Exists => write!(f, "unexpected file/directory/... (should be removed)")?,
             IssueKind::Unexpected => write!(f, "unexpected file")?,
             IssueKind::PermissionDenied => write!(f, "read error (Permission denied)")?,
-            IssueKind::TypeIncorrect => write!(f, "type mismatch")?,
-            IssueKind::SizeIncorrect => write!(f, "size mismatch")?,
-            IssueKind::ChecksumIncorrect => write!(f, "checksum mismatch")?,
+            IssueKind::TypeIncorrect { actual, expected } => {
+                write!(f, "type mismatch (expected {expected}, actual {actual})")?;
+            }
+            IssueKind::SizeIncorrect { actual, expected } => {
+                write!(f, "size mismatch (expected {expected}, actual {actual})")?;
+            }
+            IssueKind::ChecksumIncorrect { actual, expected } => write!(
+                f,
+                "checksum mismatch (expected {expected}, actual {actual})"
+            )?,
             IssueKind::SymlinkTarget { actual, expected } => write!(
                 f,
                 "symlink target mismatch (expected {expected:?}, actual {actual:?})"

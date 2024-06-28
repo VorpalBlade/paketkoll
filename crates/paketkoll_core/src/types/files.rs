@@ -233,12 +233,36 @@ pub(crate) struct Permissions {
     pub group: Gid,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+/// Represents a checksum of a file
+///
+/// Which checksum types are used depend on the feature flags.
+/// For example currently: Arch uses SHA256, and Debian uses MD5.
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
-pub(crate) enum Checksum {
+#[non_exhaustive]
+pub enum Checksum {
     #[cfg(feature = "__md5")]
+    #[cfg_attr(
+        feature = "serde",
+        serde(serialize_with = "crate::utils::buffer_to_hex")
+    )]
     Md5([u8; 16]),
     #[cfg(feature = "__sha256")]
+    #[cfg_attr(
+        feature = "serde",
+        serde(serialize_with = "crate::utils::buffer_to_hex")
+    )]
     Sha256([u8; 32]),
+}
+
+impl std::fmt::Display for Checksum {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            #[cfg(feature = "__md5")]
+            Self::Md5(value) => write!(f, "md5:{}", faster_hex::hex_string(value)),
+            #[cfg(feature = "__sha256")]
+            Self::Sha256(value) => write!(f, "sha256:{}", faster_hex::hex_string(value)),
+        }
+    }
 }

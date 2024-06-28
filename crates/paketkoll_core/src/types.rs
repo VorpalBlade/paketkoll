@@ -8,7 +8,7 @@ pub(crate) use files::{
     Checksum, DeviceNode, DeviceType, Directory, Fifo, FileEntry, FileFlags, Gid, Mode,
     Permissions, Properties, RegularFile, RegularFileBasic, RegularFileSystemd, Symlink, Uid,
 };
-pub use issue::{Issue, IssueKind, IssueVec, PackageIssue};
+pub use issue::{EntryType, Issue, IssueKind, IssueVec, PackageIssue};
 
 pub use package::ArchitectureRef;
 pub(crate) use package::BackendData;

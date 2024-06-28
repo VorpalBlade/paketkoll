@@ -10,7 +10,7 @@ use std::{
 use crate::{
     config::{CommonFileCheckConfiguration, ConfigFiles},
     types::{
-        DeviceNode, DeviceType, Directory, Fifo, FileFlags, Properties, RegularFile,
+        DeviceNode, DeviceType, Directory, EntryType, Fifo, FileFlags, Properties, RegularFile,
         RegularFileBasic, RegularFileSystemd, Symlink,
     },
     utils::MODE_MASK,
@@ -40,7 +40,10 @@ pub(crate) fn check_file(
         Ok(metadata) => match &file.properties {
             Properties::RegularFileBasic(RegularFileBasic { size, checksum }) => {
                 if !metadata.is_file() {
-                    issues.push(IssueKind::TypeIncorrect);
+                    issues.push(IssueKind::TypeIncorrect {
+                        actual: metadata.file_type().into(),
+                        expected: EntryType::RegularFile,
+                    });
                 }
                 if should_process(file, config) {
                     check_contents(
@@ -62,7 +65,10 @@ pub(crate) fn check_file(
                 checksum,
             }) => {
                 if !metadata.is_file() {
-                    issues.push(IssueKind::TypeIncorrect);
+                    issues.push(IssueKind::TypeIncorrect {
+                        actual: metadata.file_type().into(),
+                        expected: EntryType::RegularFile,
+                    });
                 }
                 if should_process(file, config) {
                     check_permissions(&mut issues, &metadata, *owner, *group, *mode);
@@ -86,7 +92,10 @@ pub(crate) fn check_file(
                 checksum,
             }) => {
                 if !metadata.is_file() {
-                    issues.push(IssueKind::TypeIncorrect);
+                    issues.push(IssueKind::TypeIncorrect {
+                        actual: metadata.file_type().into(),
+                        expected: EntryType::RegularFile,
+                    });
                 }
                 if should_process(file, config) {
                     check_permissions(&mut issues, &metadata, *owner, *group, *mode);
@@ -108,7 +117,10 @@ pub(crate) fn check_file(
             }) => {
                 check_ownership(&mut issues, &metadata, *owner, *group);
                 if !metadata.is_symlink() {
-                    issues.push(IssueKind::TypeIncorrect);
+                    issues.push(IssueKind::TypeIncorrect {
+                        actual: metadata.file_type().into(),
+                        expected: EntryType::Symlink,
+                    });
                 } else {
                     match std::fs::read_link(&file.path) {
                         Ok(actual_target) => {
@@ -127,14 +139,20 @@ pub(crate) fn check_file(
             }
             Properties::Directory(Directory { mode, owner, group }) => {
                 if !metadata.is_dir() {
-                    issues.push(IssueKind::TypeIncorrect);
+                    issues.push(IssueKind::TypeIncorrect {
+                        actual: metadata.file_type().into(),
+                        expected: EntryType::Directory,
+                    });
                 }
                 check_permissions(&mut issues, &metadata, *owner, *group, *mode);
                 // We don't do anything with mtime here currently
             }
             Properties::Fifo(Fifo { mode, owner, group }) => {
                 if !metadata.file_type().is_fifo() {
-                    issues.push(IssueKind::TypeIncorrect);
+                    issues.push(IssueKind::TypeIncorrect {
+                        actual: metadata.file_type().into(),
+                        expected: EntryType::Fifo,
+                    });
                 }
                 check_permissions(&mut issues, &metadata, *owner, *group, *mode);
             }
@@ -151,7 +169,13 @@ pub(crate) fn check_file(
                     DeviceType::Char => metadata.file_type().is_char_device(),
                 };
                 if !is_expected_type {
-                    issues.push(IssueKind::TypeIncorrect);
+                    issues.push(IssueKind::TypeIncorrect {
+                        actual: metadata.file_type().into(),
+                        expected: match device_type {
+                            DeviceType::Block => EntryType::BlockDevice,
+                            DeviceType::Char => EntryType::CharDevice,
+                        },
+                    });
                 } else {
                     // Only check major/minor if we have a device node
                     let rdev = metadata.rdev();
@@ -171,7 +195,10 @@ pub(crate) fn check_file(
             Properties::Special => {
                 // Should be something other than dir, symlink or file:
                 if metadata.is_dir() || metadata.is_file() || metadata.is_symlink() {
-                    issues.push(IssueKind::TypeIncorrect);
+                    issues.push(IssueKind::TypeIncorrect {
+                        actual: metadata.file_type().into(),
+                        expected: EntryType::Special,
+                    });
                 }
             }
             Properties::Removed => {
@@ -181,7 +208,10 @@ pub(crate) fn check_file(
             Properties::Unknown => {
                 // Should be something other than a file (but Debian doesn't tell us what)
                 if metadata.is_file() {
-                    issues.push(IssueKind::TypeIncorrect);
+                    issues.push(IssueKind::TypeIncorrect {
+                        actual: metadata.file_type().into(),
+                        expected: EntryType::Unknown,
+                    });
                 }
             }
             Properties::Permissions(crate::types::Permissions { mode, owner, group }) => {
@@ -225,7 +255,10 @@ fn check_contents(
     // Fast path with size
     if let Some(size) = expected_size {
         if size != actual_metadata.len() {
-            issues.push(IssueKind::SizeIncorrect);
+            issues.push(IssueKind::SizeIncorrect {
+                actual: actual_metadata.len(),
+                expected: size,
+            });
             return Ok(());
         }
     }
@@ -271,7 +304,10 @@ fn check_contents(
             hasher.finalize_into(&mut actual);
 
             if actual[..] != expected[..] {
-                issues.push(IssueKind::ChecksumIncorrect);
+                issues.push(IssueKind::ChecksumIncorrect {
+                    actual: Checksum::Md5(actual[..].try_into().expect("Invalid length")),
+                    expected: expected_checksum.clone(),
+                });
             }
         }
         #[cfg(feature = "__sha256")]
@@ -290,7 +326,10 @@ fn check_contents(
             let actual = hasher.finish();
 
             if actual.as_ref() != expected {
-                issues.push(IssueKind::ChecksumIncorrect);
+                issues.push(IssueKind::ChecksumIncorrect {
+                    actual: Checksum::Sha256(actual.as_ref().try_into().expect("Invalid length")),
+                    expected: expected_checksum.clone(),
+                });
             }
         }
     }
