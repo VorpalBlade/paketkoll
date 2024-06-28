@@ -64,10 +64,7 @@ impl Name for Debian {
 }
 
 impl Files for Debian {
-    fn files(
-        &self,
-        interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<Vec<crate::types::FileEntry>> {
+    fn files(&self, interner: &Interner) -> anyhow::Result<Vec<FileEntry>> {
         log::debug!(target: "paketkoll_core::backend::deb", "Loading packages");
         let packages_files: Vec<_> = get_package_files(interner)?.collect();
 
@@ -192,10 +189,7 @@ fn process_file(interner: &Interner, entry: &DirEntry) -> anyhow::Result<Option<
 }
 
 impl Packages for Debian {
-    fn packages(
-        &self,
-        interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<Vec<crate::types::PackageInterned>> {
+    fn packages(&self, interner: &Interner) -> anyhow::Result<Vec<crate::types::PackageInterned>> {
         // Parse status
         log::debug!(target: "paketkoll_core::backend::deb", "Loading status to installed packages");
         let (_, mut packages) = {

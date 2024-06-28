@@ -11,7 +11,7 @@ pub mod specifier;
 /// The type specifiers are not mapped 1:1 but as it makes sense (as several
 /// are very similar). This means that f and f+ for example are both mapped to
 /// [`Directive::CreateFile`] with fields to differentiate between the two.
-/// Similarly all of v, q and Q are mapped to [`Directive::CreateSubvolume`],
+/// Similarly, all of v, q and Q are mapped to [`Directive::CreateSubvolume`],
 /// and so on.
 ///
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

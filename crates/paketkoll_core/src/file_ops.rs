@@ -16,7 +16,7 @@ use rayon::prelude::*;
 /// Check file system for differences using the given configuration
 pub fn check_installed_files(
     config: &crate::config::CommonFileCheckConfiguration,
-) -> anyhow::Result<(paketkoll_types::intern::Interner, Vec<PackageIssue>)> {
+) -> anyhow::Result<(Interner, Vec<PackageIssue>)> {
     let backend = config
         .common
         .backend
@@ -32,7 +32,7 @@ pub fn check_installed_files(
     })?;
 
     log::debug!(target: "paketkoll_core::backend", "Checking file system");
-    // For all file entries entries, check on file system
+    // For all file entries, check on file system
     // Par-bridge is used here to avoid batching. We do too much work for
     // batching to be useful, and this way we avoid pathological cases with
     // slow batches of large files at the end.
@@ -61,7 +61,7 @@ pub fn check_installed_files(
 pub fn check_all_files(
     common_cfg: &crate::config::CommonFileCheckConfiguration,
     unexpected_cfg: &crate::config::CheckAllFilesConfiguration,
-) -> anyhow::Result<(paketkoll_types::intern::Interner, Vec<PackageIssue>)> {
+) -> anyhow::Result<(Interner, Vec<PackageIssue>)> {
     // Collect distro files
     let backend = common_cfg
         .common

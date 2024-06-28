@@ -327,7 +327,7 @@ fn do_insert(
     let normalised_path = std::path::absolute(PathBuf::from(path))?;
     match files.entry(normalised_path) {
         Entry::Occupied(mut entry) => {
-            if let Properties::Permissions(crate::types::Permissions {
+            if let Properties::Permissions(Permissions {
                 mode: new_mode,
                 owner: new_owner,
                 group: new_group,
@@ -336,7 +336,7 @@ fn do_insert(
                 // Update existing permissions
                 match &mut entry.get_mut().properties {
                     // Handle cases where we keep type but modify fields
-                    Properties::Permissions(crate::types::Permissions { mode, owner, group })
+                    Properties::Permissions(Permissions { mode, owner, group })
                     | Properties::RegularFileSystemd(RegularFileSystemd {
                         mode,
                         owner,
@@ -517,8 +517,8 @@ impl<'a> IdCache<'a> {
     ) -> anyhow::Result<u32> {
         let cache_entry = self.0.entry(key);
         match cache_entry {
-            std::collections::hash_map::Entry::Occupied(e) => Ok(*e.get()),
-            std::collections::hash_map::Entry::Vacant(v) => {
+            Entry::Occupied(e) => Ok(*e.get()),
+            Entry::Vacant(v) => {
                 let id = resolver(key.as_str())?;
                 v.insert(id);
                 Ok(id)

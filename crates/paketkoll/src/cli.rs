@@ -49,14 +49,14 @@ pub(crate) enum Commands {
 /// Output format to use
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, clap::ValueEnum)]
 pub(crate) enum Format {
-    /// Human readable output
+    /// Human-readable output
     Human,
     /// JSON formatted output
     #[cfg(feature = "json")]
     Json,
 }
 
-impl std::fmt::Display for Format {
+impl Display for Format {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Format::Human => write!(f, "human"),
@@ -84,7 +84,7 @@ pub(crate) enum Backend {
     SystemdTmpfiles,
 }
 
-impl std::fmt::Display for Backend {
+impl Display for Backend {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Backend::Auto => write!(f, "auto"),

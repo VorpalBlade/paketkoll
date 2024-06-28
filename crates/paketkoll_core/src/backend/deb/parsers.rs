@@ -173,7 +173,7 @@ pub(super) fn parse_status(
                 )
             };
             if line.starts_with(' ') {
-                let line_fragments: smallvec::SmallVec<[&str; 4]> = line.split(' ').collect();
+                let line_fragments: SmallVec<[&str; 4]> = line.split(' ').collect();
                 if line_fragments.len() < 2 {
                     return Err(anyhow::anyhow!("Too short line")).with_context(ctx);
                 }

@@ -77,11 +77,11 @@ fn main() -> anyhow::Result<Exit> {
 
 fn run_file_checks(cli: &Cli) -> Result<Exit, anyhow::Error> {
     let (interner, mut found_issues) = match cli.command {
-        cli::Commands::Check { .. } => file_ops::check_installed_files(&(cli).try_into()?)?,
+        cli::Commands::Check { .. } => file_ops::check_installed_files(&cli.try_into()?)?,
         cli::Commands::CheckUnexpected {
             ref ignore,
             canonicalize,
-        } => file_ops::check_all_files(&(cli).try_into()?, &{
+        } => file_ops::check_all_files(&cli.try_into()?, &{
             let mut builder = CheckAllFilesConfiguration::builder();
             builder.ignored_paths(ignore.clone());
             builder.canonicalize_paths(canonicalize);
@@ -115,7 +115,7 @@ fn run_file_checks(cli: &Cli) -> Result<Exit, anyhow::Error> {
                         write!(stdout, "{pkg}: ")?;
                     }
                     // Prefer to not do any escaping. This doesn't assume unicode.
-                    // Also it is faster.
+                    // Also, it is faster.
                     stdout.write_all(issue.path().as_os_str().as_bytes())?;
                     writeln!(stdout, " {kind}")?;
                 }

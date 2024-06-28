@@ -20,7 +20,7 @@ pub enum InstallReason {
 pub enum PackageInstallStatus {
     /// Fully installed, as expected
     Installed,
-    /// Some sort of partial install (not fully removed, error during install etc)
+    /// Some sort of partial install (not fully removed, error during install etc.)
     Partial,
 }
 

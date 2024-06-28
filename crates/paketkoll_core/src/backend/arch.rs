@@ -16,7 +16,7 @@ use crate::{
     config::PackageFilter,
     types::{FileEntry, Package, PackageInterned, PackageRef},
 };
-use anyhow::{Context, Result};
+use anyhow::Context;
 use dashmap::DashSet;
 use either::Either;
 use paketkoll_types::intern::Interner;
@@ -91,7 +91,7 @@ impl Files for ArchLinux {
         // It is counter-intuitive, but we are faster if we collect into a vec here and start
         // over later on with a new parallel iteration. No idea why. (241 ms vs 264 ms according
         // to hyperfine on my machine, stdev < 4 ms in both cases).
-        let results: Result<Vec<FileEntry>> = pkgs_and_paths
+        let results: anyhow::Result<Vec<FileEntry>> = pkgs_and_paths
             .into_par_iter()
             .flat_map_iter(|entry| match entry {
                 Ok(PackageData {
@@ -152,7 +152,7 @@ fn get_mtree_paths<'borrows>(
     db_path: &Path,
     interner: &'borrows Interner,
     package_filter: &'borrows PackageFilter,
-) -> Result<impl ParallelIterator<Item = Result<PackageData>> + 'borrows> {
+) -> anyhow::Result<impl ParallelIterator<Item = anyhow::Result<PackageData>> + 'borrows> {
     let db_root = db_path.join("local");
     Ok(std::fs::read_dir(db_root)
         .context("Failed to read pacman database directory")?
@@ -171,7 +171,7 @@ fn load_pkg_for_file_listing(
     entry: &std::fs::DirEntry,
     interner: &Interner,
     package_filter: &PackageFilter,
-) -> Result<Option<PackageData>> {
+) -> anyhow::Result<Option<PackageData>> {
     if !entry.file_type()?.is_dir() {
         return Ok(None);
     }
@@ -210,7 +210,10 @@ fn load_pkg_for_file_listing(
 
 /// Process a single packaging, parsing the desc and files entries
 #[inline]
-fn load_pkg(entry: &std::fs::DirEntry, interner: &Interner) -> Result<Option<PackageInterned>> {
+fn load_pkg(
+    entry: &std::fs::DirEntry,
+    interner: &Interner,
+) -> anyhow::Result<Option<PackageInterned>> {
     if !entry.file_type()?.is_dir() {
         return Ok(None);
     }

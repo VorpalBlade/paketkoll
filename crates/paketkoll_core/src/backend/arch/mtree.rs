@@ -148,7 +148,7 @@ fn extract_path(item: &mtree2::Entry) -> PathBuf {
         // SAFETY:
         // * The encoding is "an unspecified, platform-specific, self-synchronizing superset of UTF-8"
         // * We are removing a leading ASCII character here (.).
-        // * Thus the buffer still contains the same superset of UTF-8
+        // * Thus, the buffer still contains the same superset of UTF-8
         PathBuf::from(unsafe { OsStr::from_encoded_bytes_unchecked(&as_bytes[1..]) })
     } else {
         path.into()

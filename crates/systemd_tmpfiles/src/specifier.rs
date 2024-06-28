@@ -211,8 +211,16 @@ impl InvariantProvider for SystemResolver {
         &self.os_id
     }
 
+    fn temp_directory(&self) -> &str {
+        &self.temp_directory
+    }
+
     fn kernel_release(&self) -> &str {
         &self.kernel_release
+    }
+
+    fn persistent_temp_directory(&self) -> &str {
+        &self.persistent_temp_directory
     }
 
     fn os_version_id(&self) -> &str {
@@ -221,14 +229,6 @@ impl InvariantProvider for SystemResolver {
 
     fn os_variant_id(&self) -> &str {
         &self.os_variant_id
-    }
-
-    fn temp_directory(&self) -> &str {
-        &self.temp_directory
-    }
-
-    fn persistent_temp_directory(&self) -> &str {
-        &self.persistent_temp_directory
     }
 }
 

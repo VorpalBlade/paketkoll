@@ -158,7 +158,7 @@ pub enum IssueKind {
     FsCheckError(Box<anyhow::Error>),
 }
 
-impl std::fmt::Display for IssueKind {
+impl Display for IssueKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             IssueKind::Missing => write!(f, "missing or inaccessible file/directory/...")?,

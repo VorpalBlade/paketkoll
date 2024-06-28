@@ -67,7 +67,7 @@ impl std::fmt::Display for SplitterError {
 impl std::error::Error for SplitterError {}
 
 /// Parse the tmpfiles.d format from a string
-pub fn parse_str(input: &str) -> Result<Vec<super::Entry>, ParseError> {
+pub fn parse_str(input: &str) -> Result<Vec<Entry>, ParseError> {
     let first_layer = file::parse_file
         .parse(input)
         .map_err(|e| SplitterError::from_parse(&e, input))?;
@@ -251,7 +251,7 @@ fn parse_directive(line: Line) -> Result<Entry, ParseError> {
             ))?
         }
     };
-    Ok(super::Entry {
+    Ok(Entry {
         path: line.path,
         directive,
         flags,

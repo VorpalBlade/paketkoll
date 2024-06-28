@@ -19,7 +19,7 @@ use paketkoll_types::intern::Interner;
 
 impl crate::types::PackageInterned {
     pub(super) fn from_arch_linux_desc(
-        mut readable: impl std::io::BufRead,
+        mut readable: impl BufRead,
         interner: &Interner,
     ) -> anyhow::Result<Self> {
         let mut name: Option<PackageRef> = None;
