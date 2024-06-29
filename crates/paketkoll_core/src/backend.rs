@@ -1,5 +1,7 @@
 //! The various backends implementing distro specific support
 
+use compact_str::CompactString;
+
 #[cfg(feature = "arch_linux")]
 pub(crate) mod arch;
 
@@ -32,15 +34,26 @@ pub(crate) trait Files: Name {
     // TODO: Get original file contents
 }
 
-/// A package manager backend
+/// A package manager backend (reading list of packages)
 pub(crate) trait Packages: Name {
     /// Collect a list of all installed packages
     fn packages(
         &self,
         interner: &paketkoll_types::intern::Interner,
     ) -> anyhow::Result<Vec<crate::types::PackageInterned>>;
+}
 
-    // TODO: install, uninstall
+/// A package manager backend (installing/uninstalling packages)
+pub(crate) trait PackageManager: Name {
+    /// Perform installation and uninstallation of a bunch of packages
+    ///
+    /// The package name format depends on the backend.
+    fn transact(
+        &self,
+        install: &[CompactString],
+        uninstall: &[CompactString],
+        ask_confirmation: bool,
+    ) -> anyhow::Result<()>;
 }
 
 // TODO: Operations to add

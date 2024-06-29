@@ -8,6 +8,7 @@ use std::path::PathBuf;
 
 use crate::config::PackageFilter;
 use crate::types::{FileEntry, PackageRef, Properties};
+use crate::utils::package_manager_transaction;
 use anyhow::Context;
 use bstr::ByteSlice;
 use bstr::ByteVec;
@@ -15,7 +16,7 @@ use dashmap::DashMap;
 use paketkoll_types::intern::Interner;
 use rayon::prelude::*;
 
-use super::{Files, FullBackend, Name, Packages};
+use super::{Files, FullBackend, Name, PackageManager, Packages};
 
 // Each package has a set of files in DB_PATH:
 // *.list (all installed paths, one per line, including directories)
@@ -219,6 +220,35 @@ impl Packages for Debian {
         }
 
         Ok(packages)
+    }
+}
+
+impl PackageManager for Debian {
+    fn transact(
+        &self,
+        install: &[compact_str::CompactString],
+        uninstall: &[compact_str::CompactString],
+        ask_confirmation: bool,
+    ) -> anyhow::Result<()> {
+        if !install.is_empty() {
+            package_manager_transaction(
+                "apt-get",
+                "install",
+                install,
+                ask_confirmation.then_some("-y"),
+            )
+            .context("Failed to install with apt-get")?;
+        }
+        if !uninstall.is_empty() {
+            package_manager_transaction(
+                "apt-get",
+                "remove",
+                uninstall,
+                ask_confirmation.then_some("-y"),
+            )
+            .context("Failed to uninstall with apt-get")?;
+        }
+        Ok(())
     }
 }
 

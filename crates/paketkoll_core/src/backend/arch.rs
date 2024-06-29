@@ -11,10 +11,11 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use super::{Files, FullBackend, Name, Packages};
+use super::{Files, FullBackend, Name, PackageManager, Packages};
 use crate::{
     config::PackageFilter,
     types::{FileEntry, Package, PackageInterned, PackageRef},
+    utils::package_manager_transaction,
 };
 use anyhow::Context;
 use dashmap::DashSet;
@@ -136,6 +137,35 @@ impl Packages for ArchLinux {
             })
             .collect();
         results
+    }
+}
+
+impl PackageManager for ArchLinux {
+    fn transact(
+        &self,
+        install: &[compact_str::CompactString],
+        uninstall: &[compact_str::CompactString],
+        ask_confirmation: bool,
+    ) -> anyhow::Result<()> {
+        if !install.is_empty() {
+            package_manager_transaction(
+                "pacman",
+                "-S",
+                install,
+                ask_confirmation.then_some("--noconfirm"),
+            )
+            .context("Failed to install with pacman")?;
+        }
+        if !uninstall.is_empty() {
+            package_manager_transaction(
+                "pacman",
+                "-R",
+                uninstall,
+                ask_confirmation.then_some("--noconfirm"),
+            )
+            .context("Failed to uninstall with pacman")?;
+        }
+        Ok(())
     }
 }
 
