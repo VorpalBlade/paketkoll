@@ -1,6 +1,9 @@
 //! The various backends implementing distro specific support
 
 use compact_str::CompactString;
+use paketkoll_types::intern::{Interner, PackageRef};
+
+use crate::types::PackageInterned;
 
 #[cfg(feature = "arch_linux")]
 pub(crate) mod arch;
@@ -26,21 +29,28 @@ pub(crate) trait Name: Send + Sync {
 pub(crate) trait Files: Name {
     /// Collect a list of files managed by the package manager including
     /// any available metadata such as checksums or timestamps about those files
-    fn files(
-        &self,
-        interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<Vec<crate::types::FileEntry>>;
+    fn files(&self, interner: &Interner) -> anyhow::Result<Vec<crate::types::FileEntry>>;
 
-    // TODO: Get original file contents
+    /// Get the original contents of files
+    fn original_files(
+        &self,
+        queries: &[OriginalFileQuery],
+        packages: ahash::AHashMap<PackageRef, PackageInterned>,
+        interner: &Interner,
+    ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>>;
+}
+
+/// Query type for original file contents
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+pub struct OriginalFileQuery {
+    pub package: CompactString,
+    pub path: CompactString,
 }
 
 /// A package manager backend (reading list of packages)
 pub(crate) trait Packages: Name {
     /// Collect a list of all installed packages
-    fn packages(
-        &self,
-        interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<Vec<crate::types::PackageInterned>>;
+    fn packages(&self, interner: &Interner) -> anyhow::Result<Vec<crate::types::PackageInterned>>;
 }
 
 /// A package manager backend (installing/uninstalling packages)
@@ -55,11 +65,6 @@ pub(crate) trait PackageManager: Name {
         ask_confirmation: bool,
     ) -> anyhow::Result<()>;
 }
-
-// TODO: Operations to add
-// - Get source file from package (possibly downloading the package to cache if needed)
-// - Does a paccache equivalent exist for Debian or do we need to implement smart cache
-//   cleaning as a separate tool?
 
 /// A backend that implements all operations
 #[allow(dead_code)]

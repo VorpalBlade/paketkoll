@@ -8,10 +8,14 @@ use std::path::PathBuf;
 
 use crate::config::PackageFilter;
 use crate::types::{FileEntry, PackageRef, Properties};
-use crate::utils::package_manager_transaction;
+use crate::utils::{
+    extract_files, group_queries_by_pkg, locate_package_file, package_manager_transaction,
+    CompressionFormat,
+};
 use anyhow::Context;
 use bstr::ByteSlice;
 use bstr::ByteVec;
+use compact_str::CompactString;
 use dashmap::DashMap;
 use paketkoll_types::intern::Interner;
 use rayon::prelude::*;
@@ -31,6 +35,7 @@ use super::{Files, FullBackend, Name, PackageManager, Packages};
 const DB_PATH: &str = "/var/lib/dpkg/info";
 const STATUS_PATH: &str = "/var/lib/dpkg/status";
 const EXTENDED_STATUS_PATH: &str = "/var/lib/apt/extended_states";
+const CACHE_PATH: &str = "/var/cache/apt/archives";
 const NAME: &str = "Debian";
 
 #[derive(Debug)]
@@ -106,6 +111,75 @@ impl Files for Debian {
 
         // Finally extract just the file entries
         Ok(merged.into_iter().map(|(_, v)| v).collect())
+    }
+
+    fn original_files(
+        &self,
+        queries: &[super::OriginalFileQuery],
+        packages: ahash::AHashMap<PackageRef, crate::types::PackageInterned>,
+        interner: &Interner,
+    ) -> anyhow::Result<ahash::AHashMap<super::OriginalFileQuery, Vec<u8>>> {
+        let queries_by_pkg = group_queries_by_pkg(queries);
+        let mut results = ahash::AHashMap::new();
+
+        // List of directories to search for the package
+        let dir_candidates = smallvec::smallvec_inline![CACHE_PATH];
+
+        for (pkg, queries) in queries_by_pkg {
+            // We may not have exact package name, try to figure this out:
+            let package_match = if let Some(pkgref) = interner.get(pkg) {
+                // Yay, it is probably installed, we know what to look for
+                if let Some(package) = packages.get(&PackageRef::new(pkgref)) {
+                    format!(
+                        "{}_{}_{}.deb",
+                        pkg,
+                        package.version.replace(':', "%3a"),
+                        package
+                            .architecture
+                            .map(|e| e.to_str(interner))
+                            .unwrap_or("*")
+                    )
+                } else {
+                    format!("{}_*_*.deb", pkg)
+                }
+            } else {
+                format!("{}_*_*.deb", pkg)
+            };
+
+            let package_path =
+                locate_package_file(dir_candidates.as_slice(), &package_match, pkg, download_deb)?;
+            // Error if we couldn't find the package
+            let package_path = package_path.ok_or_else(|| {
+                anyhow::anyhow!("Failed to find or download package file for {pkg}")
+            })?;
+
+            // The package is a .deb, which is actually an ar archive
+            let package_file = std::fs::File::open(&package_path)?;
+            let mut archive = ar::Archive::new(package_file);
+
+            // We want the data.tar.xz file (or other compression scheme)
+            while let Some(entry) = archive.next_entry() {
+                let mut entry = entry?;
+                if entry.header().identifier().starts_with(b"data.tar") {
+                    let extension: CompactString =
+                        std::str::from_utf8(entry.header().identifier())?
+                            .split('.')
+                            .last()
+                            .ok_or_else(|| anyhow::anyhow!("No file extension found"))?
+                            .into();
+                    let mut decompressed =
+                        CompressionFormat::from_extension(&extension, &mut entry)?;
+                    let archive = tar::Archive::new(&mut decompressed);
+                    // Now, lets extract the requested files from the package
+                    extract_files(archive, &queries, &mut results, pkg, |path| {
+                        path.trim_start_matches('.').into()
+                    })?;
+                    break;
+                }
+            }
+        }
+
+        Ok(results)
     }
 }
 
@@ -252,4 +326,19 @@ impl PackageManager for Debian {
     }
 }
 
+// To get the original package file itno the cache: apt install --reinstall -d pkgname
+// /var/cache/apt/archives/pkgname_version_arch.deb
+// arch: all, amd64, arm64, ...
+// Epoch separator (normally :) is now %3a (URL encoded)
+
 impl FullBackend for Debian {}
+
+fn download_deb(pkg: &str) -> Result<(), anyhow::Error> {
+    let status = std::process::Command::new("apt-get")
+        .args(["install", "--reinstall", "-d", pkg])
+        .status()?;
+    if !status.success() {
+        log::warn!("Failed to download package for {pkg}");
+    };
+    Ok(())
+}

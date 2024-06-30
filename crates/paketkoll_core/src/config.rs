@@ -92,6 +92,33 @@ impl Backend {
             )),
         }
     }
+
+    pub(crate) fn create_full(
+        self,
+        configuration: &CommonConfiguration,
+    ) -> anyhow::Result<Box<dyn crate::backend::FullBackend>> {
+        match self {
+            #[cfg(feature = "arch_linux")]
+            Backend::ArchLinux => Ok(Box::new({
+                let mut builder = crate::backend::arch::ArchLinuxBuilder::default();
+                builder.package_filter(configuration.package_filter);
+                builder.build()?
+            })),
+            #[cfg(feature = "debian")]
+            Backend::Debian => Ok(Box::new({
+                let mut builder = crate::backend::deb::DebianBuilder::default();
+                builder.package_filter(configuration.package_filter);
+                builder.build()
+            })),
+            Backend::Flatpak => Err(anyhow::anyhow!(
+                "Flatpak backend does not support file checks"
+            )),
+            #[cfg(feature = "systemd_tmpfiles")]
+            Backend::SystemdTmpfiles => Err(anyhow::anyhow!(
+                "SystemdTmpfiles backend does not support package checks"
+            )),
+        }
+    }
 }
 
 /// Action to perform according to filter
@@ -144,7 +171,7 @@ pub struct CommonConfiguration {
 }
 
 impl CommonConfiguration {
-    /// Get a builder for this class
+    /// Get a builder for this struct
     pub fn builder() -> CommonConfigurationBuilder {
         Default::default()
     }
@@ -173,7 +200,7 @@ pub struct CheckAllFilesConfiguration {
 }
 
 impl CheckAllFilesConfiguration {
-    /// Get a builder for this class
+    /// Get a builder for this struct
     pub fn builder() -> CheckAllFilesConfigurationBuilder {
         Default::default()
     }
@@ -195,7 +222,7 @@ pub struct CommonFileCheckConfiguration {
 }
 
 impl CommonFileCheckConfiguration {
-    /// Get a builder for this class
+    /// Get a builder for this struct
     pub fn builder() -> CommonFileCheckConfigurationBuilder {
         Default::default()
     }
@@ -221,8 +248,23 @@ pub struct PackageListConfiguration {
 }
 
 impl PackageListConfiguration {
-    /// Get a builder for this class
+    /// Get a builder for this struct
     pub fn builder() -> PackageListConfigurationBuilder {
+        Default::default()
+    }
+}
+
+/// Describes how to list original files
+#[derive(Debug, derive_builder::Builder)]
+#[non_exhaustive]
+pub struct OriginalFilesConfiguration {
+    /// Common configuration
+    pub common: CommonConfiguration,
+}
+
+impl OriginalFilesConfiguration {
+    /// Get a builder for this struct
+    pub fn builder() -> OriginalFilesConfigurationBuilder {
         Default::default()
     }
 }

@@ -72,6 +72,18 @@ impl Files for SystemdTmpfiles {
         // Now parse it
         parse_systemd_tmpfiles_output(&output)
     }
+
+    fn original_files(
+        &self,
+        _queries: &[super::OriginalFileQuery],
+        _packages: ahash::AHashMap<
+            paketkoll_types::intern::PackageRef,
+            crate::types::PackageInterned,
+        >,
+        _interner: &paketkoll_types::intern::Interner,
+    ) -> anyhow::Result<ahash::AHashMap<super::OriginalFileQuery, Vec<u8>>> {
+        anyhow::bail!("Original file queries are not supported for systemd-tmpfiles")
+    }
 }
 
 /// Parse the systemd-tmpfiles output into [`crate::types::FileEntry`]s that are usable by the shared later stages.
@@ -155,6 +167,7 @@ fn process_entry<'entry>(
                 size: Some(contents.len() as u64),
                 checksum: sha256_buffer(contents.as_bytes())
                     .with_context(|| format!("Failed to generate checksum for {path:?}"))?,
+                contents: Some(contents.into_owned().into_bytes().into_boxed_slice()),
             })
         }
         systemd_tmpfiles::Directive::WriteToFile {
@@ -369,6 +382,7 @@ fn do_insert(
                                 group: new_group,
                                 size: *size,
                                 checksum: checksum.clone(),
+                                contents: None,
                             });
                     }
                     // Unknown gets upgraded to a replacement
@@ -474,6 +488,7 @@ fn recursive_copy(
                 group: Gid::new(source_metadata.gid()),
                 size: Some(source_metadata.len()),
                 checksum,
+                contents: None,
             })
         }
     };

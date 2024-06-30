@@ -14,6 +14,7 @@ use paketkoll_core::{
     config::{self, CheckAllFilesConfiguration, PackageFilter},
     file_ops, package_ops,
     types::{Issue, PackageRef},
+    OriginalFileQuery,
 };
 use proc_exit::{Code, Exit};
 use rayon::prelude::*;
@@ -70,6 +71,22 @@ fn main() -> anyhow::Result<Exit> {
                 }
             }
 
+            Ok(Exit::new(Code::SUCCESS))
+        }
+        cli::Commands::OriginalFiles {
+            ref package,
+            ref path,
+        } => {
+            let queries = vec![OriginalFileQuery {
+                package: package.into(),
+                path: path.into(),
+            }];
+            let results = file_ops::original_files(&(&cli).try_into()?, queries.as_slice())?;
+
+            for (query, result) in results {
+                println!("--- {query:?} ---");
+                std::io::stdout().write_all(&result)?;
+            }
             Ok(Exit::new(Code::SUCCESS))
         }
     }
@@ -207,6 +224,7 @@ impl TryFrom<&Cli> for config::CommonConfiguration {
                 canonicalize: _,
             } => {}
             cli::Commands::InstalledPackages => {}
+            cli::Commands::OriginalFiles { .. } => {}
         }
         Ok(builder.build()?)
     }
@@ -227,6 +245,18 @@ impl TryFrom<&Cli> for config::CommonFileCheckConfiguration {
 }
 
 impl TryFrom<&Cli> for config::PackageListConfiguration {
+    type Error = anyhow::Error;
+
+    fn try_from(value: &Cli) -> Result<Self, Self::Error> {
+        let mut builder = Self::builder();
+
+        builder.common(value.try_into()?);
+
+        Ok(builder.build()?)
+    }
+}
+
+impl TryFrom<&Cli> for config::OriginalFilesConfiguration {
     type Error = anyhow::Error;
 
     fn try_from(value: &Cli) -> Result<Self, Self::Error> {

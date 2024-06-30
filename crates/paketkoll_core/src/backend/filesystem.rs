@@ -64,6 +64,7 @@ pub(crate) fn check_file(
                 group,
                 size,
                 checksum,
+                contents: _,
             }) => {
                 if !metadata.is_file() {
                     issues.push(IssueKind::TypeIncorrect {

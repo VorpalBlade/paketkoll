@@ -13,3 +13,5 @@ pub mod file_ops;
 pub mod package_ops;
 pub mod types;
 pub(crate) mod utils;
+
+pub use backend::OriginalFileQuery;

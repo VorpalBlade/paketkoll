@@ -5,13 +5,53 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use ahash::AHashMap;
 use anyhow::Context;
 use dashmap::DashMap;
 use ignore::{overrides::OverrideBuilder, Match, WalkBuilder, WalkState};
 
-use crate::types::{FileEntry, Issue, IssueKind, PackageIssue};
+use crate::{
+    backend::OriginalFileQuery,
+    types::{FileEntry, Issue, IssueKind, PackageIssue},
+};
 use paketkoll_types::intern::Interner;
 use rayon::prelude::*;
+
+/// Perform a query of original files
+#[doc(hidden)]
+pub fn original_files(
+    config: &crate::config::OriginalFilesConfiguration,
+    queries: &[OriginalFileQuery],
+) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>> {
+    let backend = config
+        .common
+        .backend
+        .create_full(&config.common)
+        .with_context(|| format!("Failed to create backend for {}", config.common.backend))?;
+    let interner = Interner::new();
+    let packages = backend.packages(&interner).with_context(|| {
+        format!(
+            "Failed to collect information from backend {}",
+            config.common.backend
+        )
+    })?;
+    let mut package_map =
+        AHashMap::with_capacity_and_hasher(packages.len(), ahash::RandomState::new());
+    for package in packages.into_iter() {
+        package_map.insert(package.name, package);
+    }
+
+    let results = backend
+        .original_files(queries, package_map, &interner)
+        .with_context(|| {
+            format!(
+                "Failed to collect original files from backend {}",
+                config.common.backend
+            )
+        })?;
+
+    Ok(results)
+}
 
 /// Check file system for differences using the given configuration
 pub fn check_installed_files(

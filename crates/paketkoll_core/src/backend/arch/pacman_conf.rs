@@ -10,8 +10,6 @@ use compact_str::CompactString;
 pub(crate) struct PacmanConfig {
     pub(crate) root: CompactString,
     pub(crate) db_path: CompactString,
-    // TODO: This will be used in the future
-    #[allow(unused)]
     pub(crate) cache_dir: CompactString,
 }
 

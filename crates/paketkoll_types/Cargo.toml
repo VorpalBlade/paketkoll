@@ -11,11 +11,11 @@ version = "0.1.0"
 
 [features]
 # Include support for serde on public datatypes
-serde = ["dep:faster-hex", "dep:serde", "smallvec/serde"]
+serde = ["dep:serde", "smallvec/serde"]
 
 [dependencies]
 anyhow.workspace = true
-faster-hex = { workspace = true, features = ["std"], optional = true }
+faster-hex = { workspace = true, features = ["std"] }
 lasso = { workspace = true, features = [
     "ahasher",
     "inline-more",

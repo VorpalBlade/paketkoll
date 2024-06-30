@@ -33,6 +33,7 @@ pub(crate) struct RegularFileSystemd {
     pub group: Gid,
     pub size: Option<u64>,
     pub checksum: Checksum,
+    pub contents: Option<Box<[u8]>>,
 }
 
 /// A FIFO

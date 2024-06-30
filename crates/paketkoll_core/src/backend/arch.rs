@@ -15,9 +15,13 @@ use super::{Files, FullBackend, Name, PackageManager, Packages};
 use crate::{
     config::PackageFilter,
     types::{FileEntry, Package, PackageInterned, PackageRef},
-    utils::package_manager_transaction,
+    utils::{
+        extract_files, group_queries_by_pkg, locate_package_file, package_manager_transaction,
+    },
 };
+use ahash::AHashMap;
 use anyhow::Context;
+use compact_str::format_compact;
 use dashmap::DashSet;
 use either::Either;
 use paketkoll_types::intern::Interner;
@@ -116,6 +120,65 @@ impl Files for ArchLinux {
             .collect();
         results
     }
+
+    fn original_files(
+        &self,
+        queries: &[super::OriginalFileQuery],
+        packages: AHashMap<PackageRef, PackageInterned>,
+        interner: &Interner,
+    ) -> anyhow::Result<ahash::AHashMap<super::OriginalFileQuery, Vec<u8>>> {
+        let queries_by_pkg = group_queries_by_pkg(queries);
+
+        let mut results = ahash::AHashMap::new();
+
+        // List of directories to search for the package
+        let dir_candidates = smallvec::smallvec_inline![self.pacman_config.cache_dir.as_str()];
+
+        for (pkg, queries) in queries_by_pkg {
+            // We may not have exact package name, try to figure this out:
+            let package_match = if let Some(pkgref) = interner.get(pkg) {
+                // Yay, it is probably installed, we know what to look for
+                if let Some(package) = packages.get(&PackageRef::new(pkgref)) {
+                    format!(
+                        "{}-{}-{}.pkg.tar.zst",
+                        pkg,
+                        package.version,
+                        package
+                            .architecture
+                            .map(|e| e.to_str(interner))
+                            .unwrap_or("*")
+                    )
+                } else {
+                    format!("{}-*-*.pkg.tar.zst", pkg)
+                }
+            } else {
+                format!("{}-*-*.pkg.tar.zst", pkg)
+            };
+
+            let package_path = locate_package_file(
+                dir_candidates.as_slice(),
+                &package_match,
+                pkg,
+                download_arch_pkg,
+            )?;
+            // Error if we couldn't find the package
+            let package_path = package_path.ok_or_else(|| {
+                anyhow::anyhow!("Failed to find or download package file for {pkg}")
+            })?;
+
+            // The package is a .tar.zst
+            let package_file = std::fs::File::open(&package_path)?;
+            let decompressed = zstd::Decoder::new(package_file)?;
+            let archive = tar::Archive::new(decompressed);
+
+            // Now, lets extract the requested files from the package
+            extract_files(archive, &queries, &mut results, pkg, |path| {
+                format_compact!("/{path}")
+            })?;
+        }
+
+        Ok(results)
+    }
 }
 
 impl Packages for ArchLinux {
@@ -167,6 +230,22 @@ impl PackageManager for ArchLinux {
         }
         Ok(())
     }
+}
+
+// To download to cache: pacman -Sw packagename
+// /var/cache/pacman/pkg/packagename-version-arch.pkg.tar.zst
+// If foreign, also maybe look in other locations based on what aconfmgr does
+// arch: any, x86_64
+// Epoch separator is :
+
+fn download_arch_pkg(pkg: &str) -> Result<(), anyhow::Error> {
+    let status = std::process::Command::new("pacman")
+        .args(["-Sw", "--noconfirm", pkg])
+        .status()?;
+    if !status.success() {
+        log::warn!("Failed to download package for {pkg}");
+    };
+    Ok(())
 }
 
 impl FullBackend for ArchLinux {}

@@ -44,6 +44,14 @@ pub(crate) enum Commands {
     },
     /// Get a list of installed packages
     InstalledPackages,
+    #[clap(hide = true)]
+    /// Get the original contents of files
+    OriginalFiles {
+        /// Package to query
+        package: String,
+        /// Path to query
+        path: String,
+    },
 }
 
 /// Output format to use
