@@ -11,16 +11,13 @@ use std::{
 use ahash::AHashMap;
 use anyhow::Context;
 use compact_str::CompactString;
-use paketkoll_types::files::{Checksum, Gid, Mode, Uid};
+use paketkoll_types::files::{
+    Checksum, DeviceNode, DeviceType, Directory, Fifo, FileEntry, FileFlags, Gid, Mode,
+    Permissions, Properties, RegularFile, RegularFileBasic, RegularFileSystemd, Symlink, Uid,
+};
 use systemd_tmpfiles::specifier::Resolve;
 
-use crate::{
-    types::{
-        DeviceNode, DeviceType, Directory, Fifo, FileFlags, Permissions, Properties, RegularFile,
-        RegularFileBasic, RegularFileSystemd, Symlink,
-    },
-    utils::{sha256_buffer, sha256_readable, MODE_MASK},
-};
+use crate::utils::{sha256_buffer, sha256_readable, MODE_MASK};
 
 use super::{Files, Name};
 
@@ -49,7 +46,7 @@ impl Files for SystemdTmpfiles {
     fn files(
         &self,
         _interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<Vec<crate::types::FileEntry>> {
+    ) -> anyhow::Result<Vec<FileEntry>> {
         // Get the entire config from sytemd-tmpfiles
         let cmd = std::process::Command::new("systemd-tmpfiles")
             .arg("--cat-config")
@@ -78,7 +75,7 @@ impl Files for SystemdTmpfiles {
         _queries: &[super::OriginalFileQuery],
         _packages: ahash::AHashMap<
             paketkoll_types::intern::PackageRef,
-            crate::types::PackageInterned,
+            paketkoll_types::package::PackageInterned,
         >,
         _interner: &paketkoll_types::intern::Interner,
     ) -> anyhow::Result<ahash::AHashMap<super::OriginalFileQuery, Vec<u8>>> {
@@ -86,10 +83,8 @@ impl Files for SystemdTmpfiles {
     }
 }
 
-/// Parse the systemd-tmpfiles output into [`crate::types::FileEntry`]s that are usable by the shared later stages.
-fn parse_systemd_tmpfiles_output(
-    output: &str,
-) -> Result<Vec<crate::types::FileEntry>, anyhow::Error> {
+/// Parse the systemd-tmpfiles output into [`FileEntry`]s that are usable by the shared later stages.
+fn parse_systemd_tmpfiles_output(output: &str) -> Result<Vec<FileEntry>, anyhow::Error> {
     let parsed = systemd_tmpfiles::parser::parse_str(output)
         .context("Failed to parse systemd-tmpfiles output")?;
 
@@ -110,10 +105,10 @@ fn parse_systemd_tmpfiles_output(
     Ok(files.into_values().collect())
 }
 
-/// Process a single entry from the systemd-tmpfiles output, converting it to a [`crate::types::FileEntry`].
+/// Process a single entry from the systemd-tmpfiles output, converting it to a [`FileEntry`].
 fn process_entry<'entry>(
     entry: &'entry systemd_tmpfiles::Entry,
-    files: &mut AHashMap<PathBuf, crate::types::FileEntry>,
+    files: &mut AHashMap<PathBuf, FileEntry>,
     id_cache: &mut IdCache<'entry>,
     resolver: &systemd_tmpfiles::specifier::SystemResolver,
 ) -> anyhow::Result<()> {
@@ -332,7 +327,7 @@ fn process_entry<'entry>(
 
 /// Insert into the hash map, trying to update existing entries (if existing).
 fn do_insert(
-    files: &mut AHashMap<PathBuf, crate::types::FileEntry>,
+    files: &mut AHashMap<PathBuf, FileEntry>,
     path: &str,
     props: Properties,
     flags: FileFlags,
@@ -399,7 +394,7 @@ fn do_insert(
             }
         }
         Entry::Vacant(entry) => {
-            entry.insert(crate::types::FileEntry {
+            entry.insert(FileEntry {
                 package: None,
                 path: PathBuf::from(path),
                 properties: props,
@@ -414,12 +409,12 @@ fn do_insert(
 
 /// Helper to [`do_insert`] that inserts into an occupied entry.
 fn do_insert_inner(
-    entry: &mut std::collections::hash_map::OccupiedEntry<'_, PathBuf, crate::types::FileEntry>,
+    entry: &mut std::collections::hash_map::OccupiedEntry<'_, PathBuf, FileEntry>,
     path: &str,
     props: Properties,
     flags: FileFlags,
 ) {
-    entry.insert(crate::types::FileEntry {
+    entry.insert(FileEntry {
         package: None,
         path: PathBuf::from(path),
         properties: props,
@@ -431,7 +426,7 @@ fn do_insert_inner(
 
 /// Handles the recursive copy instructions from systemd-tmpfiles
 fn recursive_copy(
-    files: &mut AHashMap<PathBuf, crate::types::FileEntry>,
+    files: &mut AHashMap<PathBuf, FileEntry>,
     source_path: &Path,
     target_path: &str,
     flags: FileFlags,

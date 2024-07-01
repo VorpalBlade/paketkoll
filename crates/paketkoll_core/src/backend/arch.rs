@@ -11,20 +11,17 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use super::{Files, FullBackend, Name, PackageManager, Packages};
-use crate::{
-    config::PackageFilter,
-    types::{FileEntry, Package, PackageInterned, PackageRef},
-    utils::{
-        extract_files, group_queries_by_pkg, locate_package_file, package_manager_transaction,
-    },
+use super::{Files, FullBackend, Name, PackageFilter, PackageManager, Packages};
+use crate::utils::{
+    extract_files, group_queries_by_pkg, locate_package_file, package_manager_transaction,
 };
 use ahash::AHashMap;
 use anyhow::Context;
 use compact_str::format_compact;
 use dashmap::DashSet;
 use either::Either;
-use paketkoll_types::intern::Interner;
+use paketkoll_types::{files::FileEntry, intern::PackageRef};
+use paketkoll_types::{intern::Interner, package::PackageInterned};
 use rayon::prelude::*;
 
 const NAME: &str = "Arch Linux";
@@ -82,7 +79,7 @@ impl Files for ArchLinux {
     fn files(
         &self,
         interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<Vec<crate::types::FileEntry>> {
+    ) -> anyhow::Result<Vec<FileEntry>> {
         let db_path: &Path = Path::new(&self.pacman_config.db_path);
 
         // Load packages
@@ -290,7 +287,7 @@ fn load_pkg_for_file_listing(
             std::fs::File::open(&desc_path)
                 .with_context(|| format!("Failed to open {desc_path:?}"))?,
         );
-        Package::from_arch_linux_desc(readable, interner)?
+        desc::from_arch_linux_desc(readable, interner)?
     };
 
     // We need to read the desc file to know the package name, so it is only now
@@ -332,7 +329,7 @@ fn load_pkg(
             std::fs::File::open(&desc_path)
                 .with_context(|| format!("Failed to open {desc_path:?}"))?,
         );
-        Package::from_arch_linux_desc(readable, interner)?
+        desc::from_arch_linux_desc(readable, interner)?
     };
     Ok(Some(pkg_data))
 }

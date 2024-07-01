@@ -3,11 +3,12 @@
 use std::process::{Command, Stdio};
 
 use anyhow::Context;
-
-use crate::{
-    types::{ArchitectureRef, PackageRef},
-    utils::package_manager_transaction,
+use paketkoll_types::{
+    intern::{ArchitectureRef, PackageRef},
+    package::{Package, PackageInstallStatus, PackageInterned},
 };
+
+use crate::utils::package_manager_transaction;
 
 use super::{Name, PackageManager, Packages};
 
@@ -34,7 +35,7 @@ impl Packages for Flatpak {
     fn packages(
         &self,
         interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<Vec<crate::types::PackageInterned>> {
+    ) -> anyhow::Result<Vec<PackageInterned>> {
         let cmd = Command::new("flatpak")
             .arg("list")
             .arg("--system")
@@ -62,7 +63,7 @@ impl Packages for Flatpak {
 fn parse_flatpak_output(
     output: &str,
     interner: &paketkoll_types::intern::Interner,
-) -> Result<Vec<crate::types::PackageInterned>, anyhow::Error> {
+) -> Result<Vec<PackageInterned>, anyhow::Error> {
     let mut packages = Vec::new();
 
     for line in output.lines() {
@@ -87,7 +88,7 @@ fn parse_flatpak_output(
         };
 
         // Build package struct
-        let package = crate::types::Package {
+        let package = Package {
             name: PackageRef::get_or_intern(interner, parts[2]),
             version: version.into(),
             desc,
@@ -95,7 +96,7 @@ fn parse_flatpak_output(
             depends: vec![],
             provides: vec![],
             reason: None,
-            status: crate::types::PackageInstallStatus::Installed,
+            status: PackageInstallStatus::Installed,
             id: Some(parts[0].into()),
         };
         packages.push(package);
@@ -135,7 +136,7 @@ impl PackageManager for Flatpak {
 
 #[cfg(test)]
 mod tests {
-    use crate::types::Package;
+    use Package;
 
     use super::*;
 
@@ -173,7 +174,7 @@ mod tests {
                     depends: vec![],
                     provides: vec![],
                     reason: None,
-                    status: crate::types::PackageInstallStatus::Installed,
+                    status: PackageInstallStatus::Installed,
                     id: Some("com.github.tchx84.Flatseal/x86_64/stable".into()),
                 },
                 Package {
@@ -186,7 +187,7 @@ mod tests {
                     depends: vec![],
                     provides: vec![],
                     reason: None,
-                    status: crate::types::PackageInstallStatus::Installed,
+                    status: PackageInstallStatus::Installed,
                     id: Some("org.fedoraproject.MediaWriter/x86_64/stable".into()),
                 },
                 Package {
@@ -197,7 +198,7 @@ mod tests {
                     depends: vec![],
                     provides: vec![],
                     reason: None,
-                    status: crate::types::PackageInstallStatus::Installed,
+                    status: PackageInstallStatus::Installed,
                     id: Some("org.freedesktop.Platform/x86_64/23.08".into()),
                 },
                 Package {
@@ -208,7 +209,7 @@ mod tests {
                     depends: vec![],
                     provides: vec![],
                     reason: None,
-                    status: crate::types::PackageInstallStatus::Installed,
+                    status: PackageInstallStatus::Installed,
                     id: Some("org.freedesktop.Platform.GL.default/x86_64/23.08".into()),
                 },
                 Package {
@@ -219,7 +220,7 @@ mod tests {
                     depends: vec![],
                     provides: vec![],
                     reason: None,
-                    status: crate::types::PackageInstallStatus::Installed,
+                    status: PackageInstallStatus::Installed,
                     id: Some("org.freedesktop.Platform.GL.default/x86_64/23.08-extra".into()),
                 },
                 Package {
@@ -230,7 +231,7 @@ mod tests {
                     depends: vec![],
                     provides: vec![],
                     reason: None,
-                    status: crate::types::PackageInstallStatus::Installed,
+                    status: PackageInstallStatus::Installed,
                     id: Some("org.freedesktop.Platform.GL.nvidia-550-78/x86_64/1.4".into()),
                 },
                 Package {
@@ -241,7 +242,7 @@ mod tests {
                     depends: vec![],
                     provides: vec![],
                     reason: None,
-                    status: crate::types::PackageInstallStatus::Installed,
+                    status: PackageInstallStatus::Installed,
                     id: Some("org.freedesktop.Platform.VAAPI.Intel/x86_64/23.08".into()),
                 },
                 Package {
@@ -252,7 +253,7 @@ mod tests {
                     depends: vec![],
                     provides: vec![],
                     reason: None,
-                    status: crate::types::PackageInstallStatus::Installed,
+                    status: PackageInstallStatus::Installed,
                     id: Some("org.freedesktop.Platform.openh264/x86_64/2.2.0".into()),
                 },
                 Package {
@@ -263,7 +264,7 @@ mod tests {
                     depends: vec![],
                     provides: vec![],
                     reason: None,
-                    status: crate::types::PackageInstallStatus::Installed,
+                    status: PackageInstallStatus::Installed,
                     id: Some("org.freedesktop.Platform.openh264/x86_64/2.4.1".into()),
                 },
                 Package {
@@ -277,7 +278,7 @@ mod tests {
                     depends: vec![],
                     provides: vec![],
                     reason: None,
-                    status: crate::types::PackageInstallStatus::Installed,
+                    status: PackageInstallStatus::Installed,
                     id: Some("org.gnome.Platform/x86_64/46".into()),
                 },
                 Package {
@@ -288,7 +289,7 @@ mod tests {
                     depends: vec![],
                     provides: vec![],
                     reason: None,
-                    status: crate::types::PackageInstallStatus::Installed,
+                    status: PackageInstallStatus::Installed,
                     id: Some("org.gtk.Gtk3theme.Adwaita-dark/x86_64/3.22".into()),
                 },
                 Package {
@@ -299,7 +300,7 @@ mod tests {
                     depends: vec![],
                     provides: vec![],
                     reason: None,
-                    status: crate::types::PackageInstallStatus::Installed,
+                    status: PackageInstallStatus::Installed,
                     id: Some("org.gtk.Gtk3theme.Breeze/x86_64/3.22".into()),
                 },
                 Package {
@@ -310,7 +311,7 @@ mod tests {
                     depends: vec![],
                     provides: vec![],
                     reason: None,
-                    status: crate::types::PackageInstallStatus::Installed,
+                    status: PackageInstallStatus::Installed,
                     id: Some("org.kde.KStyle.Adwaita/x86_64/6.6".into()),
                 },
                 Package {
@@ -321,7 +322,7 @@ mod tests {
                     depends: vec![],
                     provides: vec![],
                     reason: None,
-                    status: crate::types::PackageInstallStatus::Installed,
+                    status: PackageInstallStatus::Installed,
                     id: Some("org.kde.Platform/x86_64/6.6".into()),
                 },
             ]

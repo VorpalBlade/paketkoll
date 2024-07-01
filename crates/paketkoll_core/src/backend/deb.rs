@@ -6,8 +6,8 @@ use std::fs::{DirEntry, File};
 use std::io::BufReader;
 use std::path::PathBuf;
 
-use crate::config::PackageFilter;
-use crate::types::{FileEntry, PackageRef, Properties};
+use super::{Files, FullBackend, Name, PackageManager, Packages};
+use crate::backend::PackageFilter;
 use crate::utils::{
     extract_files, group_queries_by_pkg, locate_package_file, package_manager_transaction,
     CompressionFormat,
@@ -17,10 +17,10 @@ use bstr::ByteSlice;
 use bstr::ByteVec;
 use compact_str::CompactString;
 use dashmap::DashMap;
-use paketkoll_types::intern::Interner;
+use paketkoll_types::files::{FileEntry, Properties};
+use paketkoll_types::intern::{Interner, PackageRef};
+use paketkoll_types::package::PackageInterned;
 use rayon::prelude::*;
-
-use super::{Files, FullBackend, Name, PackageManager, Packages};
 
 // Each package has a set of files in DB_PATH:
 // *.list (all installed paths, one per line, including directories)
@@ -116,7 +116,7 @@ impl Files for Debian {
     fn original_files(
         &self,
         queries: &[super::OriginalFileQuery],
-        packages: ahash::AHashMap<PackageRef, crate::types::PackageInterned>,
+        packages: ahash::AHashMap<PackageRef, PackageInterned>,
         interner: &Interner,
     ) -> anyhow::Result<ahash::AHashMap<super::OriginalFileQuery, Vec<u8>>> {
         let queries_by_pkg = group_queries_by_pkg(queries);
@@ -264,7 +264,7 @@ fn process_file(interner: &Interner, entry: &DirEntry) -> anyhow::Result<Option<
 }
 
 impl Packages for Debian {
-    fn packages(&self, interner: &Interner) -> anyhow::Result<Vec<crate::types::PackageInterned>> {
+    fn packages(&self, interner: &Interner) -> anyhow::Result<Vec<PackageInterned>> {
         // Parse status
         log::debug!(target: "paketkoll_core::backend::deb", "Loading status to installed packages");
         let (_, mut packages) = {

@@ -123,7 +123,7 @@ impl<'archive, R: Read + 'archive> Read for CompressionFormat<'archive, R> {
 
 #[cfg(feature = "__extraction")]
 pub(crate) fn group_queries_by_pkg(
-    queries: &[crate::OriginalFileQuery],
+    queries: &[crate::backend::OriginalFileQuery],
 ) -> AHashMap<&str, AHashSet<&str>> {
     let mut queries_by_pkg: AHashMap<&str, AHashSet<&str>> = AHashMap::new();
 
@@ -199,7 +199,7 @@ pub(crate) fn locate_package_file(
 pub(crate) fn extract_files(
     mut archive: tar::Archive<impl Read>,
     queries: &AHashSet<&str>,
-    results: &mut AHashMap<crate::OriginalFileQuery, Vec<u8>>,
+    results: &mut AHashMap<crate::backend::OriginalFileQuery, Vec<u8>>,
     pkg: &str,
     name_manger: impl Fn(&str) -> CompactString,
 ) -> Result<(), anyhow::Error> {
@@ -220,7 +220,7 @@ pub(crate) fn extract_files(
             let mut contents = Vec::new();
             entry.read_to_end(&mut contents)?;
             results.insert(
-                super::OriginalFileQuery {
+                crate::backend::OriginalFileQuery {
                     package: pkg.into(),
                     path,
                 },

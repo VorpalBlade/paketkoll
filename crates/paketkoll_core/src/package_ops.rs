@@ -2,23 +2,19 @@
 
 use anyhow::Context;
 
-use paketkoll_types::intern::Interner;
+use paketkoll_types::{intern::Interner, package::PackageInterned};
 
 /// Get a list of all installed packages
 pub fn installed_packages(
-    config: &crate::config::PackageListConfiguration,
-) -> anyhow::Result<(Interner, Vec<crate::types::PackageInterned>)> {
-    let backend = config
-        .common
-        .backend
-        .create_packages(&config.common)
-        .with_context(|| format!("Failed to create backend for {}", config.common.backend))?;
+    backend: &crate::backend::Backend,
+    backend_config: &crate::backend::BackendConfiguration,
+) -> anyhow::Result<(Interner, Vec<PackageInterned>)> {
+    let backend_impl = backend
+        .create_packages(backend_config)
+        .with_context(|| format!("Failed to create backend for {backend}"))?;
     let interner = Interner::new();
-    let packages = backend.packages(&interner).with_context(|| {
-        format!(
-            "Failed to collect information from backend {}",
-            config.common.backend
-        )
-    })?;
+    let packages = backend_impl
+        .packages(&interner)
+        .with_context(|| format!("Failed to collect information from backend {backend}"))?;
     Ok((interner, packages))
 }

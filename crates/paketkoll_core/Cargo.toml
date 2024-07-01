@@ -45,7 +45,6 @@ debian = [
 
 # Include support for serde on public datatypes
 serde = [
-    "bitflags/serde",
     "compact_str/serde",
     "dep:serde",
     "paketkoll_types/serde",
@@ -71,7 +70,6 @@ __extraction = ["dep:glob", "dep:tar"]
 ahash = { workspace = true }
 anyhow = { workspace = true, features = ["backtrace"] }
 ar = { workspace = true, optional = true }
-bitflags = { workspace = true }
 bstr = { workspace = true }
 bzip2 = { workspace = true, optional = true }
 cfg-if = { workspace = true }

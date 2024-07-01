@@ -5,71 +5,55 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use ahash::AHashMap;
 use anyhow::Context;
 use dashmap::DashMap;
 use ignore::{overrides::OverrideBuilder, Match, WalkBuilder, WalkState};
 
-use crate::{
-    backend::OriginalFileQuery,
-    types::{FileEntry, Issue, IssueKind, PackageIssue},
+use crate::backend::OriginalFileQuery;
+use paketkoll_types::intern::{Interner, PackageRef};
+use paketkoll_types::{
+    files::FileEntry,
+    issue::{Issue, IssueKind, PackageIssue},
 };
-use paketkoll_types::intern::Interner;
 use rayon::prelude::*;
 
 /// Perform a query of original files
 #[doc(hidden)]
 pub fn original_files(
-    config: &crate::config::OriginalFilesConfiguration,
+    backend: &crate::backend::Backend,
+    backend_config: &crate::backend::BackendConfiguration,
     queries: &[OriginalFileQuery],
 ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>> {
-    let backend = config
-        .common
-        .backend
-        .create_full(&config.common)
-        .with_context(|| format!("Failed to create backend for {}", config.common.backend))?;
+    let backend_impl = backend
+        .create_full(backend_config)
+        .with_context(|| format!("Failed to create backend for {backend}"))?;
     let interner = Interner::new();
-    let packages = backend.packages(&interner).with_context(|| {
-        format!(
-            "Failed to collect information from backend {}",
-            config.common.backend
-        )
-    })?;
-    let mut package_map =
-        AHashMap::with_capacity_and_hasher(packages.len(), ahash::RandomState::new());
-    for package in packages.into_iter() {
-        package_map.insert(package.name, package);
-    }
 
-    let results = backend
+    let package_map = backend_impl
+        .package_map(&interner)
+        .with_context(|| format!("Failed to collect information from backend {backend}"))?;
+
+    let results = backend_impl
         .original_files(queries, package_map, &interner)
-        .with_context(|| {
-            format!(
-                "Failed to collect original files from backend {}",
-                config.common.backend
-            )
-        })?;
+        .with_context(|| format!("Failed to collect original files from backend {backend}"))?;
 
     Ok(results)
 }
 
 /// Check file system for differences using the given configuration
 pub fn check_installed_files(
-    config: &crate::config::CommonFileCheckConfiguration,
+    backend: &crate::backend::Backend,
+    backend_config: &crate::backend::BackendConfiguration,
+    filecheck_config: &crate::config::CommonFileCheckConfiguration,
 ) -> anyhow::Result<(Interner, Vec<PackageIssue>)> {
-    let backend = config
-        .common
-        .backend
-        .create_files(&config.common)
-        .with_context(|| format!("Failed to create backend for {}", config.common.backend))?;
+    let backend_impl = backend
+        .create_files(backend_config)
+        .with_context(|| format!("Failed to create backend for {backend}"))?;
     let interner = Interner::new();
     // Get distro specific file list
-    let results = backend.files(&interner).with_context(|| {
-        format!(
-            "Failed to collect information from backend {}",
-            config.common.backend
-        )
-    })?;
+    let results = backend_impl
+        .files(&interner)
+        .with_context(|| format!("Failed to collect information from backend {backend}"))?;
 
     log::debug!(target: "paketkoll_core::backend", "Checking file system");
     // For all file entries, check on file system
@@ -80,7 +64,7 @@ pub fn check_installed_files(
         .into_iter()
         .par_bridge()
         .filter_map(|file_entry| {
-            match crate::backend::filesystem::check_file(&file_entry, config) {
+            match crate::backend::filesystem::check_file(&file_entry, filecheck_config) {
                 Ok(Some(inner)) => Some((file_entry.package, inner)),
                 Ok(None) => None,
                 Err(err) => {
@@ -99,35 +83,47 @@ pub fn check_installed_files(
 
 /// Check file system for differences (including unexpected files) using the given configuration
 pub fn check_all_files(
-    common_cfg: &crate::config::CommonFileCheckConfiguration,
+    backend: &crate::backend::Backend,
+    backend_config: &crate::backend::BackendConfiguration,
+    filecheck_config: &crate::config::CommonFileCheckConfiguration,
     unexpected_cfg: &crate::config::CheckAllFilesConfiguration,
 ) -> anyhow::Result<(Interner, Vec<PackageIssue>)> {
     // Collect distro files
-    let backend = common_cfg
-        .common
-        .backend
-        .create_files(&common_cfg.common)
-        .with_context(|| format!("Failed to create backend for {}", common_cfg.common.backend))?;
+    let backend_impl = backend
+        .create_files(backend_config)
+        .with_context(|| format!("Failed to create backend for {backend}"))?;
     let interner = Interner::new();
     // Get distro specific file list
-    let mut results = backend.files(&interner).with_context(|| {
-        format!(
-            "Failed to collect information from backend {}",
-            common_cfg.common.backend
-        )
-    })?;
+    let results = backend_impl
+        .files(&interner)
+        .with_context(|| format!("Failed to collect information from backend {backend}",))?;
 
+    let results = mismatching_and_unexpected_files(results, filecheck_config, unexpected_cfg)?;
+    Ok((interner, results))
+}
+
+/// Find mismatching and unexpected files
+///
+/// This takes a list of expected files to be seen and some config objects.
+///
+/// Returned will be a list of issues found (along with which package is
+/// associated with that file if known).
+pub fn mismatching_and_unexpected_files(
+    mut expected_files: Vec<FileEntry>,
+    filecheck_config: &crate::config::CommonFileCheckConfiguration,
+    unexpected_cfg: &crate::config::CheckAllFilesConfiguration,
+) -> anyhow::Result<Vec<(Option<PackageRef>, Issue)>> {
     // Possibly canonicalize paths
     if unexpected_cfg.canonicalize_paths {
         log::debug!(target: "paketkoll_core::backend", "Canonicalizing paths");
-        canonicalize_file_entries(&mut results);
+        canonicalize_file_entries(&mut expected_files);
     }
 
     log::debug!(target: "paketkoll_core::backend", "Preparing data structures");
     // We want a hashmap from path to data here.
     let path_map: DashMap<&Path, &FileEntry, ahash::RandomState> =
-        DashMap::with_capacity_and_hasher(results.len(), ahash::RandomState::new());
-    results.par_iter().for_each(|file_entry| {
+        DashMap::with_capacity_and_hasher(expected_files.len(), ahash::RandomState::new());
+    expected_files.par_iter().for_each(|file_entry| {
         path_map.insert(&file_entry.path, file_entry);
     });
 
@@ -170,7 +166,8 @@ pub fn check_all_files(
                         file_entry
                             .seen
                             .store(true, std::sync::atomic::Ordering::Relaxed);
-                        match crate::backend::filesystem::check_file(&file_entry, common_cfg) {
+                        match crate::backend::filesystem::check_file(&file_entry, filecheck_config)
+                        {
                             Ok(Some(inner)) => {
                                 collector
                                     .send((file_entry.package, inner))
@@ -217,7 +214,7 @@ pub fn check_all_files(
     });
 
     // Identify missing files (we should have seen them walking through the file system)
-    results.par_iter().for_each(|file_entry| {
+    expected_files.par_iter().for_each(|file_entry| {
         if file_entry.seen.load(std::sync::atomic::Ordering::Relaxed) {
             return;
         }
@@ -248,10 +245,10 @@ pub fn check_all_files(
     // Drop on a background thread, this help a bit.
     drop(path_map);
     rayon::spawn(move || {
-        drop(results);
+        drop(expected_files);
     });
 
-    Ok((interner, mismatches))
+    Ok(mismatches)
 }
 
 /// Canonicalize paths in file entries.

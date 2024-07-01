@@ -1,8 +1,7 @@
 //! Types and traits for representing data about packages
 
-use super::FileEntry;
+use crate::intern::{ArchitectureRef, Interner, PackageRef};
 use compact_str::CompactString;
-use paketkoll_types::intern::{ArchitectureRef, Interner, PackageRef};
 
 /// The reason a package is installed
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -24,16 +23,11 @@ pub enum PackageInstallStatus {
     Partial,
 }
 
-#[derive(Debug)]
-#[allow(dead_code)]
-pub(crate) struct BackendData {
-    pub(crate) files: Vec<FileEntry>,
-    pub(crate) packages: Vec<PackageInterned>,
-}
-
 /// Describes a package as needed by paketkoll & related future tools
+///
+/// This is generic over using interned types or direct strings. This is needed
+/// to support generating JSON for serde, which can't deal with the interner.
 #[derive(Debug, PartialEq, Eq, Clone, derive_builder::Builder)]
-#[non_exhaustive]
 pub struct Package<PackageT, ArchitectureT>
 where
     PackageT: std::fmt::Debug + PartialEq + Eq + Clone,
@@ -74,7 +68,7 @@ where
     PackageT: std::fmt::Debug + PartialEq + Eq + Clone + Copy,
     ArchitectureT: std::fmt::Debug + PartialEq + Eq + Clone + Copy,
 {
-    pub(crate) fn builder() -> PackageBuilder<PackageRef, ArchitectureRef> {
+    pub fn builder() -> PackageBuilder<PackageRef, ArchitectureRef> {
         PackageBuilder::default()
     }
 }

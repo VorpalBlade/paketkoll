@@ -7,11 +7,11 @@
 #[cfg(not(any(feature = "arch_linux", feature = "debian")))]
 compile_error!("At least one backend must be enabled");
 
-pub(crate) mod backend;
+pub mod backend;
 pub mod config;
 pub mod file_ops;
 pub mod package_ops;
-pub mod types;
 pub(crate) mod utils;
 
-pub use backend::OriginalFileQuery;
+/// Re-export for downstream to get the correct version
+pub use paketkoll_types;

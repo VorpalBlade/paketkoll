@@ -8,12 +8,16 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::types::{Directory, FileEntry, FileFlags, PackageRef, Properties, RegularFile, Symlink};
 use anyhow::Context;
 use dashmap::DashSet;
 use flate2::read::GzDecoder;
 use mtree2::{self, MTree};
-use paketkoll_types::files::{Checksum, Gid, Mode, Uid};
+use paketkoll_types::{
+    files::{
+        Checksum, Directory, FileEntry, FileFlags, Gid, Mode, Properties, RegularFile, Symlink, Uid,
+    },
+    intern::PackageRef,
+};
 
 /// Set of special files to ignore from mtree data
 ///

@@ -951,7 +951,6 @@ dependencies = [
  "ahash",
  "anyhow",
  "ar",
- "bitflags 2.6.0",
  "bstr",
  "bzip2",
  "cfg-if",
@@ -994,6 +993,9 @@ name = "paketkoll_types"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bitflags 2.6.0",
+ "compact_str",
+ "derive_builder",
  "faster-hex",
  "lasso",
  "serde",

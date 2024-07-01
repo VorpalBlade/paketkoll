@@ -9,17 +9,17 @@ use std::{
 
 use crate::{
     config::{CommonFileCheckConfiguration, ConfigFiles},
-    types::{
-        DeviceNode, DeviceType, Directory, EntryType, Fifo, FileFlags, Properties, RegularFile,
-        RegularFileBasic, RegularFileSystemd, Symlink,
-    },
     utils::MODE_MASK,
 };
 
-use crate::types::{FileEntry, Issue, IssueKind, IssueVec};
-
 use anyhow::{Context, Result};
-use paketkoll_types::files::{Checksum, Gid, Mode, Uid};
+use paketkoll_types::{
+    files::{
+        Checksum, DeviceNode, DeviceType, Directory, Fifo, FileEntry, FileFlags, Gid, Mode,
+        Permissions, Properties, RegularFile, RegularFileBasic, RegularFileSystemd, Symlink, Uid,
+    },
+    issue::{EntryType, Issue, IssueKind, IssueVec},
+};
 
 /// Determine if a given file should be processed
 fn should_process(file: &FileEntry, config: &CommonFileCheckConfiguration) -> bool {
@@ -216,7 +216,7 @@ pub(crate) fn check_file(
                     });
                 }
             }
-            Properties::Permissions(crate::types::Permissions { mode, owner, group }) => {
+            Properties::Permissions(Permissions { mode, owner, group }) => {
                 check_permissions(&mut issues, &metadata, *owner, *group, *mode);
             }
         },

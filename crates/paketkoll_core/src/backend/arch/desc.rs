@@ -13,69 +13,70 @@
 
 use std::io::BufRead;
 
-use crate::types::{ArchitectureRef, Dependency, InstallReason, PackageInstallStatus, PackageRef};
 use compact_str::CompactString;
-use paketkoll_types::intern::Interner;
+use paketkoll_types::package::{Dependency, InstallReason, PackageInstallStatus};
+use paketkoll_types::{
+    intern::{ArchitectureRef, Interner, PackageRef},
+    package::PackageInterned,
+};
 
-impl crate::types::PackageInterned {
-    pub(super) fn from_arch_linux_desc(
-        mut readable: impl BufRead,
-        interner: &Interner,
-    ) -> anyhow::Result<Self> {
-        let mut name: Option<PackageRef> = None;
-        let mut arch: Option<ArchitectureRef> = None;
-        let mut version: Option<CompactString> = None;
-        let mut desc: Option<CompactString> = None;
-        let mut depends: Vec<PackageRef> = Vec::new();
-        let mut provides: Vec<PackageRef> = Vec::new();
-        let mut reason: Option<InstallReason> = None;
+pub(super) fn from_arch_linux_desc(
+    mut readable: impl BufRead,
+    interner: &Interner,
+) -> anyhow::Result<PackageInterned> {
+    let mut name: Option<PackageRef> = None;
+    let mut arch: Option<ArchitectureRef> = None;
+    let mut version: Option<CompactString> = None;
+    let mut desc: Option<CompactString> = None;
+    let mut depends: Vec<PackageRef> = Vec::new();
+    let mut provides: Vec<PackageRef> = Vec::new();
+    let mut reason: Option<InstallReason> = None;
 
-        let mut line = String::new();
-        while readable.read_line(&mut line)? > 0 {
-            if line == "%NAME%\n" {
-                line.clear();
-                readable.read_line(&mut line)?;
-                name = Some(PackageRef::get_or_intern(interner, line.trim_end()));
-            } else if line == "%VERSION%\n" {
-                line.clear();
-                readable.read_line(&mut line)?;
-                version = Some(line.trim_end().into());
-            } else if line == "%ARCH%\n" {
-                line.clear();
-                readable.read_line(&mut line)?;
-                arch = Some(ArchitectureRef::get_or_intern(interner, line.trim_end()));
-            } else if line == "%DESC%\n" {
-                line.clear();
-                readable.read_line(&mut line)?;
-                desc = Some(line.trim_end().into());
-            } else if line == "%DEPENDS%\n" {
-                parse_package_list(&mut readable, &mut depends, interner)?;
-            } else if line == "%PROVIDES%\n" {
-                parse_package_list(&mut readable, &mut provides, interner)?;
-            } else if line == "%REASON%\n" {
-                line.clear();
-                readable.read_line(&mut line)?;
-                // Reverse engineering note: 1 means dependency, not set means explicit
-                reason = match line.trim_end() {
-                    "1" => Some(InstallReason::Dependency),
-                    _ => None,
-                };
-            }
+    let mut line = String::new();
+    while readable.read_line(&mut line)? > 0 {
+        if line == "%NAME%\n" {
             line.clear();
+            readable.read_line(&mut line)?;
+            name = Some(PackageRef::get_or_intern(interner, line.trim_end()));
+        } else if line == "%VERSION%\n" {
+            line.clear();
+            readable.read_line(&mut line)?;
+            version = Some(line.trim_end().into());
+        } else if line == "%ARCH%\n" {
+            line.clear();
+            readable.read_line(&mut line)?;
+            arch = Some(ArchitectureRef::get_or_intern(interner, line.trim_end()));
+        } else if line == "%DESC%\n" {
+            line.clear();
+            readable.read_line(&mut line)?;
+            desc = Some(line.trim_end().into());
+        } else if line == "%DEPENDS%\n" {
+            parse_package_list(&mut readable, &mut depends, interner)?;
+        } else if line == "%PROVIDES%\n" {
+            parse_package_list(&mut readable, &mut provides, interner)?;
+        } else if line == "%REASON%\n" {
+            line.clear();
+            readable.read_line(&mut line)?;
+            // Reverse engineering note: 1 means dependency, not set means explicit
+            reason = match line.trim_end() {
+                "1" => Some(InstallReason::Dependency),
+                _ => None,
+            };
         }
-
-        Ok(Self {
-            name: name.ok_or_else(|| anyhow::anyhow!("No name"))?,
-            architecture: arch,
-            version: version.ok_or_else(|| anyhow::anyhow!("No version"))?,
-            desc: Some(desc.ok_or_else(|| anyhow::anyhow!("No desc"))?),
-            depends: depends.into_iter().map(Dependency::Single).collect(),
-            provides,
-            reason: Some(reason.unwrap_or(InstallReason::Explicit)),
-            status: PackageInstallStatus::Installed,
-            id: None,
-        })
+        line.clear();
     }
+
+    Ok(PackageInterned {
+        name: name.ok_or_else(|| anyhow::anyhow!("No name"))?,
+        architecture: arch,
+        version: version.ok_or_else(|| anyhow::anyhow!("No version"))?,
+        desc: Some(desc.ok_or_else(|| anyhow::anyhow!("No desc"))?),
+        depends: depends.into_iter().map(Dependency::Single).collect(),
+        provides,
+        reason: Some(reason.unwrap_or(InstallReason::Explicit)),
+        status: PackageInstallStatus::Installed,
+        id: None,
+    })
 }
 
 /// Get the backup files list
@@ -136,10 +137,9 @@ fn parse_backup(
 }
 #[cfg(test)]
 mod tests {
-    use crate::types::Package;
 
     use super::*;
-    use paketkoll_types::intern::Interner;
+    use paketkoll_types::{intern::Interner, package::Package};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -195,7 +195,7 @@ mod tests {
             "};
 
         let interner = Interner::default();
-        let desc = Package::from_arch_linux_desc(input.as_bytes(), &interner).unwrap();
+        let desc = from_arch_linux_desc(input.as_bytes(), &interner).unwrap();
 
         assert_eq!(
             desc,

@@ -2,9 +2,8 @@
 
 use std::{collections::BTreeMap, io::BufRead, path::PathBuf};
 
-use crate::types::PackageRef;
 use anyhow::Context;
-use paketkoll_types::intern::Interner;
+use paketkoll_types::intern::{Interner, PackageRef};
 
 /// Describes a diversion by dpkg-divert
 ///
@@ -84,8 +83,7 @@ mod tests {
     use std::collections::BTreeMap;
 
     use super::{parse_diversions, Diversion};
-    use crate::types::PackageRef;
-    use paketkoll_types::intern::Interner;
+    use paketkoll_types::intern::{Interner, PackageRef};
     use pretty_assertions::assert_eq;
 
     #[test]

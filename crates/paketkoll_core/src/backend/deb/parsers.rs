@@ -2,14 +2,14 @@
 
 use std::io::BufRead;
 
-use crate::types::{
-    ArchitectureRef, Dependency, FileEntry, FileFlags, InstallReason, PackageBuilder,
-    PackageInterned, PackageRef, Properties, RegularFileBasic,
-};
 use anyhow::{bail, Context};
 use bstr::{io::BufReadExt, ByteSlice, ByteVec};
-use paketkoll_types::files::Checksum;
-use paketkoll_types::intern::Interner;
+use paketkoll_types::intern::{ArchitectureRef, Interner, PackageRef};
+use paketkoll_types::package::PackageBuilder;
+use paketkoll_types::{
+    files::{Checksum, FileEntry, FileFlags, Properties, RegularFileBasic},
+    package::{Dependency, InstallReason, PackageInstallStatus, PackageInterned},
+};
 use smallvec::SmallVec;
 
 /// Load lines from a readable as `PathBufs`
@@ -236,13 +236,13 @@ pub(super) fn parse_status(
                     package_builder
                         .as_mut()
                         .expect("Invalid internal state")
-                        .status(crate::types::PackageInstallStatus::Installed);
+                        .status(PackageInstallStatus::Installed);
                 }
                 _ => {
                     package_builder
                         .as_mut()
                         .expect("Invalid internal state")
-                        .status(crate::types::PackageInstallStatus::Partial);
+                        .status(PackageInstallStatus::Partial);
                 }
             }
         } else if line == "Conffiles:" {
@@ -325,11 +325,9 @@ enum ExtendedStatusParsingState {
 #[cfg(test)]
 mod tests {
     use super::{parse_md5sums, parse_paths, parse_status};
-    use crate::types::{
-        ArchitectureRef, Dependency, FileEntry, FileFlags, PackageRef, Properties, RegularFileBasic,
-    };
-    use paketkoll_types::files::Checksum;
-    use paketkoll_types::intern::Interner;
+    use paketkoll_types::files::{Checksum, FileEntry, FileFlags, Properties, RegularFileBasic};
+    use paketkoll_types::intern::{ArchitectureRef, Interner, PackageRef};
+    use paketkoll_types::package::{Dependency, InstallReason, Package, PackageInstallStatus};
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -530,7 +528,7 @@ mod tests {
         let (files, packages) = parse_status(&interner, &mut input).unwrap();
         assert_eq!(
             packages,
-            vec![crate::types::Package {
+            vec![Package {
                 name: PackageRef::get_or_intern(&interner, "libc6"),
                 architecture: Some(ArchitectureRef::get_or_intern(&interner, "arm64")),
                 version: "2.36-9+rpt2+deb12u4".into(),
@@ -540,8 +538,8 @@ mod tests {
                     Dependency::Single(PackageRef::get_or_intern(&interner, "something-else")),
                 ],
                 provides: vec![],
-                reason: Some(crate::types::InstallReason::Explicit),
-                status: crate::types::PackageInstallStatus::Installed,
+                reason: Some(InstallReason::Explicit),
+                status: PackageInstallStatus::Installed,
                 id: None,
             }]
         );
@@ -634,42 +632,42 @@ mod tests {
                     PackageRef::get_or_intern(&interner, "ncal"),
                     ArchitectureRef::get_or_intern(&interner, "arm64"),
                 ),
-                Some(crate::types::InstallReason::Dependency),
+                Some(InstallReason::Dependency),
             ),
             (
                 (
                     PackageRef::get_or_intern(&interner, "libqrencode4"),
                     ArchitectureRef::get_or_intern(&interner, "arm64"),
                 ),
-                Some(crate::types::InstallReason::Dependency),
+                Some(InstallReason::Dependency),
             ),
             (
                 (
                     PackageRef::get_or_intern(&interner, "linux-image-6.6.28+rpt-rpi-2712"),
                     ArchitectureRef::get_or_intern(&interner, "arm64"),
                 ),
-                Some(crate::types::InstallReason::Dependency),
+                Some(InstallReason::Dependency),
             ),
             (
                 (
                     PackageRef::get_or_intern(&interner, "linux-image-6.6.28+rpt-rpi-v8"),
                     ArchitectureRef::get_or_intern(&interner, "arm64"),
                 ),
-                Some(crate::types::InstallReason::Dependency),
+                Some(InstallReason::Dependency),
             ),
             (
                 (
                     PackageRef::get_or_intern(&interner, "linux-headers-6.6.28+rpt-common-rpi"),
                     ArchitectureRef::get_or_intern(&interner, "arm64"),
                 ),
-                Some(crate::types::InstallReason::Dependency),
+                Some(InstallReason::Dependency),
             ),
             (
                 (
                     PackageRef::get_or_intern(&interner, "linux-headers-6.6.28+rpt-rpi-v8"),
                     ArchitectureRef::get_or_intern(&interner, "arm64"),
                 ),
-                Some(crate::types::InstallReason::Dependency),
+                Some(InstallReason::Dependency),
             ),
         ]);
 

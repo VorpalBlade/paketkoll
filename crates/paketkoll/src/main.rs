@@ -11,16 +11,17 @@ use ahash::AHashSet;
 use clap::Parser;
 use cli::{Backend, Cli};
 use paketkoll_core::{
-    config::{self, CheckAllFilesConfiguration, PackageFilter},
+    backend::{self, OriginalFileQuery},
+    config::{self, CheckAllFilesConfiguration},
     file_ops, package_ops,
-    types::{Issue, PackageRef},
-    OriginalFileQuery,
+    paketkoll_types::{intern::PackageRef, issue::Issue, package::InstallReason},
 };
 use proc_exit::{Code, Exit};
 use rayon::prelude::*;
 
 #[cfg(target_env = "musl")]
 use mimalloc::MiMalloc;
+use paketkoll_core::backend::PackageFilter;
 
 #[cfg(target_env = "musl")]
 #[cfg_attr(target_env = "musl", global_allocator)]
@@ -37,7 +38,8 @@ fn main() -> anyhow::Result<Exit> {
             run_file_checks(&cli)
         }
         cli::Commands::InstalledPackages => {
-            let (interner, packages) = package_ops::installed_packages(&(&cli).try_into()?)?;
+            let (interner, packages) =
+                package_ops::installed_packages(&(cli.backend.try_into()?), &(&cli).try_into()?)?;
             let mut stdout = BufWriter::new(stdout().lock());
 
             match cli.format {
@@ -47,10 +49,10 @@ fn main() -> anyhow::Result<Exit> {
                             .try_resolve(&pkg.name.as_interner_ref())
                             .ok_or_else(|| anyhow::anyhow!("No package name for package"))?;
                         match pkg.reason {
-                            Some(paketkoll_core::types::InstallReason::Explicit) => {
+                            Some(InstallReason::Explicit) => {
                                 writeln!(stdout, "{} {}", pkg_name, pkg.version)?;
                             }
-                            Some(paketkoll_core::types::InstallReason::Dependency) => {
+                            Some(InstallReason::Dependency) => {
                                 writeln!(stdout, "{} {} (as dep)", pkg_name, pkg.version)?;
                             }
                             None => writeln!(
@@ -81,7 +83,11 @@ fn main() -> anyhow::Result<Exit> {
                 package: package.into(),
                 path: path.into(),
             }];
-            let results = file_ops::original_files(&(&cli).try_into()?, queries.as_slice())?;
+            let results = file_ops::original_files(
+                &(cli.backend.try_into()?),
+                &(&cli).try_into()?,
+                queries.as_slice(),
+            )?;
 
             for (query, result) in results {
                 println!("--- {query:?} ---");
@@ -94,16 +100,25 @@ fn main() -> anyhow::Result<Exit> {
 
 fn run_file_checks(cli: &Cli) -> Result<Exit, anyhow::Error> {
     let (interner, mut found_issues) = match cli.command {
-        cli::Commands::Check { .. } => file_ops::check_installed_files(&cli.try_into()?)?,
+        cli::Commands::Check { .. } => file_ops::check_installed_files(
+            &(cli.backend.try_into()?),
+            &cli.try_into()?,
+            &cli.try_into()?,
+        )?,
         cli::Commands::CheckUnexpected {
             ref ignore,
             canonicalize,
-        } => file_ops::check_all_files(&cli.try_into()?, &{
-            let mut builder = CheckAllFilesConfiguration::builder();
-            builder.ignored_paths(ignore.clone());
-            builder.canonicalize_paths(canonicalize);
-            builder.build()?
-        })?,
+        } => file_ops::check_all_files(
+            &(cli.backend.try_into()?),
+            &cli.try_into()?,
+            &cli.try_into()?,
+            &{
+                let mut builder = CheckAllFilesConfiguration::builder();
+                builder.ignored_paths(ignore.clone());
+                builder.canonicalize_paths(canonicalize);
+                builder.build()?
+            },
+        )?,
         _ => unreachable!(),
     };
 
@@ -166,7 +181,7 @@ struct IssueReport<'interner> {
     issue: Issue,
 }
 
-impl TryFrom<Backend> for paketkoll_core::config::Backend {
+impl TryFrom<Backend> for paketkoll_core::backend::Backend {
     type Error = anyhow::Error;
 
     fn try_from(value: Backend) -> Result<Self, Self::Error> {
@@ -207,13 +222,11 @@ impl From<cli::ConfigFiles> for config::ConfigFiles {
     }
 }
 
-impl TryFrom<&Cli> for config::CommonConfiguration {
+impl TryFrom<&Cli> for backend::BackendConfiguration {
     type Error = anyhow::Error;
 
     fn try_from(value: &Cli) -> Result<Self, Self::Error> {
         let mut builder = Self::builder();
-
-        builder.backend(value.backend.try_into()?);
 
         match value.command {
             cli::Commands::Check { ref packages } => {
@@ -238,31 +251,6 @@ impl TryFrom<&Cli> for config::CommonFileCheckConfiguration {
 
         builder.trust_mtime(value.trust_mtime);
         builder.config_files(value.config_files.into());
-        builder.common(value.try_into()?);
-
-        Ok(builder.build()?)
-    }
-}
-
-impl TryFrom<&Cli> for config::PackageListConfiguration {
-    type Error = anyhow::Error;
-
-    fn try_from(value: &Cli) -> Result<Self, Self::Error> {
-        let mut builder = Self::builder();
-
-        builder.common(value.try_into()?);
-
-        Ok(builder.build()?)
-    }
-}
-
-impl TryFrom<&Cli> for config::OriginalFilesConfiguration {
-    type Error = anyhow::Error;
-
-    fn try_from(value: &Cli) -> Result<Self, Self::Error> {
-        let mut builder = Self::builder();
-
-        builder.common(value.try_into()?);
 
         Ok(builder.build()?)
     }
@@ -271,16 +259,16 @@ impl TryFrom<&Cli> for config::OriginalFilesConfiguration {
 /// Produce a 'static reference to a package filter that will live long enough.
 ///
 /// We intentionally "leak" memory here, it will live as long as the program runs, which is fine.
-fn convert_filter(packages: Vec<String>) -> &'static config::PackageFilter {
+fn convert_filter(packages: Vec<String>) -> &'static backend::PackageFilter {
     let packages: AHashSet<String> = AHashSet::from_iter(packages);
     let boxed = Box::new(if packages.is_empty() {
-        config::PackageFilter::Everything
+        backend::PackageFilter::Everything
     } else {
-        config::PackageFilter::FilterFunction(Box::new(move |pkg| {
+        backend::PackageFilter::FilterFunction(Box::new(move |pkg| {
             if packages.contains(pkg) {
-                config::FilterAction::Include
+                backend::FilterAction::Include
             } else {
-                config::FilterAction::Exclude
+                backend::FilterAction::Exclude
             }
         }))
     });
