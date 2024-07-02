@@ -67,19 +67,19 @@ __zstd = ["dep:zstd"]
 __extraction = ["dep:glob", "dep:tar"]
 
 [dependencies]
-ahash = { workspace = true }
+ahash.workspace = true
 anyhow = { workspace = true, features = ["backtrace"] }
 ar = { workspace = true, optional = true }
-bstr = { workspace = true }
+bstr.workspace = true
 bzip2 = { workspace = true, optional = true }
-cfg-if = { workspace = true }
+cfg-if.workspace = true
 compact_str = { workspace = true, features = ["smallvec"] }
-dashmap = { workspace = true }
-derive_builder = { workspace = true }
-either = { workspace = true }
+dashmap.workspace = true
+derive_builder.workspace = true
+either.workspace = true
 faster-hex = { workspace = true, features = ["std"] }
 flate2 = { workspace = true, optional = true }
-flume = { workspace = true }
+flume.workspace = true
 glob = { workspace = true, optional = true }
 ignore = { workspace = true, features = ["simd-accel"] }
 lasso = { workspace = true, features = [
@@ -87,20 +87,20 @@ lasso = { workspace = true, features = [
     "inline-more",
     "multi-threaded",
 ] }
-libc = { workspace = true }
-log = { workspace = true }
+libc.workspace = true
+log.workspace = true
 md-5 = { workspace = true, optional = true }
 mtree2 = { version = "0.6.1", path = "../mtree2", optional = true }
 nix = { workspace = true, features = ["user"], optional = true }
-num_cpus = { workspace = true }
+num_cpus.workspace = true
 paketkoll_types = { version = "0.1.0", path = "../paketkoll_types" }
 paketkoll_utils = { version = "0.1.0", path = "../paketkoll_utils" }
 phf = { workspace = true, features = ["macros"] }
-rayon = { workspace = true }
-regex = { workspace = true }
+rayon.workspace = true
+regex.workspace = true
 ring = { workspace = true, optional = true }
 rust-ini = { workspace = true, optional = true }
-scopeguard = { workspace = true }
+scopeguard.workspace = true
 serde = { workspace = true, optional = true, features = ["derive"] }
 smallvec = { workspace = true, features = [
     "const_generics",
@@ -114,8 +114,8 @@ xz2 = { workspace = true, optional = true }
 zstd = { workspace = true, optional = true }
 
 [dev-dependencies]
-indoc = { workspace = true }
-pretty_assertions = { workspace = true }
+indoc.workspace = true
+pretty_assertions.workspace = true
 
 [lints]
 workspace = true

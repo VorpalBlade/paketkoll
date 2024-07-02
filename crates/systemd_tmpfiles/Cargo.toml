@@ -21,12 +21,12 @@ default = ["user"]
 user = ["dep:dirs", "nix/user"]
 
 [dependencies]
-base64-simd = { workspace = true }
-bitflags = { workspace = true }
+base64-simd.workspace = true
+bitflags.workspace = true
 compact_str = { workspace = true, features = ["smallvec"] }
 dirs = { workspace = true, optional = true }
-libc = { workspace = true }
-memchr = { workspace = true }
+libc.workspace = true
+memchr.workspace = true
 nix = { workspace = true, features = ["feature"] }
 smallvec = { workspace = true, features = [
     "const_generics",
@@ -34,12 +34,12 @@ smallvec = { workspace = true, features = [
     "union",
 ] }
 strum = { workspace = true, features = ["derive"] }
-thiserror = { workspace = true }
+thiserror.workspace = true
 winnow = { workspace = true, features = ["simd"] }
 
 [dev-dependencies]
-indoc = { workspace = true }
-pretty_assertions = { workspace = true }
+indoc.workspace = true
+pretty_assertions.workspace = true
 
 [lints]
 workspace = true

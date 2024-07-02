@@ -28,15 +28,15 @@ json = ["dep:serde_json", "paketkoll_core/serde", "serde"]
 serde = ["dep:serde"]
 
 [dependencies]
-ahash = { workspace = true }
+ahash.workspace = true
 anyhow = { workspace = true, features = ["backtrace"] }
 clap = { workspace = true, features = ["derive"] }
-env_logger = { workspace = true }
-log = { workspace = true }
-os_info = { workspace = true }
+env_logger.workspace = true
+log.workspace = true
+os_info.workspace = true
 paketkoll_core = { version = "0.4.1", path = "../paketkoll_core" }
-proc-exit = { workspace = true }
-rayon = { workspace = true }
+proc-exit.workspace = true
+rayon.workspace = true
 serde = { workspace = true, optional = true, features = ["serde_derive"] }
 serde_json = { workspace = true, optional = true }
 
@@ -48,8 +48,8 @@ mimalloc = "0.1.43"
 
 [build-dependencies]
 clap = { workspace = true, features = ["derive"] }
-clap_complete = { workspace = true }
-clap_mangen = { workspace = true }
+clap_complete.workspace = true
+clap_mangen.workspace = true
 
 [lints]
 workspace = true
