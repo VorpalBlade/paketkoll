@@ -6,7 +6,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use crate::files::{Checksum, Gid, Mode, Uid};
+use crate::files::{Checksum, DeviceType, Gid, Mode, Uid};
 use crate::intern::PackageRef;
 use smallvec::SmallVec;
 
@@ -19,7 +19,7 @@ pub type IssueVec = SmallVec<[IssueKind; 1]>;
 pub type PackageIssue = (Option<PackageRef>, Issue);
 
 /// Type of entry (used to report mismatches)
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize))]
 #[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 #[non_exhaustive]
@@ -147,8 +147,8 @@ pub enum IssueKind {
     WrongMode { actual: Mode, expected: Mode },
     /// Incorrect major or minor device node numbers
     WrongDeviceNodeId {
-        actual: (u64, u64),
-        expected: (u64, u64),
+        actual: (DeviceType, u64, u64),
+        expected: (DeviceType, u64, u64),
     },
     /// Some sort of parsing error for this entry (from the package manager backend)
     #[cfg_attr(feature = "serde", serde(serialize_with = "serialize_error"))]
@@ -191,8 +191,8 @@ impl Display for IssueKind {
             )?,
             IssueKind::WrongDeviceNodeId { actual, expected } => write!(
                 f,
-                "device node ID mismatch (expected {}:{}, actual {}:{})",
-                expected.0, expected.1, actual.0, actual.1
+                "device node ID mismatch (expected {} {}:{}, actual {} {}:{})",
+                expected.0, expected.1, expected.2, actual.0, actual.1, actual.2,
             )?,
             IssueKind::MetadataError(err) => {
                 write!(f, "error with metadata parsing")?;

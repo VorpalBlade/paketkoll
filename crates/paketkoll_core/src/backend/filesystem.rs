@@ -187,8 +187,8 @@ pub(crate) fn check_file(
                     let minor_actual = unsafe { libc::minor(rdev) } as u64;
                     if (major_actual, minor_actual) != (*major, *minor) {
                         issues.push(IssueKind::WrongDeviceNodeId {
-                            actual: (major_actual, minor_actual),
-                            expected: (*major, *minor),
+                            actual: (*device_type, major_actual, minor_actual),
+                            expected: (*device_type, *major, *minor),
                         });
                     }
                 }

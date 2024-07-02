@@ -143,11 +143,20 @@ pub struct DeviceNode {
 }
 
 /// Type of device node (block or char)
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub enum DeviceType {
     Block,
     Char,
+}
+
+impl std::fmt::Display for DeviceType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            DeviceType::Block => write!(f, "block"),
+            DeviceType::Char => write!(f, "char"),
+        }
+    }
 }
 
 /// A symlink
