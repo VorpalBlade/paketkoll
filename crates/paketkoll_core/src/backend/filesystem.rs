@@ -358,7 +358,7 @@ fn check_permissions(
     // There are some extra bits further up in the mode mask that we need to mask out here.
     // They indicate things like file/directory/fifo/device-node
     let actual_mode = actual_metadata.mode() & MODE_MASK;
-    if actual_mode != expected_mode.0 {
+    if actual_mode != expected_mode.as_raw() {
         issues.push(IssueKind::WrongMode {
             actual: Mode::new(actual_mode),
             expected: expected_mode,
@@ -373,13 +373,13 @@ fn check_ownership(
     expected_owner: Uid,
     expected_group: Gid,
 ) {
-    if actual_metadata.uid() != expected_owner.0 {
+    if actual_metadata.uid() != expected_owner.as_raw() {
         issues.push(IssueKind::WrongOwner {
             actual: Uid::new(actual_metadata.uid()),
             expected: expected_owner,
         });
     }
-    if actual_metadata.gid() != expected_group.0 {
+    if actual_metadata.gid() != expected_group.as_raw() {
         issues.push(IssueKind::WrongGroup {
             actual: Gid::new(actual_metadata.gid()),
             expected: expected_group,

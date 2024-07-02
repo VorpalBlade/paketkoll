@@ -82,7 +82,7 @@ fn convert_mtree(
             let dir = Directory {
                 owner: Uid::new(item.uid().context("No uid for dir")?),
                 group: Gid::new(item.gid().context("No gid for dir")?),
-                mode: Mode(item.mode().context("Missing mode")?.into()),
+                mode: Mode::new(item.mode().context("Missing mode")?.into()),
             };
             let path = extract_path(item);
             if seen_directories.insert((path.clone(), dir.clone())) {
@@ -104,7 +104,7 @@ fn convert_mtree(
             properties: Properties::RegularFile(RegularFile {
                 owner: Uid::new(item.uid().context("No uid for file")?),
                 group: Gid::new(item.gid().context("No gid for file")?),
-                mode: Mode(item.mode().context("Missing mode")?.into()),
+                mode: Mode::new(item.mode().context("Missing mode")?.into()),
                 mtime: item.time().context("Missing mtime")?,
                 checksum: Checksum::Sha256(*item.sha256().context("Missing sha256")?),
                 size: item.size().context("Missing size")?,

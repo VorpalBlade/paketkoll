@@ -999,6 +999,7 @@ dependencies = [
  "derive_builder",
  "faster-hex",
  "lasso",
+ "nix",
  "serde",
  "smallvec",
 ]

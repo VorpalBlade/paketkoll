@@ -1,6 +1,7 @@
 //! Types representing things about the file system
 
 use crate::intern::PackageRef;
+use std::fmt::Octal;
 use std::path::PathBuf;
 use std::sync::atomic::AtomicBool;
 use std::time::SystemTime;
@@ -9,11 +10,17 @@ use std::time::SystemTime;
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(transparent)]
-pub struct Mode(pub u32);
+pub struct Mode(u32);
 
 impl Mode {
+    #[inline]
     pub fn new(value: u32) -> Self {
         Self(value)
+    }
+
+    #[inline]
+    pub fn as_raw(&self) -> u32 {
+        self.0
     }
 }
 
@@ -23,21 +30,51 @@ impl std::fmt::Display for Mode {
     }
 }
 
+impl Octal for Mode {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:o}", self.0)
+    }
+}
+
+impl From<Mode> for nix::sys::stat::Mode {
+    fn from(mode: Mode) -> Self {
+        nix::sys::stat::Mode::from_bits_truncate(mode.0)
+    }
+}
+
 /// A POSIX UID
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(transparent)]
-pub struct Uid(pub u32);
+pub struct Uid(u32);
 
 impl Uid {
+    #[inline]
     pub fn new(id: u32) -> Self {
         Self(id)
+    }
+
+    #[inline]
+    pub fn as_raw(&self) -> u32 {
+        self.0
     }
 }
 
 impl std::fmt::Display for Uid {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
+        std::fmt::Display::fmt(&self.0, f)
+    }
+}
+
+impl From<Uid> for nix::unistd::Uid {
+    fn from(uid: Uid) -> Self {
+        nix::unistd::Uid::from_raw(uid.0)
+    }
+}
+
+impl From<&Uid> for nix::unistd::Uid {
+    fn from(uid: &Uid) -> Self {
+        nix::unistd::Uid::from_raw(uid.0)
     }
 }
 
@@ -45,17 +82,35 @@ impl std::fmt::Display for Uid {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 #[repr(transparent)]
-pub struct Gid(pub u32);
+pub struct Gid(u32);
 
 impl Gid {
+    #[inline]
     pub fn new(id: u32) -> Self {
         Self(id)
+    }
+
+    #[inline]
+    pub fn as_raw(&self) -> u32 {
+        self.0
+    }
+}
+
+impl From<Gid> for nix::unistd::Gid {
+    fn from(gid: Gid) -> Self {
+        nix::unistd::Gid::from_raw(gid.0)
+    }
+}
+
+impl From<&Gid> for nix::unistd::Gid {
+    fn from(gid: &Gid) -> Self {
+        nix::unistd::Gid::from_raw(gid.0)
     }
 }
 
 impl std::fmt::Display for Gid {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
+        std::fmt::Display::fmt(&self.0, f)
     }
 }
 

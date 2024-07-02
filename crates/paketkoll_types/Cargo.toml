@@ -24,6 +24,7 @@ lasso = { workspace = true, features = [
     "inline-more",
     "multi-threaded",
 ] }
+nix = { workspace = true, features = ["fs", "user"] }
 serde = { workspace = true, optional = true, features = ["derive"] }
 smallvec = { workspace = true, features = [
     "const_generics",
