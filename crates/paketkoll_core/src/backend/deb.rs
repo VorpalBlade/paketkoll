@@ -4,7 +4,7 @@ mod parsers;
 
 use std::fs::{DirEntry, File};
 use std::io::BufReader;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use super::{Files, FullBackend, Name, PackageManager, Packages};
 use crate::backend::PackageFilter;
@@ -21,6 +21,7 @@ use paketkoll_types::files::{FileEntry, Properties};
 use paketkoll_types::intern::{Interner, PackageRef};
 use paketkoll_types::package::PackageInterned;
 use rayon::prelude::*;
+use regex::RegexSet;
 
 // Each package has a set of files in DB_PATH:
 // *.list (all installed paths, one per line, including directories)
@@ -181,6 +182,75 @@ impl Files for Debian {
 
         Ok(results)
     }
+
+    fn owning_package(
+        &self,
+        paths: &ahash::AHashSet<PathBuf>,
+        interner: &Interner,
+    ) -> anyhow::Result<DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>> {
+        // Optimise for speed, go directly into package cache and look for files that contain the given string
+        let file_to_package = DashMap::with_hasher(ahash::RandomState::new());
+        let db_root = PathBuf::from(DB_PATH);
+
+        let paths: Vec<String> = paths
+            .iter()
+            .map(|e| {
+                let e = e.to_string_lossy();
+                let e = e.as_ref();
+                format!("\n{e}\n")
+            })
+            .collect();
+        let paths = paths.as_slice();
+        let re = RegexSet::new(paths)?;
+
+        std::fs::read_dir(db_root)
+            .context("Failed to read pacman database directory")?
+            .par_bridge()
+            .for_each(|entry| {
+                if let Ok(entry) = entry {
+                    if entry.file_name().as_encoded_bytes().ends_with(b".list") {
+                        if let Err(e) =
+                            is_file_match(&entry.path(), interner, &re, paths, &file_to_package)
+                        {
+                            log::error!("Failed to parse package data: {e}");
+                        }
+                    }
+                }
+            });
+
+        Ok(file_to_package)
+    }
+}
+
+fn is_file_match(
+    list_path: &Path,
+    interner: &Interner,
+    re: &RegexSet,
+    paths: &[String],
+    output: &DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>,
+) -> anyhow::Result<()> {
+    let contents = std::fs::read_to_string(list_path)
+        .with_context(|| format!("Failed to read {list_path:?}"))?;
+    let matches = re.matches(&contents);
+    if matches.matched_any() {
+        let file_name = list_path
+            .file_name()
+            .ok_or_else(|| anyhow::anyhow!("Failed to extract filename"))?;
+        let file_name = file_name.to_string_lossy();
+        let file_name = file_name
+            .strip_suffix(".list")
+            .ok_or_else(|| anyhow::anyhow!("Not a list file?"))?;
+        let pkg_name = match file_name.split_once(':') {
+            Some((name, _arch)) => name,
+            None => file_name,
+        };
+        let pkg: PackageRef = PackageRef::get_or_intern(interner, pkg_name);
+
+        for m in matches {
+            output.insert(paths[m].as_str().trim().into(), Some(pkg));
+        }
+    }
+    Ok(())
 }
 
 fn merge_deb_fileentries(

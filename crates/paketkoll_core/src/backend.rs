@@ -1,14 +1,15 @@
 //! The various backends implementing distro specific support
 
-use ahash::AHashMap;
+use ahash::{AHashMap, AHashSet};
 use anyhow::{anyhow, Context};
 use compact_str::CompactString;
+use dashmap::DashMap;
 use paketkoll_types::{
     files::FileEntry,
     intern::{Interner, PackageRef},
     package::PackageInterned,
 };
-use std::fmt::Debug;
+use std::{fmt::Debug, path::PathBuf};
 
 #[cfg(feature = "arch_linux")]
 pub(crate) mod arch;
@@ -35,6 +36,13 @@ pub trait Files: Name {
     /// Collect a list of files managed by the package manager including
     /// any available metadata such as checksums or timestamps about those files
     fn files(&self, interner: &Interner) -> anyhow::Result<Vec<FileEntry>>;
+
+    /// Find the owners of the specified packages
+    fn owning_package(
+        &self,
+        paths: &AHashSet<PathBuf>,
+        interner: &Interner,
+    ) -> anyhow::Result<DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>>;
 
     /// Get the original contents of files
     fn original_files(

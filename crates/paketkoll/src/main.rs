@@ -8,13 +8,18 @@ use std::{
 };
 
 use ahash::AHashSet;
+use anyhow::Context;
 use clap::Parser;
 use cli::{Backend, Cli};
 use paketkoll_core::{
     backend::{self, OriginalFileQuery},
     config::{self, CheckAllFilesConfiguration},
     file_ops, package_ops,
-    paketkoll_types::{intern::PackageRef, issue::Issue, package::InstallReason},
+    paketkoll_types::{
+        intern::{Interner, PackageRef},
+        issue::Issue,
+        package::InstallReason,
+    },
 };
 use proc_exit::{Code, Exit};
 use rayon::prelude::*;
@@ -75,23 +80,74 @@ fn main() -> anyhow::Result<Exit> {
 
             Ok(Exit::new(Code::SUCCESS))
         }
-        cli::Commands::OriginalFiles {
+        cli::Commands::OriginalFile {
             ref package,
             ref path,
         } => {
+            let backend: paketkoll_core::backend::Backend = cli.backend.try_into()?;
+            let backend_impl = backend
+                .create_full(&(&cli).try_into()?)
+                .context("Failed to create backend")?;
+            let interner = Interner::new();
+
+            let package_map = backend_impl
+                .package_map(&interner)
+                .with_context(|| format!("Failed to collect information from backend {backend}"))?;
+
+            let package: &str = match package {
+                Some(p) => p,
+                None => {
+                    let mut inputs = AHashSet::default();
+                    inputs.insert(path.as_str().into());
+                    let file_map = backend_impl.owning_package(&inputs, &interner)?;
+                    if file_map.len() != 1 {
+                        return Err(anyhow::anyhow!(
+                            "Expected exactly one package to own the file, found {}",
+                            file_map.len()
+                        ));
+                    }
+                    let (_path, owner) = file_map
+                        .into_iter()
+                        .next()
+                        .expect("Impossible with check above");
+                    if let Some(package) = owner {
+                        package.to_str(&interner)
+                    } else {
+                        return Err(anyhow::anyhow!("No package owns the given file"));
+                    }
+                }
+            };
             let queries = vec![OriginalFileQuery {
                 package: package.into(),
                 path: path.into(),
             }];
-            let results = file_ops::original_files(
-                &(cli.backend.try_into()?),
-                &(&cli).try_into()?,
-                queries.as_slice(),
-            )?;
+            let results = backend_impl
+                .original_files(queries.as_slice(), package_map, &interner)
+                .with_context(|| {
+                    format!("Failed to collect original files from backend {backend}")
+                })?;
 
-            for (query, result) in results {
-                println!("--- {query:?} ---");
+            for (_query, result) in results {
                 std::io::stdout().write_all(&result)?;
+            }
+            Ok(Exit::new(Code::SUCCESS))
+        }
+        cli::Commands::Owns { ref paths } => {
+            let backend: paketkoll_core::backend::Backend = cli.backend.try_into()?;
+            let backend_impl = backend
+                .create_files(&(&cli).try_into()?)
+                .context("Failed to create backend")?;
+            let interner = Interner::new();
+
+            let inputs = AHashSet::from_iter(paths.iter().map(|e| e.as_str().into()));
+            let file_map = backend_impl.owning_package(&inputs, &interner)?;
+
+            for (path, owner) in file_map {
+                if let Some(package) = owner {
+                    println!("{}: {}", package.to_str(&interner), path.to_string_lossy());
+                } else {
+                    println!("No package owns this file");
+                }
             }
             Ok(Exit::new(Code::SUCCESS))
         }
@@ -237,7 +293,8 @@ impl TryFrom<&Cli> for backend::BackendConfiguration {
                 canonicalize: _,
             } => {}
             cli::Commands::InstalledPackages => {}
-            cli::Commands::OriginalFiles { .. } => {}
+            cli::Commands::OriginalFile { .. } => {}
+            cli::Commands::Owns { .. } => {}
         }
         Ok(builder.build()?)
     }

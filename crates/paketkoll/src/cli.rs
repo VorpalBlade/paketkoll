@@ -44,11 +44,17 @@ pub(crate) enum Commands {
     },
     /// Get a list of installed packages
     InstalledPackages,
+    /// Find package that owns a given file.
+    Owns {
+        /// Path to query
+        paths: Vec<String>,
+    },
+    /// Get the original content of a file
     #[clap(hide = true)]
-    /// Get the original contents of files
-    OriginalFiles {
+    OriginalFile {
         /// Package to query
-        package: String,
+        #[arg(long)]
+        package: Option<String>,
         /// Path to query
         path: String,
     },

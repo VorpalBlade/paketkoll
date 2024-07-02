@@ -15,14 +15,15 @@ use super::{Files, FullBackend, Name, PackageFilter, PackageManager, Packages};
 use crate::utils::{
     extract_files, group_queries_by_pkg, locate_package_file, package_manager_transaction,
 };
-use ahash::AHashMap;
+use ahash::{AHashMap, AHashSet};
 use anyhow::Context;
 use compact_str::format_compact;
-use dashmap::DashSet;
+use dashmap::{DashMap, DashSet};
 use either::Either;
 use paketkoll_types::{files::FileEntry, intern::PackageRef};
 use paketkoll_types::{intern::Interner, package::PackageInterned};
 use rayon::prelude::*;
+use regex::RegexSet;
 
 const NAME: &str = "Arch Linux";
 
@@ -176,6 +177,74 @@ impl Files for ArchLinux {
 
         Ok(results)
     }
+
+    fn owning_package(
+        &self,
+        paths: &AHashSet<PathBuf>,
+        interner: &Interner,
+    ) -> anyhow::Result<DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>> {
+        // Optimise for speed, go directly into package cache and look for files that contain the given string
+        let file_to_package = DashMap::with_hasher(ahash::RandomState::new());
+        let db_root = PathBuf::from(self.pacman_config.db_path.as_str()).join("local");
+
+        let paths: Vec<String> = paths
+            .iter()
+            .map(|e| {
+                let e = e.to_string_lossy();
+                let e = e.as_ref();
+                format!("\n{}\n", e.strip_prefix('/').unwrap_or(e))
+            })
+            .collect();
+        let paths = paths.as_slice();
+        let re = RegexSet::new(paths)?;
+
+        std::fs::read_dir(db_root)
+            .context("Failed to read pacman database directory")?
+            .par_bridge()
+            .for_each(|entry| {
+                if let Ok(entry) = entry {
+                    if let Err(e) = find_files(&entry, interner, &re, paths, &file_to_package) {
+                        log::error!("Failed to parse package data: {e}");
+                    }
+                }
+            });
+
+        Ok(file_to_package)
+    }
+}
+
+fn find_files(
+    entry: &std::fs::DirEntry,
+    interner: &Interner,
+    re: &RegexSet,
+    paths: &[String],
+    output: &DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>,
+) -> anyhow::Result<()> {
+    if !entry.file_type()?.is_dir() {
+        return Ok(());
+    };
+    let files_path = entry.path().join("files");
+    let contents = std::fs::read_to_string(&files_path)
+        .with_context(|| format!("Failed to read {files_path:?}"))?;
+    let matches = re.matches(&contents);
+    if matches.matched_any() {
+        let desc_path = entry.path().join("desc");
+        let pkg_data = {
+            let readable = BufReader::new(
+                std::fs::File::open(&desc_path)
+                    .with_context(|| format!("Failed to open {desc_path:?}"))?,
+            );
+            desc::from_arch_linux_desc(readable, interner)?
+        };
+
+        for m in matches {
+            output.insert(
+                format!("/{}", paths[m].as_str().trim()).into(),
+                Some(pkg_data.name),
+            );
+        }
+    }
+    Ok(())
 }
 
 impl Packages for ArchLinux {

@@ -82,6 +82,17 @@ impl Files for SystemdTmpfiles {
     ) -> anyhow::Result<ahash::AHashMap<super::OriginalFileQuery, Vec<u8>>> {
         anyhow::bail!("Original file queries are not supported for systemd-tmpfiles")
     }
+
+    fn owning_package(
+        &self,
+        _paths: &ahash::AHashSet<PathBuf>,
+        _interner: &paketkoll_types::intern::Interner,
+    ) -> anyhow::Result<
+        dashmap::DashMap<PathBuf, Option<paketkoll_types::intern::PackageRef>, ahash::RandomState>,
+    > {
+        // This doesn't make sense for this provider
+        anyhow::bail!("Owning packages are not supported for systemd-tmpfiles")
+    }
 }
 
 /// Parse the systemd-tmpfiles output into [`FileEntry`]s that are usable by the shared later stages.
