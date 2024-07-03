@@ -172,8 +172,7 @@ fn process_entry<'entry>(
                 owner: resolve_uid(user, id_cache)?,
                 group: resolve_gid(group, id_cache)?,
                 size: Some(contents.len() as u64),
-                checksum: sha256_buffer(contents.as_bytes())
-                    .with_context(|| format!("Failed to generate checksum for {path:?}"))?,
+                checksum: sha256_buffer(contents.as_bytes()),
                 contents: Some(contents.into_owned().into_bytes().into_boxed_slice()),
             })
         }
@@ -186,8 +185,7 @@ fn process_entry<'entry>(
                 .context("Failed to apply specifiers")?;
             Properties::RegularFileBasic(RegularFileBasic {
                 size: Some(contents.len() as u64),
-                checksum: sha256_buffer(contents.as_bytes())
-                    .with_context(|| format!("Failed to generate checksum for {path:?}"))?,
+                checksum: sha256_buffer(contents.as_bytes()),
             })
         }
         systemd_tmpfiles::Directive::WriteToFile {

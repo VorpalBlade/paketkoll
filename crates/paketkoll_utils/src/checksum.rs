@@ -27,14 +27,9 @@ pub fn sha256_readable(reader: &mut impl std::io::Read) -> anyhow::Result<Checks
     ))
 }
 
-pub fn sha256_buffer(contents: &[u8]) -> anyhow::Result<Checksum> {
+pub fn sha256_buffer(contents: &[u8]) -> Checksum {
     let mut hasher = ring::digest::Context::new(&ring::digest::SHA256);
     hasher.update(contents);
     let digest = hasher.finish();
-    Ok(Checksum::Sha256(
-        digest
-            .as_ref()
-            .try_into()
-            .context("Invalid digest length")?,
-    ))
+    Checksum::Sha256(digest.as_ref().try_into().expect("Invalid digest length"))
 }
