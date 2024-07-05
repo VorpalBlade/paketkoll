@@ -972,6 +972,7 @@ dependencies = [
  "nix",
  "num_cpus",
  "paketkoll_types",
+ "paketkoll_utils",
  "phf",
  "pretty_assertions",
  "rayon",
@@ -1000,6 +1001,15 @@ dependencies = [
  "lasso",
  "serde",
  "smallvec",
+]
+
+[[package]]
+name = "paketkoll_utils"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "paketkoll_types",
+ "ring",
 ]
 
 [[package]]

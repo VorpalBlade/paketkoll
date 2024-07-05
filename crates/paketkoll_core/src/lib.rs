@@ -11,7 +11,7 @@ pub mod backend;
 pub mod config;
 pub mod file_ops;
 pub mod package_ops;
-pub(crate) mod utils;
+pub mod utils;
 
 /// Re-export for downstream to get the correct version
 pub use paketkoll_types;

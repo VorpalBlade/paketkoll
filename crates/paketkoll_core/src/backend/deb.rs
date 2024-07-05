@@ -338,7 +338,8 @@ fn download_deb(pkg: &str) -> Result<(), anyhow::Error> {
         .args(["install", "--reinstall", "-d", pkg])
         .status()?;
     if !status.success() {
-        log::warn!("Failed to download package for {pkg}");
+        log::warn!(target: "paketkoll_core::backend::deb",
+                   "Failed to download package for {pkg}");
     };
     Ok(())
 }

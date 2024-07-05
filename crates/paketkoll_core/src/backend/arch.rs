@@ -240,7 +240,7 @@ fn download_arch_pkg(pkg: &str) -> Result<(), anyhow::Error> {
         .args(["-Sw", "--noconfirm", pkg])
         .status()?;
     if !status.success() {
-        log::warn!("Failed to download package for {pkg}");
+        log::warn!(target: "paketkoll_core::backend::arch", "Failed to download package for {pkg}");
     };
     Ok(())
 }
