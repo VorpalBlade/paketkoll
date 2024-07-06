@@ -1,5 +1,6 @@
 .gdb_history
 .idea
+/.vscode
 /target
 flamegraph.svg
 heaptrack.*
