@@ -933,6 +933,7 @@ dependencies = [
  "clap",
  "clap_complete",
  "clap_mangen",
+ "compact_str",
  "env_logger",
  "log",
  "mimalloc",

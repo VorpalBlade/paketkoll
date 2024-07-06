@@ -1,31 +1,32 @@
 use std::fmt::Display;
 
 use clap::{Parser, Subcommand};
+use compact_str::CompactString;
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]
 #[command(propagate_version = true)]
 #[clap(disable_help_subcommand = true)]
-pub(crate) struct Cli {
+pub struct Cli {
     /// Trust mtime (don't check checksum if it matches)
     #[arg(long)]
-    pub(crate) trust_mtime: bool,
+    pub trust_mtime: bool,
     /// Include config files in the check
     #[arg(long, default_value_t = ConfigFiles::Exclude)]
-    pub(crate) config_files: ConfigFiles,
+    pub config_files: ConfigFiles,
     /// Which package manager backend to use
     #[arg(short, long, default_value_t = Backend::Auto)]
-    pub(crate) backend: Backend,
+    pub backend: Backend,
     /// Output format to use
     #[arg(short, long, default_value_t = Format::Human)]
-    pub(crate) format: Format,
+    pub format: Format,
     /// Operation to perform
     #[command(subcommand)]
-    pub(crate) command: Commands,
+    pub command: Commands,
 }
 
 #[derive(Debug, Subcommand)]
-pub(crate) enum Commands {
+pub enum Commands {
     /// Check package files
     Check {
         /// Packages to check (default: all of them)
@@ -36,7 +37,7 @@ pub(crate) enum Commands {
         /// Paths to ignore (apart from built in ones). Basic globs are supported.
         /// Use ** to match any number of path components.
         #[arg(long)]
-        ignore: Vec<String>,
+        ignore: Vec<CompactString>,
         /// Should paths be canonicalized before checking? If you get many false positives, try this.
         /// Required on Debian due to lack of /usr merge.
         #[arg(long)]
@@ -62,7 +63,7 @@ pub(crate) enum Commands {
 
 /// Output format to use
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, clap::ValueEnum)]
-pub(crate) enum Format {
+pub enum Format {
     /// Human-readable output
     Human,
     /// JSON formatted output
@@ -82,7 +83,7 @@ impl Display for Format {
 
 /// Determine which package manager backend to use
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, clap::ValueEnum)]
-pub(crate) enum Backend {
+pub enum Backend {
     /// Select based on current distro
     Auto,
     /// Backend for Arch Linux and derived distros (pacman)

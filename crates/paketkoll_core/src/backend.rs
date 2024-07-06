@@ -115,6 +115,19 @@ pub enum Backend {
     SystemdTmpfiles,
 }
 
+impl Backend {
+    pub fn from_name(name: &str) -> Option<Self> {
+        match name {
+            #[cfg(feature = "arch_linux")]
+            "pacman" => Some(Backend::ArchLinux),
+            #[cfg(feature = "debian")]
+            "apt" => Some(Backend::Debian),
+            "flatpak" => Some(Backend::Flatpak),
+            _ => None,
+        }
+    }
+}
+
 // Clippy is wrong, this cannot be derived due to the cfg_if
 #[allow(clippy::derivable_impls)]
 impl Default for Backend {

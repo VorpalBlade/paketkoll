@@ -22,6 +22,45 @@ impl Mode {
     pub fn as_raw(&self) -> u32 {
         self.0
     }
+
+    /// Parse from u=rwx,g=rw,o=r format
+    ///
+    /// Since that is a diff
+    pub fn parse(value: &str) -> anyhow::Result<Self> {
+        let components = value.split(',');
+
+        let mut mode: u32 = 0;
+        for component in components {
+            let component = component.as_bytes();
+            let who = component
+                .first()
+                .ok_or_else(|| anyhow::anyhow!("Invalid mode: {value}"))?;
+            if component[1] != b'=' {
+                return Err(anyhow::anyhow!("Invalid mode: {value}"));
+            }
+            let perms = &component[2..];
+
+            // Convert perms to bits
+            let mut bits = 0;
+            for perm in perms {
+                match perm {
+                    b'r' => bits |= 0b100,
+                    b'w' => bits |= 0b010,
+                    b'x' => bits |= 0b001,
+                    _ => return Err(anyhow::anyhow!("Invalid mode: {value}")),
+                }
+            }
+
+            // Shift the bits based on who
+            match who {
+                b'u' => mode |= bits << 6,
+                b'g' => mode |= bits << 3,
+                b'o' => mode |= bits,
+                _ => return Err(anyhow::anyhow!("Invalid mode: {value}")),
+            }
+        }
+        Ok(Self(mode))
+    }
 }
 
 impl std::fmt::Display for Mode {
@@ -338,4 +377,22 @@ pub struct Permissions {
     pub mode: Mode,
     pub owner: Uid,
     pub group: Gid,
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_mode_parsing() {
+        let mode = super::Mode::parse("u=rwx,g=rw,o=r").unwrap();
+        assert_eq!(mode.as_raw(), 0o764);
+
+        let mode = super::Mode::parse("u=,g=,o=").unwrap();
+        assert_eq!(mode.as_raw(), 0);
+
+        let mode = super::Mode::parse("u=rwx,g=,o=").unwrap();
+        assert_eq!(mode.as_raw(), 0o700);
+
+        let mode = super::Mode::parse("u=rwx,g=rwx,o=rwx").unwrap();
+        assert_eq!(mode.as_raw(), 0o777);
+    }
 }
