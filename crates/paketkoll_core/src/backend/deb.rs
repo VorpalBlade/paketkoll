@@ -6,7 +6,7 @@ use std::fs::{DirEntry, File};
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 
-use super::{Files, FullBackend, Name, PackageManager, Packages};
+use super::FullBackend;
 use crate::backend::PackageFilter;
 use crate::utils::{
     extract_files, group_queries_by_pkg, locate_package_file, package_manager_transaction,
@@ -17,12 +17,12 @@ use bstr::ByteSlice;
 use bstr::ByteVec;
 use compact_str::CompactString;
 use dashmap::DashMap;
+use paketkoll_types::backend::{Files, Name, OriginalFileQuery, Packages};
 use paketkoll_types::files::{FileEntry, Properties};
 use paketkoll_types::intern::{Interner, PackageRef};
 use paketkoll_types::package::PackageInterned;
 use rayon::prelude::*;
 use regex::RegexSet;
-
 // Each package has a set of files in DB_PATH:
 // *.list (all installed paths, one per line, including directories)
 // *.md5sums (md5sum<space>path, one per line for all regular files)
@@ -69,8 +69,8 @@ impl Name for Debian {
         NAME
     }
 
-    fn as_backend_enum(&self) -> paketkoll_types::Backend {
-        paketkoll_types::Backend::Apt
+    fn as_backend_enum(&self) -> paketkoll_types::backend::Backend {
+        paketkoll_types::backend::Backend::Apt
     }
 }
 
@@ -120,10 +120,10 @@ impl Files for Debian {
 
     fn original_files(
         &self,
-        queries: &[super::OriginalFileQuery],
+        queries: &[OriginalFileQuery],
         packages: ahash::AHashMap<PackageRef, PackageInterned>,
         interner: &Interner,
-    ) -> anyhow::Result<ahash::AHashMap<super::OriginalFileQuery, Vec<u8>>> {
+    ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>> {
         let queries_by_pkg = group_queries_by_pkg(queries);
         let mut results = ahash::AHashMap::new();
 
@@ -369,13 +369,11 @@ impl Packages for Debian {
 
         Ok(packages)
     }
-}
 
-impl PackageManager for Debian {
     fn transact(
         &self,
-        install: &[compact_str::CompactString],
-        uninstall: &[compact_str::CompactString],
+        install: &[&str],
+        uninstall: &[&str],
         ask_confirmation: bool,
     ) -> anyhow::Result<()> {
         if !install.is_empty() {

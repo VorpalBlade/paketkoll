@@ -11,7 +11,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use super::{Files, FullBackend, Name, PackageFilter, PackageManager, Packages};
+use super::{FullBackend, PackageFilter};
 use crate::utils::{
     extract_files, group_queries_by_pkg, locate_package_file, package_manager_transaction,
 };
@@ -20,6 +20,7 @@ use anyhow::Context;
 use compact_str::format_compact;
 use dashmap::{DashMap, DashSet};
 use either::Either;
+use paketkoll_types::backend::{Files, Name, OriginalFileQuery, Packages};
 use paketkoll_types::{files::FileEntry, intern::PackageRef};
 use paketkoll_types::{intern::Interner, package::PackageInterned};
 use rayon::prelude::*;
@@ -75,8 +76,8 @@ impl Name for ArchLinux {
         NAME
     }
 
-    fn as_backend_enum(&self) -> paketkoll_types::Backend {
-        paketkoll_types::Backend::Pacman
+    fn as_backend_enum(&self) -> paketkoll_types::backend::Backend {
+        paketkoll_types::backend::Backend::Pacman
     }
 }
 
@@ -125,10 +126,10 @@ impl Files for ArchLinux {
 
     fn original_files(
         &self,
-        queries: &[super::OriginalFileQuery],
+        queries: &[OriginalFileQuery],
         packages: AHashMap<PackageRef, PackageInterned>,
         interner: &Interner,
-    ) -> anyhow::Result<ahash::AHashMap<super::OriginalFileQuery, Vec<u8>>> {
+    ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>> {
         let queries_by_pkg = group_queries_by_pkg(queries);
 
         let mut results = ahash::AHashMap::new();
@@ -271,13 +272,11 @@ impl Packages for ArchLinux {
             .collect();
         results
     }
-}
 
-impl PackageManager for ArchLinux {
     fn transact(
         &self,
-        install: &[compact_str::CompactString],
-        uninstall: &[compact_str::CompactString],
+        install: &[&str],
+        uninstall: &[&str],
         ask_confirmation: bool,
     ) -> anyhow::Result<()> {
         if !install.is_empty() {

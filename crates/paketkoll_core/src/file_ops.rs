@@ -9,7 +9,7 @@ use anyhow::Context;
 use dashmap::DashMap;
 use ignore::{overrides::OverrideBuilder, Match, WalkBuilder, WalkState};
 
-use crate::backend::OriginalFileQuery;
+use paketkoll_types::backend::OriginalFileQuery;
 use paketkoll_types::intern::{Interner, PackageRef};
 use paketkoll_types::{
     files::FileEntry,

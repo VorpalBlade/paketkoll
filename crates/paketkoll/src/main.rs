@@ -10,7 +10,6 @@ use anyhow::Context;
 use clap::Parser;
 use paketkoll::cli::{Cli, Commands, Format};
 use paketkoll_core::{
-    backend::OriginalFileQuery,
     config::CheckAllFilesConfiguration,
     file_ops, package_ops,
     paketkoll_types::{
@@ -19,6 +18,7 @@ use paketkoll_core::{
         package::InstallReason,
     },
 };
+use paketkoll_types::backend::OriginalFileQuery;
 use proc_exit::{Code, Exit};
 use rayon::prelude::*;
 

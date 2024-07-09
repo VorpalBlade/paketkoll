@@ -11,6 +11,7 @@ use std::{
 use ahash::AHashMap;
 use anyhow::Context;
 use compact_str::CompactString;
+use paketkoll_types::backend::{Files, Name, OriginalFileQuery};
 use paketkoll_types::files::{
     Checksum, DeviceNode, DeviceType, Directory, Fifo, FileEntry, FileFlags, Gid, Mode,
     Permissions, Properties, RegularFile, RegularFileBasic, RegularFileSystemd, Symlink, Uid,
@@ -19,8 +20,6 @@ use paketkoll_utils::checksum::{sha256_buffer, sha256_readable};
 use systemd_tmpfiles::specifier::Resolve;
 
 use paketkoll_utils::MODE_MASK;
-
-use super::{Files, Name};
 
 const NAME: &str = "systemd_tmpfiles";
 
@@ -42,8 +41,8 @@ impl Name for SystemdTmpfiles {
         NAME
     }
 
-    fn as_backend_enum(&self) -> paketkoll_types::Backend {
-        paketkoll_types::Backend::SystemdTmpfiles
+    fn as_backend_enum(&self) -> paketkoll_types::backend::Backend {
+        paketkoll_types::backend::Backend::SystemdTmpfiles
     }
 }
 
@@ -77,13 +76,13 @@ impl Files for SystemdTmpfiles {
 
     fn original_files(
         &self,
-        _queries: &[super::OriginalFileQuery],
+        _queries: &[OriginalFileQuery],
         _packages: ahash::AHashMap<
             paketkoll_types::intern::PackageRef,
             paketkoll_types::package::PackageInterned,
         >,
         _interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<ahash::AHashMap<super::OriginalFileQuery, Vec<u8>>> {
+    ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>> {
         anyhow::bail!("Original file queries are not supported for systemd-tmpfiles")
     }
 

@@ -1,15 +1,8 @@
 //! The various backends implementing distro specific support
 
-use ahash::{AHashMap, AHashSet};
-use anyhow::{anyhow, Context};
-use compact_str::CompactString;
-use dashmap::DashMap;
-use paketkoll_types::{
-    files::FileEntry,
-    intern::{Interner, PackageRef},
-    package::PackageInterned,
-};
-use std::{fmt::Debug, path::PathBuf};
+use paketkoll_types::backend::{Files, Packages};
+use paketkoll_types::intern::{Interner, PackageRef};
+use std::fmt::Debug;
 
 #[cfg(feature = "arch_linux")]
 pub(crate) mod arch;
@@ -23,82 +16,9 @@ pub(crate) mod flatpak;
 #[cfg(feature = "systemd_tmpfiles")]
 pub(crate) mod systemd_tmpfiles;
 
-/// Get the name of a backend (useful in dynamic dispatch for generating reports)
-pub trait Name: Send + Sync {
-    /// The name of the backend (for logging and debugging purposes)
-    fn name(&self) -> &'static str;
-
-    /// The backend enum value corresponding to this backend
-    fn as_backend_enum(&self) -> paketkoll_types::Backend;
-}
-
-/// A package manager backend
-pub trait Files: Name {
-    /// Collect a list of files managed by the package manager including
-    /// any available metadata such as checksums or timestamps about those files
-    fn files(&self, interner: &Interner) -> anyhow::Result<Vec<FileEntry>>;
-
-    /// Find the owners of the specified packages
-    fn owning_package(
-        &self,
-        paths: &AHashSet<PathBuf>,
-        interner: &Interner,
-    ) -> anyhow::Result<DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>>;
-
-    /// Get the original contents of files
-    fn original_files(
-        &self,
-        queries: &[OriginalFileQuery],
-        packages: ahash::AHashMap<PackageRef, PackageInterned>,
-        interner: &Interner,
-    ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>>;
-}
-
-/// Query type for original file contents
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
-pub struct OriginalFileQuery {
-    pub package: CompactString,
-    pub path: CompactString,
-}
-
-/// A package manager backend (reading list of packages)
-pub trait Packages: Name {
-    /// Collect a list of all installed packages
-    fn packages(&self, interner: &Interner) -> anyhow::Result<Vec<PackageInterned>>;
-
-    /// Collect a map of packages with the interned name as key
-    fn package_map(
-        &self,
-        interner: &Interner,
-    ) -> anyhow::Result<ahash::AHashMap<PackageRef, PackageInterned>> {
-        let packages = self
-            .packages(interner)
-            .with_context(|| anyhow!("Failed to load package list"))?;
-        let mut package_map =
-            AHashMap::with_capacity_and_hasher(packages.len(), ahash::RandomState::new());
-        for package in packages.into_iter() {
-            package_map.insert(package.name, package);
-        }
-        Ok(package_map)
-    }
-}
-
-/// A package manager backend (installing/uninstalling packages)
-pub trait PackageManager: Name {
-    /// Perform installation and uninstallation of a bunch of packages
-    ///
-    /// The package name format depends on the backend.
-    fn transact(
-        &self,
-        install: &[CompactString],
-        uninstall: &[CompactString],
-        ask_confirmation: bool,
-    ) -> anyhow::Result<()>;
-}
-
 /// A backend that implements all operations
 #[allow(dead_code)]
-pub trait FullBackend: Files + Packages + PackageManager {}
+pub trait FullBackend: Files + Packages {}
 
 /// Which backend to use for the system package manager
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, strum::Display)]
@@ -120,34 +40,34 @@ pub enum ConcreteBackend {
     SystemdTmpfiles,
 }
 
-impl TryFrom<paketkoll_types::Backend> for ConcreteBackend {
+impl TryFrom<paketkoll_types::backend::Backend> for ConcreteBackend {
     type Error = anyhow::Error;
 
-    fn try_from(value: paketkoll_types::Backend) -> Result<Self, Self::Error> {
+    fn try_from(value: paketkoll_types::backend::Backend) -> Result<Self, Self::Error> {
         match value {
             #[cfg(feature = "arch_linux")]
-            paketkoll_types::Backend::Pacman => Ok(Self::Pacman),
+            paketkoll_types::backend::Backend::Pacman => Ok(Self::Pacman),
             #[cfg(feature = "debian")]
-            paketkoll_types::Backend::Apt => Ok(Self::Apt),
-            paketkoll_types::Backend::Flatpak => Ok(Self::Flatpak),
+            paketkoll_types::backend::Backend::Apt => Ok(Self::Apt),
+            paketkoll_types::backend::Backend::Flatpak => Ok(Self::Flatpak),
             #[cfg(feature = "systemd_tmpfiles")]
-            paketkoll_types::Backend::SystemdTmpfiles => Ok(Self::SystemdTmpfiles),
+            paketkoll_types::backend::Backend::SystemdTmpfiles => Ok(Self::SystemdTmpfiles),
             #[allow(unreachable_patterns)]
             _ => anyhow::bail!("Unsupported backend in current build: {:?}", value),
         }
     }
 }
 
-impl From<ConcreteBackend> for paketkoll_types::Backend {
+impl From<ConcreteBackend> for paketkoll_types::backend::Backend {
     fn from(value: ConcreteBackend) -> Self {
         match value {
             #[cfg(feature = "arch_linux")]
-            ConcreteBackend::Pacman => paketkoll_types::Backend::Pacman,
+            ConcreteBackend::Pacman => paketkoll_types::backend::Backend::Pacman,
             #[cfg(feature = "debian")]
-            ConcreteBackend::Apt => paketkoll_types::Backend::Apt,
-            ConcreteBackend::Flatpak => paketkoll_types::Backend::Flatpak,
+            ConcreteBackend::Apt => paketkoll_types::backend::Backend::Apt,
+            ConcreteBackend::Flatpak => paketkoll_types::backend::Backend::Flatpak,
             #[cfg(feature = "systemd_tmpfiles")]
-            ConcreteBackend::SystemdTmpfiles => paketkoll_types::Backend::SystemdTmpfiles,
+            ConcreteBackend::SystemdTmpfiles => paketkoll_types::backend::Backend::SystemdTmpfiles,
         }
     }
 }

@@ -940,6 +940,7 @@ dependencies = [
  "mimalloc",
  "os_info",
  "paketkoll_core",
+ "paketkoll_types",
  "proc-exit",
  "rayon",
  "serde",
@@ -995,9 +996,11 @@ dependencies = [
 name = "paketkoll_types"
 version = "0.1.0"
 dependencies = [
+ "ahash",
  "anyhow",
  "bitflags 2.6.0",
  "compact_str",
+ "dashmap 6.0.1",
  "derive_builder",
  "faster-hex",
  "lasso",
