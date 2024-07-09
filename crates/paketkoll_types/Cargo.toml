@@ -14,9 +14,11 @@ version = "0.1.0"
 serde = ["dep:serde", "smallvec/serde", "bitflags/serde", "compact_str/serde"]
 
 [dependencies]
+ahash.workspace = true
 anyhow.workspace = true
 bitflags.workspace = true
 compact_str.workspace = true
+dashmap.workspace = true
 derive_builder.workspace = true
 faster-hex = { workspace = true, features = ["std"] }
 lasso = { workspace = true, features = [

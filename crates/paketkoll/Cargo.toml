@@ -36,6 +36,7 @@ env_logger.workspace = true
 log.workspace = true
 os_info.workspace = true
 paketkoll_core = { version = "0.4.1", path = "../paketkoll_core" }
+paketkoll_types = { version = "0.1.0", path = "../paketkoll_types" }
 proc-exit.workspace = true
 rayon.workspace = true
 serde = { workspace = true, optional = true, features = ["serde_derive"] }

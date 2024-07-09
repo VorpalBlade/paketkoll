@@ -2,15 +2,13 @@
 
 use std::process::{Command, Stdio};
 
+use crate::utils::package_manager_transaction;
 use anyhow::Context;
+use paketkoll_types::backend::{Name, Packages};
 use paketkoll_types::{
     intern::{ArchitectureRef, PackageRef},
     package::{Package, PackageInstallStatus, PackageInterned},
 };
-
-use crate::utils::package_manager_transaction;
-
-use super::{Name, PackageManager, Packages};
 
 /// Flatpak backend
 #[derive(Debug)]
@@ -30,8 +28,8 @@ impl Name for Flatpak {
         "Flatpak"
     }
 
-    fn as_backend_enum(&self) -> paketkoll_types::Backend {
-        paketkoll_types::Backend::Flatpak
+    fn as_backend_enum(&self) -> paketkoll_types::backend::Backend {
+        paketkoll_types::backend::Backend::Flatpak
     }
 }
 
@@ -61,6 +59,34 @@ impl Packages for Flatpak {
             String::from_utf8(output.stdout).context("Failed to parse flatpak list as UTF-8")?;
 
         parse_flatpak_output(&output, interner)
+    }
+
+    /// Flatpak uses the package ref (or partial ref, i.e. application ID) for installation
+    fn transact(
+        &self,
+        install: &[&str],
+        uninstall: &[&str],
+        ask_confirmation: bool,
+    ) -> anyhow::Result<()> {
+        if !install.is_empty() {
+            package_manager_transaction(
+                "flatpak",
+                "install",
+                install,
+                ask_confirmation.then_some("--noninteractive"),
+            )
+            .context("Failed to install with flatpak")?;
+        }
+        if !uninstall.is_empty() {
+            package_manager_transaction(
+                "flatpak",
+                "uninstall",
+                uninstall,
+                ask_confirmation.then_some("--noninteractive"),
+            )
+            .context("Failed to uninstall with flatpak")?;
+        }
+        Ok(())
     }
 }
 
@@ -106,36 +132,6 @@ fn parse_flatpak_output(
         packages.push(package);
     }
     Ok(packages)
-}
-
-impl PackageManager for Flatpak {
-    /// Flatpak uses the package ref (or partial ref, i.e. application ID) for installation
-    fn transact(
-        &self,
-        install: &[compact_str::CompactString],
-        uninstall: &[compact_str::CompactString],
-        ask_confirmation: bool,
-    ) -> anyhow::Result<()> {
-        if !install.is_empty() {
-            package_manager_transaction(
-                "flatpak",
-                "install",
-                install,
-                ask_confirmation.then_some("--noninteractive"),
-            )
-            .context("Failed to install with flatpak")?;
-        }
-        if !uninstall.is_empty() {
-            package_manager_transaction(
-                "flatpak",
-                "uninstall",
-                uninstall,
-                ask_confirmation.then_some("--noninteractive"),
-            )
-            .context("Failed to uninstall with flatpak")?;
-        }
-        Ok(())
-    }
 }
 
 #[cfg(test)]
