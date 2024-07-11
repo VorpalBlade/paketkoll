@@ -10,9 +10,6 @@ use std::{
     path::PathBuf,
 };
 
-/// Mask out the bits of the mode that are actual permissions
-pub(crate) const MODE_MASK: u32 = 0o7777;
-
 /// Helper to do a generic package manager transaction
 pub(crate) fn package_manager_transaction(
     program_name: &str,

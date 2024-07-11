@@ -20,7 +20,7 @@ use rayon::prelude::*;
 /// Perform a query of original files
 #[doc(hidden)]
 pub fn original_files(
-    backend: &crate::backend::Backend,
+    backend: &crate::backend::ConcreteBackend,
     backend_config: &crate::backend::BackendConfiguration,
     queries: &[OriginalFileQuery],
 ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>> {
@@ -42,7 +42,7 @@ pub fn original_files(
 
 /// Check file system for differences using the given configuration
 pub fn check_installed_files(
-    backend: &crate::backend::Backend,
+    backend: &crate::backend::ConcreteBackend,
     backend_config: &crate::backend::BackendConfiguration,
     filecheck_config: &crate::config::CommonFileCheckConfiguration,
 ) -> anyhow::Result<(Interner, Vec<PackageIssue>)> {
@@ -83,7 +83,7 @@ pub fn check_installed_files(
 
 /// Check file system for differences (including unexpected files) using the given configuration
 pub fn check_all_files(
-    backend: &crate::backend::Backend,
+    backend: &crate::backend::ConcreteBackend,
     backend_config: &crate::backend::BackendConfiguration,
     filecheck_config: &crate::config::CommonFileCheckConfiguration,
     unexpected_cfg: &crate::config::CheckAllFilesConfiguration,
@@ -223,6 +223,14 @@ pub fn mismatching_and_unexpected_files(
             file_entry.properties.is_dir().unwrap_or(false),
         ) {
             return;
+        }
+        // We also need to check the parent directories against ignores
+        for parent in file_entry.path.ancestors() {
+            match overrides.matched(parent, true) {
+                Match::None => (),
+                Match::Ignore(_) => return,
+                Match::Whitelist(_) => break,
+            }
         }
         collector
             .send((

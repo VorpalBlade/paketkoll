@@ -7,10 +7,7 @@ use std::{
     path::PathBuf,
 };
 
-use crate::{
-    config::{CommonFileCheckConfiguration, ConfigFiles},
-    utils::MODE_MASK,
-};
+use crate::config::{CommonFileCheckConfiguration, ConfigFiles};
 
 use anyhow::{Context, Result};
 use paketkoll_types::{
@@ -20,6 +17,7 @@ use paketkoll_types::{
     },
     issue::{EntryType, Issue, IssueKind, IssueVec},
 };
+use paketkoll_utils::MODE_MASK;
 
 /// Determine if a given file should be processed
 fn should_process(file: &FileEntry, config: &CommonFileCheckConfiguration) -> bool {

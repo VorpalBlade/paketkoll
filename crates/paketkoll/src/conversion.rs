@@ -2,7 +2,7 @@ use ahash::AHashSet;
 
 use crate::cli::{Backend, Cli, Commands, ConfigFiles};
 
-impl TryFrom<Backend> for paketkoll_core::backend::Backend {
+impl TryFrom<Backend> for paketkoll_core::backend::ConcreteBackend {
     type Error = anyhow::Error;
 
     fn try_from(value: Backend) -> Result<Self, Self::Error> {
@@ -12,20 +12,20 @@ impl TryFrom<Backend> for paketkoll_core::backend::Backend {
                 match info.os_type() {
                     #[cfg(feature = "arch_linux")]
                     os_info::Type::Arch | os_info::Type::EndeavourOS |
-                    os_info::Type::Manjaro => Ok(Self::ArchLinux),
+                    os_info::Type::Manjaro => Ok(Self::Pacman),
                     #[cfg(feature = "debian")]
                     os_info::Type::Debian | os_info::Type::Mint |
                     os_info::Type::Pop | os_info::Type::Raspbian |
-                    os_info::Type::Ubuntu => Ok(Self::Debian),
+                    os_info::Type::Ubuntu => Ok(Self::Apt),
                     _ => Err(anyhow::anyhow!(
                         "Unknown or unsupported distro: {} (try passing a specific backend if you think it should work)",
                         info.os_type())),
                 }
             }
             #[cfg(feature = "arch_linux")]
-            Backend::ArchLinux => Ok(Self::ArchLinux),
+            Backend::ArchLinux => Ok(Self::Pacman),
             #[cfg(feature = "debian")]
-            Backend::Debian => Ok(Self::Debian),
+            Backend::Debian => Ok(Self::Apt),
             Backend::Flatpak => Ok(Self::Flatpak),
             #[cfg(feature = "systemd_tmpfiles")]
             Backend::SystemdTmpfiles => Ok(Self::SystemdTmpfiles),
