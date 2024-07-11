@@ -18,7 +18,7 @@ use paketkoll_types::files::{
 use paketkoll_utils::checksum::{sha256_buffer, sha256_readable};
 use systemd_tmpfiles::specifier::Resolve;
 
-use crate::utils::MODE_MASK;
+use paketkoll_utils::MODE_MASK;
 
 use super::{Files, Name};
 
@@ -40,6 +40,10 @@ impl SystemdTmpfilesBuilder {
 impl Name for SystemdTmpfiles {
     fn name(&self) -> &'static str {
         NAME
+    }
+
+    fn as_backend_enum(&self) -> paketkoll_types::Backend {
+        paketkoll_types::Backend::SystemdTmpfiles
     }
 }
 

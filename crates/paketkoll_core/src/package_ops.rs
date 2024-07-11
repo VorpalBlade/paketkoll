@@ -6,7 +6,7 @@ use paketkoll_types::{intern::Interner, package::PackageInterned};
 
 /// Get a list of all installed packages
 pub fn installed_packages(
-    backend: &crate::backend::Backend,
+    backend: &crate::backend::ConcreteBackend,
     backend_config: &crate::backend::BackendConfiguration,
 ) -> anyhow::Result<(Interner, Vec<PackageInterned>)> {
     let backend_impl = backend

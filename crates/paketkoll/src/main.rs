@@ -79,7 +79,7 @@ fn main() -> anyhow::Result<Exit> {
             ref package,
             ref path,
         } => {
-            let backend: paketkoll_core::backend::Backend = cli.backend.try_into()?;
+            let backend: paketkoll_core::backend::ConcreteBackend = cli.backend.try_into()?;
             let backend_impl = backend
                 .create_full(&(&cli).try_into()?)
                 .context("Failed to create backend")?;
@@ -128,7 +128,7 @@ fn main() -> anyhow::Result<Exit> {
             Ok(Exit::new(Code::SUCCESS))
         }
         Commands::Owns { ref paths } => {
-            let backend: paketkoll_core::backend::Backend = cli.backend.try_into()?;
+            let backend: paketkoll_core::backend::ConcreteBackend = cli.backend.try_into()?;
             let backend_impl = backend
                 .create_files(&(&cli).try_into()?)
                 .context("Failed to create backend")?;

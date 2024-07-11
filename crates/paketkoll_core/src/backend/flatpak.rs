@@ -29,6 +29,10 @@ impl Name for Flatpak {
     fn name(&self) -> &'static str {
         "Flatpak"
     }
+
+    fn as_backend_enum(&self) -> paketkoll_types::Backend {
+        paketkoll_types::Backend::Flatpak
+    }
 }
 
 impl Packages for Flatpak {

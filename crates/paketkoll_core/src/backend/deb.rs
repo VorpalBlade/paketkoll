@@ -68,6 +68,10 @@ impl Name for Debian {
     fn name(&self) -> &'static str {
         NAME
     }
+
+    fn as_backend_enum(&self) -> paketkoll_types::Backend {
+        paketkoll_types::Backend::Apt
+    }
 }
 
 impl Files for Debian {
