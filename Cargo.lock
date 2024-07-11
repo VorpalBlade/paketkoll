@@ -739,6 +739,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "konfigkoll_hwinfo"
+version = "0.1.0"
+dependencies = [
+ "ahash",
+ "anyhow",
+ "indoc",
+ "itertools",
+ "pretty_assertions",
+ "rune",
+ "winnow 0.6.13",
+]
+
+[[package]]
 name = "konfigkoll_types"
 version = "0.1.0"
 dependencies = [
