@@ -1,0 +1,25 @@
+[package]
+description = "Hardware info provider for Konfigkoll"
+edition = "2021"
+license = "MPL-2.0"
+name = "konfigkoll_hwinfo"
+repository = "https://github.com/VorpalBlade/paketkoll"
+rust-version = "1.79.0"
+version = "0.1.0"
+
+[dependencies]
+ahash.workspace = true
+anyhow.workspace = true
+itertools.workspace = true
+rune = { workspace = true, optional = true }
+winnow = { workspace = true, features = ["simd"] }
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+indoc.workspace = true
+pretty_assertions = "1.4.0"
+
+[features]
+rune = ["dep:rune"]
