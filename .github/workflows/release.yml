@@ -50,7 +50,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - uses: taiki-e/install-action@cross
-      - uses: taiki-e/upload-rust-binary-action@v1.21.0
+      - uses: taiki-e/upload-rust-binary-action@v1.21.1
         id: upload-rust-binary-action
         with:
           bin: paketkoll
