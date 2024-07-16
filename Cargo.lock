@@ -853,6 +853,7 @@ dependencies = [
  "bitflags 2.6.0",
  "faster-hex",
  "memchr",
+ "smallvec",
 ]
 
 [[package]]
