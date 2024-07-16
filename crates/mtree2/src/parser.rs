@@ -1,4 +1,6 @@
 //! Stuff for parsing mtree files.
+use smallvec::SmallVec;
+
 use crate::{
     util::{parse_time, FromDec, FromHex},
     Device,
@@ -13,15 +15,15 @@ pub enum MTreeLine<'a> {
     /// Lines starting with a '#' are ignored.
     Comment,
     /// Special commands (starting with '/') alter the behavior of later entries.
-    Special(SpecialKind, Vec<Keyword<'a>>),
+    Special(SpecialKind, SmallVec<[Keyword<'a>; 5]>),
     /// If the first word does not contain a '/', it is a file in the current
     /// directory.
-    Relative(&'a [u8], Vec<Keyword<'a>>),
+    Relative(&'a [u8], SmallVec<[Keyword<'a>; 5]>),
     /// Change the current directory to the parent of the current directory.
     DotDot,
     /// If the first word does contain a '/', it is a file relative to the starting
     /// (not current) directory.
-    Full(&'a [u8], Vec<Keyword<'a>>),
+    Full(&'a [u8], SmallVec<[Keyword<'a>; 5]>),
 }
 
 impl<'a> MTreeLine<'a> {
@@ -43,7 +45,7 @@ impl<'a> MTreeLine<'a> {
             return Ok(MTreeLine::DotDot);
         }
         // the rest need params
-        let mut params = Vec::new();
+        let mut params = SmallVec::new();
         for part in parts {
             let keyword = Keyword::from_bytes(part);
             debug_assert!(
