@@ -114,3 +114,7 @@ syn.opt-level = 2
 zstd-safe.opt-level = 2
 zstd-sys.opt-level = 2
 zstd.opt-level = 2
+
+[patch.crates-io]
+# Rune
+rune = { path = "patches/rune/crates/rune" }
