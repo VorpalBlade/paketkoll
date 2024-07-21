@@ -1,12 +1,16 @@
 //! Apply a stream of instructions to the current system
 
-use std::{fs::Permissions, os::unix::fs::PermissionsExt};
+use std::{collections::BTreeMap, fs::Permissions, os::unix::fs::PermissionsExt, sync::Arc};
 
 use ahash::AHashMap;
+use anyhow::Context;
 use either::Either;
 use itertools::Itertools;
 use konfigkoll_types::{FsInstruction, FsOp, FsOpDiscriminants, PkgIdent, PkgInstruction, PkgOp};
-use paketkoll_types::backend::{Backend, PackageBackendMap};
+use paketkoll_types::{
+    backend::{Backend, Files, OriginalFileQuery, PackageBackendMap, PackageMap},
+    intern::Interner,
+};
 
 use crate::{
     confirm::MultiOptionConfirm,
@@ -62,14 +66,25 @@ where
 /// Apply with no privilege separation
 #[derive(Debug)]
 pub struct InProcessApplicator {
-    backends: PackageBackendMap,
+    package_backends: PackageBackendMap,
+    file_backend: Arc<dyn Files>,
+    interner: Arc<Interner>,
+    package_maps: BTreeMap<Backend, Arc<PackageMap>>,
     id_resolver: NameToNumericResolveCache,
 }
 
 impl InProcessApplicator {
-    pub fn new(backends: PackageBackendMap) -> Self {
+    pub fn new(
+        package_backends: PackageBackendMap,
+        interner: &Arc<Interner>,
+        package_maps: &BTreeMap<Backend, Arc<PackageMap>>,
+        file_backend: &Arc<dyn Files>,
+    ) -> Self {
         Self {
-            backends,
+            package_backends,
+            file_backend: file_backend.clone(),
+            interner: Arc::clone(interner),
+            package_maps: package_maps.clone(),
             id_resolver: NameToNumericResolveCache::new(),
         }
     }
@@ -89,7 +104,7 @@ impl Applicator for InProcessApplicator {
             backend
         );
         let backend = self
-            .backends
+            .package_backends
             .get(&backend)
             .ok_or_else(|| anyhow::anyhow!("Unknown backend: {:?}", backend))?;
         backend.transact(install, uninstall, true)?;
@@ -97,6 +112,15 @@ impl Applicator for InProcessApplicator {
     }
 
     fn apply_files(&mut self, instructions: &[&FsInstruction]) -> anyhow::Result<()> {
+        let pkg_map = self
+            .package_maps
+            .get(&self.file_backend.as_backend_enum())
+            .ok_or_else(|| {
+                anyhow::anyhow!(
+                    "No package map for file backend {:?}",
+                    self.file_backend.as_backend_enum()
+                )
+            })?;
         for instr in instructions {
             tracing::info!("Applying: {}: {}", instr.path, instr.op);
             match &instr.op {
@@ -162,6 +186,35 @@ impl Applicator for InProcessApplicator {
                         self.id_resolver.lookup(&IdKey::Group(group.clone()))?,
                     );
                     nix::unistd::chown(instr.path.as_std_path(), None, Some(gid))?;
+                }
+                FsOp::Restore => {
+                    // Get package:
+                    let owners = self
+                        .file_backend
+                        .owning_packages(&[instr.path.as_std_path()].into(), &self.interner)
+                        .with_context(|| format!("Failed to find owner for {}", instr.path))?;
+                    let package = owners
+                        .get(instr.path.as_std_path())
+                        .with_context(|| format!("Failed to find owner for {}", instr.path))?
+                        .ok_or_else(|| anyhow::anyhow!("No owner for {}", instr.path))?;
+                    let package = package.to_str(&self.interner);
+                    // Get original contents:
+                    let queries = [OriginalFileQuery {
+                        package: package.into(),
+                        path: instr.path.as_str().into(),
+                    }];
+                    let original_contents =
+                        self.file_backend
+                            .original_files(&queries, pkg_map, &self.interner)?;
+                    // Apply
+                    for query in queries {
+                        let contents = original_contents.get(&query).ok_or_else(|| {
+                            anyhow::anyhow!("No original contents for {:?}", query)
+                        })?;
+                        std::fs::write(&instr.path, contents)?;
+                    }
+                    // TODO: Permissions and modes
+                    // TODO: Symlinks etc
                 }
                 FsOp::Comment => (),
             }

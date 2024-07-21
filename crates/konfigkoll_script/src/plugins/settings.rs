@@ -12,7 +12,7 @@ use std::str::FromStr;
 #[derive(Debug, rune::Any)]
 #[rune(item = ::settings)]
 pub struct Settings {
-    enabled_file_backends: Mutex<AHashSet<paketkoll_types::backend::Backend>>,
+    file_backend: Mutex<Option<paketkoll_types::backend::Backend>>,
     enabled_pkg_backends: Mutex<AHashSet<paketkoll_types::backend::Backend>>,
     /// Configuration files (such as `/etc/passwd`) that should be applied early,
     /// before installing packages.
@@ -27,7 +27,7 @@ pub struct Settings {
 impl Default for Settings {
     fn default() -> Self {
         Self {
-            enabled_file_backends: Mutex::new(AHashSet::new()),
+            file_backend: Mutex::new(None),
             enabled_pkg_backends: Mutex::new(AHashSet::new()),
             early_configs: Mutex::new(AHashSet::new()),
             diff: Mutex::new(vec!["diff".into(), "-Naur".into()]),
@@ -39,8 +39,8 @@ impl Default for Settings {
 /// Rust API
 impl Settings {
     pub fn is_file_backend_enabled(&self, backend: paketkoll_types::backend::Backend) -> bool {
-        let guard = self.enabled_file_backends.lock();
-        guard.contains(&backend)
+        let guard = self.file_backend.lock();
+        *guard == Some(backend)
     }
 
     pub fn is_pkg_backend_enabled(&self, backend: paketkoll_types::backend::Backend) -> bool {
@@ -48,10 +48,9 @@ impl Settings {
         guard.contains(&backend)
     }
 
-    pub fn enabled_file_backends(&self) -> impl Iterator<Item = paketkoll_types::backend::Backend> {
-        let guard = self.enabled_file_backends.lock();
-        let v: Vec<_> = guard.iter().cloned().collect();
-        v.into_iter()
+    pub fn file_backend(&self) -> Option<paketkoll_types::backend::Backend> {
+        let guard = self.file_backend.lock();
+        *guard
     }
 
     pub fn enabled_pkg_backends(&self) -> impl Iterator<Item = paketkoll_types::backend::Backend> {
@@ -75,7 +74,7 @@ impl Settings {
     /// Get preferred pager to use
     pub fn pager(&self) -> Vec<String> {
         let guard = self.pager.lock();
-        if guard.len() > 1 {
+        if guard.len() >= 1 {
             guard.clone()
         } else {
             vec![std::env::var("PAGER").ok().unwrap_or_else(|| "less".into())]
@@ -85,7 +84,11 @@ impl Settings {
 
 /// Rune API
 impl Settings {
-    /// Enable a package manager or other backend as a data source and target for file system checks.
+    /// Set a package manager as the data source and target for file system checks.
+    ///
+    /// Unlike package manager backends, there can only be one of these (otherwise
+    /// the semantics would get confusing regarding which files are managed by which
+    /// tool).
     ///
     /// Valid values are:
     /// * "pacman" (Arch Linux and derivatives)
@@ -93,20 +96,21 @@ impl Settings {
     ///
     /// This will return an error on other values.
     #[rune::function]
-    pub fn enable_file_backend(&self, name: &str) -> anyhow::Result<()> {
+    pub fn set_file_backend(&self, name: &str) -> anyhow::Result<()> {
         let backend = paketkoll_types::backend::Backend::from_str(name)
             .with_context(|| format!("Unknown backend {name}"))?;
-
-        let before = self.enabled_file_backends.lock().insert(backend);
-
-        if !before {
-            tracing::warn!("File backend {name} was enabled more than once");
+        let mut guard = self.file_backend.lock();
+        if guard.is_some() {
+            tracing::warn!("File backend was set more than once");
         }
+        *guard = Some(backend);
 
         Ok(())
     }
 
     /// Enable a package manager or other backend as a data source and target for package operations.
+    ///
+    /// Multiple ones can be enabled at the same time (typically flatpak + native package manager).
     ///
     /// Valid values are:
     /// * "pacman" (Arch Linux and derivatives)
@@ -164,7 +168,7 @@ impl Settings {
 pub(crate) fn module() -> Result<Module, ContextError> {
     let mut m = Module::from_meta(self::module_meta)?;
     m.ty::<Settings>()?;
-    m.function_meta(Settings::enable_file_backend)?;
+    m.function_meta(Settings::set_file_backend)?;
     m.function_meta(Settings::enable_pkg_backend)?;
     m.function_meta(Settings::early_config)?;
     m.function_meta(Settings::set_diff)?;

@@ -15,18 +15,19 @@ pub fn phase_system_discovery(props, settings) {
     match os_id {
         "arch" => {
             settings.enable_pkg_backend("pacman")?;
-            settings.enable_file_backend("pacman")?
+            settings.set_file_backend("pacman")?
         },
         "debian" => {
             settings.enable_pkg_backend("apt")?;
-            settings.enable_file_backend("apt")?
+            settings.set_file_backend("apt")?
         },
         "ubuntu" => {
             settings.enable_pkg_backend("apt")?;
-            settings.enable_file_backend("apt")?
+            settings.set_file_backend("apt")?
         },
         _ => return Err("Unsupported OS")?,
     }
+    // Also enable flatpak
     settings.enable_pkg_backend("flatpak")?;
 
     // Changes to these files should be applied early (before packages)

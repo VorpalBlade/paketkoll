@@ -84,9 +84,9 @@ impl Files for SystemdTmpfiles {
         anyhow::bail!("Original file queries are not supported for systemd-tmpfiles")
     }
 
-    fn owning_package(
+    fn owning_packages(
         &self,
-        _paths: &ahash::AHashSet<PathBuf>,
+        _paths: &ahash::AHashSet<&Path>,
         _interner: &paketkoll_types::intern::Interner,
     ) -> anyhow::Result<
         dashmap::DashMap<PathBuf, Option<paketkoll_types::intern::PackageRef>, ahash::RandomState>,

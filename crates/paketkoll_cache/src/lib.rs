@@ -2,6 +2,7 @@
 
 use std::fmt::Debug;
 use std::fmt::Display;
+use std::path::Path;
 
 use ahash::AHashMap;
 use anyhow::Context;
@@ -78,13 +79,13 @@ impl Files for FilesCache {
         self.inner.files(interner)
     }
 
-    fn owning_package(
+    fn owning_packages(
         &self,
-        paths: &ahash::AHashSet<std::path::PathBuf>,
+        paths: &ahash::AHashSet<&Path>,
         interner: &Interner,
     ) -> anyhow::Result<dashmap::DashMap<std::path::PathBuf, Option<PackageRef>, ahash::RandomState>>
     {
-        self.inner.owning_package(paths, interner)
+        self.inner.owning_packages(paths, interner)
     }
 
     fn original_files(

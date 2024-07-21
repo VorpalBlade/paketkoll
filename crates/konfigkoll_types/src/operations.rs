@@ -10,6 +10,8 @@ use crate::FileContents;
 pub enum FsOp {
     /// Remove a file
     Remove,
+    /// Restore a file to its original state
+    Restore,
 
     // Creation
     /// Create a directory
@@ -41,6 +43,9 @@ impl std::fmt::Display for FsOp {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             FsOp::Remove => write!(f, "remove"),
+            FsOp::Restore => {
+                write!(f, "restore (from package manager)")
+            }
             FsOp::CreateDirectory => write!(f, "mkdir"),
             FsOp::CreateFile(contents) => write!(f, "create file (with {})", contents.checksum()),
             FsOp::CreateSymlink { target } => write!(f, "symlink to {target}"),
