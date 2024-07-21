@@ -10,11 +10,11 @@ pub(crate) mod arch;
 #[cfg(feature = "debian")]
 pub(crate) mod deb;
 
-pub(crate) mod filesystem;
-pub(crate) mod flatpak;
-
 #[cfg(feature = "systemd_tmpfiles")]
 pub(crate) mod systemd_tmpfiles;
+
+pub(crate) mod filesystem;
+pub(crate) mod flatpak;
 
 /// A backend that implements all operations
 #[allow(dead_code)]

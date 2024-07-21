@@ -29,11 +29,14 @@ ahash.workspace = true
 anyhow = { workspace = true, features = ["backtrace"] }
 camino.workspace = true
 clap = { workspace = true, features = ["derive"] }
+compact_str.workspace = true
+directories.workspace = true
 either.workspace = true
 itertools.workspace = true
 konfigkoll_core = { version = "0.1.0", path = "../konfigkoll_core" }
 konfigkoll_script = { version = "0.1.0", path = "../konfigkoll_script" }
 konfigkoll_types = { version = "0.1.0", path = "../konfigkoll_types" }
+paketkoll_cache = { version = "0.1.0", path = "../paketkoll_cache" }
 paketkoll_core = { version = "0.4.1", path = "../paketkoll_core" }
 paketkoll_types = { version = "0.1.0", path = "../paketkoll_types" }
 rayon.workspace = true
@@ -48,7 +51,6 @@ tokio = { workspace = true, features = [
 tracing-log.workspace = true
 tracing-subscriber = { workspace = true, features = ["env-filter", "parking_lot"] }
 tracing.workspace = true
-compact_str.workspace = true
 
 [target.'cfg(target_env = "musl")'.dependencies]
 # The allocator on musl is attrociously slow, so we use a custom one.

@@ -29,8 +29,6 @@ arch_linux = [
     "dep:rust-ini",
 ]
 
-systemd_tmpfiles = ["__sha256", "dep:systemd_tmpfiles", "dep:nix"]
-
 # Include support for the Debian backend
 debian = [
     "__bzip2",
@@ -42,6 +40,9 @@ debian = [
     "dashmap/rayon",
     "dep:ar",
 ]
+
+# Experimental systemd-tmpfiles backend
+systemd_tmpfiles = ["__sha256", "dep:systemd_tmpfiles", "dep:nix"]
 
 # Include support for serde on public datatypes
 serde = [

@@ -36,7 +36,7 @@ paketkoll_utils = { version = "0.1.0", path = "../paketkoll_utils" }
 parking_lot.workspace = true
 regex.workspace = true
 rune.workspace = true
-rune-modules = { version = "0.13.3", features = ["process", "json", "toml", "tokio"] }
+rune-modules = { workspace = true, features = ["process", "json", "toml", "tokio"] }
 rust-ini.workspace = true
 smallvec.workspace = true
 sysinfo.workspace = true
