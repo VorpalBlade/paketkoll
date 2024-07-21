@@ -8,9 +8,23 @@ use crate::{Commands, Phase};
 
 use super::package_managers::PackageManager;
 
+/// A systemd Unit file
+///
+/// This can be used to enable or mask systemd units.
+///
+/// For example, to enable a unit file from a package:
+///
+/// ```rune
+/// systemd::Unit::from_pkg("util-linux",
+///                          "fstrim.timer",
+///                          package_managers.get_files())
+///     .enable(ctx.cmds)?;
+/// ```
+///
+/// The additional functions can be used to customise the behaviour.
 #[derive(Debug, Any)]
 #[rune(item = ::systemd)]
-struct Systemd {
+struct Unit {
     unit: CompactString,
     source: Source,
     type_: Type,
@@ -46,7 +60,7 @@ enum Source {
     },
 }
 
-impl Systemd {
+impl Unit {
     fn symlink_name(&self) -> &str {
         match &self.name {
             Some(name) => name.as_str(),
@@ -93,7 +107,7 @@ impl Systemd {
 }
 
 /// Rune API
-impl Systemd {
+impl Unit {
     /// Create a new instance from a file path
     #[rune::function(path = Self::from_file)]
     pub fn from_file(file: &str, cmds: &Commands) -> anyhow::Result<Self> {
@@ -209,17 +223,17 @@ impl Systemd {
 }
 
 #[rune::module(::systemd)]
-/// Various functions to get system information
+/// Functionality to simplify working with systemd
 pub(crate) fn module() -> Result<Module, ContextError> {
     let mut m = Module::from_meta(self::module_meta)?;
-    m.ty::<Systemd>()?;
-    m.function_meta(Systemd::from_file)?;
-    m.function_meta(Systemd::from_pkg)?;
-    m.function_meta(Systemd::user)?;
-    m.function_meta(Systemd::name)?;
-    m.function_meta(Systemd::skip_aliases)?;
-    m.function_meta(Systemd::skip_wanted_by)?;
-    m.function_meta(Systemd::enable)?;
-    m.function_meta(Systemd::mask)?;
+    m.ty::<Unit>()?;
+    m.function_meta(Unit::from_file)?;
+    m.function_meta(Unit::from_pkg)?;
+    m.function_meta(Unit::user)?;
+    m.function_meta(Unit::name)?;
+    m.function_meta(Unit::skip_aliases)?;
+    m.function_meta(Unit::skip_wanted_by)?;
+    m.function_meta(Unit::enable)?;
+    m.function_meta(Unit::mask)?;
     Ok(m)
 }

@@ -49,7 +49,7 @@ impl Properties {
 }
 
 #[rune::module(::properties)]
-/// Settings & user defined persistent properties
+/// User defined persistent (between phases) properties
 pub(crate) fn module() -> Result<Module, ContextError> {
     let mut m = Module::from_meta(self::module_meta)?;
     m.ty::<Properties>()?;

@@ -20,6 +20,58 @@ type Users = BTreeMap<String, User>;
 type Groups = BTreeMap<String, Group>;
 
 /// A representation of the user and group databases
+///
+/// This can be used to handle `/etc/passwd` and related files.
+/// Typically you would:
+/// * Create an instance early in the main phase
+/// * Add things to it as needed (next to the associated packages)
+/// * Apply it at the end of the main phase
+///
+///
+/// A rough example:
+///
+/// ```rune
+/// // Mappings for the IDs that systemd auto-assigns inconsistently from computer to computer
+/// const USER_MAPPING = [("systemd-journald", 900), /* ... */]
+/// const GROUP_MAPPING = [("systemd-journald", 900), /* ... */]
+///
+/// pub async fn phase_main(props, cmds, package_managers) {
+///     let passwd = passwd::Passwd::new(USER_MAPPING, GROUP_MAPPING);
+///
+///     let files = ctx.package_managers.get_files();
+///     // These two files MUST come first as other files later on refer to them,
+///     // and we are not order independent (unlike the real sysusers.d).
+///     ctx.passwd.add_from_sysusers(files, "systemd", "/usr/lib/sysusers.d/basic.conf")?;
+///     ctx.passwd.add_from_sysusers(files, "filesystem", "/usr/lib/sysusers.d/arch.conf")?;
+///
+///     // Various other packages and other changes ...
+///     ctx.passwd.add_from_sysusers(files, "dbus", "/usr/lib/sysusers.d/dbus.conf")?;
+///     // ...
+///
+///     // Add human user
+///     let me = passwd::User::new(1000, "me", "me", "");
+///     me.shell = "/bin/zsh";
+///     me.home = "/home/me";
+///     ctx.passwd.add_user_with_group(me);
+///     ctx.passwd.add_user_to_groups("me", ["wheel", "optical", "uucp", "users"]);
+///
+///     // Don't store passwords in your git repo, load them from the system instead
+///     ctx.passwd.passwd_from_system(["me", "root"]);
+///
+///     // Give root a login shell, we don't want /usr/bin/nologin!
+///     ctx.passwd.update_user("root", |user| {
+///         user.shell = "/bin/zsh";
+///         user
+///     });
+///
+///     // Deal with the IDs not matching (because the mappings were created
+///     // before konfigkoll was in use for example)
+///     passwd.align_ids_with_system()?;
+///
+///     // Apply changes
+///     passwd.apply(cmds)?;
+/// }
+/// ```
 #[derive(Debug, Any)]
 #[rune(item = ::passwd)]
 struct Passwd {
@@ -313,6 +365,7 @@ impl Passwd {
     }
 }
 
+/// Represents a user
 #[derive(Any, Debug, Clone, Eq, PartialEq, PartialOrd, Ord)]
 #[rune(item = ::passwd)]
 struct User {
@@ -424,6 +477,7 @@ impl User {
     }
 }
 
+/// Represents a group
 #[derive(Any, Debug, Clone, Eq, PartialEq, PartialOrd, Ord)]
 #[rune(item = ::passwd)]
 struct Group {
