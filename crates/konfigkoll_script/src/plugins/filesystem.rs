@@ -84,7 +84,7 @@ impl TempDir {
     }
 
     /// Read a file from the temporary directory
-    /// 
+    ///
     /// Returns a `Result<Bytes>`
     #[rune::function]
     fn read(&self, path: &str) -> anyhow::Result<Bytes> {
@@ -135,7 +135,7 @@ impl File {
     /// This is generally safe (as long as the file exists in the config directory)
     #[rune::function(path = Self::open_from_config)]
     pub fn open_from_config(path: &str) -> anyhow::Result<Self> {
-        let p = safe_path_join(&CFG_PATH.get().expect("CFG_PATH not set"), path.into());
+        let p = safe_path_join(CFG_PATH.get().expect("CFG_PATH not set"), path.into());
         let file = std::fs::File::open(&p)
             .with_context(|| format!("Failed to open {path} from config directory, tried {p}"))?;
         Ok(Self {
@@ -193,6 +193,8 @@ fn glob(pattern: &str) -> anyhow::Result<Vec<String>> {
 
 /// Get the path to the configuration directory
 ///
+/// **Prefer `File::open_from_config` instead if you just want to load data from the config directory**
+///
 /// This is primarily useful together with the `process` module to pass a
 /// path to a file from the configuration directory to an external command.
 #[rune::function]
@@ -221,6 +223,9 @@ fn config_path() -> String {
 ///
 /// This is generally safe, in order to read files that are part of the configuration
 /// (if you want to use them as templates for example and fill in some values)
+///
+/// Use `File::open_from_config` for this. In special circumstances (together with the `process` module)
+/// you may also need [`config_path`].
 ///
 /// # Temporary directories
 ///
