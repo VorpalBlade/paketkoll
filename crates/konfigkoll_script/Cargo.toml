@@ -28,6 +28,7 @@ konfigkoll_hwinfo = { version = "0.1.0", path = "../konfigkoll_hwinfo", features
     "rune",
 ] }
 konfigkoll_types = { version = "0.1.0", path = "../konfigkoll_types" }
+nix = { workspace = true, features = ["user"] }
 paketkoll_core = { version = "0.4.1", path = "../paketkoll_core" }
 paketkoll_types = { version = "0.1.0", path = "../paketkoll_types", features = [
     "serde",

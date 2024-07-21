@@ -13,7 +13,7 @@ use crate::plugins::{
 use anyhow::Context;
 use camino::{Utf8Path, Utf8PathBuf};
 use paketkoll_types::{
-    backend::{FilesBackendMap, PackageBackendMap, PackageMap},
+    backend::{Backend, Files, PackageBackendMap, PackageMap},
     intern::Interner,
 };
 use rune::{
@@ -87,13 +87,15 @@ impl EngineState {
     pub fn setup_package_managers(
         &mut self,
         package_backends: &PackageBackendMap,
-        files_backends: &FilesBackendMap,
-        package_maps: &BTreeMap<paketkoll_types::backend::Backend, Arc<PackageMap>>,
+        file_backend_id: Backend,
+        files_backend: &Arc<dyn Files>,
+        package_maps: &BTreeMap<Backend, Arc<PackageMap>>,
         interner: &Arc<Interner>,
     ) {
         self.package_managers = Some(PackageManagers::create_from(
             package_backends,
-            files_backends,
+            file_backend_id,
+            files_backend,
             package_maps,
             interner,
         ));

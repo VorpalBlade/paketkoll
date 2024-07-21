@@ -318,6 +318,11 @@ impl FsEntries {
                         });
                 }
                 FsOp::Comment => (),
+                FsOp::Restore { .. } => {
+                    tracing::error!(
+                        "Restore operation not supported as *input* to state::apply_instructions"
+                    );
+                }
             }
         }
     }
@@ -356,8 +361,21 @@ impl FsEntries {
     }
 }
 
+/// Describe the goal of the diff: is it for saving or for application/diff
+///
+/// This will affect the exact instructions that gets generated
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum DiffGoal {
+    Apply,
+    Save,
+}
+
 // Generate a stream of instructions to go from state before to state after
-pub fn diff(before: FsEntries, after: FsEntries) -> impl Iterator<Item = FsInstruction> {
+pub fn diff(
+    goal: DiffGoal,
+    before: FsEntries,
+    after: FsEntries,
+) -> impl Iterator<Item = FsInstruction> {
     let diff_iter = itertools::merge_join_by(before.fs, after.fs, |(k1, _), (k2, _)| k1.cmp(k2));
 
     let mut results = vec![];
@@ -447,7 +465,7 @@ pub fn diff(before: FsEntries, after: FsEntries) -> impl Iterator<Item = FsInstr
                     }
                 }
             }
-            itertools::EitherOrBoth::Left(before) => {
+            itertools::EitherOrBoth::Left(before) if goal == DiffGoal::Save => {
                 // Generate instructions to remove the entry
                 results.push(FsInstruction {
                     path: before.0,
@@ -455,6 +473,14 @@ pub fn diff(before: FsEntries, after: FsEntries) -> impl Iterator<Item = FsInstr
                     comment: before.1.comment,
                 });
                 // TODO: Do something special when the before instruction is a removal one?
+            }
+            itertools::EitherOrBoth::Left(before) => {
+                // Generate instructions to remove the entry
+                results.push(FsInstruction {
+                    path: before.0,
+                    op: FsOp::Restore,
+                    comment: before.1.comment,
+                });
             }
             itertools::EitherOrBoth::Right(after) => {
                 results.extend(after.1.into_instruction(&after.0));

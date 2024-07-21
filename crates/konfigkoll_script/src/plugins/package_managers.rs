@@ -4,9 +4,7 @@ use std::{collections::BTreeMap, str::FromStr, sync::Arc};
 
 use anyhow::Context;
 use paketkoll_types::{
-    backend::{
-        Backend, Files, FilesBackendMap, OriginalFileQuery, PackageBackendMap, PackageMap, Packages,
-    },
+    backend::{Backend, Files, OriginalFileQuery, PackageBackendMap, PackageMap, Packages},
     intern::Interner,
 };
 use rune::{
@@ -28,21 +26,23 @@ impl PackageManagers {
     /// Create a new package managers
     pub fn create_from(
         package_backends: &PackageBackendMap,
-        files_backends: &FilesBackendMap,
+        file_backend_id: Backend,
+        files_backend: &Arc<dyn Files>,
         package_maps: &BTreeMap<paketkoll_types::backend::Backend, Arc<PackageMap>>,
         interner: &Arc<Interner>,
     ) -> Self {
+        let files_backends = [(file_backend_id, files_backend)];
         // Join all three maps on key. This is equivalent to a SQL outer join.
         // Use itertools::merge_join_by for this.
         let merged =
-            itertools::merge_join_by(package_backends, files_backends, |l, r| l.0.cmp(r.0));
+            itertools::merge_join_by(package_backends, files_backends, |l, r| l.0.cmp(&r.0));
         // We now know that all keys are present (everything is a package, file or both backend)
         let mut package_managers = PackageManagerMap::new();
         for entry in merged {
             let (backend, packages, files) = match entry {
                 itertools::EitherOrBoth::Both(a, b) => (*a.0, Some(a.1), Some(b.1)),
                 itertools::EitherOrBoth::Left(a) => (*a.0, Some(a.1), None),
-                itertools::EitherOrBoth::Right(b) => (*b.0, None, Some(b.1)),
+                itertools::EitherOrBoth::Right(b) => (b.0, None, Some(b.1)),
             };
 
             let package_map = package_maps.get(&backend).cloned();

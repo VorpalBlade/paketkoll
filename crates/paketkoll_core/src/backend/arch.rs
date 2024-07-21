@@ -183,9 +183,9 @@ impl Files for ArchLinux {
         Ok(results)
     }
 
-    fn owning_package(
+    fn owning_packages(
         &self,
-        paths: &AHashSet<PathBuf>,
+        paths: &AHashSet<&Path>,
         interner: &Interner,
     ) -> anyhow::Result<DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>> {
         // Optimise for speed, go directly into package cache and look for files that contain the given string

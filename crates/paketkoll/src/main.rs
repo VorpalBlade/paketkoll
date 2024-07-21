@@ -3,6 +3,7 @@
 use std::{
     io::{stdout, BufWriter, Write},
     os::unix::ffi::OsStrExt,
+    path::Path,
 };
 
 use ahash::AHashSet;
@@ -64,8 +65,8 @@ fn main() -> anyhow::Result<Exit> {
                 Some(p) => p,
                 None => {
                     let mut inputs = AHashSet::default();
-                    inputs.insert(path.as_str().into());
-                    let file_map = backend_impl.owning_package(&inputs, &interner)?;
+                    inputs.insert(Path::new(path));
+                    let file_map = backend_impl.owning_packages(&inputs, &interner)?;
                     if file_map.len() != 1 {
                         return Err(anyhow::anyhow!(
                             "Expected exactly one package to own the file, found {}",
@@ -105,8 +106,8 @@ fn main() -> anyhow::Result<Exit> {
                 .create_files(&(&cli).try_into()?, &interner)
                 .context("Failed to create backend")?;
 
-            let inputs = AHashSet::from_iter(paths.iter().map(|e| e.as_str().into()));
-            let file_map = backend_impl.owning_package(&inputs, &interner)?;
+            let inputs = AHashSet::from_iter(paths.iter().map(Path::new));
+            let file_map = backend_impl.owning_packages(&inputs, &interner)?;
 
             for (path, owner) in file_map {
                 if let Some(package) = owner {

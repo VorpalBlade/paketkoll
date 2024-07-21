@@ -197,9 +197,9 @@ impl Files for Debian {
         Ok(results)
     }
 
-    fn owning_package(
+    fn owning_packages(
         &self,
-        paths: &ahash::AHashSet<PathBuf>,
+        paths: &ahash::AHashSet<&Path>,
         interner: &Interner,
     ) -> anyhow::Result<DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>> {
         // Optimise for speed, go directly into package cache and look for files that contain the given string

@@ -9,7 +9,7 @@ use anyhow::{anyhow, Context};
 use compact_str::CompactString;
 use dashmap::DashMap;
 use std::collections::BTreeMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 /// Which backend to use for the system package manager
@@ -61,10 +61,10 @@ pub trait Files: Name {
         false
     }
 
-    /// Find the owners of the specified packages
-    fn owning_package(
+    /// Find the owners of the specified files
+    fn owning_packages(
         &self,
-        paths: &AHashSet<PathBuf>,
+        paths: &AHashSet<&Path>,
         interner: &Interner,
     ) -> anyhow::Result<DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>>;
 
