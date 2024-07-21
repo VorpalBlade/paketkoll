@@ -17,6 +17,7 @@ use konfigkoll_core::utils::safe_path_join;
 use konfigkoll_script::Phase;
 use konfigkoll_types::PkgInstructions;
 use konfigkoll_types::{FileContents, FsInstruction};
+use paketkoll_cache::FilesCache;
 use paketkoll_core::backend::ConcreteBackend;
 use paketkoll_core::config::CheckAllFilesConfiguration;
 use paketkoll_core::config::CommonFileCheckConfiguration;
@@ -79,6 +80,9 @@ async fn main() -> anyhow::Result<()> {
     // Script: Do system discovery and configuration
     script_engine.run_phase(Phase::SystemDiscovery).await?;
 
+    let proj_dirs = directories::ProjectDirs::from("", "", "konfigkoll")
+        .context("Failed to get directories for disk cache")?;
+
     // Create backends
     tracing::info!("Creating backends");
     let interner = Arc::new(Interner::new());
@@ -122,7 +126,9 @@ async fn main() -> anyhow::Result<()> {
                 let backend = b
                     .create_files(&backend_cfg, &interner)
                     .with_context(|| format!("Failed to create backend {b}"))?;
-                let b: Arc<dyn Files> = Arc::from(backend);
+                let backend = FilesCache::from_path(backend, proj_dirs.cache_dir())
+                    .context("Failed to create disk cache")?;
+                let b: Arc<dyn Files> = Arc::new(backend);
                 Ok(b)
             })
             .map(|b| b.map(|b| (b.as_backend_enum(), b)))
