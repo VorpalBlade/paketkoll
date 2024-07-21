@@ -94,12 +94,18 @@ pub fn check_all_files(
         .create_files(backend_config, &interner)
         .with_context(|| format!("Failed to create backend for {backend}"))?;
     // Get distro specific file list
-    let results = backend_impl
+    let mut expected_files = backend_impl
         .files(&interner)
         .with_context(|| format!("Failed to collect information from backend {backend}",))?;
 
-    let results = mismatching_and_unexpected_files(results, filecheck_config, unexpected_cfg)?;
-    Ok((interner, results))
+    let mismatches =
+        mismatching_and_unexpected_files(&mut expected_files, filecheck_config, unexpected_cfg)?;
+
+    // Drop on a background thread, this help a bit.
+    rayon::spawn(move || {
+        drop(expected_files);
+    });
+    Ok((interner, mismatches))
 }
 
 /// Find mismatching and unexpected files
@@ -109,15 +115,17 @@ pub fn check_all_files(
 /// Returned will be a list of issues found (along with which package is
 /// associated with that file if known).
 pub fn mismatching_and_unexpected_files(
-    mut expected_files: Vec<FileEntry>,
+    expected_files: &mut Vec<FileEntry>,
     filecheck_config: &crate::config::CommonFileCheckConfiguration,
     unexpected_cfg: &crate::config::CheckAllFilesConfiguration,
 ) -> anyhow::Result<Vec<(Option<PackageRef>, Issue)>> {
     // Possibly canonicalize paths
     if unexpected_cfg.canonicalize_paths {
         log::debug!(target: "paketkoll_core::backend", "Canonicalizing paths");
-        canonicalize_file_entries(&mut expected_files);
+        canonicalize_file_entries(expected_files);
     }
+    // Drop mutability
+    let expected_files = &*expected_files;
 
     log::debug!(target: "paketkoll_core::backend", "Preparing data structures");
     // We want a hashmap from path to data here.
@@ -249,13 +257,6 @@ pub fn mismatching_and_unexpected_files(
     for item in collected_issues.drain() {
         mismatches.push(item);
     }
-
-    // Drop on a background thread, this help a bit.
-    drop(path_map);
-    rayon::spawn(move || {
-        drop(expected_files);
-    });
-
     Ok(mismatches)
 }
 
