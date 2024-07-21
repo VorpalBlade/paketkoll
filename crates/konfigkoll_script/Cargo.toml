@@ -43,6 +43,11 @@ smallvec.workspace = true
 sysinfo.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
+winnow = { workspace = true, features = ["simd"] }
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+indoc.workspace = true
+pretty_assertions.workspace = true
