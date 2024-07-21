@@ -32,14 +32,17 @@
 use rune::alloc::fmt::TryWrite;
 use rune::alloc::Vec;
 use rune::runtime::{Bytes, Formatter, Mut, Shared, Value, VmResult};
-use rune::{vm_try, Any, ContextError, Module};
+use rune::{vm_try, vm_write, Any, ContextError, Module};
 
 use std::io;
 use tokio::process;
 
-/// Construct the `process` module.
+/// A module for working with processes.
+///
+/// This allows spawning child processes, capturing their output, and creating pipelines.
+#[rune::module(::process)]
 pub fn module(_stdio: bool) -> Result<Module, ContextError> {
-    let mut module = Module::with_crate("process")?;
+    let mut module = Module::from_meta(self::module_meta)?;
     module.ty::<Command>()?;
     module.ty::<Child>()?;
     module.ty::<ExitStatus>()?;
@@ -49,6 +52,7 @@ pub fn module(_stdio: bool) -> Result<Module, ContextError> {
     module.ty::<ChildStdout>()?;
     module.ty::<ChildStderr>()?;
 
+    module.function_meta(Command::string_debug)?;
     module.function_meta(Command::new)?;
     module.function_meta(Command::spawn)?;
     module.function_meta(Command::arg)?;
@@ -58,6 +62,8 @@ pub fn module(_stdio: bool) -> Result<Module, ContextError> {
     module.function_meta(Command::stdin)?;
     module.function_meta(Command::stdout)?;
     module.function_meta(Command::stderr)?;
+
+    module.function_meta(Child::string_debug)?;
     module.function_meta(Child::stdin)?;
     module.function_meta(Child::stdout)?;
     module.function_meta(Child::stderr)?;
@@ -66,26 +72,42 @@ pub fn module(_stdio: bool) -> Result<Module, ContextError> {
     module.function_meta(Child::kill)?;
     module.function_meta(Child::wait)?;
     module.function_meta(Child::wait_with_output)?;
+
+    module.function_meta(ExitStatus::string_debug)?;
     module.function_meta(ExitStatus::string_display)?;
     module.function_meta(ExitStatus::code)?;
     module.function_meta(ExitStatus::success)?;
+
+    module.function_meta(Output::string_debug)?;
     module.function_meta(Stdio::null)?;
     module.function_meta(Stdio::inherit)?;
     module.function_meta(Stdio::piped)?;
+
+    module.function_meta(ChildStdin::string_debug)?;
     module.function_meta(ChildStdin::try_into_stdio)?;
+
+    module.function_meta(ChildStdout::string_debug)?;
     module.function_meta(ChildStdout::try_into_stdio)?;
+
+    module.function_meta(ChildStderr::string_debug)?;
     module.function_meta(ChildStderr::try_into_stdio)?;
 
     Ok(module)
 }
 
-#[derive(Any)]
+/// A builder for a child command to execute
+#[derive(Debug, Any)]
 #[rune(item = ::process)]
 struct Command {
     inner: process::Command,
 }
 
 impl Command {
+    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    fn string_debug(&self, f: &mut Formatter) {
+        vm_write!(f, "{:?}", self);
+    }
+
     /// Construct a new command.
     #[rune::function(path = Self::new)]
     fn new(command: &str) -> Self {
@@ -151,7 +173,8 @@ impl Command {
     }
 }
 
-#[derive(Any)]
+/// A running child process
+#[derive(Debug, Any)]
 #[rune(item = ::process)]
 struct Child {
     // we use an option to avoid a panic if we try to complete the child process
@@ -162,6 +185,11 @@ struct Child {
 }
 
 impl Child {
+    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    fn string_debug(&self, f: &mut Formatter) {
+        vm_write!(f, "{:?}", self);
+    }
+
     /// Attempt to take the stdin of the child process.
     ///
     /// Once taken this can not be taken again.
@@ -277,7 +305,8 @@ impl Child {
     }
 }
 
-#[derive(Any)]
+/// The output and exit status, returned by [`Child::wait_with_output`].
+#[derive(Debug, Any)]
 #[rune(item = ::process)]
 struct Output {
     #[rune(get)]
@@ -288,17 +317,29 @@ struct Output {
     stderr: Shared<Bytes>,
 }
 
-#[derive(Clone, Copy, Any)]
+impl Output {
+    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    fn string_debug(&self, f: &mut Formatter) {
+        vm_write!(f, "{:?}", self);
+    }
+}
+
+/// The exit status from a completed child process
+#[derive(Debug, Clone, Copy, Any)]
 #[rune(item = ::process)]
 struct ExitStatus {
     status: std::process::ExitStatus,
 }
 
 impl ExitStatus {
-    #[rune::function(protocol = STRING_DISPLAY)]
-    fn string_display(&self, f: &mut Formatter) -> VmResult<()> {
-        rune::vm_write!(f, "{}", self.status);
-        VmResult::Ok(())
+    #[rune::function(vm_result, protocol = STRING_DISPLAY)]
+    fn string_display(&self, f: &mut Formatter) {
+        vm_write!(f, "{}", self.status);
+    }
+
+    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    fn string_debug(&self, f: &mut Formatter) {
+        vm_write!(f, "{:?}", self);
     }
 
     #[rune::function]
@@ -312,14 +353,19 @@ impl ExitStatus {
     }
 }
 
-#[derive(Any)]
-#[rune(item = ::process)]
 /// Describes what to do with a standard I/O stream for a child process when passed to the stdin, stdout, and stderr methods of Command.
+#[derive(Debug, Any)]
+#[rune(item = ::process)]
 struct Stdio {
     inner: std::process::Stdio,
 }
 
 impl Stdio {
+    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    fn string_debug(&self, f: &mut Formatter) {
+        vm_write!(f, "{:?}", self);
+    }
+
     /// This stream will be ignored. This is the equivalent of attaching the stream to /dev/null.
     #[rune::function(path = Self::null)]
     fn null() -> Self {
@@ -346,15 +392,25 @@ impl Stdio {
 }
 
 macro_rules! stdio_stream {
-    ($name:ident) => {
-        #[derive(Any)]
+    ($name:ident, $stream:tt) => {
+        #[derive(Debug, Any)]
         #[rune(item = ::process)]
-        /// The $name stream for spawned children.
+        #[doc = concat!("The ", $stream, " stream for spawned children.")]
         struct $name {
             inner: process::$name,
         }
 
         impl $name {
+            #[rune::function(vm_result, protocol = STRING_DEBUG)]
+            fn string_debug(&self, f: &mut Formatter) {
+                vm_write!(f, "{:?}", self);
+            }
+
+            /// Try to convert into a `Stdio`, which allows creating a pipeline between processes.
+            ///
+            /// This consumes the stream, as it can only be used once.
+            ///
+            /// Returns a Result<Stdio>
             #[rune::function(instance)]
             fn try_into_stdio(self) -> Result<Stdio, std::io::Error> {
                 Ok(Stdio {
@@ -364,6 +420,6 @@ macro_rules! stdio_stream {
         }
     };
 }
-stdio_stream!(ChildStdin);
-stdio_stream!(ChildStdout);
-stdio_stream!(ChildStderr);
+stdio_stream!(ChildStdin, "stdin");
+stdio_stream!(ChildStdout, "stdout");
+stdio_stream!(ChildStderr, "stderr");
