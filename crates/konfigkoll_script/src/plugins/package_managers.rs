@@ -20,6 +20,7 @@ pub type PackageManagerMap = BTreeMap<Backend, PackageManager>;
 /// The collection of enabled package managers
 pub struct PackageManagers {
     package_managers: PackageManagerMap,
+    backend_with_files: Backend,
 }
 
 impl PackageManagers {
@@ -55,7 +56,10 @@ impl PackageManagers {
             );
             package_managers.insert(backend, pkg_mgr);
         }
-        Self { package_managers }
+        Self {
+            package_managers,
+            backend_with_files: file_backend_id,
+        }
     }
 }
 
@@ -65,6 +69,15 @@ impl PackageManagers {
     fn get(&self, name: &str) -> Option<PackageManager> {
         let backend = Backend::from_str(name).ok()?;
         self.package_managers.get(&backend).cloned()
+    }
+
+    /// Get the package manager that handles files
+    #[rune::function]
+    fn get_files(&self) -> PackageManager {
+        self.package_managers
+            .get(&self.backend_with_files)
+            .expect("There should always be a files backend")
+            .clone()
     }
 }
 
@@ -163,5 +176,6 @@ pub(crate) fn module() -> Result<Module, ContextError> {
     m.function_meta(PackageManager::original_file_contents)?;
     m.ty::<PackageManagers>()?;
     m.function_meta(PackageManagers::get)?;
+    m.function_meta(PackageManagers::get_files)?;
     Ok(m)
 }
