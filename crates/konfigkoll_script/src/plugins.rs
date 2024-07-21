@@ -6,7 +6,7 @@ pub mod package_managers;
 mod passwd;
 mod patch;
 pub(crate) mod properties;
-mod regex;
+pub(crate) mod regex;
 pub(crate) mod settings;
 mod shell;
 mod sysinfo;
@@ -16,6 +16,7 @@ pub(crate) fn register_modules(context: &mut rune::Context) -> Result<(), rune::
     context.install(command::module()?)?;
     context.install(host_fs::module()?)?;
     context.install(package_managers::module()?)?;
+    context.install(patch::module()?)?;
     context.install(properties::module()?)?;
     context.install(regex::module()?)?;
     context.install(settings::module()?)?;

@@ -6,10 +6,18 @@ use rune::{Any, ContextError, Module};
 #[derive(Debug, Clone, Any)]
 #[rune(item = ::regex)]
 /// A UTF-8 string regular expression
-struct Regex {
+pub struct Regex {
     inner: InnerRegex,
 }
 
+/// Rust API
+impl Regex {
+    pub fn inner(&self) -> &InnerRegex {
+        &self.inner
+    }
+}
+
+/// Rune API
 impl Regex {
     /// Create a new regex from a string
     #[rune::function(path = Self::new)]
@@ -31,13 +39,21 @@ impl Regex {
         self.inner.find(text).map(|m| (m.start(), m.end()))
     }
 
-    /// Replace the leftmost match in the string
+    /// Replace the leftmost match in the string.
+    ///
+    /// Capture groups can be referred to via `$1`, `$2`, etc. (`$0` is the full match).
+    /// Named capture groups are supported via `$name`.
+    /// You can also use `${name}` or `${1}` etc, which is often needed to disambiguate
+    /// when a capture group number is followed by literal text.
     #[rune::function]
     fn replace(&self, text: &str, replace: &str) -> String {
         self.inner.replace(text, replace).to_string()
     }
 
     /// Replace all matches in the string
+    ///
+    /// Capture groups can be referred to via `$1`, `$2`, etc. (`$0` is the full match).
+    /// Named capture groups are supported via `$name`.
     #[rune::function]
     fn replace_all(&self, text: &str, replace: &str) -> String {
         self.inner.replace_all(text, replace).to_string()
