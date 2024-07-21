@@ -342,7 +342,7 @@ fn scan_fs(
     trust_mtime: bool,
 ) -> anyhow::Result<Vec<FsInstruction>> {
     let mut fs_instructions_sys = vec![];
-    let files = backend.files(interner).with_context(|| {
+    let mut files = backend.files(interner).with_context(|| {
         format!(
             "Failed to collect information from backend {}",
             backend.name()
@@ -356,7 +356,7 @@ fn scan_fs(
         .canonicalize_paths(backend.may_need_canonicalization())
         .ignored_paths(ignores.to_owned())
         .build()?;
-    let issues = mismatching_and_unexpected_files(files, &common_config, &unexpected_config)?;
+    let issues = mismatching_and_unexpected_files(&mut files, &common_config, &unexpected_config)?;
 
     // Convert issues to an instruction stream
     fs_instructions_sys
