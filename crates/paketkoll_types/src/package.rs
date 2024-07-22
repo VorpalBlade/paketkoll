@@ -68,6 +68,20 @@ pub type PackageDirect = Package<CompactString, CompactString>;
 
 impl<PackageT, ArchitectureT> Package<PackageT, ArchitectureT>
 where
+    PackageT: std::fmt::Debug + PartialEq + Eq + Clone,
+    ArchitectureT: std::fmt::Debug + PartialEq + Eq + Clone,
+{
+    pub fn canonical_id(&self) -> &PackageT {
+        if self.ids.is_empty() {
+            &self.name
+        } else {
+            &self.ids[0]
+        }
+    }
+}
+
+impl<PackageT, ArchitectureT> Package<PackageT, ArchitectureT>
+where
     PackageT: std::fmt::Debug + PartialEq + Eq + Clone + Copy,
     ArchitectureT: std::fmt::Debug + PartialEq + Eq + Clone + Copy,
 {
