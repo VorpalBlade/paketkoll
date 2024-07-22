@@ -145,9 +145,9 @@ pub(crate) fn locate_package_file(
 
         // Nothing found, try downloading the package
         if downloaded {
-            log::error!(target: "paketkoll_core::utils", "Failed to find package for {pkg}");
+            log::error!("Failed to find package for {pkg}");
         } else {
-            log::info!(target: "paketkoll_core::utils", "Downloading package for {pkg}");
+            log::info!("Downloading package for {pkg}");
             download_pkg(pkg)?;
         }
     }

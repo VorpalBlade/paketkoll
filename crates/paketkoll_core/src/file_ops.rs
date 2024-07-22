@@ -51,7 +51,7 @@ pub fn check_installed_files(
         .files(&interner)
         .with_context(|| format!("Failed to collect information from backend {backend}"))?;
 
-    log::debug!(target: "paketkoll_core::backend", "Checking file system");
+    log::debug!("Checking file system");
     // For all file entries, check on file system
     // Par-bridge is used here to avoid batching. We do too much work for
     // batching to be useful, and this way we avoid pathological cases with
@@ -96,11 +96,11 @@ pub fn check_all_files(
 
     // Possibly canonicalize paths
     if unexpected_cfg.canonicalize_paths {
-        log::debug!(target: "paketkoll_core::backend", "Canonicalizing paths");
+        log::debug!("Canonicalizing paths");
         canonicalize_file_entries(&mut expected_files);
     }
 
-    log::debug!(target: "paketkoll_core::backend", "Preparing data structures");
+    log::debug!("Preparing data structures");
     // We want a hashmap from path to data here.
     let path_map = create_path_map(&expected_files);
 
@@ -131,7 +131,7 @@ pub fn mismatching_and_unexpected_files<'a>(
     filecheck_config: &crate::config::CommonFileCheckConfiguration,
     unexpected_cfg: &crate::config::CheckAllFilesConfiguration,
 ) -> anyhow::Result<Vec<(Option<PackageRef>, Issue)>> {
-    log::debug!(target: "paketkoll_core::backend", "Building ignores");
+    log::debug!("Building ignores");
     // Build glob set of ignores
     let overrides = {
         let mut builder = OverrideBuilder::new("/");
@@ -146,7 +146,7 @@ pub fn mismatching_and_unexpected_files<'a>(
         builder.build()?
     };
 
-    log::debug!(target: "paketkoll_core::backend", "Walking file system");
+    log::debug!("Walking file system");
     let walker = WalkBuilder::new("/")
         .hidden(false)
         .parents(false)
@@ -217,6 +217,7 @@ pub fn mismatching_and_unexpected_files<'a>(
         })
     });
 
+    log::debug!("Identifying and processing missing files");
     // Identify missing files (we should have seen them walking through the file system)
     expected_files.par_iter().for_each(|file_entry| {
         if file_entry.seen.load(std::sync::atomic::Ordering::Relaxed) {
@@ -248,6 +249,7 @@ pub fn mismatching_and_unexpected_files<'a>(
             .expect("Unbounded queue");
     });
 
+    log::debug!("Collecting results");
     // Collect all items from queue into vec
     let mut mismatches = Vec::new();
     for item in collected_issues.drain() {

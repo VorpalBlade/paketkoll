@@ -45,7 +45,7 @@ pub(crate) struct ArchLinuxBuilder {
 impl ArchLinuxBuilder {
     /// Load pacman config
     fn load_config(&mut self) -> anyhow::Result<pacman_conf::PacmanConfig> {
-        log::debug!(target: "paketkoll_core::backend::arch", "Loading pacman config");
+        log::debug!("Loading pacman config");
         let mut readable = BufReader::new(std::fs::File::open("/etc/pacman.conf")?);
         let pacman_config: pacman_conf::PacmanConfig =
             pacman_conf::PacmanConfig::new(&mut readable)?;
@@ -91,11 +91,11 @@ impl Files for ArchLinux {
         let db_path: &Path = Path::new(&self.pacman_config.db_path);
 
         // Load packages
-        log::debug!(target: "paketkoll_core::backend::arch", "Loading packages");
+        log::debug!("Loading packages");
         let pkgs_and_paths = get_mtree_paths(db_path, interner, self.package_filter)?;
 
         // Load mtrees
-        log::debug!(target: "paketkoll_core::backend::arch", "Loading mtrees");
+        log::debug!("Loading mtrees");
         // Directories are duplicated across packages, we deduplicate them here
         let seen_directories = DashSet::new();
         // It is counter-intuitive, but we are faster if we collect into a vec here and start
@@ -357,7 +357,7 @@ fn download_arch_pkg(pkg: &str) -> Result<(), anyhow::Error> {
         .args(["-Sw", "--noconfirm", pkg])
         .status()?;
     if !status.success() {
-        log::warn!(target: "paketkoll_core::backend::arch", "Failed to download package for {pkg}");
+        log::warn!("Failed to download package for {pkg}");
     };
     Ok(())
 }

@@ -11,6 +11,7 @@ use paketkoll_types::{
 };
 use rayon::prelude::*;
 
+#[tracing::instrument(skip_all)]
 pub(crate) fn load_packages(
     interner: &Arc<Interner>,
     backends_pkg: &PackageBackendMap,

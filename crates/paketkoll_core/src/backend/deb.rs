@@ -88,30 +88,30 @@ impl Name for Debian {
 
 impl Files for Debian {
     fn files(&self, interner: &Interner) -> anyhow::Result<Vec<FileEntry>> {
-        log::debug!(target: "paketkoll_core::backend::deb", "Loading packages");
+        log::debug!("Loading packages");
         let packages_files: Vec<_> = get_package_files(interner)?.collect();
 
         // Handle diversions: (parse output of dpkg-divert --list)
-        log::debug!(target: "paketkoll_core::backend::deb", "Loading diversions");
+        log::debug!("Loading diversions");
         let diversions =
             divert::get_diverions(interner).context("Failed to get dpkg diversions")?;
 
         // Load config files.
-        log::debug!(target: "paketkoll_core::backend::deb", "Loading status to get config files");
+        log::debug!("Loading status to get config files");
         let (config_files, _) = {
             let mut status = BufReader::new(File::open(STATUS_PATH)?);
             parsers::parse_status(interner, &mut status, self.primary_architecture)
         }
         .context(format!("Failed to parse {}", STATUS_PATH))?;
 
-        log::debug!(target: "paketkoll_core::backend::deb", "Merging packages files into one map");
+        log::debug!("Merging packages files into one map");
         let merged = DashMap::with_hasher(ahash::RandomState::new());
         packages_files.into_par_iter().for_each(|files| {
             merge_deb_fileentries(&merged, files, &diversions);
         });
 
         // The config files must be merged into the results
-        log::debug!(target: "paketkoll_core::backend::deb", "Merging config files");
+        log::debug!("Merging config files");
         merge_deb_fileentries(&merged, config_files, &diversions);
 
         // For Debian we apply the filter here at the end, since multiple steps
@@ -356,7 +356,7 @@ fn process_file(interner: &Interner, entry: &DirEntry) -> anyhow::Result<Option<
 impl Packages for Debian {
     fn packages(&self, interner: &Interner) -> anyhow::Result<Vec<PackageInterned>> {
         // Parse status
-        log::debug!(target: "paketkoll_core::backend::deb", "Loading status to installed packages");
+        log::debug!("Loading status to installed packages");
         let (_, mut packages) = {
             let mut status = BufReader::new(File::open(STATUS_PATH)?);
             parsers::parse_status(interner, &mut status, self.primary_architecture)
@@ -364,7 +364,7 @@ impl Packages for Debian {
         .context(format!("Failed to parse {}", STATUS_PATH))?;
 
         // Parse extended status
-        log::debug!(target: "paketkoll_core::backend::deb", "Loading extended status to get auto installed packages");
+        log::debug!("Loading extended status to get auto installed packages");
         let extended_packages = {
             let mut status = BufReader::new(File::open(EXTENDED_STATUS_PATH)?);
             parsers::parse_extended_status(interner, &mut status)?
@@ -449,8 +449,7 @@ fn download_deb(pkg: &str) -> Result<(), anyhow::Error> {
         .args(["install", "--reinstall", "-d", pkg])
         .status()?;
     if !status.success() {
-        log::warn!(target: "paketkoll_core::backend::deb",
-                   "Failed to download package for {pkg}");
+        log::warn!("Failed to download package for {pkg}");
     };
     Ok(())
 }

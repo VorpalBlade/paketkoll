@@ -25,12 +25,14 @@ pub(crate) struct ScanResult {
     pub path_map: PathMap<'this>,
 }
 
+#[tracing::instrument(skip_all)]
 pub(crate) fn scan_fs(
     interner: &Arc<Interner>,
     backend: &Arc<dyn Files>,
     ignores: &[CompactString],
     trust_mtime: bool,
 ) -> anyhow::Result<(ScanResult, Vec<FsInstruction>)> {
+    tracing::debug!("Scanning filesystem");
     let mut fs_instructions_sys = vec![];
     let mut files = backend.files(interner).with_context(|| {
         format!(
@@ -39,17 +41,20 @@ pub(crate) fn scan_fs(
         )
     })?;
     if backend.may_need_canonicalization() {
+        tracing::debug!("Canonicalizing file entries");
         canonicalize_file_entries(&mut files);
     }
     // Drop mutability
     let files = files;
 
+    tracing::debug!("Building path map");
     let scan_result = ScanResultBuilder {
         files,
         path_map_builder: |files| create_path_map(files.as_slice()),
     }
     .build();
 
+    tracing::debug!("Checking for unexpected files");
     let common_config = CommonFileCheckConfiguration::builder()
         .trust_mtime(trust_mtime)
         .config_files(ConfigFiles::Include)

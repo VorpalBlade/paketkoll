@@ -29,21 +29,29 @@ use crate::utils::{IdKey, NumericToNameResolveCache};
 pub fn convert_issues_to_fs_instructions(
     issues: Vec<(Option<PackageRef>, Issue)>,
 ) -> anyhow::Result<Vec<FsInstruction>> {
+    tracing::debug!("Starting conversion of {} issues", issues.len());
     let error_count = AtomicU32::new(0);
     let id_resolver = Mutex::new(NumericToNameResolveCache::new());
 
-    let converted: Vec<FsInstruction> = issues.into_par_iter().map(|issue| {
-        let mut results = vec![];
-        let (_pkg, issue) = issue;
-        match convert_issue(&issue, &mut results, &id_resolver) {
-            Ok(()) => (),
-            Err(err) => {
-                tracing::error!(target: "konfigkoll_core::conversion", "Error converting issue: {err:?} for {}", issue.path().display());
-                error_count.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    let converted: Vec<FsInstruction> = issues
+        .into_par_iter()
+        .map(|issue| {
+            let mut results = vec![];
+            let (_pkg, issue) = issue;
+            match convert_issue(&issue, &mut results, &id_resolver) {
+                Ok(()) => (),
+                Err(err) => {
+                    tracing::error!(
+                        "Error converting issue: {err:?} for {}",
+                        issue.path().display()
+                    );
+                    error_count.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                }
             }
-        }
-        results
-    }).flatten().collect();
+            results
+        })
+        .flatten()
+        .collect();
 
     tracing::debug!("Conversion done, length: {}", converted.len());
     let error_count = error_count.load(std::sync::atomic::Ordering::Relaxed);
@@ -242,7 +250,7 @@ fn from_fs(
     } else if metadata.file_type().is_socket() {
         // Socket files can only be created by a running program and gets
         // removed on program end. We can't do anything with them.
-        tracing::warn!(target: "konfigkoll_core::conversion", "Ignoring socket file: {:?}", path);
+        tracing::warn!("Ignoring socket file: {:?}", path);
         return Ok(results.into_iter());
     } else {
         anyhow::bail!("Unsupported file type: {:?}", path);

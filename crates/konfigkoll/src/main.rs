@@ -153,7 +153,7 @@ async fn main() -> anyhow::Result<()> {
     // Script: Do early package phase
     script_engine.run_phase(Phase::ScriptDependencies).await?;
 
-    tracing::info!("Retriving package loading results");
+    tracing::info!("Waiting for package loading results...");
     let (pkgs_sys, package_maps) = package_loader.await??;
     tracing::info!("Got package loading results");
 
@@ -194,7 +194,7 @@ async fn main() -> anyhow::Result<()> {
     // Make sure FS actions are sorted
     script_engine.state_mut().commands_mut().fs_actions.sort();
 
-    tracing::info!("Retriving file system scan results...");
+    tracing::info!("Waiting for file system scan results...");
     let (fs_scan_result, fs_instructions_sys) = fs_instructions_sys.await??;
     tracing::info!("Got file system scan results");
 
