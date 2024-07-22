@@ -1,35 +1,33 @@
 use ahash::AHashSet;
 use anyhow::Context;
+use apply::create_applicator;
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use clap::Parser;
 use compact_str::CompactString;
-use either::Either;
 use itertools::Itertools;
 use konfigkoll::cli::Cli;
 use konfigkoll::cli::Commands;
 use konfigkoll::cli::Paranoia;
 use konfigkoll_core::apply::apply_files;
 use konfigkoll_core::apply::apply_packages;
-use konfigkoll_core::apply::Applicator;
 use konfigkoll_core::diff::show_fs_instr_diff;
 use konfigkoll_core::state::DiffGoal;
-use konfigkoll_core::utils::safe_path_join;
 use konfigkoll_script::Phase;
-use konfigkoll_types::FileContents;
-use konfigkoll_types::PkgInstructions;
 use paketkoll_cache::FilesCache;
 use paketkoll_core::backend::ConcreteBackend;
 use paketkoll_core::paketkoll_types::intern::Interner;
+use paketkoll_types::backend::Files;
 use paketkoll_types::backend::PackageBackendMap;
-use paketkoll_types::backend::PackageMap;
 use paketkoll_types::backend::Packages;
-use paketkoll_types::backend::{Backend, Files};
-use rayon::prelude::*;
-use std::collections::BTreeMap;
 use std::io::BufWriter;
 use std::io::Write;
 use std::sync::Arc;
+
+mod apply;
+mod fs_scan;
+mod pkgs;
+mod save;
 
 #[cfg(target_env = "musl")]
 use mimalloc::MiMalloc;
@@ -129,7 +127,7 @@ async fn main() -> anyhow::Result<()> {
     let package_loader = {
         let interner = interner.clone();
         let backends_pkg = backends_pkg.clone();
-        tokio::task::spawn_blocking(move || load_packages(&interner, &backends_pkg))
+        tokio::task::spawn_blocking(move || pkgs::load_packages(&interner, &backends_pkg))
     };
     // Script: Get FS ignores
     script_engine.run_phase(Phase::Ignores).await?;
@@ -148,7 +146,7 @@ async fn main() -> anyhow::Result<()> {
         let interner = interner.clone();
         let backends_files = backend_files.clone();
         tokio::task::spawn_blocking(move || {
-            konfigkoll::fs_scan::scan_fs(&interner, &backends_files, &ignores, trust_mtime)
+            fs_scan::scan_fs(&interner, &backends_files, &ignores, trust_mtime)
         })
     };
 
@@ -181,7 +179,7 @@ async fn main() -> anyhow::Result<()> {
             script_engine.state().settings().diff(),
             script_engine.state().settings().pager(),
         );
-        let pkg_diff = package_diff(&pkgs_sys, &script_engine);
+        let pkg_diff = pkgs::package_diff(&pkgs_sys, &script_engine);
         let pkgs_changes = pkg_diff.filter_map(|v| match v {
             itertools::EitherOrBoth::Both(_, _) => None,
             itertools::EitherOrBoth::Left(_) => None,
@@ -208,7 +206,7 @@ async fn main() -> anyhow::Result<()> {
     sys_fs.apply_instructions(fs_instructions_sys.into_iter(), false);
 
     // Packages are so much easier
-    let pkg_diff = package_diff(&pkgs_sys, &script_engine);
+    let pkg_diff = pkgs::package_diff(&pkgs_sys, &script_engine);
 
     // At the end, decide what we want to do with the results
     match cli.command {
@@ -251,8 +249,8 @@ async fn main() -> anyhow::Result<()> {
             konfigkoll_core::save::save_fs_changes(
                 &mut output,
                 |path, contents| match cli.confirmation == Paranoia::DryRun {
-                    true => noop_file_data_saver(path),
-                    false => file_data_saver(&files_path, path, contents),
+                    true => save::noop_file_data_saver(path),
+                    false => save::file_data_saver(&files_path, path, contents),
                 },
                 fs_additions.iter(),
             )?;
@@ -339,48 +337,6 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn load_packages(
-    interner: &Arc<Interner>,
-    backends_pkg: &PackageBackendMap,
-) -> anyhow::Result<(PkgInstructions, BTreeMap<Backend, Arc<PackageMap>>)> {
-    let mut pkgs_sys = BTreeMap::new();
-    let mut package_maps: BTreeMap<Backend, Arc<PackageMap>> = BTreeMap::new();
-    let backend_maps: Vec<_> = backends_pkg
-        .values()
-        .par_bridge()
-        .map(|backend| {
-            let backend_pkgs = backend
-                .packages(interner)
-                .with_context(|| {
-                    format!(
-                        "Failed to collect information from backend {}",
-                        backend.name()
-                    )
-                })
-                .map(|backend_pkgs| {
-                    let pkg_map = Arc::new(paketkoll_types::backend::packages_to_package_map(
-                        backend_pkgs.clone(),
-                    ));
-                    let pkg_instructions =
-                        konfigkoll_core::conversion::convert_packages_to_pkg_instructions(
-                            backend_pkgs.into_iter(),
-                            backend.as_backend_enum(),
-                            interner,
-                        );
-                    (pkg_map, pkg_instructions)
-                });
-            (backend, backend_pkgs)
-        })
-        .collect();
-    for (backend, backend_pkgs) in backend_maps.into_iter() {
-        let (backend_pkgs_map, pkg_instructions) = backend_pkgs?;
-        package_maps.insert(backend.as_backend_enum(), backend_pkgs_map);
-        pkgs_sys.extend(pkg_instructions.into_iter());
-    }
-
-    Ok((pkgs_sys, package_maps))
-}
-
 fn init_directory(config_path: &Utf8Path) -> anyhow::Result<()> {
     std::fs::create_dir_all(config_path).context("Failed to create config directory")?;
     std::fs::create_dir_all(config_path.join("files"))?;
@@ -410,89 +366,5 @@ fn init_directory(config_path: &Utf8Path) -> anyhow::Result<()> {
         std::fs::write(&runetoml, b"")?;
     }
 
-    Ok(())
-}
-
-type PackagePair<'a> = (
-    &'a konfigkoll_types::PkgIdent,
-    &'a konfigkoll_types::PkgInstruction,
-);
-
-/// Get a diff of packages
-fn package_diff<'input>(
-    sorted_pkgs_sys: &'input PkgInstructions,
-    script_engine: &'input konfigkoll_script::ScriptEngine,
-) -> impl Iterator<Item = itertools::EitherOrBoth<PackagePair<'input>, PackagePair<'input>>> {
-    let left = sorted_pkgs_sys.iter();
-    let right = script_engine
-        .state()
-        .commands()
-        .package_actions
-        .iter()
-        .sorted();
-
-    konfigkoll_core::diff::comm(left, right)
-}
-
-#[allow(clippy::too_many_arguments)]
-fn create_applicator(
-    confirmation: Paranoia,
-    force_dry_run: bool,
-    backend_map: &PackageBackendMap,
-    interner: &Arc<Interner>,
-    package_maps: &BTreeMap<Backend, Arc<PackageMap>>,
-    files_backend: &Arc<dyn Files>,
-    diff_command: Vec<String>,
-    pager_command: Vec<String>,
-) -> Box<dyn Applicator> {
-    // TODO: This is where privilege separation would happen (well, one of the locations)
-    let inner_applicator = if force_dry_run {
-        Either::Left(konfigkoll_core::apply::NoopApplicator::default())
-    } else {
-        Either::Right(konfigkoll_core::apply::InProcessApplicator::new(
-            backend_map.clone(),
-            interner,
-            package_maps,
-            files_backend,
-        ))
-    };
-    // Create applicator based on paranoia setting
-    let applicator: Box<dyn Applicator> = match confirmation {
-        Paranoia::Yolo => Box::new(inner_applicator),
-        Paranoia::Ask => Box::new(konfigkoll_core::apply::InteractiveApplicator::new(
-            inner_applicator,
-            diff_command,
-            pager_command,
-        )),
-        Paranoia::DryRun => Box::new(konfigkoll_core::apply::NoopApplicator::default()),
-    };
-    applicator
-}
-
-/// Copy files to the config directory, under the "files/".
-fn file_data_saver(
-    files_path: &Utf8Path,
-    path: &Utf8Path,
-    contents: &FileContents,
-) -> Result<(), anyhow::Error> {
-    tracing::info!("Saving file data for {}", path);
-    let full_path = safe_path_join(files_path, path);
-    std::fs::create_dir_all(full_path.parent().with_context(|| {
-        format!("Impossible error: joined path should always below config dir: {full_path}")
-    })?)?;
-    match contents {
-        FileContents::Literal { checksum: _, data } => {
-            let mut file = std::fs::File::create(&full_path)?;
-            file.write_all(data)?;
-        }
-        FileContents::FromFile { checksum: _, path } => {
-            std::fs::copy(path, &full_path)?;
-        }
-    }
-    Ok(())
-}
-
-fn noop_file_data_saver(path: &Utf8Path) -> Result<(), anyhow::Error> {
-    tracing::info!("Would save file data for {}", path);
     Ok(())
 }

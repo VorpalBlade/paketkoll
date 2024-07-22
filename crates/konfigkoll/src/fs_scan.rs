@@ -18,14 +18,14 @@ use paketkoll_types::files::PathMap;
 use paketkoll_types::intern::Interner;
 
 #[self_referencing]
-pub struct ScanResult {
+pub(crate) struct ScanResult {
     pub files: Vec<FileEntry>,
     #[borrows(files)]
     #[covariant]
     pub path_map: PathMap<'this>,
 }
 
-pub fn scan_fs(
+pub(crate) fn scan_fs(
     interner: &Arc<Interner>,
     backend: &Arc<dyn Files>,
     ignores: &[CompactString],
