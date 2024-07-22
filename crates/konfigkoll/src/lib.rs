@@ -2,3 +2,6 @@
 
 #[doc(hidden)]
 pub mod cli;
+
+#[doc(hidden)]
+pub mod fs_scan;

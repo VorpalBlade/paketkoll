@@ -36,6 +36,7 @@ itertools.workspace = true
 konfigkoll_core = { version = "0.1.0", path = "../konfigkoll_core" }
 konfigkoll_script = { version = "0.1.0", path = "../konfigkoll_script" }
 konfigkoll_types = { version = "0.1.0", path = "../konfigkoll_types" }
+ouroboros.workspace = true
 paketkoll_cache = { version = "0.1.0", path = "../paketkoll_cache" }
 paketkoll_core = { version = "0.4.1", path = "../paketkoll_core" }
 paketkoll_types = { version = "0.1.0", path = "../paketkoll_types" }

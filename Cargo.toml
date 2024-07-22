@@ -44,6 +44,7 @@ mimalloc = "0.1.43"
 nix = { version = "0.29.0", default-features = false }
 num_cpus = "1.16.0"
 os_info = { version = "3.8.2", default-features = false }
+ouroboros = "0.18.4"
 parking_lot = "0.12.3"
 phf = "0.11.2"
 pretty_assertions = "1.4.0"
@@ -103,16 +104,8 @@ lto = false
 [profile.dev.package]
 # Needed for reasonable performance
 flate2.opt-level = 2
-libz-ng-sys.opt-level = 2
 md-5.opt-level = 2
-proc-macro2.opt-level = 2
-quote.opt-level = 2
 ring.opt-level = 2
-rune-macros.opt-level = 2
-serde_derive.opt-level = 2
-syn.opt-level = 2
-zstd-safe.opt-level = 2
-zstd-sys.opt-level = 2
 zstd.opt-level = 2
 
 [patch.crates-io]
