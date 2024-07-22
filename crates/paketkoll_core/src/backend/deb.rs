@@ -17,7 +17,9 @@ use bstr::ByteSlice;
 use bstr::ByteVec;
 use compact_str::CompactString;
 use dashmap::DashMap;
-use paketkoll_types::backend::{Files, Name, OriginalFileQuery, PackageMap, Packages};
+use paketkoll_types::backend::{
+    Files, Name, OriginalFileQuery, PackageManagerError, PackageMap, Packages,
+};
 use paketkoll_types::files::{FileEntry, Properties};
 use paketkoll_types::intern::{ArchitectureRef, Interner, PackageRef};
 use paketkoll_types::package::PackageInterned;
@@ -389,25 +391,48 @@ impl Packages for Debian {
         install: &[&str],
         uninstall: &[&str],
         ask_confirmation: bool,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), PackageManagerError> {
         if !install.is_empty() {
             package_manager_transaction(
                 "apt-get",
-                "install",
+                &["install"],
                 install,
-                ask_confirmation.then_some("-y"),
+                (!ask_confirmation).then_some("-y"),
             )
             .context("Failed to install with apt-get")?;
         }
         if !uninstall.is_empty() {
             package_manager_transaction(
                 "apt-get",
-                "remove",
+                &["remove"],
                 uninstall,
-                ask_confirmation.then_some("-y"),
+                (!ask_confirmation).then_some("-y"),
             )
             .context("Failed to uninstall with apt-get")?;
         }
+        Ok(())
+    }
+
+    fn mark(&self, dependencies: &[&str], manual: &[&str]) -> Result<(), PackageManagerError> {
+        if !dependencies.is_empty() {
+            package_manager_transaction("apt-mark", &["auto"], dependencies, None)
+                .context("Failed to mark auto-installed with apt-mark")?;
+        }
+        if !manual.is_empty() {
+            package_manager_transaction("apt-mark", &["manual"], manual, None)
+                .context("Failed to mark manual with apt-mark")?;
+        }
+        Ok(())
+    }
+
+    fn remove_unused(&self, ask_confirmation: bool) -> Result<(), PackageManagerError> {
+        package_manager_transaction(
+            "apt-get",
+            &["autoremove"],
+            &[],
+            (!ask_confirmation).then_some("-y"),
+        )
+        .context("Failed to autoremove with apt-get")?;
         Ok(())
     }
 }

@@ -105,7 +105,26 @@ pub trait Packages: Name {
         install: &[&str],
         uninstall: &[&str],
         ask_confirmation: bool,
-    ) -> anyhow::Result<()>;
+    ) -> Result<(), PackageManagerError>;
+
+    /// Mark packages as dependencies and manually installed
+    fn mark(&self, dependencies: &[&str], manual: &[&str]) -> Result<(), PackageManagerError>;
+
+    /// Ask package manager to uninstall unused packages
+    ///
+    /// If needed, this should internally repeat until no more packages can be removed (or the used aborted)
+    fn remove_unused(&self, ask_confirmation: bool) -> Result<(), PackageManagerError>;
+}
+
+/// Errors that package manager transactions can produce
+#[derive(Debug, thiserror::Error)]
+pub enum PackageManagerError {
+    /// This operation isn't supported by this backend
+    #[error("Operation not supported: {0}")]
+    UnsupportedOperation(&'static str),
+    /// All other errors
+    #[error("{0:?}")]
+    Other(#[from] anyhow::Error),
 }
 
 /// Convert a package vector to a package map

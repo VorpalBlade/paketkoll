@@ -30,6 +30,7 @@ nix = { workspace = true, features = ["fs", "user"] }
 serde = { workspace = true, optional = true, features = ["derive"] }
 smallvec.workspace = true
 strum.workspace = true
+thiserror.workspace = true
 
 [lints]
 workspace = true

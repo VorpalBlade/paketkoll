@@ -4,7 +4,7 @@ use std::process::{Command, Stdio};
 
 use crate::utils::package_manager_transaction;
 use anyhow::Context;
-use paketkoll_types::backend::{Name, Packages};
+use paketkoll_types::backend::{Name, PackageManagerError, Packages};
 use paketkoll_types::package::InstallReason;
 use paketkoll_types::{
     intern::{ArchitectureRef, PackageRef},
@@ -69,25 +69,42 @@ impl Packages for Flatpak {
         install: &[&str],
         uninstall: &[&str],
         ask_confirmation: bool,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), PackageManagerError> {
         if !install.is_empty() {
             package_manager_transaction(
                 "flatpak",
-                "install",
+                &["install"],
                 install,
-                ask_confirmation.then_some("--noninteractive"),
+                (!ask_confirmation).then_some("--noninteractive"),
             )
             .context("Failed to install with flatpak")?;
         }
         if !uninstall.is_empty() {
             package_manager_transaction(
                 "flatpak",
-                "uninstall",
+                &["uninstall"],
                 uninstall,
-                ask_confirmation.then_some("--noninteractive"),
+                (!ask_confirmation).then_some("--noninteractive"),
             )
             .context("Failed to uninstall with flatpak")?;
         }
+        Ok(())
+    }
+
+    fn mark(&self, _dependencies: &[&str], _manual: &[&str]) -> Result<(), PackageManagerError> {
+        Err(PackageManagerError::UnsupportedOperation(
+            "Marking packages as dependencies or manually installed is not supported by flatpak",
+        ))
+    }
+
+    fn remove_unused(&self, ask_confirmation: bool) -> Result<(), PackageManagerError> {
+        package_manager_transaction(
+            "flatpak",
+            &["uninstall", "--unused"],
+            &[],
+            (!ask_confirmation).then_some("--noninteractive"),
+        )
+        .context("Failed to remove unused packages with flatpak")?;
         Ok(())
     }
 }

@@ -20,7 +20,9 @@ use anyhow::Context;
 use compact_str::format_compact;
 use dashmap::{DashMap, DashSet};
 use either::Either;
-use paketkoll_types::backend::{Files, Name, OriginalFileQuery, PackageMap, Packages};
+use paketkoll_types::backend::{
+    Files, Name, OriginalFileQuery, PackageManagerError, PackageMap, Packages,
+};
 use paketkoll_types::{files::FileEntry, intern::PackageRef};
 use paketkoll_types::{intern::Interner, package::PackageInterned};
 use rayon::prelude::*;
@@ -278,25 +280,68 @@ impl Packages for ArchLinux {
         install: &[&str],
         uninstall: &[&str],
         ask_confirmation: bool,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), PackageManagerError> {
         if !install.is_empty() {
             package_manager_transaction(
                 "pacman",
-                "-S",
+                &["-S"],
                 install,
-                ask_confirmation.then_some("--noconfirm"),
+                (!ask_confirmation).then_some("--noconfirm"),
             )
             .context("Failed to install with pacman")?;
         }
         if !uninstall.is_empty() {
             package_manager_transaction(
                 "pacman",
-                "-R",
+                &["-R"],
                 uninstall,
-                ask_confirmation.then_some("--noconfirm"),
+                (!ask_confirmation).then_some("--noconfirm"),
             )
             .context("Failed to uninstall with pacman")?;
         }
+        Ok(())
+    }
+
+    fn mark(&self, dependencies: &[&str], manual: &[&str]) -> Result<(), PackageManagerError> {
+        if !dependencies.is_empty() {
+            package_manager_transaction("pacman", &["-D", "--asdeps"], dependencies, None)
+                .context("Failed to mark dependencies with pacman")?;
+        }
+        if !manual.is_empty() {
+            package_manager_transaction("pacman", &["-D", "--asexplicit"], manual, None)
+                .context("Failed to mark manual with pacman")?;
+        }
+        Ok(())
+    }
+
+    fn remove_unused(&self, ask_confirmation: bool) -> Result<(), PackageManagerError> {
+        let mut query_cmd = std::process::Command::new("pacman");
+        query_cmd.args(["-Qdtq"]);
+
+        let mut run_query = || -> anyhow::Result<Option<String>> {
+            let query_output = query_cmd
+                .output()
+                .with_context(|| "Failed to execute pacman -Qdtq")?;
+            let out = String::from_utf8(query_output.stdout)
+                .with_context(|| "Failed to parse pacman -Qdtq output as UTF-8")?;
+            if out.is_empty() {
+                Ok(None)
+            } else {
+                Ok(Some(out))
+            }
+        };
+
+        while let Some(packages) = run_query()? {
+            let packages = packages.lines().collect::<Vec<_>>();
+            package_manager_transaction(
+                "pacman",
+                &["-R"],
+                &packages,
+                (!ask_confirmation).then_some("--noconfirm"),
+            )
+            .context("Failed to remove unused packages with pacman")?;
+        }
+
         Ok(())
     }
 }

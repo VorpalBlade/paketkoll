@@ -1787,6 +1787,7 @@ dependencies = [
  "serde",
  "smallvec",
  "strum",
+ "thiserror",
 ]
 
 [[package]]

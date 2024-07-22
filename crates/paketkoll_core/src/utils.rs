@@ -13,19 +13,21 @@ use std::{
 /// Helper to do a generic package manager transaction
 pub(crate) fn package_manager_transaction(
     program_name: &str,
-    mode: &str,
+    flags: &[&str],
     pkg_list: &[&str],
     ask_confirmation: Option<&str>,
 ) -> anyhow::Result<()> {
-    let mut apt_get = std::process::Command::new(program_name);
-    apt_get.arg(mode);
+    let mut cmd = std::process::Command::new(program_name);
+    for arg in flags {
+        cmd.arg(arg);
+    }
     if let Some(flag) = ask_confirmation {
-        apt_get.arg(flag);
+        cmd.arg(flag);
     }
     for pkg in pkg_list {
-        apt_get.arg(pkg);
+        cmd.arg(pkg);
     }
-    let status = apt_get
+    let status = cmd
         .status()
         .with_context(|| format!("Failed to execute {program_name}"))?;
     if !status.success() {
