@@ -19,7 +19,7 @@ use paketkoll_core::{
         package::InstallReason,
     },
 };
-use paketkoll_types::backend::OriginalFileQuery;
+use paketkoll_types::{backend::OriginalFileQuery, package::PackageInterned};
 use proc_exit::{Code, Exit};
 use rayon::prelude::*;
 
@@ -43,36 +43,7 @@ fn main() -> anyhow::Result<Exit> {
                 package_ops::installed_packages(&(cli.backend.try_into()?), &(&cli).try_into()?)?;
             let mut stdout = BufWriter::new(stdout().lock());
 
-            match cli.format {
-                Format::Human => {
-                    for pkg in packages {
-                        let pkg_name = interner
-                            .try_resolve(&pkg.name.as_interner_ref())
-                            .ok_or_else(|| anyhow::anyhow!("No package name for package"))?;
-                        match pkg.reason {
-                            Some(InstallReason::Explicit) => {
-                                writeln!(stdout, "{} {}", pkg_name, pkg.version)?;
-                            }
-                            Some(InstallReason::Dependency) => {
-                                writeln!(stdout, "{} {} (as dep)", pkg_name, pkg.version)?;
-                            }
-                            None => writeln!(
-                                stdout,
-                                "{} {} (unknown install reason)",
-                                pkg_name, pkg.version
-                            )?,
-                        }
-                    }
-                }
-                #[cfg(feature = "json")]
-                Format::Json => {
-                    let packages: Vec<_> = packages
-                        .into_par_iter()
-                        .map(|pkg| pkg.into_direct(&interner))
-                        .collect();
-                    serde_json::to_writer_pretty(&mut stdout, &packages)?;
-                }
-            }
+            print_packages(&cli, packages, interner, &mut stdout)?;
 
             Ok(Exit::new(Code::SUCCESS))
         }
@@ -148,6 +119,45 @@ fn main() -> anyhow::Result<Exit> {
             Ok(Exit::new(Code::SUCCESS))
         }
     }
+}
+
+fn print_packages(
+    cli: &Cli,
+    packages: Vec<PackageInterned>,
+    interner: Interner,
+    stdout: &mut BufWriter<std::io::StdoutLock<'_>>,
+) -> Result<(), anyhow::Error> {
+    match cli.format {
+        Format::Human => {
+            for pkg in packages {
+                let pkg_name = interner
+                    .try_resolve(&pkg.name.as_interner_ref())
+                    .ok_or_else(|| anyhow::anyhow!("No package name for package"))?;
+                match pkg.reason {
+                    Some(InstallReason::Explicit) => {
+                        writeln!(stdout, "{} {}", pkg_name, pkg.version)?;
+                    }
+                    Some(InstallReason::Dependency) => {
+                        writeln!(stdout, "{} {} (as dep)", pkg_name, pkg.version)?;
+                    }
+                    None => writeln!(
+                        stdout,
+                        "{} {} (unknown install reason)",
+                        pkg_name, pkg.version
+                    )?,
+                }
+            }
+        }
+        #[cfg(feature = "json")]
+        Format::Json => {
+            let packages: Vec<_> = packages
+                .into_par_iter()
+                .map(|pkg| pkg.into_direct(&interner))
+                .collect();
+            serde_json::to_writer_pretty(stdout, &packages)?;
+        }
+    };
+    Ok(())
 }
 
 fn run_file_checks(cli: &Cli) -> Result<Exit, anyhow::Error> {
