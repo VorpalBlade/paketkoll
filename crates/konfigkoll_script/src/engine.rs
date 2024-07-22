@@ -3,7 +3,7 @@ use std::{
     fmt::Display,
     io::Write,
     panic::{catch_unwind, AssertUnwindSafe},
-    sync::Arc,
+    sync::{Arc, OnceLock},
 };
 
 use crate::plugins::{
@@ -73,6 +73,9 @@ pub struct EngineState {
     pub(crate) package_managers: Option<PackageManagers>,
 }
 
+/// Path to the configuration directory
+pub(crate) static CFG_PATH: OnceLock<Utf8PathBuf> = OnceLock::new();
+
 impl EngineState {
     pub fn new(files_path: Utf8PathBuf) -> Self {
         let settings = Arc::new(Settings::default());
@@ -134,11 +137,18 @@ impl ScriptEngine {
         context.install(rune_modules::json::module(true)?)?;
         context.install(rune_modules::process::module(true)?)?;
         context.install(rune_modules::toml::module(true)?)?;
+        context.install(rune_modules::toml::de::module(true)?)?;
+        context.install(rune_modules::toml::ser::module(true)?)?;
 
         Ok(context)
     }
 
     pub fn new_with_files(config_path: &Utf8Path) -> anyhow::Result<Self> {
+        CFG_PATH.set(config_path.to_owned()).map_err(|v| {
+            anyhow::anyhow!(
+                "Failed to set CFG_PATH to {v}, this should not be called more than once"
+            )
+        })?;
         let context = Self::create_context()?;
 
         // Create state
@@ -254,17 +264,17 @@ impl ScriptEngine {
 fn try_format_error(phase: Phase, value: &rune::Value) -> anyhow::Result<()> {
     match value.clone().into_any() {
         rune::runtime::VmResult::Ok(any) => {
-            match any.clone().downcast_into_ref::<anyhow::Error>() {
-                Ok(err) => {
-                    anyhow::bail!("Got error result from {phase}: {:?}", *err);
-                }
-                Err(err) => {
-                    let ty = try_get_type_info(value, "error");
-                    anyhow::bail!(
-                        "Got error result from {phase}, but it was not an anyhow error: {err:?}, type info: {ty}: {any:?}",
-                    );
-                }
+            if let Ok(err) = any.downcast_borrow_ref::<anyhow::Error>() {
+                anyhow::bail!("Got error result from {phase}: {:?}", *err);
             }
+            if let Ok(err) = any.downcast_borrow_ref::<std::io::Error>() {
+                anyhow::bail!("Got IO error result from {phase}: {:?}", *err);
+            }
+            let ty = try_get_type_info(value, "error");
+            let formatted = catch_unwind(AssertUnwindSafe(|| format!("{value:?}")));
+            anyhow::bail!(
+                "Got error result from {phase}, but it is a unknown error type: {ty}: {any:?}, formats as: {formatted:?}",
+            );
         }
         rune::runtime::VmResult::Err(not_any) => {
             tracing::error!("Got error result from {phase}, it was not an Any: {not_any:?}. Trying other approches at printing the error.");

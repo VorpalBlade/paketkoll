@@ -1,7 +1,7 @@
 //! RHAI plugins for Konfigkoll
 
 pub(crate) mod command;
-mod host_fs;
+mod filesystem;
 pub mod package_managers;
 mod passwd;
 mod patch;
@@ -14,7 +14,7 @@ mod systemd;
 
 pub(crate) fn register_modules(context: &mut rune::Context) -> Result<(), rune::ContextError> {
     context.install(command::module()?)?;
-    context.install(host_fs::module()?)?;
+    context.install(filesystem::module()?)?;
     context.install(package_managers::module()?)?;
     context.install(passwd::module()?)?;
     context.install(patch::module()?)?;
