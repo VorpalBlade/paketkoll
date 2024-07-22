@@ -1,0 +1,38 @@
+[package]
+description = "Cargo-xtask pattern. Do not upload to crates.io"
+edition = "2021"
+license = "MPL-2.0"
+name = "xtask"
+repository = "https://github.com/VorpalBlade/paketkoll"
+rust-version = "1.79.0"
+version = "0.1.0"
+
+[features]
+# Default features
+default = ["debian", "arch_linux", "json"]
+
+# Include the Arch Linux backend
+arch_linux = ["paketkoll/arch_linux"]
+
+# Include support for the Debian backend
+debian = ["paketkoll/debian"]
+
+# Include support for JSON output
+json = ["paketkoll/json"]
+
+# Include support for the systemd-tmpfiles backend (EXPERIMENTAL)
+systemd_tmpfiles = ["paketkoll/systemd_tmpfiles"]
+
+[dependencies]
+anyhow = { workspace = true, features = ["backtrace"] }
+camino.workspace = true
+clap = { workspace = true, features = ["derive"] }
+clap_complete.workspace = true
+clap_mangen.workspace = true
+env_logger.workspace = true
+konfigkoll = { version = "0.1.0", path = "../konfigkoll" }
+paketkoll = { version = "0.2.3", path = "../paketkoll" }
+log.workspace = true
+
+[lints]
+workspace = true

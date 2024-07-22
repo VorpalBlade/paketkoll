@@ -1,16 +1,15 @@
-use ahash::AHashMap;
+use std::collections::BTreeMap;
+
 use compact_str::CompactString;
 use paketkoll_types::files::Mode;
 
 use crate::FileContents;
 
 /// An operation to be performed on a file system entry
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, strum::EnumDiscriminants)]
 pub enum FsOp {
     /// Remove a file
     Remove,
-    /// Removes a path recursively
-    RemoveRecursive,
 
     // Creation
     /// Create a directory
@@ -33,13 +32,15 @@ pub enum FsOp {
     SetOwner { owner: CompactString },
     /// Set the group of a file
     SetGroup { group: CompactString },
+
+    /// Special value for when we want to inform the user about extraneous entries in their config
+    Comment,
 }
 
 impl std::fmt::Display for FsOp {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             FsOp::Remove => write!(f, "remove"),
-            FsOp::RemoveRecursive => write!(f, "remove recursive"),
             FsOp::CreateDirectory => write!(f, "mkdir"),
             FsOp::CreateFile(contents) => write!(f, "create file (with {})", contents.checksum()),
             FsOp::CreateSymlink { target } => write!(f, "symlink to {target}"),
@@ -49,6 +50,7 @@ impl std::fmt::Display for FsOp {
             FsOp::SetMode { mode } => write!(f, "chmod {mode}"),
             FsOp::SetOwner { owner } => write!(f, "chown {owner}"),
             FsOp::SetGroup { group } => write!(f, "chgrp {group}"),
+            FsOp::Comment => write!(f, "COMMENT"),
         }
     }
 }
@@ -128,7 +130,7 @@ impl PkgInstruction {
 }
 
 /// Type of collection of package instructions
-pub type PkgInstructions = AHashMap<PkgIdent, PkgInstruction>;
+pub type PkgInstructions = BTreeMap<PkgIdent, PkgInstruction>;
 
 impl PartialEq for PkgInstruction {
     fn eq(&self, other: &Self) -> bool {

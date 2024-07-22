@@ -75,7 +75,7 @@ pub(super) fn from_arch_linux_desc(
         provides,
         reason: Some(reason.unwrap_or(InstallReason::Explicit)),
         status: PackageInstallStatus::Installed,
-        id: None,
+        ids: Default::default(),
     })
 }
 
@@ -214,7 +214,7 @@ mod tests {
                 provides: vec![PackageRef::get_or_intern(&interner, "libfoo.so"),],
                 reason: Some(InstallReason::Dependency),
                 status: PackageInstallStatus::Installed,
-                id: None,
+                ids: Default::default(),
             }
         );
     }

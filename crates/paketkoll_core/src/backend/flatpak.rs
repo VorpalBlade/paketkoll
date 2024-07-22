@@ -5,10 +5,12 @@ use std::process::{Command, Stdio};
 use crate::utils::package_manager_transaction;
 use anyhow::Context;
 use paketkoll_types::backend::{Name, Packages};
+use paketkoll_types::package::InstallReason;
 use paketkoll_types::{
     intern::{ArchitectureRef, PackageRef},
     package::{Package, PackageInstallStatus, PackageInterned},
 };
+use smallvec::SmallVec;
 
 /// Flatpak backend
 #[derive(Debug)]
@@ -97,17 +99,17 @@ fn parse_flatpak_output(
     let mut packages = Vec::new();
 
     for line in output.lines() {
-        let parts: Vec<&str> = line.split('\t').collect();
+        let parts: SmallVec<[&str; 6]> = line.split('\t').collect();
         if parts.len() != 6 {
             anyhow::bail!("Unexpected number of columns in flatpak list: {}", line);
         }
         // Parse ref
-        let arch = {
+        let (app_id, arch) = {
             let ref_parts: Vec<&str> = parts[0].split('/').collect();
             if ref_parts.len() != 3 {
                 anyhow::bail!("Unexpected number of parts in flatpak ref: {}", parts[0]);
             }
-            ref_parts[1]
+            (ref_parts[0], ref_parts[1])
         };
 
         let version = parts[3];
@@ -117,6 +119,9 @@ fn parse_flatpak_output(
             Some(parts[4].into())
         };
 
+        let options = parts[5];
+        let is_runtime = options.contains("runtime");
+
         // Build package struct
         let package = Package {
             name: PackageRef::get_or_intern(interner, parts[2]),
@@ -125,9 +130,19 @@ fn parse_flatpak_output(
             architecture: Some(ArchitectureRef::get_or_intern(interner, arch)),
             depends: vec![],
             provides: vec![],
-            reason: None,
+            reason: if is_runtime {
+                // This is an approximation, flatpak doesn't appear to track
+                // dependency vs explicit installs.
+                Some(InstallReason::Dependency)
+            } else {
+                None
+            },
             status: PackageInstallStatus::Installed,
-            id: Some(parts[0].into()),
+            ids: smallvec::smallvec![
+                // TODO: What other subsets of the ref is valid?
+                PackageRef::get_or_intern(interner, app_id),
+                PackageRef::get_or_intern(interner, parts[0])
+            ],
         };
         packages.push(package);
     }
@@ -175,7 +190,13 @@ mod tests {
                     provides: vec![],
                     reason: None,
                     status: PackageInstallStatus::Installed,
-                    id: Some("com.github.tchx84.Flatseal/x86_64/stable".into()),
+                    ids: smallvec::smallvec![
+                        PackageRef::get_or_intern(&interner, "com.github.tchx84.Flatseal"),
+                        PackageRef::get_or_intern(
+                            &interner,
+                            "com.github.tchx84.Flatseal/x86_64/stable"
+                        )
+                    ],
                 },
                 Package {
                     name: PackageRef::get_or_intern(&interner, "Fedora Media Writer"),
@@ -188,7 +209,13 @@ mod tests {
                     provides: vec![],
                     reason: None,
                     status: PackageInstallStatus::Installed,
-                    id: Some("org.fedoraproject.MediaWriter/x86_64/stable".into()),
+                    ids: smallvec::smallvec![
+                        PackageRef::get_or_intern(&interner, "org.fedoraproject.MediaWriter"),
+                        PackageRef::get_or_intern(
+                            &interner,
+                            "org.fedoraproject.MediaWriter/x86_64/stable"
+                        )
+                    ],
                 },
                 Package {
                     name: PackageRef::get_or_intern(&interner, "Freedesktop Platform"),
@@ -197,9 +224,15 @@ mod tests {
                     architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
-                    reason: None,
+                    reason: Some(InstallReason::Dependency),
                     status: PackageInstallStatus::Installed,
-                    id: Some("org.freedesktop.Platform/x86_64/23.08".into()),
+                    ids: smallvec::smallvec![
+                        PackageRef::get_or_intern(&interner, "org.freedesktop.Platform"),
+                        PackageRef::get_or_intern(
+                            &interner,
+                            "org.freedesktop.Platform/x86_64/23.08"
+                        )
+                    ],
                 },
                 Package {
                     name: PackageRef::get_or_intern(&interner, "Mesa"),
@@ -208,9 +241,15 @@ mod tests {
                     architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
-                    reason: None,
+                    reason: Some(InstallReason::Dependency),
                     status: PackageInstallStatus::Installed,
-                    id: Some("org.freedesktop.Platform.GL.default/x86_64/23.08".into()),
+                    ids: smallvec::smallvec![
+                        PackageRef::get_or_intern(&interner, "org.freedesktop.Platform.GL.default"),
+                        PackageRef::get_or_intern(
+                            &interner,
+                            "org.freedesktop.Platform.GL.default/x86_64/23.08"
+                        )
+                    ],
                 },
                 Package {
                     name: PackageRef::get_or_intern(&interner, "Mesa (Extra)"),
@@ -219,9 +258,15 @@ mod tests {
                     architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
-                    reason: None,
+                    reason: Some(InstallReason::Dependency),
                     status: PackageInstallStatus::Installed,
-                    id: Some("org.freedesktop.Platform.GL.default/x86_64/23.08-extra".into()),
+                    ids: smallvec::smallvec![
+                        PackageRef::get_or_intern(&interner, "org.freedesktop.Platform.GL.default"),
+                        PackageRef::get_or_intern(
+                            &interner,
+                            "org.freedesktop.Platform.GL.default/x86_64/23.08-extra"
+                        )
+                    ],
                 },
                 Package {
                     name: PackageRef::get_or_intern(&interner, "nvidia-550-78"),
@@ -230,9 +275,18 @@ mod tests {
                     architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
-                    reason: None,
+                    reason: Some(InstallReason::Dependency),
                     status: PackageInstallStatus::Installed,
-                    id: Some("org.freedesktop.Platform.GL.nvidia-550-78/x86_64/1.4".into()),
+                    ids: smallvec::smallvec![
+                        PackageRef::get_or_intern(
+                            &interner,
+                            "org.freedesktop.Platform.GL.nvidia-550-78"
+                        ),
+                        PackageRef::get_or_intern(
+                            &interner,
+                            "org.freedesktop.Platform.GL.nvidia-550-78/x86_64/1.4"
+                        )
+                    ],
                 },
                 Package {
                     name: PackageRef::get_or_intern(&interner, "Intel"),
@@ -241,9 +295,18 @@ mod tests {
                     architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
-                    reason: None,
+                    reason: Some(InstallReason::Dependency),
                     status: PackageInstallStatus::Installed,
-                    id: Some("org.freedesktop.Platform.VAAPI.Intel/x86_64/23.08".into()),
+                    ids: smallvec::smallvec![
+                        PackageRef::get_or_intern(
+                            &interner,
+                            "org.freedesktop.Platform.VAAPI.Intel"
+                        ),
+                        PackageRef::get_or_intern(
+                            &interner,
+                            "org.freedesktop.Platform.VAAPI.Intel/x86_64/23.08"
+                        )
+                    ],
                 },
                 Package {
                     name: PackageRef::get_or_intern(&interner, "openh264"),
@@ -252,9 +315,15 @@ mod tests {
                     architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
-                    reason: None,
+                    reason: Some(InstallReason::Dependency),
                     status: PackageInstallStatus::Installed,
-                    id: Some("org.freedesktop.Platform.openh264/x86_64/2.2.0".into()),
+                    ids: smallvec::smallvec![
+                        PackageRef::get_or_intern(&interner, "org.freedesktop.Platform.openh264"),
+                        PackageRef::get_or_intern(
+                            &interner,
+                            "org.freedesktop.Platform.openh264/x86_64/2.2.0"
+                        )
+                    ],
                 },
                 Package {
                     name: PackageRef::get_or_intern(&interner, "openh264"),
@@ -263,9 +332,15 @@ mod tests {
                     architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
-                    reason: None,
+                    reason: Some(InstallReason::Dependency),
                     status: PackageInstallStatus::Installed,
-                    id: Some("org.freedesktop.Platform.openh264/x86_64/2.4.1".into()),
+                    ids: smallvec::smallvec![
+                        PackageRef::get_or_intern(&interner, "org.freedesktop.Platform.openh264"),
+                        PackageRef::get_or_intern(
+                            &interner,
+                            "org.freedesktop.Platform.openh264/x86_64/2.4.1"
+                        )
+                    ],
                 },
                 Package {
                     name: PackageRef::get_or_intern(
@@ -277,9 +352,12 @@ mod tests {
                     architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
-                    reason: None,
+                    reason: Some(InstallReason::Dependency),
                     status: PackageInstallStatus::Installed,
-                    id: Some("org.gnome.Platform/x86_64/46".into()),
+                    ids: smallvec::smallvec![
+                        PackageRef::get_or_intern(&interner, "org.gnome.Platform"),
+                        PackageRef::get_or_intern(&interner, "org.gnome.Platform/x86_64/46")
+                    ],
                 },
                 Package {
                     name: PackageRef::get_or_intern(&interner, "Adwaita dark GTK theme"),
@@ -288,9 +366,15 @@ mod tests {
                     architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
-                    reason: None,
+                    reason: Some(InstallReason::Dependency),
                     status: PackageInstallStatus::Installed,
-                    id: Some("org.gtk.Gtk3theme.Adwaita-dark/x86_64/3.22".into()),
+                    ids: smallvec::smallvec![
+                        PackageRef::get_or_intern(&interner, "org.gtk.Gtk3theme.Adwaita-dark"),
+                        PackageRef::get_or_intern(
+                            &interner,
+                            "org.gtk.Gtk3theme.Adwaita-dark/x86_64/3.22"
+                        )
+                    ],
                 },
                 Package {
                     name: PackageRef::get_or_intern(&interner, "Breeze GTK theme"),
@@ -299,9 +383,15 @@ mod tests {
                     architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
-                    reason: None,
+                    reason: Some(InstallReason::Dependency),
                     status: PackageInstallStatus::Installed,
-                    id: Some("org.gtk.Gtk3theme.Breeze/x86_64/3.22".into()),
+                    ids: smallvec::smallvec![
+                        PackageRef::get_or_intern(&interner, "org.gtk.Gtk3theme.Breeze"),
+                        PackageRef::get_or_intern(
+                            &interner,
+                            "org.gtk.Gtk3theme.Breeze/x86_64/3.22"
+                        )
+                    ],
                 },
                 Package {
                     name: PackageRef::get_or_intern(&interner, "Adwaita theme"),
@@ -310,9 +400,12 @@ mod tests {
                     architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
-                    reason: None,
+                    reason: Some(InstallReason::Dependency),
                     status: PackageInstallStatus::Installed,
-                    id: Some("org.kde.KStyle.Adwaita/x86_64/6.6".into()),
+                    ids: smallvec::smallvec![
+                        PackageRef::get_or_intern(&interner, "org.kde.KStyle.Adwaita"),
+                        PackageRef::get_or_intern(&interner, "org.kde.KStyle.Adwaita/x86_64/6.6")
+                    ],
                 },
                 Package {
                     name: PackageRef::get_or_intern(&interner, "KDE Application Platform"),
@@ -321,9 +414,12 @@ mod tests {
                     architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
                     depends: vec![],
                     provides: vec![],
-                    reason: None,
+                    reason: Some(InstallReason::Dependency),
                     status: PackageInstallStatus::Installed,
-                    id: Some("org.kde.Platform/x86_64/6.6".into()),
+                    ids: smallvec::smallvec![
+                        PackageRef::get_or_intern(&interner, "org.kde.Platform"),
+                        PackageRef::get_or_intern(&interner, "org.kde.Platform/x86_64/6.6")
+                    ],
                 },
             ]
         );

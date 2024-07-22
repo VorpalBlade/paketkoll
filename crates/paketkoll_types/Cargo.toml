@@ -28,12 +28,8 @@ lasso = { workspace = true, features = [
 ] }
 nix = { workspace = true, features = ["fs", "user"] }
 serde = { workspace = true, optional = true, features = ["derive"] }
-smallvec = { workspace = true, features = [
-    "const_generics",
-    "const_new",
-    "union",
-] }
-strum = { workspace = true, features = ["derive"] }
+smallvec.workspace = true
+strum.workspace = true
 
 [lints]
 workspace = true

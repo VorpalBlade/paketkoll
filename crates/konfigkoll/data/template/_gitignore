@@ -1,0 +1,8 @@
+*.dpkg-*
+*.old
+*.pacnew
+*.pacorig
+*.pacsave
+*.ucf-*
+*~
+/unsorted.rn

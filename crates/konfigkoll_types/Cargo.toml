@@ -15,6 +15,7 @@ compact_str.workspace = true
 either.workspace = true
 paketkoll_types = { version = "0.1.0", path = "../paketkoll_types" }
 paketkoll_utils = { version = "0.1.0", path = "../paketkoll_utils" }
+strum.workspace = true
 
 [lints]
 workspace = true

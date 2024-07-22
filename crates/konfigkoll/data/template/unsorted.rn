@@ -1,0 +1,9 @@
+//! This file will be overwritten when you use `konfigkoll save`
+//!
+//! It is recommended to use the "save" sub-command to create an initial
+//! `unsorted.rn` file that you can then copy the parts you want from into `main.rn`.
+//! 
+//! A tip is to use `konfigkoll -p dry-run save` the first few times to not
+//! *actually* save all the files, this helps you figure out what ignores to add
+//! above in `phase_ignores()` without copying a ton of files. Once you are happy
+//! with the ignores, you can remove the `-p dry-run` part.

@@ -11,6 +11,7 @@ mod operations;
 pub use misc::FileContents;
 pub use operations::FsInstruction;
 pub use operations::FsOp;
+pub use operations::FsOpDiscriminants;
 pub use operations::PkgIdent;
 pub use operations::PkgInstruction;
 pub use operations::PkgInstructions;

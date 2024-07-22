@@ -1,7 +1,10 @@
 .gdb_history
 .idea
+*.code-workspace
 /.vscode
+/patches
 /target
+/test_config
 flamegraph.svg
 heaptrack.*
 memory-profiling_*

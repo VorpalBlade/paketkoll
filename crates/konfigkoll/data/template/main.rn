@@ -1,0 +1,81 @@
+// This is the main script for konfigkoll
+            
+/// System configuration
+///
+/// Parameters:
+/// - props: A persistent properties object that the script can use to store
+///   data between phases
+/// - settings: Settings for konfigkoll
+pub fn phase_system_discovery(props, settings) {
+    let sysinfo = sysinfo::SysInfo::new();
+    let os_id = sysinfo.os_id();
+    println!("Configuring for host {} (distro: {})", sysinfo.host_name()?, os_id);
+
+    // We need to enable the backends that we want to use
+    match os_id {
+        "arch" => {
+            settings.enable_pkg_backend("pacman")?;
+            settings.enable_file_backend("pacman")?
+        },
+        "debian" => {
+            settings.enable_pkg_backend("apt")?;
+            settings.enable_file_backend("apt")?
+        },
+        "ubuntu" => {
+            settings.enable_pkg_backend("apt")?;
+            settings.enable_file_backend("apt")?
+        },
+        _ => return Err("Unsupported OS")?,
+    }
+    settings.enable_pkg_backend("flatpak")?;
+
+    // Changes to these files should be applied early (before packages)
+    //
+    // This is to help guarantee stable UID/GIDs as these are often auto-assigned
+    // by package managers when installing packages
+    settings.early_config("/etc/passwd");
+    settings.early_config("/etc/group");
+    settings.early_config("/etc/shadow");
+    settings.early_config("/etc/gshadow");
+
+    Ok(())
+}
+
+/// Ignored paths
+pub fn phase_ignores(props, cmds) {
+    // Note! Some ignores are built in to konfigkoll, so you don't need to add them here:
+    // These are things like /dev, /proc, /sys, /home etc. See documentation for
+    // current list of built in ignores.
+
+    // Ignore some common paths
+    cmds.ignore_path("/var/cache")?;
+    cmds.ignore_path("/var/spool")?;
+    // It is generally best to ignore the state directories of package managers,
+    // as they are managed separately.
+    cmds.ignore_path("/var/lib/flatpak")?;
+    cmds.ignore_path("/var/lib/pacman")?;
+    cmds.ignore_path("/var/lib/apt")?;
+    cmds.ignore_path("/var/lib/dpkg")?;
+    // Add more paths to ignore here
+    Ok(())
+}
+
+/// Early package phase, this is for packages that is needed by the script
+/// itself (e.g. if we need to call out to a command from that package)
+pub fn phase_script_dependencies(props, cmds) {
+    Ok(())
+}
+
+/// Main phase, this is where the bulk of your changes should be made
+///
+/// It is recommended to use the "save" sub-command to create an initial
+/// `unsorted.rn` file that you can then copy the parts you want from into here.
+/// 
+/// A tip is to use `konfigkoll -p dry-run save` the first few times to not
+/// *actually* save all the files, this helps you figure out what ignores to add
+/// above in `phase_ignores()` without copying a ton of files. Once you are happy
+/// with the ignores, you can remove the `-p dry-run` part.
+pub fn phase_main(props, cmds, package_managers) {
+
+    Ok(())
+}

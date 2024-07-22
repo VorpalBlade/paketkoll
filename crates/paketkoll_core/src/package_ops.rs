@@ -9,10 +9,10 @@ pub fn installed_packages(
     backend: &crate::backend::ConcreteBackend,
     backend_config: &crate::backend::BackendConfiguration,
 ) -> anyhow::Result<(Interner, Vec<PackageInterned>)> {
-    let backend_impl = backend
-        .create_packages(backend_config)
-        .with_context(|| format!("Failed to create backend for {backend}"))?;
     let interner = Interner::new();
+    let backend_impl = backend
+        .create_packages(backend_config, &interner)
+        .with_context(|| format!("Failed to create backend for {backend}"))?;
     let packages = backend_impl
         .packages(&interner)
         .with_context(|| format!("Failed to collect information from backend {backend}"))?;

@@ -17,9 +17,9 @@ use bstr::ByteSlice;
 use bstr::ByteVec;
 use compact_str::CompactString;
 use dashmap::DashMap;
-use paketkoll_types::backend::{Files, Name, OriginalFileQuery, Packages};
+use paketkoll_types::backend::{Files, Name, OriginalFileQuery, PackageMap, Packages};
 use paketkoll_types::files::{FileEntry, Properties};
-use paketkoll_types::intern::{Interner, PackageRef};
+use paketkoll_types::intern::{ArchitectureRef, Interner, PackageRef};
 use paketkoll_types::package::PackageInterned;
 use rayon::prelude::*;
 use regex::RegexSet;
@@ -42,6 +42,7 @@ const NAME: &str = "Debian";
 #[derive(Debug)]
 pub(crate) struct Debian {
     package_filter: &'static PackageFilter,
+    primary_architecture: ArchitectureRef,
 }
 
 #[derive(Debug, Default)]
@@ -55,11 +56,20 @@ impl DebianBuilder {
         self
     }
 
-    pub fn build(self) -> Debian {
+    pub fn build(self, interner: &Interner) -> Debian {
+        let arch = std::process::Command::new("dpkg")
+            .args(["--print-architecture"])
+            .output()
+            .expect("Failed to get primary architecture")
+            .stdout;
+        let arch_str = arch.trim();
+        let primary_architecture =
+            ArchitectureRef::get_or_intern(interner, arch_str.to_str_lossy().as_ref());
         Debian {
             package_filter: self
                 .package_filter
                 .unwrap_or_else(|| &PackageFilter::Everything),
+            primary_architecture,
         }
     }
 }
@@ -88,7 +98,7 @@ impl Files for Debian {
         log::debug!(target: "paketkoll_core::backend::deb", "Loading status to get config files");
         let (config_files, _) = {
             let mut status = BufReader::new(File::open(STATUS_PATH)?);
-            parsers::parse_status(interner, &mut status)
+            parsers::parse_status(interner, &mut status, self.primary_architecture)
         }
         .context(format!("Failed to parse {}", STATUS_PATH))?;
 
@@ -121,7 +131,7 @@ impl Files for Debian {
     fn original_files(
         &self,
         queries: &[OriginalFileQuery],
-        packages: ahash::AHashMap<PackageRef, PackageInterned>,
+        packages: &PackageMap,
         interner: &Interner,
     ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>> {
         let queries_by_pkg = group_queries_by_pkg(queries);
@@ -223,6 +233,10 @@ impl Files for Debian {
             });
 
         Ok(file_to_package)
+    }
+
+    fn may_need_canonicalization(&self) -> bool {
+        true
     }
 }
 
@@ -343,7 +357,7 @@ impl Packages for Debian {
         log::debug!(target: "paketkoll_core::backend::deb", "Loading status to installed packages");
         let (_, mut packages) = {
             let mut status = BufReader::new(File::open(STATUS_PATH)?);
-            parsers::parse_status(interner, &mut status)
+            parsers::parse_status(interner, &mut status, self.primary_architecture)
         }
         .context(format!("Failed to parse {}", STATUS_PATH))?;
 
