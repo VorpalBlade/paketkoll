@@ -378,6 +378,7 @@ pub enum DiffGoal<'map, 'files> {
 
 impl PartialEq for DiffGoal<'_, '_> {
     fn eq(&self, other: &Self) -> bool {
+        #[allow(clippy::match_like_matches_macro)]
         match (self, other) {
             (DiffGoal::Apply(_, _), DiffGoal::Apply(_, _)) => true,
             (DiffGoal::Save, DiffGoal::Save) => true,
@@ -388,7 +389,7 @@ impl PartialEq for DiffGoal<'_, '_> {
 
 // Generate a stream of instructions to go from state before to state after
 pub fn diff(
-    goal: DiffGoal<'_, '_>,
+    goal: &DiffGoal<'_, '_>,
     before: FsEntries,
     after: FsEntries,
 ) -> anyhow::Result<impl Iterator<Item = FsInstruction>> {
