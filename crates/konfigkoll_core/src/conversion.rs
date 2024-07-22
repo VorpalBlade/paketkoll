@@ -222,6 +222,7 @@ fn from_fs(
             op: FsOp::CreateBlockDevice {
                 // SAFETY: rdev is a valid device number
                 major: unsafe { libc::major(rdev) } as u64,
+                // SAFETY: rdev is a valid device number
                 minor: unsafe { libc::minor(rdev) } as u64,
             },
             comment: None,
@@ -233,6 +234,7 @@ fn from_fs(
             op: FsOp::CreateCharDevice {
                 // SAFETY: rdev is a valid device number
                 major: unsafe { libc::major(rdev) } as u64,
+                // SAFETY: rdev is a valid device number
                 minor: unsafe { libc::minor(rdev) } as u64,
             },
             comment: None,

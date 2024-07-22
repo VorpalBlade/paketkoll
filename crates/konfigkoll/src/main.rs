@@ -216,7 +216,7 @@ async fn main() -> anyhow::Result<()> {
             tracing::info!("Saving changes");
             // Split out additions and removals
             let mut fs_additions =
-                konfigkoll_core::state::diff(DiffGoal::Save, script_fs, sys_fs)?.collect_vec();
+                konfigkoll_core::state::diff(&DiffGoal::Save, script_fs, sys_fs)?.collect_vec();
             fs_additions.sort();
             let mut pkg_additions = vec![];
             let mut pkg_removals = vec![];
@@ -271,7 +271,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Apply {} => {
             tracing::info!("Applying changes");
             let mut fs_changes = konfigkoll_core::state::diff(
-                DiffGoal::Apply(backend_files.clone(), fs_scan_result.borrow_path_map()),
+                &DiffGoal::Apply(backend_files.clone(), fs_scan_result.borrow_path_map()),
                 sys_fs,
                 script_fs,
             )?
@@ -319,7 +319,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Diff { path } => {
             tracing::info!("Computing diff");
             let mut fs_changes = konfigkoll_core::state::diff(
-                DiffGoal::Apply(backend_files.clone(), fs_scan_result.borrow_path_map()),
+                &DiffGoal::Apply(backend_files.clone(), fs_scan_result.borrow_path_map()),
                 sys_fs,
                 script_fs,
             )?
@@ -494,10 +494,5 @@ fn file_data_saver(
 
 fn noop_file_data_saver(path: &Utf8Path) -> Result<(), anyhow::Error> {
     tracing::info!("Would save file data for {}", path);
-    Ok(())
-}
-
-fn removal_file_data_saver(path: &Utf8Path) -> Result<(), anyhow::Error> {
-    tracing::info!("The file {} is gone", path);
     Ok(())
 }

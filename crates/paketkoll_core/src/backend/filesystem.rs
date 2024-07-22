@@ -182,6 +182,7 @@ pub(crate) fn check_file(
                     // SAFETY: As far as I can find out, these do not actually
                     // have any safety invariants, as they just perform some simple bitwise arithmetics.
                     let major_actual = unsafe { libc::major(rdev) } as u64;
+                    // SAFETY: Same as for major
                     let minor_actual = unsafe { libc::minor(rdev) } as u64;
                     if (major_actual, minor_actual) != (*major, *minor) {
                         issues.push(IssueKind::WrongDeviceNodeId {
