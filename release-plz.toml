@@ -2,7 +2,8 @@
 git_release_enable = false
 
 [[package]]
-name = "mtree2"
+name = "xtask"
+release = false
 
 [[package]]
 name = "paketkoll_core"
@@ -13,9 +14,6 @@ name = "paketkoll"
 # We only want GH releases for the binary
 git_release_enable = true
 git_release_type = "auto"
-
-[[package]]
-name = "systemd_tmpfiles"
 
 [changelog]
 body = """
@@ -37,7 +35,8 @@ header = """
 # Changelog\n
 All notable changes to this project will be documented in this file.
 Keep in mind that this is only updated when releases are made and the file
-is generated automatically from commit messages.\n
+is generated automatically from commit messages (and may or may not be lightly
+edited).\n
 For a possibly more edited message focused on the binary please see the github
 releases.\n
 """

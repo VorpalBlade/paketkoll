@@ -1,0 +1,47 @@
+[package]
+description = "Scripting language for Konfigkoll (not for direct public use)"
+edition = "2021"
+license = "MPL-2.0"
+name = "konfigkoll_script"
+repository = "https://github.com/VorpalBlade/paketkoll"
+rust-version = "1.79.0"
+version = "0.1.0"
+
+[features]
+# Default features
+default = ["arch_linux", "debian"]
+
+# Include the Arch Linux backend    
+arch_linux = ["paketkoll_core/arch_linux"]
+
+# Include support for the Debian backend
+debian = ["paketkoll_core/debian"]
+
+[dependencies]
+ahash.workspace = true
+anyhow.workspace = true
+camino.workspace = true
+compact_str.workspace = true
+itertools.workspace = true
+konfigkoll_core = { version = "0.1.0", path = "../konfigkoll_core" }
+konfigkoll_hwinfo = { version = "0.1.0", path = "../konfigkoll_hwinfo", features = [
+    "rune",
+] }
+konfigkoll_types = { version = "0.1.0", path = "../konfigkoll_types" }
+paketkoll_core = { version = "0.4.1", path = "../paketkoll_core" }
+paketkoll_types = { version = "0.1.0", path = "../paketkoll_types", features = [
+    "serde",
+] }
+paketkoll_utils = { version = "0.1.0", path = "../paketkoll_utils" }
+parking_lot.workspace = true
+regex.workspace = true
+rune.workspace = true
+rune-modules = { version = "0.13.3", features = ["process", "json", "toml", "tokio"] }
+rust-ini.workspace = true
+smallvec.workspace = true
+sysinfo.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+
+[lints]
+workspace = true

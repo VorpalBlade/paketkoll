@@ -102,12 +102,8 @@ ring = { workspace = true, optional = true }
 rust-ini = { workspace = true, optional = true }
 scopeguard.workspace = true
 serde = { workspace = true, optional = true, features = ["derive"] }
-smallvec = { workspace = true, features = [
-    "const_generics",
-    "const_new",
-    "union",
-] }
-strum = { workspace = true, features = ["derive"] }
+smallvec.workspace = true
+strum.workspace = true
 systemd_tmpfiles = { version = "0.1.1", path = "../systemd_tmpfiles", optional = true }
 tar = { workspace = true, optional = true }
 xz2 = { workspace = true, optional = true }

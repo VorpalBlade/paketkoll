@@ -15,12 +15,12 @@ use super::{FullBackend, PackageFilter};
 use crate::utils::{
     extract_files, group_queries_by_pkg, locate_package_file, package_manager_transaction,
 };
-use ahash::{AHashMap, AHashSet};
+use ahash::AHashSet;
 use anyhow::Context;
 use compact_str::format_compact;
 use dashmap::{DashMap, DashSet};
 use either::Either;
-use paketkoll_types::backend::{Files, Name, OriginalFileQuery, Packages};
+use paketkoll_types::backend::{Files, Name, OriginalFileQuery, PackageMap, Packages};
 use paketkoll_types::{files::FileEntry, intern::PackageRef};
 use paketkoll_types::{intern::Interner, package::PackageInterned};
 use rayon::prelude::*;
@@ -127,7 +127,7 @@ impl Files for ArchLinux {
     fn original_files(
         &self,
         queries: &[OriginalFileQuery],
-        packages: AHashMap<PackageRef, PackageInterned>,
+        packages: &PackageMap,
         interner: &Interner,
     ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>> {
         let queries_by_pkg = group_queries_by_pkg(queries);

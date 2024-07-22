@@ -8,7 +8,9 @@ use ahash::AHashSet;
 use anyhow::{anyhow, Context};
 use compact_str::CompactString;
 use dashmap::DashMap;
+use std::collections::BTreeMap;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 /// Which backend to use for the system package manager
 #[derive(
@@ -29,6 +31,15 @@ pub enum Backend {
     SystemdTmpfiles,
 }
 
+/// Type for a mapping of package IDs to package data
+pub type PackageMap = AHashMap<PackageRef, PackageInterned>;
+
+/// Type of map of package backends
+pub type PackageBackendMap = BTreeMap<Backend, Arc<dyn Packages>>;
+
+/// Type of map of file backends
+pub type FilesBackendMap = BTreeMap<Backend, Arc<dyn Files>>;
+
 /// Get the name of a backend (useful in dynamic dispatch for generating reports)
 pub trait Name: Send + Sync + std::fmt::Debug {
     /// The name of the backend (for logging and debugging purposes)
@@ -44,6 +55,12 @@ pub trait Files: Name {
     /// any available metadata such as checksums or timestamps about those files
     fn files(&self, interner: &Interner) -> anyhow::Result<Vec<FileEntry>>;
 
+    /// True if this backend may benefit from path canonicalization for certain scans
+    /// (i.e. paths may be inaccuarate)
+    fn may_need_canonicalization(&self) -> bool {
+        false
+    }
+
     /// Find the owners of the specified packages
     fn owning_package(
         &self,
@@ -55,7 +72,7 @@ pub trait Files: Name {
     fn original_files(
         &self,
         queries: &[OriginalFileQuery],
-        packages: ahash::AHashMap<PackageRef, PackageInterned>,
+        packages: &PackageMap,
         interner: &Interner,
     ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>>;
 }
@@ -72,20 +89,12 @@ pub trait Packages: Name {
     /// Collect a list of all installed packages
     fn packages(&self, interner: &Interner) -> anyhow::Result<Vec<PackageInterned>>;
 
-    /// Collect a map of packages with the interned name as key
-    fn package_map(
-        &self,
-        interner: &Interner,
-    ) -> anyhow::Result<ahash::AHashMap<PackageRef, PackageInterned>> {
+    /// Collect a map of packages with all alternative names as keys
+    fn package_map_complete(&self, interner: &Interner) -> anyhow::Result<PackageMap> {
         let packages = self
             .packages(interner)
             .with_context(|| anyhow!("Failed to load package list"))?;
-        let mut package_map =
-            AHashMap::with_capacity_and_hasher(packages.len(), ahash::RandomState::new());
-        for package in packages.into_iter() {
-            package_map.insert(package.name, package);
-        }
-        Ok(package_map)
+        Ok(packages_to_package_map(packages))
     }
 
     /// Perform installation and uninstallation of a bunch of packages
@@ -97,4 +106,20 @@ pub trait Packages: Name {
         uninstall: &[&str],
         ask_confirmation: bool,
     ) -> anyhow::Result<()>;
+}
+
+/// Convert a package vector to a package map
+pub fn packages_to_package_map(packages: Vec<PackageInterned>) -> PackageMap {
+    let mut package_map =
+        AHashMap::with_capacity_and_hasher(packages.len(), ahash::RandomState::new());
+    for package in packages.into_iter() {
+        if package.ids.is_empty() {
+            package_map.insert(package.name, package);
+        } else {
+            for id in &package.ids {
+                package_map.insert(*id, package.clone());
+            }
+        }
+    }
+    package_map
 }

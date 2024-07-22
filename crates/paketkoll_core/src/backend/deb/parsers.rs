@@ -4,8 +4,9 @@ use std::io::BufRead;
 
 use anyhow::{bail, Context};
 use bstr::{io::BufReadExt, ByteSlice, ByteVec};
+use compact_str::format_compact;
 use paketkoll_types::intern::{ArchitectureRef, Interner, PackageRef};
-use paketkoll_types::package::PackageBuilder;
+use paketkoll_types::package::{Package, PackageBuilder};
 use paketkoll_types::{
     files::{Checksum, FileEntry, FileFlags, Properties, RegularFileBasic},
     package::{Dependency, InstallReason, PackageInstallStatus, PackageInterned},
@@ -132,8 +133,11 @@ fn dependency_name(segment: &str, interner: &lasso::ThreadedRodeo) -> PackageRef
 pub(super) fn parse_status(
     interner: &Interner,
     input: &mut impl BufRead,
+    primary_architecture: ArchitectureRef,
 ) -> anyhow::Result<(Vec<FileEntry>, Vec<PackageInterned>)> {
     let mut state = StatusParsingState::Start;
+
+    let all_architecture = ArchitectureRef::get_or_intern(interner, "all");
 
     let mut config_files = vec![];
     let mut packages = vec![];
@@ -150,7 +154,14 @@ pub(super) fn parse_status(
         let line = guard.trim_end();
         if let Some(stripped) = line.strip_prefix("Package: ") {
             if let Some(builder) = package_builder {
-                packages.push(builder.build()?);
+                let mut package = builder.build()?;
+                fixup_pkg_ids(
+                    &mut package,
+                    primary_architecture,
+                    all_architecture,
+                    interner,
+                );
+                packages.push(package);
             }
             package_builder = Some(PackageInterned::builder());
             // This will be updated later with the correct reason when we parse extended status
@@ -257,10 +268,50 @@ pub(super) fn parse_status(
     }
 
     if let Some(builder) = package_builder {
-        packages.push(builder.build()?);
+        let mut package = builder.build()?;
+        fixup_pkg_ids(
+            &mut package,
+            primary_architecture,
+            all_architecture,
+            interner,
+        );
+        packages.push(package);
     }
 
     Ok((config_files, packages))
+}
+
+fn fixup_pkg_ids(
+    package: &mut Package<PackageRef, ArchitectureRef>,
+    primary_architecture: ArchitectureRef,
+    all_architecture: ArchitectureRef,
+    interner: &lasso::ThreadedRodeo,
+) {
+    match package.architecture {
+        Some(arch) if arch == primary_architecture || arch == all_architecture => {
+            let pkg = package.name.to_str(interner);
+            let arch = arch.to_str(interner);
+            package.ids.push(package.name);
+            package.ids.push(PackageRef::get_or_intern(
+                interner,
+                format_compact!("{pkg}:{arch}"),
+            ));
+        }
+        Some(arch) => {
+            let pkg = package.name.to_str(interner);
+            let arch = arch.to_str(interner);
+            package.ids.push(PackageRef::get_or_intern(
+                interner,
+                format_compact!("{pkg}:{arch}"),
+            ));
+        }
+        None => {
+            log::error!(
+                "Package {} has no architecture",
+                package.name.to_str(interner)
+            );
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -525,7 +576,8 @@ mod tests {
             "};
         let mut input = input.as_bytes();
         let interner = Interner::default();
-        let (files, packages) = parse_status(&interner, &mut input).unwrap();
+        let primary_arch = ArchitectureRef::get_or_intern(&interner, "arm64");
+        let (files, packages) = parse_status(&interner, &mut input, primary_arch).unwrap();
         assert_eq!(
             packages,
             vec![Package {
@@ -540,7 +592,10 @@ mod tests {
                 provides: vec![],
                 reason: Some(InstallReason::Explicit),
                 status: PackageInstallStatus::Installed,
-                id: None,
+                ids: smallvec::smallvec![
+                    PackageRef::get_or_intern(&interner, "libc6"),
+                    PackageRef::get_or_intern(&interner, "libc6:arm64"),
+                ],
             }]
         );
         assert_eq!(

@@ -28,12 +28,8 @@ dirs = { workspace = true, optional = true }
 libc.workspace = true
 memchr.workspace = true
 nix = { workspace = true, features = ["feature"] }
-smallvec = { workspace = true, features = [
-    "const_generics",
-    "const_new",
-    "union",
-] }
-strum = { workspace = true, features = ["derive"] }
+smallvec.workspace = true
+strum.workspace = true
 thiserror.workspace = true
 winnow = { workspace = true, features = ["simd"] }
 

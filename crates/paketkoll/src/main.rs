@@ -50,14 +50,14 @@ fn main() -> anyhow::Result<Exit> {
             ref package,
             ref path,
         } => {
+            let interner = Interner::new();
             let backend: paketkoll_core::backend::ConcreteBackend = cli.backend.try_into()?;
             let backend_impl = backend
-                .create_full(&(&cli).try_into()?)
+                .create_full(&(&cli).try_into()?, &interner)
                 .context("Failed to create backend")?;
-            let interner = Interner::new();
 
             let package_map = backend_impl
-                .package_map(&interner)
+                .package_map_complete(&interner)
                 .with_context(|| format!("Failed to collect information from backend {backend}"))?;
 
             let package: &str = match package {
@@ -88,7 +88,7 @@ fn main() -> anyhow::Result<Exit> {
                 path: path.into(),
             }];
             let results = backend_impl
-                .original_files(queries.as_slice(), package_map, &interner)
+                .original_files(queries.as_slice(), &package_map, &interner)
                 .with_context(|| {
                     format!("Failed to collect original files from backend {backend}")
                 })?;
@@ -99,11 +99,11 @@ fn main() -> anyhow::Result<Exit> {
             Ok(Exit::new(Code::SUCCESS))
         }
         Commands::Owns { ref paths } => {
+            let interner = Interner::new();
             let backend: paketkoll_core::backend::ConcreteBackend = cli.backend.try_into()?;
             let backend_impl = backend
-                .create_files(&(&cli).try_into()?)
+                .create_files(&(&cli).try_into()?, &interner)
                 .context("Failed to create backend")?;
-            let interner = Interner::new();
 
             let inputs = AHashSet::from_iter(paths.iter().map(|e| e.as_str().into()));
             let file_map = backend_impl.owning_package(&inputs, &interner)?;

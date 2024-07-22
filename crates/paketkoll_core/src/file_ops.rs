@@ -24,17 +24,17 @@ pub fn original_files(
     backend_config: &crate::backend::BackendConfiguration,
     queries: &[OriginalFileQuery],
 ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>> {
-    let backend_impl = backend
-        .create_full(backend_config)
-        .with_context(|| format!("Failed to create backend for {backend}"))?;
     let interner = Interner::new();
+    let backend_impl = backend
+        .create_full(backend_config, &interner)
+        .with_context(|| format!("Failed to create backend for {backend}"))?;
 
     let package_map = backend_impl
-        .package_map(&interner)
+        .package_map_complete(&interner)
         .with_context(|| format!("Failed to collect information from backend {backend}"))?;
 
     let results = backend_impl
-        .original_files(queries, package_map, &interner)
+        .original_files(queries, &package_map, &interner)
         .with_context(|| format!("Failed to collect original files from backend {backend}"))?;
 
     Ok(results)
@@ -46,10 +46,10 @@ pub fn check_installed_files(
     backend_config: &crate::backend::BackendConfiguration,
     filecheck_config: &crate::config::CommonFileCheckConfiguration,
 ) -> anyhow::Result<(Interner, Vec<PackageIssue>)> {
-    let backend_impl = backend
-        .create_files(backend_config)
-        .with_context(|| format!("Failed to create backend for {backend}"))?;
     let interner = Interner::new();
+    let backend_impl = backend
+        .create_files(backend_config, &interner)
+        .with_context(|| format!("Failed to create backend for {backend}"))?;
     // Get distro specific file list
     let results = backend_impl
         .files(&interner)
@@ -88,11 +88,11 @@ pub fn check_all_files(
     filecheck_config: &crate::config::CommonFileCheckConfiguration,
     unexpected_cfg: &crate::config::CheckAllFilesConfiguration,
 ) -> anyhow::Result<(Interner, Vec<PackageIssue>)> {
+    let interner = Interner::new();
     // Collect distro files
     let backend_impl = backend
-        .create_files(backend_config)
+        .create_files(backend_config, &interner)
         .with_context(|| format!("Failed to create backend for {backend}"))?;
-    let interner = Interner::new();
     // Get distro specific file list
     let results = backend_impl
         .files(&interner)

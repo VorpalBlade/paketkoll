@@ -1,0 +1,40 @@
+[package]
+description = "Core functionality for Konfigkoll"
+edition = "2021"
+license = "MPL-2.0"
+name = "konfigkoll_core"
+repository = "https://github.com/VorpalBlade/paketkoll"
+rust-version = "1.79.0"
+version = "0.1.0"
+
+[dependencies]
+ahash.workspace = true
+anyhow.workspace = true
+camino.workspace = true
+clru.workspace = true
+compact_str.workspace = true
+console.workspace = true
+duct.workspace = true
+either.workspace = true
+itertools.workspace = true
+konfigkoll_types = { version = "0.1.0", path = "../konfigkoll_types" }
+libc.workspace = true
+nix = { workspace = true, features = ["user"] }
+paketkoll_types = { version = "0.1.0", path = "../paketkoll_types" }
+paketkoll_utils = { version = "0.1.0", path = "../paketkoll_utils" }
+parking_lot.workspace = true
+rayon.workspace = true
+smallvec.workspace = true
+strum = { workspace = true, features = ["derive"] }
+tracing.workspace = true
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+indoc.workspace = true
+pretty_assertions.workspace = true
+
+[[example]]
+name = "multi_confirm_demo"
+path = "examples/multi_confirm_demo.rs"

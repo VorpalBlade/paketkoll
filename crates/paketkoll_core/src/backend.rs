@@ -93,6 +93,7 @@ impl ConcreteBackend {
     pub fn create_files(
         self,
         configuration: &BackendConfiguration,
+        interner: &Interner,
     ) -> anyhow::Result<Box<dyn Files>> {
         match self {
             #[cfg(feature = "arch_linux")]
@@ -105,7 +106,7 @@ impl ConcreteBackend {
             ConcreteBackend::Apt => Ok(Box::new({
                 let mut builder = crate::backend::deb::DebianBuilder::default();
                 builder.package_filter(configuration.package_filter);
-                builder.build()
+                builder.build(interner)
             })),
             ConcreteBackend::Flatpak => Err(anyhow::anyhow!(
                 "Flatpak backend does not support file checks"
@@ -122,6 +123,7 @@ impl ConcreteBackend {
     pub fn create_packages(
         self,
         configuration: &BackendConfiguration,
+        interner: &Interner,
     ) -> anyhow::Result<Box<dyn Packages>> {
         match self {
             #[cfg(feature = "arch_linux")]
@@ -134,7 +136,7 @@ impl ConcreteBackend {
             ConcreteBackend::Apt => Ok(Box::new({
                 let mut builder = crate::backend::deb::DebianBuilder::default();
                 builder.package_filter(configuration.package_filter);
-                builder.build()
+                builder.build(interner)
             })),
             ConcreteBackend::Flatpak => Ok(Box::new({
                 let builder = crate::backend::flatpak::FlatpakBuilder::default();
@@ -151,6 +153,7 @@ impl ConcreteBackend {
     pub fn create_full(
         self,
         configuration: &BackendConfiguration,
+        interner: &Interner,
     ) -> anyhow::Result<Box<dyn FullBackend>> {
         match self {
             #[cfg(feature = "arch_linux")]
@@ -163,7 +166,7 @@ impl ConcreteBackend {
             ConcreteBackend::Apt => Ok(Box::new({
                 let mut builder = crate::backend::deb::DebianBuilder::default();
                 builder.package_filter(configuration.package_filter);
-                builder.build()
+                builder.build(interner)
             })),
             ConcreteBackend::Flatpak => Err(anyhow::anyhow!(
                 "Flatpak backend does not support file checks"

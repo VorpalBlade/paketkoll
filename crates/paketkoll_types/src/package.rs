@@ -2,6 +2,7 @@
 
 use crate::intern::{ArchitectureRef, Interner, PackageRef};
 use compact_str::CompactString;
+use smallvec::SmallVec;
 
 /// The reason a package is installed
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -53,9 +54,11 @@ where
     pub reason: Option<InstallReason>,
     /// Install status
     pub status: PackageInstallStatus,
-    /// ID for package (if not same as name)
-    #[builder(default = "None")]
-    pub id: Option<CompactString>,
+    /// IDs for package (if not same as name).
+    ///
+    /// The first one should be the preferred or canonical one.
+    #[builder(default = "smallvec::smallvec![]")]
+    pub ids: SmallVec<[PackageT; 4]>,
 }
 
 /// Interned compact package
@@ -97,7 +100,11 @@ impl PackageInterned {
                 .collect(),
             reason: self.reason,
             status: self.status,
-            id: self.id,
+            ids: self
+                .ids
+                .into_iter()
+                .flat_map(|pkg| pkg.try_to_str(interner).map(Into::into))
+                .collect(),
         }
     }
 }
@@ -118,7 +125,7 @@ impl serde::Serialize for PackageDirect {
         state.serialize_field("provides", &self.provides)?;
         state.serialize_field("reason", &self.reason)?;
         state.serialize_field("status", &self.status)?;
-        state.serialize_field("id", &self.id)?;
+        state.serialize_field("id", &self.ids)?;
         state.end()
     }
 }

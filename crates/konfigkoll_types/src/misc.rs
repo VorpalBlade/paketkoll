@@ -1,4 +1,5 @@
 use std::{
+    borrow::Cow,
     fs::File,
     hash::{Hash, Hasher},
     io::{BufReader, Read},
@@ -9,6 +10,7 @@ use camino::Utf8Path;
 use either::Either;
 use paketkoll_types::files::Checksum;
 
+/// Describes the contents of a file for the purpose of a [`FsOp`](crate::FsOp).
 #[derive(Debug, Clone)]
 pub enum FileContents {
     /// Literal data
@@ -29,7 +31,8 @@ impl FileContents {
     pub fn from_file(path: &Utf8Path) -> anyhow::Result<Self> {
         let mut reader =
             BufReader::new(File::open(path).with_context(|| format!("Failed to open {path}"))?);
-        let checksum = paketkoll_utils::checksum::sha256_readable(&mut reader)?;
+        let checksum =
+            paketkoll_utils::checksum::sha256_readable(&mut reader).context("Checksum failed")?;
         Ok(Self::FromFile {
             checksum,
             path: path.to_owned(),
@@ -50,6 +53,20 @@ impl FileContents {
             FileContents::FromFile { checksum: _, path } => Ok(Either::Right(
                 File::open(path).with_context(|| format!("Failed to open {path}"))?,
             )),
+        }
+    }
+
+    pub fn contents(&self) -> anyhow::Result<Cow<'_, [u8]>> {
+        match self {
+            FileContents::Literal { data, .. } => Ok(Cow::Borrowed(data.as_ref())),
+            FileContents::FromFile { path, .. } => {
+                let mut reader = BufReader::new(
+                    File::open(path).with_context(|| format!("Failed to open {path}"))?,
+                );
+                let mut data = Vec::new();
+                reader.read_to_end(&mut data)?;
+                Ok(Cow::Owned(data))
+            }
         }
     }
 }

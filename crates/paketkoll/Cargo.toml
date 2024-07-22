@@ -48,11 +48,5 @@ serde_json = { workspace = true, optional = true }
 # the slightly slower mimalloc instead.
 mimalloc.workspace = true
 
-[build-dependencies]
-clap = { workspace = true, features = ["derive"] }
-clap_complete.workspace = true
-clap_mangen.workspace = true
-compact_str.workspace = true
-
 [lints]
 workspace = true

@@ -19,7 +19,7 @@ workspace = true
 
 [dev-dependencies]
 indoc.workspace = true
-pretty_assertions = "1.4.0"
+pretty_assertions = { workspace = true }
 
 [features]
 rune = ["dep:rune"]

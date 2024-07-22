@@ -1,0 +1,60 @@
+[package]
+categories = [
+    "command-line-utilities",
+    "filesystem",
+    "os::linux-apis",
+    "config",
+]
+description = "Konfigkoll is a configuration management tool for Arch Linux and Debian (and derivatives)"
+edition = "2021"
+keywords = ["apt", "arch-linux", "debian", "pacman", "config-management"]
+license = "MPL-2.0"
+name = "konfigkoll"
+repository = "https://github.com/VorpalBlade/paketkoll"
+rust-version = "1.79.0"
+version = "0.1.0"
+
+[features]
+# Default features
+default = ["arch_linux", "debian"]
+
+# Include the Arch Linux backend    
+arch_linux = ["konfigkoll_script/arch_linux"]
+
+# Include support for the Debian backend
+debian = ["konfigkoll_script/debian"]
+
+[dependencies]
+ahash.workspace = true
+anyhow = { workspace = true, features = ["backtrace"] }
+camino.workspace = true
+clap = { workspace = true, features = ["derive"] }
+either.workspace = true
+itertools.workspace = true
+konfigkoll_core = { version = "0.1.0", path = "../konfigkoll_core" }
+konfigkoll_script = { version = "0.1.0", path = "../konfigkoll_script" }
+konfigkoll_types = { version = "0.1.0", path = "../konfigkoll_types" }
+paketkoll_core = { version = "0.4.1", path = "../paketkoll_core" }
+paketkoll_types = { version = "0.1.0", path = "../paketkoll_types" }
+rayon.workspace = true
+rune.workspace = true
+tokio = { workspace = true, features = [
+    "macros",
+    "parking_lot",
+    "process",
+    "rt",
+    "sync",
+] }
+tracing-log.workspace = true
+tracing-subscriber = { workspace = true, features = ["env-filter", "parking_lot"] }
+tracing.workspace = true
+compact_str.workspace = true
+
+[target.'cfg(target_env = "musl")'.dependencies]
+# The allocator on musl is attrociously slow, so we use a custom one.
+# Jemalloc doesn't work reliably on Aarch64 due to varying page size, so use
+# the slightly slower mimalloc instead.
+mimalloc.workspace = true
+
+[lints]
+workspace = true

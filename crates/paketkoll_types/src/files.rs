@@ -14,12 +14,12 @@ pub struct Mode(u32);
 
 impl Mode {
     #[inline]
-    pub fn new(value: u32) -> Self {
+    pub const fn new(value: u32) -> Self {
         Self(value)
     }
 
     #[inline]
-    pub fn as_raw(&self) -> u32 {
+    pub const fn as_raw(&self) -> u32 {
         self.0
     }
 
