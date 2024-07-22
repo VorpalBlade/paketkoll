@@ -2,7 +2,7 @@
 name: Support request
 about: Need help? Confused about something?
 title: ''
-labels: question
+labels: C-question
 assignees: ''
 
 ---
