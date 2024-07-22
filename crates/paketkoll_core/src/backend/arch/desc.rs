@@ -106,7 +106,7 @@ fn parse_package_list(
             break;
         }
         let pkg = trimmed_line
-            .split_once('=')
+            .split_once(|ch| ch == '=' || ch == '>' || ch == '<')
             .map(|(name, _)| name)
             .unwrap_or(trimmed_line);
         to_fill.push(PackageRef::get_or_intern(interner, pkg));
@@ -190,6 +190,7 @@ mod tests {
             glibc
             somelib=1.2.3
             some-other-lib.so=4.5.6
+            linux-api-headers>=4.10
 
             %PROVIDES%
             libfoo.so=1.2.3
@@ -210,6 +211,7 @@ mod tests {
                     Dependency::Single(PackageRef::get_or_intern(&interner, "glibc")),
                     Dependency::Single(PackageRef::get_or_intern(&interner, "somelib")),
                     Dependency::Single(PackageRef::get_or_intern(&interner, "some-other-lib.so")),
+                    Dependency::Single(PackageRef::get_or_intern(&interner, "linux-api-headers")),
                 ],
                 provides: vec![PackageRef::get_or_intern(&interner, "libfoo.so"),],
                 reason: Some(InstallReason::Dependency),
