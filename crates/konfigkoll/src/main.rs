@@ -16,14 +16,10 @@ use konfigkoll_core::diff::show_fs_instr_diff;
 use konfigkoll_core::state::DiffGoal;
 use konfigkoll_core::utils::safe_path_join;
 use konfigkoll_script::Phase;
+use konfigkoll_types::FileContents;
 use konfigkoll_types::PkgInstructions;
-use konfigkoll_types::{FileContents, FsInstruction};
 use paketkoll_cache::FilesCache;
 use paketkoll_core::backend::ConcreteBackend;
-use paketkoll_core::config::CheckAllFilesConfiguration;
-use paketkoll_core::config::CommonFileCheckConfiguration;
-use paketkoll_core::config::ConfigFiles;
-use paketkoll_core::file_ops::mismatching_and_unexpected_files;
 use paketkoll_core::paketkoll_types::intern::Interner;
 use paketkoll_types::backend::PackageBackendMap;
 use paketkoll_types::backend::PackageMap;
@@ -152,7 +148,7 @@ async fn main() -> anyhow::Result<()> {
         let interner = interner.clone();
         let backends_files = backend_files.clone();
         tokio::task::spawn_blocking(move || {
-            scan_fs(&interner, &backends_files, &ignores, trust_mtime)
+            konfigkoll::fs_scan::scan_fs(&interner, &backends_files, &ignores, trust_mtime)
         })
     };
 
@@ -201,7 +197,7 @@ async fn main() -> anyhow::Result<()> {
     script_engine.state_mut().commands_mut().fs_actions.sort();
 
     tracing::info!("Retriving file system scan results...");
-    let fs_instructions_sys = fs_instructions_sys.await??;
+    let (fs_scan_result, fs_instructions_sys) = fs_instructions_sys.await??;
     tracing::info!("Got file system scan results");
 
     // Compare expected to system
@@ -220,7 +216,7 @@ async fn main() -> anyhow::Result<()> {
             tracing::info!("Saving changes");
             // Split out additions and removals
             let mut fs_additions =
-                konfigkoll_core::state::diff(DiffGoal::Save, script_fs, sys_fs).collect_vec();
+                konfigkoll_core::state::diff(DiffGoal::Save, script_fs, sys_fs)?.collect_vec();
             fs_additions.sort();
             let mut pkg_additions = vec![];
             let mut pkg_removals = vec![];
@@ -274,8 +270,12 @@ async fn main() -> anyhow::Result<()> {
         }
         Commands::Apply {} => {
             tracing::info!("Applying changes");
-            let mut fs_changes =
-                konfigkoll_core::state::diff(DiffGoal::Apply, sys_fs, script_fs).collect_vec();
+            let mut fs_changes = konfigkoll_core::state::diff(
+                DiffGoal::Apply(backend_files.clone(), fs_scan_result.borrow_path_map()),
+                sys_fs,
+                script_fs,
+            )?
+            .collect_vec();
             fs_changes.sort();
             let pkgs_changes = pkg_diff.filter_map(|v| match v {
                 itertools::EitherOrBoth::Both(_, _) => None,
@@ -318,8 +318,12 @@ async fn main() -> anyhow::Result<()> {
         }
         Commands::Diff { path } => {
             tracing::info!("Computing diff");
-            let mut fs_changes =
-                konfigkoll_core::state::diff(DiffGoal::Apply, sys_fs, script_fs).collect_vec();
+            let mut fs_changes = konfigkoll_core::state::diff(
+                DiffGoal::Apply(backend_files.clone(), fs_scan_result.borrow_path_map()),
+                sys_fs,
+                script_fs,
+            )?
+            .collect_vec();
             fs_changes.sort();
             let diff_cmd = script_engine.state().settings().diff();
             let pager_cmd = script_engine.state().settings().pager();
@@ -333,37 +337,6 @@ async fn main() -> anyhow::Result<()> {
     }
 
     Ok(())
-}
-
-fn scan_fs(
-    interner: &Arc<Interner>,
-    backend: &Arc<dyn Files>,
-    ignores: &[CompactString],
-    trust_mtime: bool,
-) -> anyhow::Result<Vec<FsInstruction>> {
-    let mut fs_instructions_sys = vec![];
-    let mut files = backend.files(interner).with_context(|| {
-        format!(
-            "Failed to collect information from backend {}",
-            backend.name()
-        )
-    })?;
-    let common_config = CommonFileCheckConfiguration::builder()
-        .trust_mtime(trust_mtime)
-        .config_files(ConfigFiles::Include)
-        .build()?;
-    let unexpected_config = CheckAllFilesConfiguration::builder()
-        .canonicalize_paths(backend.may_need_canonicalization())
-        .ignored_paths(ignores.to_owned())
-        .build()?;
-    let issues = mismatching_and_unexpected_files(&mut files, &common_config, &unexpected_config)?;
-
-    // Convert issues to an instruction stream
-    fs_instructions_sys
-        .extend(konfigkoll_core::conversion::convert_issues_to_fs_instructions(issues)?);
-    // Ensure instructions are sorted
-    fs_instructions_sys.sort();
-    Ok(fs_instructions_sys)
 }
 
 fn load_packages(

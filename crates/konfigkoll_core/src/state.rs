@@ -1,11 +1,17 @@
 //! State representation of file system
 
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::Arc};
 
+use anyhow::anyhow;
 use camino::{Utf8Path, Utf8PathBuf};
 use compact_str::CompactString;
 use konfigkoll_types::{FileContents, FsInstruction, FsOp};
-use paketkoll_types::files::Mode;
+use paketkoll_types::{
+    backend::Files,
+    files::{Mode, PathMap, Properties},
+};
+
+use crate::utils::{IdKey, NumericToNameResolveCache};
 
 const DEFAULT_FILE_MODE: Mode = Mode::new(0o644);
 const DEFAULT_DIR_MODE: Mode = Mode::new(0o755);
@@ -364,21 +370,33 @@ impl FsEntries {
 /// Describe the goal of the diff: is it for saving or for application/diff
 ///
 /// This will affect the exact instructions that gets generated
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub enum DiffGoal {
-    Apply,
+#[derive(Debug, Clone, strum::EnumDiscriminants)]
+pub enum DiffGoal<'map, 'files> {
+    Apply(Arc<dyn Files>, &'map PathMap<'files>),
     Save,
+}
+
+impl PartialEq for DiffGoal<'_, '_> {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (DiffGoal::Apply(_, _), DiffGoal::Apply(_, _)) => true,
+            (DiffGoal::Save, DiffGoal::Save) => true,
+            _ => false,
+        }
+    }
 }
 
 // Generate a stream of instructions to go from state before to state after
 pub fn diff(
-    goal: DiffGoal,
+    goal: DiffGoal<'_, '_>,
     before: FsEntries,
     after: FsEntries,
-) -> impl Iterator<Item = FsInstruction> {
+) -> anyhow::Result<impl Iterator<Item = FsInstruction>> {
     let diff_iter = itertools::merge_join_by(before.fs, after.fs, |(k1, _), (k2, _)| k1.cmp(k2));
 
     let mut results = vec![];
+
+    let mut id_resolver = NumericToNameResolveCache::new();
 
     for entry in diff_iter {
         match entry {
@@ -465,22 +483,114 @@ pub fn diff(
                     }
                 }
             }
-            itertools::EitherOrBoth::Left(before) if goal == DiffGoal::Save => {
-                // Generate instructions to remove the entry
-                results.push(FsInstruction {
-                    path: before.0,
-                    op: FsOp::Remove,
-                    comment: before.1.comment,
-                });
-                // TODO: Do something special when the before instruction is a removal one?
-            }
             itertools::EitherOrBoth::Left(before) => {
-                // Generate instructions to remove the entry
-                results.push(FsInstruction {
-                    path: before.0,
-                    op: FsOp::Restore,
-                    comment: before.1.comment,
-                });
+                match goal {
+                    DiffGoal::Apply(ref _backend_impl, path_map) => {
+                        // Figure out what the previous state of this file was:
+                        match path_map.get(before.0.as_std_path()) {
+                            Some(entry) => {
+                                match entry.properties {
+                                    Properties::RegularFileBasic(_)
+                                    | Properties::RegularFileSystemd(_)
+                                    | Properties::RegularFile(_) => {
+                                        results.push(FsInstruction {
+                                            path: before.0.clone(),
+                                            op: FsOp::Restore,
+                                            comment: before.1.comment,
+                                        });
+                                    }
+                                    Properties::Symlink(ref v) => {
+                                        results.push(FsInstruction {
+                                            path: before.0.clone(),
+                                            op: FsOp::CreateSymlink {
+                                                target: Utf8Path::from_path(&v.target)
+                                                    .ok_or_else(|| anyhow!("Invalid UTF-8"))?
+                                                    .into(),
+                                            },
+                                            comment: before.1.comment,
+                                        });
+                                    }
+                                    Properties::Directory(_) => {
+                                        results.push(FsInstruction {
+                                            path: before.0.clone(),
+                                            op: FsOp::CreateDirectory,
+                                            comment: before.1.comment,
+                                        });
+                                    }
+                                    Properties::Fifo(_)
+                                    | Properties::DeviceNode(_)
+                                    | Properties::Permissions(_)
+                                    | Properties::Special
+                                    | Properties::Removed => {
+                                        anyhow::bail!("{:?} needs to be restored to package manager state, but how do to that is not yet implemented", entry.path)
+                                    }
+                                    Properties::Unknown => {
+                                        anyhow::bail!("{:?} needs to be restored to package manager state, but how do to that is unknown", entry.path)
+                                    }
+                                }
+                                match (entry.properties.mode(), before.1.mode) {
+                                    (None, None) | (None, Some(_)) | (Some(_), None) => (),
+                                    (Some(v1), Some(v2)) if v1 == v2 => (),
+                                    (Some(v1), Some(_)) => {
+                                        results.push(FsInstruction {
+                                            path: before.0.clone(),
+                                            op: FsOp::SetMode { mode: v1 },
+                                            comment: None,
+                                        });
+                                    }
+                                }
+                                let fs_owner = entry
+                                    .properties
+                                    .owner()
+                                    .map(|v| id_resolver.lookup(&IdKey::User(v)))
+                                    .transpose()?;
+                                match (fs_owner, before.1.owner) {
+                                    (None, None) | (None, Some(_)) | (Some(_), None) => (),
+                                    (Some(v1), Some(v2)) if v1 == v2 => (),
+                                    (Some(v1), Some(_)) => {
+                                        results.push(FsInstruction {
+                                            path: before.0.clone(),
+                                            op: FsOp::SetOwner { owner: v1 },
+                                            comment: None,
+                                        });
+                                    }
+                                }
+                                let fs_group = entry
+                                    .properties
+                                    .group()
+                                    .map(|v| id_resolver.lookup(&IdKey::Group(v)))
+                                    .transpose()?;
+                                match (fs_group, before.1.group) {
+                                    (None, None) | (None, Some(_)) | (Some(_), None) => (),
+                                    (Some(v1), Some(v2)) if v1 == v2 => (),
+                                    (Some(v1), Some(_)) => {
+                                        results.push(FsInstruction {
+                                            path: before.0.clone(),
+                                            op: FsOp::SetGroup { group: v1 },
+                                            comment: None,
+                                        });
+                                    }
+                                }
+                            }
+                            None => {
+                                results.push(FsInstruction {
+                                    path: before.0,
+                                    op: FsOp::Remove,
+                                    comment: before.1.comment,
+                                });
+                            }
+                        }
+                    }
+                    DiffGoal::Save => {
+                        // Generate instructions to remove the entry
+                        results.push(FsInstruction {
+                            path: before.0,
+                            op: FsOp::Remove,
+                            comment: before.1.comment,
+                        });
+                        // TODO: Do something special when the before instruction is a removal one?I
+                    }
+                }
             }
             itertools::EitherOrBoth::Right(after) => {
                 results.extend(after.1.into_instruction(&after.0));
@@ -488,7 +598,7 @@ pub fn diff(
         }
     }
 
-    results.into_iter()
+    Ok(results.into_iter())
 }
 
 #[cfg(test)]

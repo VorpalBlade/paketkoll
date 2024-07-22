@@ -2,7 +2,7 @@
 
 use crate::intern::PackageRef;
 use std::fmt::Octal;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::AtomicBool;
 use std::time::SystemTime;
 
@@ -272,6 +272,9 @@ pub struct Directory {
     pub group: Gid,
 }
 
+/// A mapping from paths to file entries
+pub type PathMap<'a> = ahash::AHashMap<&'a Path, &'a FileEntry>;
+
 /// A file entry from the package database
 #[derive(Debug)]
 pub struct FileEntry {
@@ -353,6 +356,22 @@ pub enum Properties {
 }
 
 impl Properties {
+    pub fn is_regular_file(&self) -> Option<bool> {
+        match self {
+            Properties::RegularFileBasic(_) => Some(true),
+            Properties::RegularFileSystemd(_) => Some(true),
+            Properties::RegularFile(_) => Some(true),
+            Properties::Symlink(_) => Some(false),
+            Properties::Directory(_) => Some(false),
+            Properties::Fifo(_) => Some(false),
+            Properties::DeviceNode(_) => Some(false),
+            Properties::Special => Some(false),
+            Properties::Removed => None,
+            Properties::Unknown => None,
+            Properties::Permissions(_) => None,
+        }
+    }
+
     pub fn is_dir(&self) -> Option<bool> {
         match self {
             Properties::RegularFileBasic(_) => Some(false),
@@ -366,6 +385,55 @@ impl Properties {
             Properties::Removed => None,
             Properties::Unknown => None,
             Properties::Permissions(_) => None,
+        }
+    }
+
+    /// Get mode (if available)
+    pub fn mode(&self) -> Option<Mode> {
+        match self {
+            Properties::RegularFileBasic(_) => None,
+            Properties::RegularFileSystemd(val) => Some(val.mode),
+            Properties::RegularFile(val) => Some(val.mode),
+            Properties::Symlink(_) => None,
+            Properties::Directory(val) => Some(val.mode),
+            Properties::Fifo(val) => Some(val.mode),
+            Properties::DeviceNode(val) => Some(val.mode),
+            Properties::Special => None,
+            Properties::Removed => None,
+            Properties::Unknown => None,
+            Properties::Permissions(val) => Some(val.mode),
+        }
+    }
+
+    pub fn owner(&self) -> Option<Uid> {
+        match self {
+            Properties::RegularFileBasic(_) => None,
+            Properties::RegularFileSystemd(val) => Some(val.owner),
+            Properties::RegularFile(val) => Some(val.owner),
+            Properties::Symlink(val) => Some(val.owner),
+            Properties::Directory(val) => Some(val.owner),
+            Properties::Fifo(val) => Some(val.owner),
+            Properties::DeviceNode(val) => Some(val.owner),
+            Properties::Special => None,
+            Properties::Removed => None,
+            Properties::Unknown => None,
+            Properties::Permissions(val) => Some(val.owner),
+        }
+    }
+
+    pub fn group(&self) -> Option<Gid> {
+        match self {
+            Properties::RegularFileBasic(_) => None,
+            Properties::RegularFileSystemd(val) => Some(val.group),
+            Properties::RegularFile(val) => Some(val.group),
+            Properties::Symlink(val) => Some(val.group),
+            Properties::Directory(val) => Some(val.group),
+            Properties::Fifo(val) => Some(val.group),
+            Properties::DeviceNode(val) => Some(val.group),
+            Properties::Special => None,
+            Properties::Removed => None,
+            Properties::Unknown => None,
+            Properties::Permissions(val) => Some(val.group),
         }
     }
 }

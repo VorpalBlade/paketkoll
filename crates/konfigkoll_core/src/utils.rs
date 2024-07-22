@@ -38,9 +38,11 @@ where
     }
 }
 
-pub(crate) type NumericToNameResolveCache = IdResolveCache<IdKey<Uid, Gid>, CompactString>;
-pub(crate) type NameToNumericResolveCache =
-    IdResolveCache<IdKey<CompactString, CompactString>, u32>;
+pub(crate) type IdKeyId = IdKey<Uid, Gid>;
+pub(crate) type IdKeyName = IdKey<CompactString, CompactString>;
+
+pub(crate) type NumericToNameResolveCache = IdResolveCache<IdKeyId, CompactString>;
+pub(crate) type NameToNumericResolveCache = IdResolveCache<IdKeyName, u32>;
 
 impl IdResolveCache<IdKey<Uid, Gid>, CompactString> {
     /// Lookup a UID/GID (resolving and caching if necessary)

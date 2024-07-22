@@ -1,16 +1,12 @@
 //! Contain file checking functionality
 
-use std::{
-    os::unix::ffi::OsStrExt,
-    path::{Path, PathBuf},
-};
+use std::{os::unix::ffi::OsStrExt, path::PathBuf};
 
 use anyhow::Context;
-use dashmap::DashMap;
 use ignore::{overrides::OverrideBuilder, Match, WalkBuilder, WalkState};
 
-use paketkoll_types::backend::OriginalFileQuery;
 use paketkoll_types::intern::{Interner, PackageRef};
+use paketkoll_types::{backend::OriginalFileQuery, files::PathMap};
 use paketkoll_types::{
     files::FileEntry,
     issue::{Issue, IssueKind, PackageIssue},
@@ -98,10 +94,25 @@ pub fn check_all_files(
         .files(&interner)
         .with_context(|| format!("Failed to collect information from backend {backend}",))?;
 
-    let mismatches =
-        mismatching_and_unexpected_files(&mut expected_files, filecheck_config, unexpected_cfg)?;
+    // Possibly canonicalize paths
+    if unexpected_cfg.canonicalize_paths {
+        log::debug!(target: "paketkoll_core::backend", "Canonicalizing paths");
+        canonicalize_file_entries(&mut expected_files);
+    }
+
+    log::debug!(target: "paketkoll_core::backend", "Preparing data structures");
+    // We want a hashmap from path to data here.
+    let path_map = create_path_map(&expected_files);
+
+    let mismatches = mismatching_and_unexpected_files(
+        &expected_files,
+        &path_map,
+        filecheck_config,
+        unexpected_cfg,
+    )?;
 
     // Drop on a background thread, this help a bit.
+    drop(path_map);
     rayon::spawn(move || {
         drop(expected_files);
     });
@@ -114,27 +125,13 @@ pub fn check_all_files(
 ///
 /// Returned will be a list of issues found (along with which package is
 /// associated with that file if known).
-pub fn mismatching_and_unexpected_files(
-    expected_files: &mut Vec<FileEntry>,
+pub fn mismatching_and_unexpected_files<'a>(
+    expected_files: &'a Vec<FileEntry>,
+    path_map: &PathMap<'a>,
     filecheck_config: &crate::config::CommonFileCheckConfiguration,
     unexpected_cfg: &crate::config::CheckAllFilesConfiguration,
 ) -> anyhow::Result<Vec<(Option<PackageRef>, Issue)>> {
-    // Possibly canonicalize paths
-    if unexpected_cfg.canonicalize_paths {
-        log::debug!(target: "paketkoll_core::backend", "Canonicalizing paths");
-        canonicalize_file_entries(expected_files);
-    }
-    // Drop mutability
-    let expected_files = &*expected_files;
-
-    log::debug!(target: "paketkoll_core::backend", "Preparing data structures");
-    // We want a hashmap from path to data here.
-    let path_map: DashMap<&Path, &FileEntry, ahash::RandomState> =
-        DashMap::with_capacity_and_hasher(expected_files.len(), ahash::RandomState::new());
-    expected_files.par_iter().for_each(|file_entry| {
-        path_map.insert(&file_entry.path, file_entry);
-    });
-
+    log::debug!(target: "paketkoll_core::backend", "Building ignores");
     // Build glob set of ignores
     let overrides = {
         let mut builder = OverrideBuilder::new("/");
@@ -174,8 +171,7 @@ pub fn mismatching_and_unexpected_files(
                         file_entry
                             .seen
                             .store(true, std::sync::atomic::Ordering::Relaxed);
-                        match crate::backend::filesystem::check_file(&file_entry, filecheck_config)
-                        {
+                        match crate::backend::filesystem::check_file(file_entry, filecheck_config) {
                             Ok(Some(inner)) => {
                                 collector
                                     .send((file_entry.package, inner))
@@ -260,10 +256,20 @@ pub fn mismatching_and_unexpected_files(
     Ok(mismatches)
 }
 
+/// Create a path map for a set of expected files
+pub fn create_path_map(expected_files: &[FileEntry]) -> PathMap<'_> {
+    let mut path_map: PathMap<'_> =
+        PathMap::with_capacity_and_hasher(expected_files.len(), ahash::RandomState::new());
+    expected_files.iter().for_each(|file_entry| {
+        path_map.insert(&file_entry.path, file_entry);
+    });
+    path_map
+}
+
 /// Canonicalize paths in file entries.
 ///
 /// This is needed for Debian as packages don't make sense wrt /usr-merge
-fn canonicalize_file_entries(results: &mut Vec<FileEntry>) {
+pub fn canonicalize_file_entries(results: &mut Vec<FileEntry>) {
     results.par_iter_mut().for_each(|file_entry| {
         if file_entry.path.as_os_str().as_bytes() == b"/" {
             return;
