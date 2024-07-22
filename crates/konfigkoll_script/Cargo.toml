@@ -22,6 +22,7 @@ ahash.workspace = true
 anyhow.workspace = true
 camino.workspace = true
 compact_str.workspace = true
+glob.workspace = true
 itertools.workspace = true
 konfigkoll_core = { version = "0.1.0", path = "../konfigkoll_core" }
 konfigkoll_hwinfo = { version = "0.1.0", path = "../konfigkoll_hwinfo", features = [
@@ -41,6 +42,7 @@ rune-modules = { workspace = true, features = ["process", "json", "toml", "tokio
 rust-ini.workspace = true
 smallvec.workspace = true
 sysinfo.workspace = true
+tempfile = { workspace = true }
 thiserror.workspace = true
 tracing.workspace = true
 winnow = { workspace = true, features = ["simd"] }
