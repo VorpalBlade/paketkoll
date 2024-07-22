@@ -45,6 +45,9 @@ pub enum Commands {
     },
     /// Get a list of installed packages
     InstalledPackages,
+    /// Get a list of packages that are not used by any installed package
+    #[clap(hide = true)]
+    UnusedPackages,
     /// Find package that owns a given file.
     Owns {
         /// Path to query

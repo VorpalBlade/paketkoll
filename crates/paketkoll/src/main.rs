@@ -47,6 +47,15 @@ fn main() -> anyhow::Result<Exit> {
 
             Ok(Exit::new(Code::SUCCESS))
         }
+        Commands::UnusedPackages => {
+            let (interner, packages) =
+                package_ops::unused_packages(&(cli.backend.try_into()?), &(&cli).try_into()?)?;
+            let mut stdout = BufWriter::new(stdout().lock());
+
+            print_packages(&cli, packages, interner, &mut stdout)?;
+
+            Ok(Exit::new(Code::SUCCESS))
+        }
         Commands::OriginalFile {
             ref package,
             ref path,

@@ -58,6 +58,7 @@ impl TryFrom<&Cli> for paketkoll_core::backend::BackendConfiguration {
                 canonicalize: _,
             } => {}
             Commands::InstalledPackages => {}
+            Commands::UnusedPackages => {}
             Commands::OriginalFile { .. } => {}
             Commands::Owns { .. } => {}
         }

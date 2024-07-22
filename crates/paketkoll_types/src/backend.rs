@@ -34,6 +34,9 @@ pub enum Backend {
 /// Type for a mapping of package IDs to package data
 pub type PackageMap = AHashMap<PackageRef, PackageInterned>;
 
+/// Type for mapping of package aliases
+pub type PackageAliases = AHashMap<PackageRef, PackageRef>;
+
 /// Type of map of package backends
 pub type PackageBackendMap = BTreeMap<Backend, Arc<dyn Packages>>;
 
@@ -125,4 +128,31 @@ pub fn packages_to_package_map(packages: Vec<PackageInterned>) -> PackageMap {
         }
     }
     package_map
+}
+
+/// Convert a package vector to a package map
+pub fn packages_to_split_maps(packages: Vec<PackageInterned>) -> (PackageMap, PackageAliases) {
+    let mut package_map: PackageMap =
+        AHashMap::with_capacity_and_hasher(packages.len(), ahash::RandomState::new());
+    let mut package_aliases: AHashMap<PackageRef, PackageRef> = AHashMap::new();
+    let mut alias_insert = |v, canon| {
+        if v != canon {
+            package_aliases.insert(v, canon);
+        }
+    };
+    for package in packages.into_iter() {
+        let canonical_id = *package.canonical_id();
+        for provides in &package.provides {
+            alias_insert(*provides, canonical_id);
+        }
+        if package.ids.is_empty() {
+            alias_insert(package.name, canonical_id);
+        } else {
+            for id in &package.ids {
+                alias_insert(*id, canonical_id);
+            }
+        }
+        package_map.insert(canonical_id, package);
+    }
+    (package_map, package_aliases)
 }
