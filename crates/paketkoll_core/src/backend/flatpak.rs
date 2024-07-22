@@ -73,7 +73,7 @@ impl Packages for Flatpak {
         if !install.is_empty() {
             package_manager_transaction(
                 "flatpak",
-                "install",
+                &["install"],
                 install,
                 ask_confirmation.then_some("--noninteractive"),
             )
@@ -82,13 +82,17 @@ impl Packages for Flatpak {
         if !uninstall.is_empty() {
             package_manager_transaction(
                 "flatpak",
-                "uninstall",
+                &["uninstall"],
                 uninstall,
                 ask_confirmation.then_some("--noninteractive"),
             )
             .context("Failed to uninstall with flatpak")?;
         }
         Ok(())
+    }
+
+    fn mark(&self, _dependencies: &[&str], _manual: &[&str]) -> anyhow::Result<()> {
+        anyhow::bail!("Flatpak does not support marking install status of packages")
     }
 }
 

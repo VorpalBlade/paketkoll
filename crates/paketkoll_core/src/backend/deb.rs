@@ -393,7 +393,7 @@ impl Packages for Debian {
         if !install.is_empty() {
             package_manager_transaction(
                 "apt-get",
-                "install",
+                &["install"],
                 install,
                 ask_confirmation.then_some("-y"),
             )
@@ -402,11 +402,23 @@ impl Packages for Debian {
         if !uninstall.is_empty() {
             package_manager_transaction(
                 "apt-get",
-                "remove",
+                &["remove"],
                 uninstall,
                 ask_confirmation.then_some("-y"),
             )
             .context("Failed to uninstall with apt-get")?;
+        }
+        Ok(())
+    }
+
+    fn mark(&self, dependencies: &[&str], manual: &[&str]) -> anyhow::Result<()> {
+        if !dependencies.is_empty() {
+            package_manager_transaction("apt-mark", &["auto"], dependencies, None)
+                .context("Failed to mark auto-installed with apt-mark")?;
+        }
+        if !manual.is_empty() {
+            package_manager_transaction("apt-mark", &["manual"], manual, None)
+                .context("Failed to mark manual with apt-mark")?;
         }
         Ok(())
     }

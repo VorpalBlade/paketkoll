@@ -106,6 +106,9 @@ pub trait Packages: Name {
         uninstall: &[&str],
         ask_confirmation: bool,
     ) -> anyhow::Result<()>;
+
+    /// Mark packages as dependencies and manually installed
+    fn mark(&self, dependencies: &[&str], manual: &[&str]) -> anyhow::Result<()>;
 }
 
 /// Convert a package vector to a package map

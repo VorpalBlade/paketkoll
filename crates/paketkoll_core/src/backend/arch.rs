@@ -282,7 +282,7 @@ impl Packages for ArchLinux {
         if !install.is_empty() {
             package_manager_transaction(
                 "pacman",
-                "-S",
+                &["-S"],
                 install,
                 ask_confirmation.then_some("--noconfirm"),
             )
@@ -291,11 +291,23 @@ impl Packages for ArchLinux {
         if !uninstall.is_empty() {
             package_manager_transaction(
                 "pacman",
-                "-R",
+                &["-R"],
                 uninstall,
                 ask_confirmation.then_some("--noconfirm"),
             )
             .context("Failed to uninstall with pacman")?;
+        }
+        Ok(())
+    }
+
+    fn mark(&self, dependencies: &[&str], manual: &[&str]) -> anyhow::Result<()> {
+        if !dependencies.is_empty() {
+            package_manager_transaction("pacman", &["-D", "--asdeps"], dependencies, None)
+                .context("Failed to mark dependencies with pacman")?;
+        }
+        if !manual.is_empty() {
+            package_manager_transaction("pacman", &["-D", "--asexplicit"], manual, None)
+                .context("Failed to mark manual with pacman")?;
         }
         Ok(())
     }
