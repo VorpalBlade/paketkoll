@@ -8,8 +8,8 @@ use either::Either;
 use itertools::Itertools;
 use konfigkoll_types::{FsInstruction, FsOp, FsOpDiscriminants, PkgIdent, PkgInstruction, PkgOp};
 use paketkoll_types::{
-    backend::{Backend, Files, OriginalFileQuery, PackageBackendMap, PackageMap},
-    intern::Interner,
+    backend::{Backend, Files, OriginalFileQuery, PackageBackendMap, PackageMap, PackageMapMap},
+    intern::{Interner, PackageRef},
 };
 
 use crate::{
@@ -31,6 +31,7 @@ pub trait Applicator {
         &mut self,
         backend: Backend,
         install: &[&'instructions str],
+        mark_explicit: &[&'instructions str],
         uninstall: &[&'instructions str],
     ) -> anyhow::Result<()>;
 
@@ -47,11 +48,12 @@ where
         &mut self,
         backend: Backend,
         install: &[&'instructions str],
+        mark_explicit: &[&'instructions str],
         uninstall: &[&'instructions str],
     ) -> anyhow::Result<()> {
         match self {
-            Either::Left(inner) => inner.apply_pkgs(backend, install, uninstall),
-            Either::Right(inner) => inner.apply_pkgs(backend, install, uninstall),
+            Either::Left(inner) => inner.apply_pkgs(backend, install, mark_explicit, uninstall),
+            Either::Right(inner) => inner.apply_pkgs(backend, install, mark_explicit, uninstall),
         }
     }
 
@@ -95,6 +97,7 @@ impl Applicator for InProcessApplicator {
         &mut self,
         backend: Backend,
         install: &[&'instructions str],
+        mark_explicit: &[&'instructions str],
         uninstall: &[&'instructions str],
     ) -> anyhow::Result<()> {
         tracing::info!(
@@ -107,7 +110,25 @@ impl Applicator for InProcessApplicator {
             .package_backends
             .get(&backend)
             .ok_or_else(|| anyhow::anyhow!("Unknown backend: {:?}", backend))?;
-        backend.transact(install, uninstall, true)?;
+
+        tracing::info!("Installing packages...");
+        backend.transact(install, &[], true)?;
+        tracing::info!("Marking packages explicit...");
+        backend.mark(&[], mark_explicit)?;
+        tracing::info!("Attempting to mark unwanted packages as dependencies...");
+        match backend.mark(uninstall, &[]) {
+            Ok(()) => {
+                tracing::info!("Successfully marked unwanted packages as dependencies");
+                tracing::info!("Removing unused packages...");
+                backend.remove_unused(true)?;
+            }
+            Err(paketkoll_types::backend::PackageManagerError::UnsupportedOperation(_)) => {
+                tracing::info!("Marking unwanted packages as dependencies not supported, using uninstall instead");
+                backend.transact(&[], uninstall, true)?;
+            }
+            Err(e) => return Err(e.into()),
+        }
+
         Ok(())
     }
 
@@ -271,11 +292,13 @@ impl<Inner: Applicator + std::fmt::Debug> Applicator for InteractiveApplicator<I
         &mut self,
         backend: Backend,
         install: &[&'instructions str],
+        mark_explicit: &[&'instructions str],
         uninstall: &[&'instructions str],
     ) -> anyhow::Result<()> {
         tracing::info!(
-            "Will install {:?} and uninstall {:?} with backend {backend}",
+            "Will install {:?}, mark {:?} as explicit and uninstall {:?} with backend {backend}",
             install.len(),
+            mark_explicit.len(),
             uninstall.len(),
         );
 
@@ -283,7 +306,9 @@ impl<Inner: Applicator + std::fmt::Debug> Applicator for InteractiveApplicator<I
             match self.pkg_confirmer.prompt()? {
                 'y' => {
                     tracing::info!("Applying changes");
-                    return self.inner.apply_pkgs(backend, install, uninstall);
+                    return self
+                        .inner
+                        .apply_pkgs(backend, install, mark_explicit, uninstall);
                 }
                 'n' => {
                     tracing::info!("Aborting");
@@ -293,6 +318,9 @@ impl<Inner: Applicator + std::fmt::Debug> Applicator for InteractiveApplicator<I
                     println!("With package manager {backend}:");
                     for pkg in install {
                         println!(" {} {}", style("+").green(), pkg);
+                    }
+                    for pkg in mark_explicit {
+                        println!(" {} {} (mark explicit)", style("E").green(), pkg);
                     }
                     for pkg in uninstall {
                         println!(" {} {}", style("-").red(), pkg);
@@ -379,16 +407,22 @@ impl Applicator for NoopApplicator {
         &mut self,
         backend: Backend,
         install: &[&'instructions str],
+        mark_explicit: &[&'instructions str],
         uninstall: &[&'instructions str],
     ) -> anyhow::Result<()> {
         tracing::info!(
-            "Would install {:?} and uninstall {:?} with backend {:?}",
+            "Would install {:?}, mark {:?} explicit and uninstall {:?} with backend {:?}",
             install.len(),
+            mark_explicit.len(),
             uninstall.len(),
             backend
         );
+
         for pkg in install {
             tracing::info!(" + {}", pkg);
+        }
+        for pkg in mark_explicit {
+            tracing::info!("   {} (mark explicit)", pkg);
         }
         for pkg in uninstall {
             tracing::info!(" - {}", pkg);
@@ -424,10 +458,19 @@ pub fn apply_files<'instructions>(
     Ok(())
 }
 
+#[derive(Default)]
+struct PackageOperations<'a> {
+    install: Vec<&'a str>,
+    mark_as_manual: Vec<&'a str>,
+    uninstall: Vec<&'a str>,
+}
+
 /// Apply package changes
 pub fn apply_packages<'instructions>(
     applicator: &mut dyn Applicator,
-    instructions: impl Iterator<Item = (&'instructions PkgIdent, &'instructions PkgInstruction)>,
+    instructions: impl Iterator<Item = (&'instructions PkgIdent, PkgInstruction)>,
+    package_maps: &PackageMapMap,
+    interner: &Interner,
 ) -> anyhow::Result<()> {
     // Sort into backends
     let mut sorted = AHashMap::new();
@@ -435,16 +478,28 @@ pub fn apply_packages<'instructions>(
         let backend = pkg.package_manager;
         let entry = sorted
             .entry(backend)
-            .or_insert_with(|| (Vec::new(), Vec::new()));
-        match instr.op {
-            PkgOp::Install => entry.0.push(pkg.identifier.as_str()),
-            PkgOp::Uninstall => entry.1.push(pkg.identifier.as_str()),
+            .or_insert_with(PackageOperations::default);
+        let sub_map = package_maps
+            .get(&backend)
+            .ok_or_else(|| anyhow::anyhow!("No package map for backend {:?}", backend))?;
+        // Deal with the case where a package is installed as a dependency and we want it explicit
+        let pkg_ref = PackageRef::get_or_intern(interner, pkg.identifier.as_str());
+        let has_pkg = sub_map.get(&pkg_ref).is_some();
+        match (instr.op, has_pkg) {
+            (PkgOp::Install, true) => entry.mark_as_manual.push(pkg.identifier.as_str()),
+            (PkgOp::Install, false) => entry.install.push(pkg.identifier.as_str()),
+            (PkgOp::Uninstall, _) => entry.uninstall.push(pkg.identifier.as_str()),
         }
     }
 
     // Apply with applicator
-    for (backend, (install, uninstall)) in sorted {
-        applicator.apply_pkgs(backend, &install, &uninstall)?;
+    for (backend, operations) in sorted {
+        applicator.apply_pkgs(
+            backend,
+            &operations.install,
+            &operations.mark_as_manual,
+            &operations.uninstall,
+        )?;
     }
     Ok(())
 }

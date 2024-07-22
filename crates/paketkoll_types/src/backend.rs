@@ -34,6 +34,9 @@ pub enum Backend {
 /// Type for a mapping of package IDs to package data
 pub type PackageMap = AHashMap<PackageRef, PackageInterned>;
 
+/// Type for a mapping from backend to package map
+pub type PackageMapMap = BTreeMap<Backend, Arc<PackageMap>>;
+
 /// Type of map of package backends
 pub type PackageBackendMap = BTreeMap<Backend, Arc<dyn Packages>>;
 

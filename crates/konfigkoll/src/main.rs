@@ -183,9 +183,9 @@ async fn main() -> anyhow::Result<()> {
         let pkgs_changes = pkg_diff.filter_map(|v| match v {
             itertools::EitherOrBoth::Both(_, _) => None,
             itertools::EitherOrBoth::Left(_) => None,
-            itertools::EitherOrBoth::Right(v) => Some(v),
+            itertools::EitherOrBoth::Right((id, instr)) => Some((id, instr.clone())),
         });
-        apply_packages(applicator.as_mut(), pkgs_changes)?;
+        apply_packages(applicator.as_mut(), pkgs_changes, &package_maps, &interner)?;
     }
 
     // Script: Do main phase
@@ -275,10 +275,11 @@ async fn main() -> anyhow::Result<()> {
             )?
             .collect_vec();
             fs_changes.sort();
+
             let pkgs_changes = pkg_diff.filter_map(|v| match v {
                 itertools::EitherOrBoth::Both(_, _) => None,
-                itertools::EitherOrBoth::Left(_) => None,
-                itertools::EitherOrBoth::Right(v) => Some(v),
+                itertools::EitherOrBoth::Left((id, instr)) => Some((id, instr.inverted())),
+                itertools::EitherOrBoth::Right((id, instr)) => Some((id, instr.clone())),
             });
 
             let mut applicator = create_applicator(
@@ -309,7 +310,7 @@ async fn main() -> anyhow::Result<()> {
             apply_files(applicator.as_mut(), early_fs_changes.iter())?;
 
             // Apply packages
-            apply_packages(applicator.as_mut(), pkgs_changes)?;
+            apply_packages(applicator.as_mut(), pkgs_changes, &package_maps, &interner)?;
 
             // Apply rest of file system
             apply_files(applicator.as_mut(), late_fs_changes.iter())?;

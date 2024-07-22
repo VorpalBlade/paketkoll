@@ -316,7 +316,7 @@ impl Packages for ArchLinux {
 
     fn remove_unused(&self, ask_confirmation: bool) -> Result<(), PackageManagerError> {
         let mut query_cmd = std::process::Command::new("pacman");
-        query_cmd.args(["-Qdtq"]);
+        query_cmd.args(["-Qttdq"]);
 
         let mut run_query = || -> anyhow::Result<Option<String>> {
             let query_output = query_cmd

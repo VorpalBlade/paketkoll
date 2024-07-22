@@ -6,7 +6,7 @@ use anyhow::Context;
 use itertools::Itertools;
 use konfigkoll_types::PkgInstructions;
 use paketkoll_types::{
-    backend::{Backend, PackageBackendMap, PackageMap},
+    backend::{Backend, PackageBackendMap, PackageMap, PackageMapMap},
     intern::Interner,
 };
 use rayon::prelude::*;
@@ -14,7 +14,7 @@ use rayon::prelude::*;
 pub(crate) fn load_packages(
     interner: &Arc<Interner>,
     backends_pkg: &PackageBackendMap,
-) -> anyhow::Result<(PkgInstructions, BTreeMap<Backend, Arc<PackageMap>>)> {
+) -> anyhow::Result<(PkgInstructions, PackageMapMap)> {
     let mut pkgs_sys = BTreeMap::new();
     let mut package_maps: BTreeMap<Backend, Arc<PackageMap>> = BTreeMap::new();
     let backend_maps: Vec<_> = backends_pkg
@@ -63,13 +63,9 @@ pub(crate) fn package_diff<'input>(
     sorted_pkgs_sys: &'input PkgInstructions,
     script_engine: &'input konfigkoll_script::ScriptEngine,
 ) -> impl Iterator<Item = itertools::EitherOrBoth<PackagePair<'input>, PackagePair<'input>>> {
+    let pkg_actions = &script_engine.state().commands().package_actions;
     let left = sorted_pkgs_sys.iter();
-    let right = script_engine
-        .state()
-        .commands()
-        .package_actions
-        .iter()
-        .sorted();
+    let right = pkg_actions.iter().sorted();
 
     konfigkoll_core::diff::comm(left, right)
 }
