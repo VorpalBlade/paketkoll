@@ -1,4 +1,4 @@
-# kondigkoll_script
+# konfigkoll_script
 
 Scripting language interface for konfigkoll.
 
