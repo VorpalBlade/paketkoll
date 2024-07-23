@@ -121,6 +121,14 @@ impl PackageManager {
         }
     }
 
+    pub fn files(&self) -> Option<Arc<dyn Files>> {
+        self.inner.borrow_ref().ok()?.files.clone()
+    }
+
+    pub fn packages(&self) -> Option<Arc<dyn Packages>> {
+        self.inner.borrow_ref().ok()?.packages.clone()
+    }
+
     /// Get the original file contents of a package from Rust code
     pub fn file_contents(&self, package: &str, path: &str) -> anyhow::Result<Vec<u8>> {
         let queries: [_; 1] = [OriginalFileQuery {

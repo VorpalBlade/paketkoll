@@ -10,6 +10,8 @@ struct SysInfo {
     inner: sysinfo::System,
     cpu_loaded: bool,
     pci_devices: Option<Vec<PciDevice>>,
+    // TODO: Needed for future functionality
+    #[allow(dead_code)]
     pci_db: Option<PciIdDb>,
 }
 

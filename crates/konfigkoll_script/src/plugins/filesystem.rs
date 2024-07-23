@@ -99,6 +99,8 @@ impl TempDir {
 #[rune(item = ::filesystem)]
 struct File {
     file: std::fs::File,
+    // TODO: Needed for future privilege separation
+    #[allow(dead_code)]
     need_root: bool,
 }
 
