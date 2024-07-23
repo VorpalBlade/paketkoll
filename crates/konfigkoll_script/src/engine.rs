@@ -135,7 +135,6 @@ impl ScriptEngine {
         // Register modules
         crate::plugins::register_modules(&mut context)?;
         context.install(rune_modules::json::module(true)?)?;
-        context.install(rune_modules::process::module(true)?)?;
         context.install(rune_modules::toml::module(true)?)?;
         context.install(rune_modules::toml::de::module(true)?)?;
         context.install(rune_modules::toml::ser::module(true)?)?;
