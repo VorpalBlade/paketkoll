@@ -354,7 +354,6 @@ impl FsEntries {
     /// Add missing directory parents for a given node
     fn add_missing_parents(&mut self, path: &Utf8Path) {
         for parent in path.ancestors() {
-            // TODO: Avoid allocation here?
             self.fs.entry(parent.into()).or_insert_with(|| FsNode {
                 entry: FsEntry::Directory,
                 mode: Some(DEFAULT_DIR_MODE),

@@ -234,8 +234,6 @@ impl Applicator for InProcessApplicator {
                         })?;
                         std::fs::write(&instr.path, contents)?;
                     }
-                    // TODO: Permissions and modes
-                    // TODO: Symlinks etc
                 }
                 FsOp::Comment => (),
             }
