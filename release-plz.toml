@@ -9,9 +9,14 @@ release = false
 name = "paketkoll_core"
 publish_features = ["arch_linux", "debian", "serde"]
 
+# We only want GH releases for the binaries
+[[package]]
+name = "konfigkoll"
+git_release_enable = true
+git_release_type = "auto"
+
 [[package]]
 name = "paketkoll"
-# We only want GH releases for the binary
 git_release_enable = true
 git_release_type = "auto"
 
