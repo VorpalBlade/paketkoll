@@ -15,7 +15,7 @@ use crate::utils::{IdKey, NumericToNameResolveCache};
 
 const DEFAULT_FILE_MODE: Mode = Mode::new(0o644);
 const DEFAULT_DIR_MODE: Mode = Mode::new(0o755);
-const ROOT: CompactString = CompactString::new_inline("root");
+const ROOT: CompactString = CompactString::const_new("root");
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 struct FsNode {
