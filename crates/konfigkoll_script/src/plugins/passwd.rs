@@ -38,7 +38,7 @@ type Groups = BTreeMap<String, Group>;
 /// pub async fn phase_main(props, cmds, package_managers) {
 ///     let passwd = passwd::Passwd::new(USER_MAPPING, GROUP_MAPPING);
 ///
-///     let files = ctx.package_managers.get_files();
+///     let files = ctx.package_managers.files();
 ///     // These two files MUST come first as other files later on refer to them,
 ///     // and we are not order independent (unlike the real sysusers.d).
 ///     ctx.passwd.add_from_sysusers(files, "systemd", "/usr/lib/sysusers.d/basic.conf")?;

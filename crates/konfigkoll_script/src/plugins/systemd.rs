@@ -17,7 +17,7 @@ use super::package_managers::PackageManager;
 /// ```rune
 /// systemd::Unit::from_pkg("util-linux",
 ///                          "fstrim.timer",
-///                          package_managers.get_files())
+///                          package_managers.files())
 ///     .enable(ctx.cmds)?;
 /// ```
 ///

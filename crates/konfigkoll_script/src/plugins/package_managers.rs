@@ -73,7 +73,7 @@ impl PackageManagers {
 
     /// Get the package manager that handles files
     #[rune::function]
-    fn get_files(&self) -> PackageManager {
+    fn files(&self) -> PackageManager {
         self.package_managers
             .get(&self.backend_with_files)
             .expect("There should always be a files backend")
@@ -184,6 +184,6 @@ pub(crate) fn module() -> Result<Module, ContextError> {
     m.function_meta(PackageManager::original_file_contents)?;
     m.ty::<PackageManagers>()?;
     m.function_meta(PackageManagers::get)?;
-    m.function_meta(PackageManagers::get_files)?;
+    m.function_meta(PackageManagers::files)?;
     Ok(m)
 }

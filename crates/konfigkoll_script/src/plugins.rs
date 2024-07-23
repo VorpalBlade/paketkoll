@@ -9,7 +9,6 @@ mod process;
 pub(crate) mod properties;
 pub(crate) mod regex;
 pub(crate) mod settings;
-mod shell;
 mod sysinfo;
 mod systemd;
 
