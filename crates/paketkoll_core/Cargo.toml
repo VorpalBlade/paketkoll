@@ -52,6 +52,9 @@ serde = [
     "smallvec/serde",
 ]
 
+# Vendor C/C++ dependencies instead of linking them dynamically
+vendored = ["xz2?/static", "bzip2?/static"]
+
 # Internal feature: Enable MD5 support
 __md5 = ["dep:md-5"]
 # Internal feature: Enable SHA-256 support

@@ -12,7 +12,7 @@ version = "0.2.3"
 
 [features]
 # Default features
-default = ["debian", "arch_linux", "json"]
+default = ["debian", "arch_linux", "json", "vendored"]
 
 # Include the Arch Linux backend
 arch_linux = ["paketkoll_core/arch_linux"]
@@ -26,6 +26,9 @@ systemd_tmpfiles = ["paketkoll_core/systemd_tmpfiles"]
 # Include support for exporting to JSON
 json = ["dep:serde_json", "paketkoll_core/serde", "serde"]
 serde = ["dep:serde"]
+
+# Vendor C/C++ dependencies instead of linking them dynamically
+vendored = ["paketkoll_core/vendored"]
 
 [dependencies]
 ahash.workspace = true

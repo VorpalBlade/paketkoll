@@ -36,3 +36,12 @@ pub(crate) enum CommandName {
     Paketkoll,
     Konfigkoll,
 }
+
+impl std::fmt::Display for CommandName {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CommandName::Paketkoll => write!(f, "paketkoll"),
+            CommandName::Konfigkoll => write!(f, "konfigkoll"),
+        }
+    }
+}

@@ -20,13 +20,14 @@ fn main() -> anyhow::Result<()> {
             clap_mangen::generate_to(cmd, &output)?;
         }
         Commands::Completions { output, cmd } => {
+            let bin_name = cmd.to_string();
             let mut cmd = match cmd {
                 cli::CommandName::Paketkoll => paketkoll::cli::Cli::command(),
                 cli::CommandName::Konfigkoll => konfigkoll::cli::Cli::command(),
             };
             std::fs::create_dir_all(&output)?;
             for &shell in Shell::value_variants() {
-                clap_complete::generate_to(shell, &mut cmd, "paketkoll", &output)?;
+                clap_complete::generate_to(shell, &mut cmd, &bin_name, &output)?;
             }
         }
     }
