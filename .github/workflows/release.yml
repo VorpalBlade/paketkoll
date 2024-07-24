@@ -31,6 +31,26 @@ defaults:
     shell: bash
 
 jobs:
+
+  cargo-about:
+    if: github.repository_owner == 'VorpalBlade' && (startsWith(github.event.release.name, 'paketkoll-v') || startsWith(github.event.release.name, 'konfigkoll-v'))
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Rust
+      run: rustup update stable && rustup default stable && rustup component add clippy
+    - name: Get cargo-binstall
+      run: |
+        curl -L https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-musl.tgz | tar -zxf - && mv cargo-binstall $HOME/.cargo/bin/
+    - name: Install required cargo addons
+      run: cargo binstall --no-confirm --no-symlinks cargo-about
+    - run: mkdir target && cargo about generate  about.hbs > target/licenses.html
+    - name: Upload licenses.html
+      run: GITHUB_TOKEN="${token}" retry gh release upload "${tag}"  target/licenses.html --clobber
+      env:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.event.release.tag_name }}
+
   upload-paketkoll:
     name: ${{ matrix.target }}
     if: github.repository_owner == 'VorpalBlade' && startsWith(github.event.release.name, 'paketkoll-v')
