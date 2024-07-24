@@ -109,7 +109,7 @@ impl Unit {
 /// Rune API
 impl Unit {
     /// Create a new instance from a file path
-    #[rune::function(path = Self::from_file)]
+    #[rune::function(path = Self::from_file, keep)]
     pub fn from_file(file: &str, cmds: &Commands) -> anyhow::Result<Self> {
         Ok(Self {
             unit: file.rsplit_once('/').map(|(_, f)| f).ok_or_else(|| anyhow::anyhow!("No file name found"))?.into(),
@@ -127,7 +127,7 @@ impl Unit {
     }
 
     /// Create a new instace from a unit file in a package
-    #[rune::function(path = Self::from_pkg)]
+    #[rune::function(path = Self::from_pkg, keep)]
     pub fn from_pkg(package: &str, unit: &str, package_manager: &PackageManager) -> Self {
         Self {
             unit: unit.into(),
@@ -143,35 +143,35 @@ impl Unit {
     }
 
     /// Mark this as a user unit instead of (the default) system unit type
-    #[rune::function]
+    #[rune::function(keep)]
     pub fn user(mut self) -> Self {
         self.type_ = Type::User;
         self
     }
 
     /// Override the name of the unit. Useful for parameterised units (e.g. `foo@.service`)
-    #[rune::function]
+    #[rune::function(keep)]
     pub fn name(mut self, name: &str) -> Self {
         self.name = Some(name.into());
         self
     }
 
     /// Skip installing aliases
-    #[rune::function]
+    #[rune::function(keep)]
     pub fn skip_aliases(mut self) -> Self {
         self.process_aliases = false;
         self
     }
 
     /// Skip installing wanted-by
-    #[rune::function]
+    #[rune::function(keep)]
     pub fn skip_wanted_by(mut self) -> Self {
         self.process_wanted_by = false;
         self
     }
 
     /// Enable the unit
-    #[rune::function]
+    #[rune::function(keep)]
     pub fn enable(self, commands: &mut Commands) -> anyhow::Result<()> {
         if commands.phase != Phase::Main {
             return Err(anyhow::anyhow!(
@@ -209,7 +209,7 @@ impl Unit {
     }
 
     /// Mask the unit
-    #[rune::function]
+    #[rune::function(keep)]
     pub fn mask(self, commands: &mut Commands) -> anyhow::Result<()> {
         if commands.phase != Phase::Main {
             return Err(anyhow::anyhow!(
@@ -227,13 +227,13 @@ impl Unit {
 pub(crate) fn module() -> Result<Module, ContextError> {
     let mut m = Module::from_meta(self::module_meta)?;
     m.ty::<Unit>()?;
-    m.function_meta(Unit::from_file)?;
-    m.function_meta(Unit::from_pkg)?;
-    m.function_meta(Unit::user)?;
-    m.function_meta(Unit::name)?;
-    m.function_meta(Unit::skip_aliases)?;
-    m.function_meta(Unit::skip_wanted_by)?;
-    m.function_meta(Unit::enable)?;
-    m.function_meta(Unit::mask)?;
+    m.function_meta(Unit::from_file__meta)?;
+    m.function_meta(Unit::from_pkg__meta)?;
+    m.function_meta(Unit::user__meta)?;
+    m.function_meta(Unit::name__meta)?;
+    m.function_meta(Unit::skip_aliases__meta)?;
+    m.function_meta(Unit::skip_wanted_by__meta)?;
+    m.function_meta(Unit::enable__meta)?;
+    m.function_meta(Unit::mask__meta)?;
     Ok(m)
 }

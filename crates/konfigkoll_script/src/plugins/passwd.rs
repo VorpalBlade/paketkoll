@@ -38,28 +38,28 @@ type Groups = BTreeMap<String, Group>;
 /// pub async fn phase_main(props, cmds, package_managers) {
 ///     let passwd = passwd::Passwd::new(USER_MAPPING, GROUP_MAPPING);
 ///
-///     let files = ctx.package_managers.files();
+///     let files = package_managers.files();
 ///     // These two files MUST come first as other files later on refer to them,
 ///     // and we are not order independent (unlike the real sysusers.d).
-///     ctx.passwd.add_from_sysusers(files, "systemd", "/usr/lib/sysusers.d/basic.conf")?;
-///     ctx.passwd.add_from_sysusers(files, "filesystem", "/usr/lib/sysusers.d/arch.conf")?;
+///     passwd.add_from_sysusers(files, "systemd", "/usr/lib/sysusers.d/basic.conf")?;
+///     passwd.add_from_sysusers(files, "filesystem", "/usr/lib/sysusers.d/arch.conf")?;
 ///
 ///     // Various other packages and other changes ...
-///     ctx.passwd.add_from_sysusers(files, "dbus", "/usr/lib/sysusers.d/dbus.conf")?;
+///     passwd.add_from_sysusers(files, "dbus", "/usr/lib/sysusers.d/dbus.conf")?;
 ///     // ...
 ///
 ///     // Add human user
 ///     let me = passwd::User::new(1000, "me", "me", "");
 ///     me.shell = "/bin/zsh";
 ///     me.home = "/home/me";
-///     ctx.passwd.add_user_with_group(me);
-///     ctx.passwd.add_user_to_groups("me", ["wheel", "optical", "uucp", "users"]);
+///     passwd.add_user_with_group(me);
+///     passwd.add_user_to_groups("me", ["wheel", "optical", "uucp", "users"]);
 ///
 ///     // Don't store passwords in your git repo, load them from the system instead
-///     ctx.passwd.passwd_from_system(["me", "root"]);
+///     passwd.passwd_from_system(["me", "root"]);
 ///
 ///     // Give root a login shell, we don't want /usr/bin/nologin!
-///     ctx.passwd.update_user("root", |user| {
+///     passwd.update_user("root", |user| {
 ///         user.shell = "/bin/zsh";
 ///         user
 ///     });
@@ -178,7 +178,10 @@ impl Passwd {
             let name = parts[0];
             let uid: u32 = parts[2].parse()?;
             if let Some(user) = self.users.get_mut(name) {
-                user.uid = uid;
+                if user.uid != uid {
+                    tracing::info!("Updating UID for {} from {} to {}", name, user.uid, uid);
+                    user.uid = uid;
+                }
             }
         }
 
@@ -192,7 +195,10 @@ impl Passwd {
             let name = parts[0];
             let gid: u32 = parts[2].parse()?;
             if let Some(group) = self.groups.get_mut(name) {
-                group.gid = gid;
+                if group.gid != gid {
+                    tracing::info!("Updating GID for {} from {} to {}", name, group.gid, gid);
+                    group.gid = gid;
+                }
             }
         }
         Ok(())
