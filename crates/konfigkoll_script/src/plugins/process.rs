@@ -1,3 +1,17 @@
+// Copyright:
+//
+// This is based on the process module from rune-rs which is dual licensed under
+// the MIT and Apache 2.0 licenses. See
+// https://github.com/rune-rs/rune/blob/0.13.x/crates/rune-modules/src/process.rs
+// for the original source code.
+//
+// Parts of the documentation is also copied from tokio and the Rust standard library
+// These are *also* dual licensed under the MIT and Apache 2.0 licenses.
+// See:
+// * https://docs.rs/tokio/1.39.1/tokio/process/index.html
+// * https://doc.rust-lang.org/stable/std/process/index.html
+// (The docs were not copied from the source but from the generated documentation)
+
 //! The native `process` module for the [Rune Language].
 //!
 //! [Rune Language]: https://rune-rs.github.io
