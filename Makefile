@@ -11,13 +11,13 @@ ZSHDIR ?= $(DATADIR)/zsh/site-functions
 FISHDIR ?= $(DATADIR)/fish/vendor_completions.d
 MANDIR ?= $(DATADIR)/man/man1
 
-PROGS := target/release/paketkoll target/release/konfigkoll target/release/konfigkoll_rune target/release/xtask
+PROGS := target/release/paketkoll target/release/konfigkoll target/release/konfigkoll-rune target/release/xtask
 
 all: $(PROGS)
 
 target/release/paketkoll: build-cargo
 target/release/konfigkoll: build-cargo
-target/release/konfigkoll_rune: build-cargo
+target/release/konfigkoll-rune: build-cargo
 target/release/xtask: build-cargo
 
 build-cargo:
@@ -35,9 +35,9 @@ install-paketkoll: target/release/paketkoll target/release/xtask install-dirs
 	install -Dm644 target/completions/_paketkoll $(DESTDIR)$(ZSHDIR)/_paketkoll
 
 
-install-konfigkoll: target/release/konfigkoll target/release/konfigkoll_rune target/release/xtask install-dirs
+install-konfigkoll: target/release/konfigkoll target/release/konfigkoll-rune target/release/xtask install-dirs
 	install $< $(DESTDIR)$(BINDIR)
-	install target/release/konfigkoll_rune $(DESTDIR)$(BINDIR)
+	install target/release/konfigkoll-rune $(DESTDIR)$(BINDIR)
 	./target/release/xtask man --output $(DESTDIR)$(MANDIR) konfigkoll
 	./target/release/xtask completions --output target/completions konfigkoll
 	install -Dm644 target/completions/konfigkoll.bash $(DESTDIR)$(BASHDIR)/konfigkoll

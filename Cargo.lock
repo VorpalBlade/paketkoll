@@ -1172,15 +1172,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "konfigkoll_rune"
-version = "0.1.0"
-dependencies = [
- "konfigkoll_script",
- "mimalloc",
- "rune",
-]
-
-[[package]]
 name = "konfigkoll_script"
 version = "0.1.0"
 dependencies = [

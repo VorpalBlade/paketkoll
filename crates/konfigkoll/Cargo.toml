@@ -14,6 +14,14 @@ repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.79.0"
 version = "0.1.0"
 
+[[bin]]
+name = "konfigkoll"
+path = "src/main.rs"
+
+[[bin]]
+name = "konfigkoll-rune"
+path = "src/bin/rune.rs"
+
 [features]
 # Default features
 default = ["arch_linux", "debian", "vendored"]
@@ -44,7 +52,7 @@ paketkoll_cache = { version = "0.1.0", path = "../paketkoll_cache" }
 paketkoll_core = { version = "0.4.1", path = "../paketkoll_core" }
 paketkoll_types = { version = "0.1.0", path = "../paketkoll_types" }
 rayon.workspace = true
-rune.workspace = true
+rune = { workspace = true, features = ["cli"] }
 tokio = { workspace = true, features = [
     "macros",
     "parking_lot",

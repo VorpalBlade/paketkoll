@@ -19,6 +19,25 @@ but with a few key differences:
 
 Please see [the documentation](https://vorpalblade.github.io/paketkoll/book#konfigkoll) for more information.
 
+## Installed binaries
+
+This crate consists of two binaries:
+
+### konfigkoll
+
+This is the main binary you will be interacting with
+
+### konfigkoll-rune
+
+This is a helper binary for [konfigkoll] that provides Rune support (the embedded
+scripting language used by konfigkoll) functions such as:
+
+* Documentation generation
+* LSP language server
+* Formatting of rune files
+* Syntax checking
+* etc
+
 ## MSRV (Minimum Supported Rust Version) policy
 
 The MSRV may be bumped as needed. It is guaranteed that this program will at

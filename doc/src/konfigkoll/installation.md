@@ -8,12 +8,14 @@ or build it yourself. The way to build it yourself is from the [git repository],
 `cargo install` from crates.io is not recommended (it will work, but you won't get
 shell completion nor man pages).
 
-There are two binaries of interest:
+There are three binaries of interest:
 
 * `konfigkoll` - The main binary that will apply and save your configuration.
-* `konfigkoll_rune` - This provides LSP language server for the scripting language
+* `konfigkoll-rune` - This provides LSP language server for the scripting language
   ([Rune]) used in konfigkoll. as well as some generic Rune utilities (such as
   auto-formatting code, though that has limitations currently).
+* `paketkoll` - A query tool similar to `debsums`. Parts of it's code is also
+  used in konfigkoll, and as such they are maintained in the same git repository.
 
 To build from source:
 
