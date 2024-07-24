@@ -4,3 +4,8 @@ language = "en"
 multilingual = false
 src = "src"
 title = "Konfigkoll & paketkoll Documentation"
+
+[output.html]
+site-url = "/paketkoll/"
+git-repository-url = "https://github.com/VorpalBlade/paketkoll/tree/main"
+edit-url-template = "https://github.com/VorpalBlade/paketkoll/edit/main/docs/{path}"

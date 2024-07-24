@@ -6,7 +6,7 @@
 /// - props: A persistent properties object that the script can use to store
 ///   data between phases
 /// - settings: Settings for konfigkoll
-pub fn phase_system_discovery(props, settings) {
+pub async fn phase_system_discovery(props, settings) {
     let sysinfo = sysinfo::SysInfo::new();
     let os_id = sysinfo.os_id();
     println!("Configuring for host {} (distro: {})", sysinfo.host_name()?, os_id);
@@ -34,7 +34,7 @@ pub fn phase_system_discovery(props, settings) {
 }
 
 /// Ignored paths
-pub fn phase_ignores(props, cmds) {
+pub async fn phase_ignores(props, cmds) {
     // Note! Some ignores are built in to konfigkoll, so you don't need to add them here:
     // These are things like /dev, /proc, /sys, /home etc. See documentation for
     // current list of built in ignores.
@@ -54,11 +54,11 @@ pub fn phase_ignores(props, cmds) {
 
 /// Early package phase, this is for packages that is needed by the script
 /// itself (e.g. if we need to call out to a command from that package)
-pub fn phase_script_dependencies(props, cmds) {
+pub async fn phase_script_dependencies(props, cmds) {
     Ok(())
 }
 
-/// Main phase, this is where the bulk of your changes should be made
+/// Main phase, this is where the bulk of your configration should go
 ///
 /// It is recommended to use the "save" sub-command to create an initial
 /// `unsorted.rn` file that you can then copy the parts you want from into here.
@@ -67,7 +67,7 @@ pub fn phase_script_dependencies(props, cmds) {
 /// *actually* save all the files, this helps you figure out what ignores to add
 /// above in `phase_ignores()` without copying a ton of files. Once you are happy
 /// with the ignores, you can remove the `-p dry-run` part.
-pub fn phase_main(props, cmds, package_managers) {
+pub async fn phase_main(props, cmds, package_managers) {
 
     Ok(())
 }
