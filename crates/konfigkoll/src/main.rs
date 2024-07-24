@@ -246,11 +246,25 @@ async fn main() -> anyhow::Result<()> {
             output.write_all("pub fn unsorted_additions(props, cmds) {\n".as_bytes())?;
             konfigkoll_core::save::save_packages(&mut output, pkg_additions.into_iter())?;
             let files_path = config_path.join("files");
+            let sensitive_configs: AHashSet<Utf8PathBuf> = script_engine
+                .state()
+                .settings()
+                .sensitive_configs()
+                .collect();
             konfigkoll_core::save::save_fs_changes(
                 &mut output,
-                |path, contents| match cli.confirmation == Paranoia::DryRun {
-                    true => save::noop_file_data_saver(path),
-                    false => save::file_data_saver(&files_path, path, contents),
+                |path, contents| {
+                    if sensitive_configs.contains(path) {
+                        tracing::warn!(
+                            "{} has changes, but it is marked sensitive, won't auto-save",
+                            path
+                        );
+                        return Ok(());
+                    }
+                    match cli.confirmation == Paranoia::DryRun {
+                        true => save::noop_file_data_saver(path),
+                        false => save::file_data_saver(&files_path, path, contents),
+                    }
                 },
                 fs_additions.iter(),
             )?;

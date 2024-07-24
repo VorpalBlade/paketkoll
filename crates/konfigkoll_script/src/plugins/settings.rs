@@ -8,6 +8,9 @@ use rune::ContextError;
 use rune::Module;
 use std::str::FromStr;
 
+const DEFAULT_EARLY: &[&str] = &["/etc/passwd", "/etc/group", "/etc/shadow", "/etc/gshadow"];
+const DEFAUT_SENSITIVE: &[&str] = &["/etc/shadow", "/etc/gshadow"];
+
 /// Configuration of how konfigkoll should behave.
 #[derive(Debug, rune::Any)]
 #[rune(item = ::settings)]
@@ -18,6 +21,9 @@ pub struct Settings {
     /// before installing packages.
     /// This is useful to assign the same IDs instead of auto assignment
     early_configs: Mutex<AHashSet<Utf8PathBuf>>,
+    /// Configuration files that are sensitive and should not be written with
+    /// `save`
+    sensitive_configs: Mutex<AHashSet<Utf8PathBuf>>,
     /// Diff tool to use for comparing files. Default is `diff`.
     diff: Mutex<Vec<String>>,
     /// Pager to use, default is to use $PAGER and fall back to `less`
@@ -29,7 +35,10 @@ impl Default for Settings {
         Self {
             file_backend: Mutex::new(None),
             enabled_pkg_backends: Mutex::new(AHashSet::new()),
-            early_configs: Mutex::new(AHashSet::new()),
+            early_configs: Mutex::new(AHashSet::from_iter(DEFAULT_EARLY.iter().map(Into::into))),
+            sensitive_configs: Mutex::new(AHashSet::from_iter(
+                DEFAUT_SENSITIVE.iter().map(Into::into),
+            )),
             diff: Mutex::new(vec!["diff".into(), "-Naur".into()]),
             pager: Mutex::new(vec![]),
         }
@@ -61,6 +70,12 @@ impl Settings {
 
     pub fn early_configs(&self) -> impl Iterator<Item = Utf8PathBuf> {
         let guard = self.early_configs.lock();
+        let v: Vec<_> = guard.iter().cloned().collect();
+        v.into_iter()
+    }
+
+    pub fn sensitive_configs(&self) -> impl Iterator<Item = Utf8PathBuf> {
+        let guard = self.sensitive_configs.lock();
         let v: Vec<_> = guard.iter().cloned().collect();
         v.into_iter()
     }
@@ -135,12 +150,29 @@ impl Settings {
     /// Add a configuration file that should be applied early (before package installation).
     /// This is useful for files like `/etc/passwd` to assign the same IDs instead
     /// of auto assignment at package installation.
+    ///
+    /// By default, `/etc/passwd`, `/etc/group`, `/etc/shadow`, and `/etc/gshadow` are already added.
     #[rune::function]
     pub fn early_config(&self, path: &str) {
         let before = self.early_configs.lock().insert(path.into());
 
         if !before {
             tracing::warn!("Early config {path} was added more than once");
+        }
+    }
+
+    /// Set a configuration as sensitive, this will not be saved with `save`.
+    ///
+    /// This is intended for things like `/etc/shadow` and `/etc/gshadow`
+    /// (those are sensitive by default) to prevent accidental leaks.
+    ///
+    /// You can add more such files with this function.
+    #[rune::function]
+    pub fn sensitive_config(&self, path: &str) {
+        let before = self.sensitive_configs.lock().insert(path.into());
+
+        if !before {
+            tracing::warn!("Sensitive config {path} was added more than once");
         }
     }
 
@@ -171,6 +203,7 @@ pub(crate) fn module() -> Result<Module, ContextError> {
     m.function_meta(Settings::set_file_backend)?;
     m.function_meta(Settings::enable_pkg_backend)?;
     m.function_meta(Settings::early_config)?;
+    m.function_meta(Settings::sensitive_config)?;
     m.function_meta(Settings::set_diff)?;
     m.function_meta(Settings::set_pager)?;
     Ok(m)

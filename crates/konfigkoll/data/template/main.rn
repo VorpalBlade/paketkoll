@@ -30,15 +30,6 @@ pub fn phase_system_discovery(props, settings) {
     // Also enable flatpak
     settings.enable_pkg_backend("flatpak")?;
 
-    // Changes to these files should be applied early (before packages)
-    //
-    // This is to help guarantee stable UID/GIDs as these are often auto-assigned
-    // by package managers when installing packages
-    settings.early_config("/etc/passwd");
-    settings.early_config("/etc/group");
-    settings.early_config("/etc/shadow");
-    settings.early_config("/etc/gshadow");
-
     Ok(())
 }
 
