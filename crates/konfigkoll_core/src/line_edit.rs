@@ -98,6 +98,10 @@ impl EditProgram {
             match prog_action {
                 ProgramAction::Done => (),
                 ProgramAction::Stop => break 'input,
+                ProgramAction::StopAndPrint => {
+                    print_rest_of_input(&mut output, &mut pattern_space, &mut lines);
+                    break 'input;
+                }
                 ProgramAction::ShortCircuit => continue 'input,
             }
             if self.print_default {
@@ -114,6 +118,10 @@ impl EditProgram {
                     ActionResult::Continue => (),
                     ActionResult::ShortCircuit => break,
                     ActionResult::Stop => break,
+                    ActionResult::StopAndPrint => {
+                        print_rest_of_input(&mut output, &mut pattern_space, &mut lines);
+                        break;
+                    }
                     ActionResult::NextLine => {
                         tracing::error!("NextLine not allowed in EOF selector");
                     }
@@ -149,6 +157,7 @@ impl EditProgram {
                     ActionResult::Continue => (),
                     ActionResult::ShortCircuit => return ProgramAction::ShortCircuit,
                     ActionResult::Stop => return ProgramAction::Stop,
+                    ActionResult::StopAndPrint => return ProgramAction::StopAndPrint,
                     ActionResult::NextLine => {
                         self.advance_line(pattern_space, output, &mut line, lines, line_number);
                     }
@@ -163,6 +172,7 @@ impl EditProgram {
                         match result {
                             ProgramAction::Done => (),
                             ProgramAction::Stop => return ProgramAction::Stop,
+                            ProgramAction::StopAndPrint => return ProgramAction::StopAndPrint,
                             // TODO: Is this the sensible semantics?
                             ProgramAction::ShortCircuit => return ProgramAction::ShortCircuit,
                         }
@@ -174,10 +184,21 @@ impl EditProgram {
     }
 }
 
+fn print_rest_of_input(output: &mut String, pattern_space: &mut String, lines: &mut Lines<'_>) {
+    output.push_str(&*pattern_space);
+    pattern_space.clear();
+    output.push('\n');
+    for line in lines.by_ref() {
+        output.push_str(line);
+        output.push('\n');
+    }
+}
+
 #[derive(Debug)]
 enum ProgramAction {
     Done,
     Stop,
+    StopAndPrint,
     ShortCircuit,
 }
 
@@ -265,8 +286,10 @@ pub enum Action {
     Delete,
     /// Replace pattern space with next line (will print unless auto-print is disabled)
     NextLine,
-    /// Stop processing the input and program and terminate early
+    /// Stop processing the input and program and terminate early (do not print rest of file)
     Stop,
+    /// Stop processing the input and program and terminate early (auto-print rest of file)
+    StopAndPrint,
     /// Insert a new line *before* the current line
     InsertBefore(CompactString),
     /// Insert a new line *after* the current line
@@ -300,6 +323,7 @@ impl Action {
                 return ActionResult::ShortCircuit;
             }
             Action::Stop => return ActionResult::Stop,
+            Action::StopAndPrint => return ActionResult::StopAndPrint,
             Action::InsertBefore(s) => {
                 let old_pattern_space = std::mem::take(pattern_space);
                 *pattern_space = s.to_string();
@@ -345,6 +369,7 @@ impl Debug for Action {
             Self::Print => write!(f, "Print"),
             Self::Delete => write!(f, "Delete"),
             Self::Stop => write!(f, "Stop"),
+            Self::StopAndPrint => write!(f, "StopAndPrint"),
             Self::InsertBefore(arg0) => f.debug_tuple("InsertBefore").field(arg0).finish(),
             Self::InsertAfter(arg0) => f.debug_tuple("InsertAfter").field(arg0).finish(),
             Self::Replace(arg0) => f.debug_tuple("Replace").field(arg0).finish(),
@@ -372,6 +397,7 @@ enum ActionResult {
     Subprogram(Rc<RefCell<EditProgram>>),
     ShortCircuit,
     Stop,
+    StopAndPrint,
 }
 
 #[cfg(test)]
@@ -579,6 +605,30 @@ mod tests {
         let input = "bar\nbaz\nquux\nquack";
         let output = program.apply(input);
         assert_eq!(output, "foo\nfoo\n");
+    }
+
+    #[test]
+    fn test_stop_and_print() {
+        let mut program = EditProgram::new();
+        program.add(
+            Selector::Regex(Regex::new("x").unwrap()),
+            false,
+            Action::StopAndPrint,
+        );
+        let input = "bar\nbaz\nquux\nquack";
+        let output = program.apply(input);
+        assert_eq!(output, "bar\nbaz\nquux\nquack\n");
+
+        let mut program = EditProgram::new();
+        program.add(Selector::All, false, Action::Replace("foo".into()));
+        program.add(
+            Selector::Regex(Regex::new("x").unwrap()),
+            false,
+            Action::StopAndPrint,
+        );
+        let input = "bar\nbaz\nquux\nquack";
+        let output = program.apply(input);
+        assert_eq!(output, "foo\nfoo\nfoo\nquack\n");
     }
 
     #[test]

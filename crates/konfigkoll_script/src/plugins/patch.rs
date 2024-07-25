@@ -128,9 +128,12 @@ enum Action {
     /// Replace pattern space with next line (will print unless auto-print is disabled)
     #[rune(constructor)]
     NextLine,
-    /// Stop processing the input and program and terminate early
+    /// Stop processing the input and program and terminate early (do not print rest of file)
     #[rune(constructor)]
     Stop,
+    /// Stop processing the input and program and terminate early (auto-print rest of file)
+    #[rune(constructor)]
+    StopAndPrint,
     /// Insert a new line *before* the current line
     #[rune(constructor)]
     InsertBefore(#[rune(get)] String),
@@ -173,6 +176,7 @@ impl TryFrom<&Action> for konfigkoll_core::line_edit::Action {
             Action::Print => Ok(Self::Print),
             Action::Delete => Ok(Self::Delete),
             Action::Stop => Ok(Self::Stop),
+            Action::StopAndPrint => Ok(Self::StopAndPrint),
             Action::InsertBefore(s) => Ok(Self::InsertBefore(s.into())),
             Action::InsertAfter(s) => Ok(Self::InsertAfter(s.into())),
             Action::Replace(s) => Ok(Self::Replace(s.into())),
