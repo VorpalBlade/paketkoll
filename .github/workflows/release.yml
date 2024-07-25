@@ -105,7 +105,7 @@ jobs:
       - uses: taiki-e/upload-rust-binary-action@v1.21.1
         id: upload-rust-binary-action
         with:
-          bin: konfigkoll, konfigkoll_rune
+          bin: konfigkoll,konfigkoll-rune
           target: ${{ matrix.target }}
           # Include version number.
           archive: konfigkoll-$tag-$target
