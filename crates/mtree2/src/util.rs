@@ -15,7 +15,7 @@ pub trait FromDec: Sized {
     fn from_dec(input: &[u8]) -> ParserResult<Self>;
 }
 
-macro_rules! impl_FromDec_uint {
+macro_rules! impl_from_dec_uint {
     ($from:ty) => {
         impl FromDec for $from {
             fn from_dec(input: &[u8]) -> ParserResult<Self> {
@@ -46,12 +46,12 @@ macro_rules! impl_FromDec_uint {
     };
 }
 
-impl_FromDec_uint!(u8);
-impl_FromDec_uint!(u16);
-impl_FromDec_uint!(u32);
-impl_FromDec_uint!(u64);
+impl_from_dec_uint!(u8);
+impl_from_dec_uint!(u16);
+impl_from_dec_uint!(u32);
+impl_from_dec_uint!(u64);
 
-macro_rules! impl_FromHex_arr {
+macro_rules! impl_from_hex_arr {
     ($size:expr) => {
         impl FromHex for [u8; $size] {
             #[inline]
@@ -66,11 +66,11 @@ macro_rules! impl_FromHex_arr {
     };
 }
 
-impl_FromHex_arr!(16);
-impl_FromHex_arr!(20);
-impl_FromHex_arr!(32);
-impl_FromHex_arr!(48);
-impl_FromHex_arr!(64);
+impl_from_hex_arr!(16);
+impl_from_hex_arr!(20);
+impl_from_hex_arr!(32);
+impl_from_hex_arr!(48);
+impl_from_hex_arr!(64);
 
 #[cold]
 fn map_faster_hex_err(input: &[u8], err: faster_hex::Error) -> ParserError {
