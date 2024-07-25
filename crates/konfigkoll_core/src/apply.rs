@@ -451,6 +451,11 @@ pub fn apply_files<'instructions>(
     // Process each chunk separately
     for (_discr, chunk) in chunked_instructions.into_iter() {
         let chunk = chunk.cloned().collect_vec();
+        // Removing things has to be sorted reverse, so we remove contents before the directory they are containers of
+        let chunk = match chunk[0].op {
+            FsOp::Remove => chunk.into_iter().rev().collect_vec(),
+            _ => chunk,
+        };
         applicator.apply_files(chunk.as_slice())?;
     }
     Ok(())
