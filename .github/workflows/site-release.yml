@@ -28,12 +28,6 @@ jobs:
           mkdir mdbook
           curl -sSL $url | tar -xz --directory=./mdbook
           echo `pwd`/mdbook >> $GITHUB_PATH
-      - run: mkdir -p target/site/
-      - name: Build Book
-        run: |
-          (cd doc && mdbook build -d ../target/site/book)
-      - name: Add static landing page
-        run: cp -r site/* target/site/
 
       - name: Install Rust
         run: rustup update stable && rustup default stable
@@ -41,6 +35,14 @@ jobs:
         uses: Swatinem/rust-cache@v2.7.3
         with:
           key: website
+
+      - run: mkdir -p target/site/
+      - name: Build Book
+        run: |
+          (cd doc && mdbook build -d ../target/site/book)
+      - name: Add static landing page
+        run: cp -r site/* target/site/
+
       - name: Build Rune API docs
         run: cargo run --bin konfigkoll-rune -- doc --output target/site/api
 
