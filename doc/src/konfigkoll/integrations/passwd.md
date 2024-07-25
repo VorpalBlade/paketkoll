@@ -22,7 +22,7 @@ const USER_MAPPING = [("systemd-journald", 900), /* ... */]
 const GROUP_MAPPING = [("systemd-journald", 900), /* ... */]
 
 pub async fn phase_main(props, cmds, package_managers) {
-    let passwd = passwd::Passwd::new(USER_MAPPING, GROUP_MAPPING);
+    let passwd = passwd::Passwd::new(USER_MAPPING, GROUP_MAPPING)?;
 
     let files = package_managers.files();
     // These two files MUST come first as other files later on refer to them,
@@ -77,7 +77,7 @@ The idea is (as stated above) to create *one* instance of `Passwd`, update it
 as you go along, and then write out the result at the end:
 
 ```rune
-let passwd = passwd::Passwd::new(USER_MAPPING, GROUP_MAPPING);
+let passwd = passwd::Passwd::new(USER_MAPPING, GROUP_MAPPING)?;
 
 // Do stuff
 

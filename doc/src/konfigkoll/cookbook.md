@@ -112,7 +112,7 @@ pub struct Context {
 pub async fn phase_main(props, cmds, package_managers) {
     let system = props.get("system")?;
     let tasks = props.get("tasks")?;
-    let passwd = passwd::Passwd::new(tables::USER_MAPPING, tables::GROUP_MAPPING);
+    let passwd = passwd::Passwd::new(tables::USER_MAPPING, tables::GROUP_MAPPING)?;
 
     let ctx = Context {
         props,

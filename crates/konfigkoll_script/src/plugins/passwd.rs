@@ -7,6 +7,7 @@ use std::{
     fmt::Write,
 };
 
+use ahash::{AHashMap, AHashSet};
 use itertools::Itertools;
 use rune::{runtime::Function, Any, ContextError, Module, Value};
 use sysusers::{GroupId, UserId};
@@ -36,7 +37,7 @@ type Groups = BTreeMap<String, Group>;
 /// const GROUP_MAPPING = [("systemd-journald", 900), /* ... */]
 ///
 /// pub async fn phase_main(props, cmds, package_managers) {
-///     let passwd = passwd::Passwd::new(USER_MAPPING, GROUP_MAPPING);
+///     let passwd = passwd::Passwd::new(USER_MAPPING, GROUP_MAPPING)?;
 ///
 ///     let files = package_managers.files();
 ///     // These two files MUST come first as other files later on refer to them,
@@ -77,8 +78,45 @@ type Groups = BTreeMap<String, Group>;
 struct Passwd {
     users: Users,
     groups: Groups,
-    user_ids: BTreeMap<String, u32>,
-    group_ids: BTreeMap<String, u32>,
+    user_ids: AHashMap<String, u32>,
+    group_ids: AHashMap<String, u32>,
+}
+
+/// Internal helper functions
+impl Passwd {
+    fn sanity_check(&self) -> anyhow::Result<()> {
+        // Check for duplicate IDs
+        {
+            let mut ids = BTreeSet::new();
+            for user in self.users.values() {
+                if !ids.insert(user.uid) {
+                    return Err(anyhow::anyhow!(
+                        "More than one user maps to UID: {}",
+                        user.uid
+                    ));
+                }
+            }
+        }
+        {
+            let mut ids = BTreeSet::new();
+            for group in self.groups.values() {
+                if !ids.insert(group.gid) {
+                    return Err(anyhow::anyhow!(
+                        "More than one group maps to GID: {}",
+                        group.gid
+                    ));
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
+macro_rules! log_and_error {
+    ($($arg:tt)*) => {
+        tracing::error!($($arg)*);
+        return Err(anyhow::anyhow!($($arg)*));
+    };
 }
 
 /// Rune API
@@ -89,13 +127,31 @@ impl Passwd {
     /// * `user_ids` - A list of tuples of (username, uid) to use if sysusers files does not specify a UID
     /// * `group_ids` - A list of tuples of (groupname, gid) to use if sysusers files does not specify a GID
     #[rune::function(path = Self::new)]
-    fn new(user_ids: Vec<(String, u32)>, group_ids: Vec<(String, u32)>) -> Self {
-        Self {
+    fn new(user_ids: Vec<(String, u32)>, group_ids: Vec<(String, u32)>) -> anyhow::Result<Self> {
+        let num_uids = user_ids.len();
+        let num_gids = group_ids.len();
+        let uids: AHashMap<String, u32> = user_ids.into_iter().collect();
+        let gids: AHashMap<String, u32> = group_ids.into_iter().collect();
+        // Sanity check that there are no duplicates
+        if uids.len() != num_uids {
+            log_and_error!("Duplicate user names in user ID mapping");
+        }
+        if gids.len() != num_gids {
+            log_and_error!("Duplicate group names in group ID mapping");
+        }
+        // Sanity check that the mapped to values are unique
+        if uids.values().collect::<AHashSet<_>>().len() != num_uids {
+            log_and_error!("Duplicate user IDs in user ID mapping");
+        }
+        if gids.values().collect::<AHashSet<_>>().len() != num_gids {
+            log_and_error!("Duplicate group IDs in group ID mapping");
+        }
+        Ok(Self {
             users: BTreeMap::new(),
             groups: BTreeMap::new(),
-            user_ids: user_ids.into_iter().collect(),
-            group_ids: group_ids.into_iter().collect(),
-        }
+            user_ids: uids,
+            group_ids: gids,
+        })
     }
 
     /// Add a user to the passwd database
@@ -168,6 +224,9 @@ impl Passwd {
     /// Read the passwd and group files from the system and update IDs to match the system (based on name)
     #[rune::function]
     fn align_ids_with_system(&mut self) -> anyhow::Result<()> {
+        self.sanity_check().inspect_err(|e| {
+            tracing::error!("Sanity check *before* aligning passwd IDs failed: {e}");
+        })?;
         let passwd = std::fs::read_to_string("/etc/passwd")?;
         for line in passwd.lines() {
             let parts: Vec<_> = line.split(':').collect();
@@ -340,6 +399,8 @@ impl Passwd {
     /// Apply to commands
     #[rune::function]
     fn apply(self, cmds: &mut Commands) -> anyhow::Result<()> {
+        self.sanity_check()
+            .inspect_err(|e| tracing::error!("Sanity check when applying passwd failed: {e}"))?;
         let mut passwd = String::new();
         let mut shadow = String::new();
         let users = self.users.values().sorted().collect_vec();
