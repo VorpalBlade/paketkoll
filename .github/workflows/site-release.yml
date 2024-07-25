@@ -3,7 +3,7 @@ name: Website
 on:
   push:
     tags:
-      - v[0-9]+.*
+      - konfigkoll-v[0-9]+.*
   workflow_dispatch:
 
 concurrency:
