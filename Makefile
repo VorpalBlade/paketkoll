@@ -22,7 +22,10 @@ target/release/xtask: build-cargo
 
 build-cargo:
 	# Let cargo figure out if a build is needed
-	cargo build --release $(CARGO_FLAGS)
+	cargo build --locked --release $(CARGO_FLAGS)
+
+test:
+	cargo test --locked --release $(CARGO_FLAGS)
 
 install: install-paketkoll install-konfigkoll
 
@@ -47,4 +50,4 @@ install-konfigkoll: target/release/konfigkoll target/release/konfigkoll-rune tar
 install-dirs:
 	install -d $(DESTDIR)$(BINDIR) $(DESTDIR)$(BASHDIR) $(DESTDIR)$(ZSHDIR) $(DESTDIR)$(FISHDIR) $(DESTDIR)$(MANDIR)
 
-.PHONY: all build-cargo install install-paketkoll install-konfigkoll install-dirs $(PROGS)
+.PHONY: all build-cargo test install install-paketkoll install-konfigkoll install-dirs $(PROGS)
