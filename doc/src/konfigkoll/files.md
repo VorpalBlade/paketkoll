@@ -116,10 +116,10 @@ In fact, a few such abstractions are already provided by Konfigkoll.
 
 ## Patching a file with LineEditor
 
-If you are at all familar with sed, `::patch::LineEditor` is basically a Rune/Rust variant of that.
+If you are at all familiar with sed, `::patch::LineEditor` is basically a Rune/Rust variant of that.
 The syntax is different though (not a terse one-liner but a bit more verbose).
 
-Lets look at patching the grub config again:
+Let's look at patching the grub config again:
 
 ```rune
 use patch::LineEditor;
@@ -190,7 +190,7 @@ code in Rune, you just want to reuse an existing command. This can be done with
 the `process` module to invoke an external command. This will be
 [covered in the advanced section](./advanced/process.md).
 
-## Other file operations (permissions, mkdir, symlinks etc)
+## Other file operations (permissions, mkdir, symlinks etc.)
 
 Writing files is not all you can do, you can also:
 

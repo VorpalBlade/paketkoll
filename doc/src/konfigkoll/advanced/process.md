@@ -109,7 +109,7 @@ Here is what you have to keep in mind:
 
 ### Awaiting multiple things
 
-If you want to do do multiple things in parallel yourself, you don't need to
+If you want to do multiple things in parallel yourself, you don't need to
 *immediately* `await` the `async fn`, the key here is that it has to be awaited
 *eventually*. Using `std::future::join` you can wait for multiple async functions:
 

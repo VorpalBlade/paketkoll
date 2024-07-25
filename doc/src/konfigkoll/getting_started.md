@@ -31,12 +31,12 @@ The only hard requirements from `konfigkoll` is `main.rn` and `unsorted.rn`. `fi
 also has special convenient support. The rest is just a suggestion. You can
 structure your configuration however you like.
 
-If you are comming from [aconfmgr] this structure should feel somewhat familiar.
+If you are coming from [aconfmgr] this structure should feel somewhat familiar.
 
 ## The configuration language
 
 The configuration language in use is [Rune], which is based on Rust when it comes
-to syntax. Unlike Rust it is a dynamically typed language with reference counting,
+to syntax. Unlike Rust, it is a dynamically typed language with reference counting,
 no need to worry about borrow checking, strict types or any of the other features
 that make Rust a bit of a learning curve.
 
@@ -100,7 +100,7 @@ pub async fn phase_main(props, cmds, package_managers) {
 }
 ```
 
-Lets look at it once piece at a time:
+Let's look at it once piece at a time:
 
 ### System discovery
 
@@ -155,7 +155,7 @@ Some Rune language features of interest here:
   and is used instead of exceptions that some other languages uses. Basically it
   means "if this is a `Result::Error`, abort the function and propagate the error to the
   caller".
-* The use of `Result` is also why the function has a finak `Ok(())` at the end. This
+* The use of `Result` is also why the function has a final `Ok(())` at the end. This
   is because the function needs to return a `Result` type, and `Ok(())` is a way to
   return a successful result with no value.
 * Why `()` you might ask? Well, `()` is an empty tuple, and is used in Rust and
@@ -243,7 +243,7 @@ The key here is the use of the `mod` keyword to declare another module in the
 same directory. This is similar to how you would do it in Rust, and is a way to
 split up your configuration into multiple files.
 
-You can also create nested sub-modules, which is covered in a later section of
+You can also create nested submodules, which is covered in a later section of
 the manual.
 
 ### Script dependencies
@@ -269,7 +269,7 @@ This is the bread and butter of your configuration. This is where you will do
 most of your work. This is where you will install packages, copy files, patch
 configurations, etc.
 
-Lets look at the signature again:
+Let's look at the signature again:
 
 ```rune
 pub async fn phase_main(props, cmds, package_managers) {
@@ -293,7 +293,7 @@ In fact, let's dwell a bit more on that last bullet point. That (apart from
 wholesale copying and replacing configuration files) is the main approach to
 configuration management in `konfigkoll`.
 
-This means you don't have to merge `.pacnew` or `.dpkg-dist` files any more, just
+This means you don't have to merge `.pacnew` or `.dpkg-dist` files anymore, just
 reapply your config: it will apply the same change to the new version of the config.
 Of course, it is possible the config has changed *drastically*, in which case you
 still have to intervene manually, but almost always that isn't the case.

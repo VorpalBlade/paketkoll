@@ -8,7 +8,7 @@
 - [Getting started](./konfigkoll/getting_started.md)
 - [Managing packages](./konfigkoll/packages.md)
 - [Managing files](./konfigkoll/files.md)
-- [Integrations (systemd, passwd, etc) & advanced topics](./konfigkoll/integrations/README.md)
+- [Integrations (systemd, passwd, etc.) & advanced topics](./konfigkoll/integrations/README.md)
   - [Systemd units](./konfigkoll/integrations/systemd_units.md)
   - [`/etc/passwd`, `/etc/group` and shadow files](./konfigkoll/integrations/passwd.md)
   - [Getting system information](./konfigkoll/integrations/sysinfo.md)

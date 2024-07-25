@@ -2,7 +2,7 @@
 
 Konfigkoll has special support for enabling and masking systemd units. This
 simplifies what would otherwise be a bunch of `cmds.ln()` calls. In particular,
-it will handle aliases, WantedBy, etc correctly
+it will handle `Alias` and `WantedBy` correctly
 
 ## Enabling units from packages
 
@@ -18,7 +18,7 @@ systemd::Unit::from_pkg("gpm",
 This will load the unit file from the package manager and figure out what symlinks
 needs to be created to enable the unit.
 
-Some units are parametersised, this can be handled by using the `name` method:
+Some units are parameterised, this can be handled by using the `name` method:
 
 ```rune
 systemd::Unit::from_pkg("systemd",

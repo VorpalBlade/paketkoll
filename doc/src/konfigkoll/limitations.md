@@ -11,7 +11,7 @@ for more potential limitations.
 ### Debian
 
 On Debian, `apt`/`dpkg` doesn't provide a lot of information about the files installed by a package.
-In fact it only provides the MD5 sum of regular files and the list of non-regular files (without info
+In fact, it only provides the MD5 sum of regular files and the list of non-regular files (without info
 about what *type* of non-regular file they are). This means that unlike Arch Linux:
 
 * We won't be able to tell if the mode/owner/group is wrong on a file.

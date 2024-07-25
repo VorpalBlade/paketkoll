@@ -35,7 +35,7 @@ but with a few key differences:
 
 ### Comparisons
 
-Unlike tools such as ansible, puppet, etc:
+Unlike tools such as ansible, puppet, etc.:
 
 * Konfigkoll only manages the computer it is running on, not remote systems over the network.
 * Konfigkoll can save the system state to a file, giving you a full template config to work from.

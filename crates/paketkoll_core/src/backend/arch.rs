@@ -129,6 +129,40 @@ impl Files for ArchLinux {
         results
     }
 
+    fn owning_packages(
+        &self,
+        paths: &AHashSet<&Path>,
+        interner: &Interner,
+    ) -> anyhow::Result<DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>> {
+        // Optimise for speed, go directly into package cache and look for files that contain the given string
+        let file_to_package = DashMap::with_hasher(ahash::RandomState::new());
+        let db_root = PathBuf::from(self.pacman_config.db_path.as_str()).join("local");
+
+        let paths: Vec<String> = paths
+            .iter()
+            .map(|e| {
+                let e = e.to_string_lossy();
+                let e = e.as_ref();
+                format!("\n{}\n", e.strip_prefix('/').unwrap_or(e))
+            })
+            .collect();
+        let paths = paths.as_slice();
+        let re = RegexSet::new(paths)?;
+
+        std::fs::read_dir(db_root)
+            .context("Failed to read pacman database directory")?
+            .par_bridge()
+            .for_each(|entry| {
+                if let Ok(entry) = entry {
+                    if let Err(e) = find_files(&entry, interner, &re, paths, &file_to_package) {
+                        log::error!("Failed to parse package data: {e}");
+                    }
+                }
+            });
+
+        Ok(file_to_package)
+    }
+
     fn original_files(
         &self,
         queries: &[OriginalFileQuery],
@@ -186,40 +220,6 @@ impl Files for ArchLinux {
         }
 
         Ok(results)
-    }
-
-    fn owning_packages(
-        &self,
-        paths: &AHashSet<&Path>,
-        interner: &Interner,
-    ) -> anyhow::Result<DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>> {
-        // Optimise for speed, go directly into package cache and look for files that contain the given string
-        let file_to_package = DashMap::with_hasher(ahash::RandomState::new());
-        let db_root = PathBuf::from(self.pacman_config.db_path.as_str()).join("local");
-
-        let paths: Vec<String> = paths
-            .iter()
-            .map(|e| {
-                let e = e.to_string_lossy();
-                let e = e.as_ref();
-                format!("\n{}\n", e.strip_prefix('/').unwrap_or(e))
-            })
-            .collect();
-        let paths = paths.as_slice();
-        let re = RegexSet::new(paths)?;
-
-        std::fs::read_dir(db_root)
-            .context("Failed to read pacman database directory")?
-            .par_bridge()
-            .for_each(|entry| {
-                if let Ok(entry) = entry {
-                    if let Err(e) = find_files(&entry, interner, &re, paths, &file_to_package) {
-                        log::error!("Failed to parse package data: {e}");
-                    }
-                }
-            });
-
-        Ok(file_to_package)
     }
 }
 

@@ -6,7 +6,7 @@ configuration.
 ## Using strong types
 
 While `props` is a generic key value store for passing info between the phases,
-it is easy to make a typo (was it `enable_disk_ecryption` or `use_disk_encryption`, etc?)
+it is easy to make a typo (was it `enable_disk_ecryption` or `use_disk_encryption`, etc.?)
 
 A useful pattern is to define one or a few struct that contains all your properties
 and store that, then extract it at the start of each phase that needs it.
@@ -72,7 +72,7 @@ typo it, unlike if you use the properties directly.
 
 This is a continuation of the previous pattern, and most useful in the main phase:
 
-You might end up with helper functions that need a whole bunch of objects passed to them:
+You might end up with helper functions that need a large number of objects passed to them:
 
 ```rune
 fn configure_grub(
@@ -87,7 +87,7 @@ fn configure_grub(
 }
 ```
 
-What if you need yet another one? No the solution here is to pass a single context object
+What if you need yet another one? No, the solution here is to pass a single context object
 around:
 
 ```rune

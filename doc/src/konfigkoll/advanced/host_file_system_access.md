@@ -24,7 +24,7 @@ example of use cases:
   already exposed by other APIs
 
 Now, the use case of `/etc/shadow` is better served by the built-in
-[`passwd`](../integrations/passwd.md) module. But lets look at some of the
+[`passwd`](../integrations/passwd.md) module. But let's look at some of the
 other use cases.
 
 ## Read from `/sys`

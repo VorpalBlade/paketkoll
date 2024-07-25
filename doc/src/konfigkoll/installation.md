@@ -14,7 +14,7 @@ There are three binaries of interest:
 * `konfigkoll-rune` - This provides LSP language server for the scripting language
   ([Rune]) used in konfigkoll. as well as some generic Rune utilities (such as
   auto-formatting code, though that has limitations currently).
-* `paketkoll` - A query tool similar to `debsums`. Parts of it's code is also
+* `paketkoll` - A query tool similar to `debsums`. Parts of its code is also
   used in konfigkoll, and as such they are maintained in the same git repository.
 
 To build from source:

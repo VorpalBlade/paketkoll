@@ -75,15 +75,6 @@ impl Files for SystemdTmpfiles {
         parse_systemd_tmpfiles_output(&output)
     }
 
-    fn original_files(
-        &self,
-        _queries: &[OriginalFileQuery],
-        _packages: &PackageMap,
-        _interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>> {
-        anyhow::bail!("Original file queries are not supported for systemd-tmpfiles")
-    }
-
     fn owning_packages(
         &self,
         _paths: &ahash::AHashSet<&Path>,
@@ -93,6 +84,15 @@ impl Files for SystemdTmpfiles {
     > {
         // This doesn't make sense for this provider
         anyhow::bail!("Owning packages are not supported for systemd-tmpfiles")
+    }
+
+    fn original_files(
+        &self,
+        _queries: &[OriginalFileQuery],
+        _packages: &PackageMap,
+        _interner: &paketkoll_types::intern::Interner,
+    ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>> {
+        anyhow::bail!("Original file queries are not supported for systemd-tmpfiles")
     }
 }
 
