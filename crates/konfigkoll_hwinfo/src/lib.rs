@@ -1,4 +1,4 @@
-//! Hardware information module for `KonfigKoll`
+//! Hardware information module for `Konfigkoll`
 //!
 //! This is a collection of functions that no other library seemed to provide.
 //! You are free to use this, and this follows semver, but it isn't primarily

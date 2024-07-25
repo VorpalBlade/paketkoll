@@ -102,7 +102,7 @@ impl SpecialKind {
 pub enum Keyword<'a> {
     /// `cksum` The checksum of the file using the default algorithm specified by
     /// the cksum(1) utility.
-    // I'm pretty sure u32 is big enough, but I'm using u64 because I'm not sure this is
+    // I'm pretty sure u32 is big enough, but I'm using u64 because I'm not sure that this is
     // guaranteed.
     Checksum(u64),
     /// `device` The device number for *block* or *char* file types.

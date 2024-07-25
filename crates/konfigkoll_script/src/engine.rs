@@ -278,7 +278,7 @@ fn try_format_error(phase: Phase, value: &rune::Value) -> anyhow::Result<()> {
             );
         }
         rune::runtime::VmResult::Err(not_any) => {
-            tracing::error!("Got error result from {phase}, it was not an Any: {not_any:?}. Trying other approches at printing the error.");
+            tracing::error!("Got error result from {phase}, it was not an Any: {not_any:?}. Trying other approaches at printing the error.");
         }
     }
     // Attempt to format the error

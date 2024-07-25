@@ -4,7 +4,7 @@
 
 This is a Rust replacement for `debsums` (on Debian/Ubuntu/...) and `paccheck`
 (on Arch Linux and derivatives). It is much faster than those thanks to using
-all your CPU cores in parallel. (It is also much much faster than `pacman -Qkk`
+all your CPU cores in parallel. (It is also much, much faster than `pacman -Qkk`
 which is much slower than `paccheck` even.)
 
 What it does is compare installed files to what the package manager installed and
@@ -23,13 +23,13 @@ Additional features:
   where the mtime matches. This makes the check ultra-fast.
 * Doesn't depend on any distro specific libraries for interacting with the package
   database. We do our own parsing. This makes it possible to be way faster
-  (parallelism!) and also to make a cross platform binary that will run on either
+  (parallelism!) and also to make a cross-platform binary that will run on either
   distro without any dependencies apart from libc.
 * You can also use this to find unmanaged files (not installed by the package
   manager) using `paketkoll check-unexpected`, though some work is required,
   since there are many legitimately unmanaged files. You may need to find a set
   of `--ignore` flags suitable for your system. Only some simple basics ignores
-  are built in (`/proc`, `/sys`, `/home`, etc).
+  are built in (`/proc`, `/sys`, `/home`, etc.).
 
 Caveats:
 
@@ -48,9 +48,9 @@ Note: CPU time is actually comparable to the original tools (slightly better in
 general). But due to parallelism the wall time is *way* better, especially
 without `--trust-mtime` (where the runtime is quite small to begin with).
 
-* All of the runs were performed on warm disk cache.
+* All the runs were performed on warm disk cache.
 * Distro-installed versions of paccheck and debsums were used.
-* Musl builds built using cross was used across the board for best portability.
+* Musl builds (built using cross) was used across the board for best portability.
 * The same build flags as used for binary releases in this were used (opt level 2, fat LTO)
 
 ### Arch Linux (x64-64 AMD desktop)
@@ -100,7 +100,7 @@ Summary
 ```
 
 * Many and large packages installed
-* 6 cores, 12 thread means a decent speed up from multi-threading is possible.
+* 6 cores, 12 thread means a decent speed-up from multi-threading is possible.
 * I don't know what paccheck was doing such that it took 68 seconds but didn't use very much CPU. Presumably waiting for IO?
 
 ### Debian (ARM64 Raspberry Pi)

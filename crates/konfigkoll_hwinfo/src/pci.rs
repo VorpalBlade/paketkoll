@@ -107,7 +107,7 @@ impl PciDevice {
             d.subsystems
                 .get(&(self.subsystem_vendor, self.subsystem_device))
         });
-        // The subvendor can be different than the main vendor
+        // The subvendor can be different from the main vendor
         // See https://admin.pci-ids.ucw.cz/mods/PC/?action=help?help=pci
         let subvendor = db.vendors.get(&self.subsystem_vendor);
 

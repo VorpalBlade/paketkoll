@@ -76,7 +76,7 @@ impl TempDir {
         self.path.to_string()
     }
 
-    /// Write a temporary file under this directory, getting it's path path
+    /// Write a temporary file under this directory, getting its path
     #[rune::function]
     fn write(&self, path: &str, contents: &[u8]) -> anyhow::Result<String> {
         let p = safe_path_join(&self.path, path.into());

@@ -17,7 +17,7 @@ way the source code is organized.
 ### 🚀 Features
 
 - Add Makefile to help install things. This is needed to get man pages and
-  shell completion files installed. They are not longer generated as part
+  shell completion files installed. They are no longer generated as part
   of the build script.
 - Vendor deps by default (instead of linking them dynamically)
 - Rework, only single files backend allowed
@@ -107,7 +107,7 @@ way the source code is organized.
 
 ### 🚀 Features
 
-- Report existance of issues with exit code
+- Report existence of issues with exit code
 
 ## [0.1.1] - 2024-02-26
 

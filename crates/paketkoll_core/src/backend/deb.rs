@@ -98,7 +98,7 @@ impl Files for Debian {
         // Handle diversions: (parse output of dpkg-divert --list)
         log::debug!("Loading diversions");
         let diversions =
-            divert::get_diverions(interner).context("Failed to get dpkg diversions")?;
+            divert::get_diversions(interner).context("Failed to get dpkg diversions")?;
 
         // Load config files.
         log::debug!("Loading status to get config files");

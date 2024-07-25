@@ -3,7 +3,7 @@
 [ [lib.rs] ] [ [crates.io] ]
 
 This is a fork of [mtree-rs](https://github.com/derekdreery/mtree-rs) fixing some issues and improving performance. Unfortunately the upstream
-has been dead apart from one comment, so a fork was neccesary.
+has been dead apart from one comment, so a fork was necessary.
 
 The original README is reproduced below:
 

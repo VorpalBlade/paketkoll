@@ -19,7 +19,7 @@ pub(super) struct Diversion {
 pub(super) type Diversions = BTreeMap<PathBuf, Diversion>;
 
 /// Get all diversions from dpkg-divert --list
-pub(super) fn get_diverions(interner: &Interner) -> anyhow::Result<Diversions> {
+pub(super) fn get_diversions(interner: &Interner) -> anyhow::Result<Diversions> {
     let mut cmd = std::process::Command::new("dpkg-divert");
     cmd.arg("--list");
     let output = cmd.output().context("Failed to run dpkg-divert")?;

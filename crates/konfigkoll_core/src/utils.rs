@@ -113,7 +113,7 @@ pub fn safe_path_join(left: &Utf8Path, right: &Utf8Path) -> Utf8PathBuf {
     let right = if right.is_absolute() {
         right
             .strip_prefix("/")
-            .expect("We know the path is aboslute")
+            .expect("We know the path is absolute")
     } else {
         right
     };

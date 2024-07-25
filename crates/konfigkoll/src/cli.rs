@@ -12,7 +12,7 @@ pub struct Cli {
     /// Trust mtime (don't check checksum if mtime matches (not supported on Debian))
     #[arg(long)]
     pub trust_mtime: bool,
-    /// Decribe how much to ask for confirmation
+    /// How much to ask for confirmation
     #[arg(long, short = 'p', default_value = "ask")]
     pub confirmation: Paranoia,
     /// For debugging: force a dry run applicator

@@ -67,7 +67,7 @@ impl MultiOptionConfirm {
                     anyhow::bail!("User aborted with Ctrl-C");
                 }
                 _ => {
-                    term.write_line("Unkown input, try again")?;
+                    term.write_line("Unknown input, try again")?;
                 }
             }
         }

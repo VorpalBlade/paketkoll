@@ -54,7 +54,7 @@ impl Commands {
         }
     }
 
-    /// Get the contents of an set file
+    /// Get the contents of a previously set file
     pub(crate) fn file_contents(&self, path: &str) -> Option<&FileContents> {
         self.fs_actions
             .iter()
@@ -168,7 +168,7 @@ impl Commands {
         Ok(())
     }
 
-    /// Check if a file exists in the `files/` sub-directory to the configuration
+    /// Check if a file exists in the `files/` subdirectory to the configuration
     #[rune::function(keep)]
     pub fn has_source_file(&self, path: &str) -> bool {
         let path = safe_path_join(&self.base_files_path, path.into());

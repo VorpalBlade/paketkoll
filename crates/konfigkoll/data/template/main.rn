@@ -58,7 +58,7 @@ pub async fn phase_script_dependencies(props, cmds) {
     Ok(())
 }
 
-/// Main phase, this is where the bulk of your configration should go
+/// Main phase, this is where the bulk of your configuration should go
 ///
 /// It is recommended to use the "save" sub-command to create an initial
 /// `unsorted.rn` file that you can then copy the parts you want from into here.

@@ -90,7 +90,7 @@ fn convert_issue(
                 results.push(FsInstruction {
                     path: path.into(),
                     op: FsOp::Remove,
-                    comment: Some(format_compact!("Removed due to type confict")),
+                    comment: Some(format_compact!("Removed due to type conflict")),
                 });
                 results.extend(from_fs(path, id_resolver)?);
             }

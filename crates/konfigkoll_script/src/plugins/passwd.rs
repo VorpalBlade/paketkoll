@@ -24,7 +24,7 @@ type Groups = BTreeMap<String, Group>;
 /// A representation of the user and group databases
 ///
 /// This can be used to handle `/etc/passwd` and related files.
-/// Typically you would:
+/// Typically, you would:
 /// * Create an instance early in the main phase
 /// * Add things to it as needed (next to the associated packages)
 /// * Apply it at the end of the main phase
@@ -523,7 +523,7 @@ impl User {
     /// * Home directory: `/`
     /// * Shell: `/usr/bin/nologin`
     /// * Password: `!*` (no login)
-    /// * No password expiration/age/warning/etc
+    /// * No password expiration/age/warning/etc.
     /// * No account expiration
     #[rune::function(path = Self::new)]
     fn new(uid: u32, name: String, group: String, gecos: String) -> Self {

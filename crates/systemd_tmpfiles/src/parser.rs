@@ -83,7 +83,7 @@ fn parse_directive(line: Line) -> Result<Entry, ParseError> {
     let (type_, plus, mut flags) = parse_entry_type(entry_type.as_str())
         .ok_or_else(|| ParseError::InvalidDirective(line.path.clone(), entry_type.clone()))?;
 
-    // Decode base64 (if appliccable)
+    // Decode base64 (if applicable)
     let argument = if flags.contains(super::EntryFlags::ARG_BASE64)
         && !flags.contains(super::EntryFlags::ARG_CREDENTIAL)
     {

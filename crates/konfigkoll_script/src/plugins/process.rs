@@ -194,7 +194,7 @@ struct Child {
     // we use an option to avoid a panic if we try to complete the child process
     // multiple times.
     //
-    // TODO: enapculate this pattern in some better way.
+    // TODO: encapsulate this pattern in some better way.
     inner: Option<process::Child>,
 }
 

@@ -61,7 +61,7 @@ pub trait Files: Name {
     fn files(&self, interner: &Interner) -> anyhow::Result<Vec<FileEntry>>;
 
     /// True if this backend may benefit from path canonicalization for certain scans
-    /// (i.e. paths may be inaccuarate)
+    /// (i.e. paths may be inaccurate)
     fn may_need_canonicalization(&self) -> bool {
         false
     }

@@ -6,7 +6,7 @@ use compact_str::CompactString;
 #[derive(Debug, derive_builder::Builder)]
 #[non_exhaustive]
 pub struct CheckAllFilesConfiguration {
-    /// Ignored paths (globs). Only appliccable to some operations.
+    /// Ignored paths (globs). Only applicable to some operations.
     #[builder(default = "vec![]")]
     pub ignored_paths: Vec<CompactString>,
     /// Should paths be canonicalized before checking? (This is needed on Debian

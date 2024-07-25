@@ -10,7 +10,7 @@ pub type PropertyValue = rune::runtime::Value;
 
 /// Configuration and persistent (across phases) properties.
 ///
-/// It is recommended to store properties using structrured system, such as
+/// It is recommended to store properties using structured system, such as
 /// creating a hierarchy separated by `.`. But it is up to you.
 #[derive(Debug, Default, rune::Any)]
 #[rune(item = ::properties)]

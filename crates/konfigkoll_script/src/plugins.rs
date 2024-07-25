@@ -1,4 +1,4 @@
-//! RHAI plugins for Konfigkoll
+//! Rune plugins for Konfigkoll
 
 pub(crate) mod command;
 mod filesystem;

@@ -23,7 +23,7 @@ releases.
 ### 📚 Documentation
 
 - Fix example in README
-- Fix incorrect SPDX license expression for mtree2
+- Fix incorrect SPDX licence expression for mtree2
 
 ## [0.6.0] - 2024-06-28
 
@@ -50,7 +50,7 @@ releases.
   Params has gone from 672 bytes to 528 bytes
 - Cut temporary allocations by 2/3\
   More than 1 million temporary allocations just went away by using `ok_or_else` instead of `ok_or`!
-- Speed up parsing by by not using our own hex parser
+- Speed up parsing by not using our own hex parser
 
 ### Refactoring
 
@@ -72,7 +72,7 @@ NOTE: This refers to a release from the previous mtree-rs project that mtree2 is
 
 ### Removed
 
-- Removed test that didn't test anyting useful.
+- Removed test that didn't test anything useful.
 
 ### New contributors
 

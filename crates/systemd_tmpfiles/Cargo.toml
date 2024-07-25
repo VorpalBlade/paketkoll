@@ -17,7 +17,7 @@ version = "0.1.2"
 
 [features]
 default = ["user"]
-# Enable support for resolving specifiers in an user context
+# Enable support for resolving specifiers in a user context
 user = ["dep:dirs", "nix/user"]
 
 [dependencies]

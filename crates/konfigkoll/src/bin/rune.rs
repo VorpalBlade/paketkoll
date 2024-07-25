@@ -2,7 +2,7 @@
 //! such as:
 //!
 //! * Documentation generation
-//! * LSP langauge server
+//! * LSP language server
 //! * Formatting of rune files
 //! * Syntax checking
 use konfigkoll_script::ScriptEngine;

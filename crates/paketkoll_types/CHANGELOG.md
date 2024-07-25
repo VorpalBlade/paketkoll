@@ -16,7 +16,7 @@ the initial release of the `paketkoll_types` crate.
 ### 🚀 Features
 
 - Handle removing unused dependencies
-- Backend support for marking as depndency/manual install and asking to
+- Backend support for marking as dependency/manual install and asking to
   uninstall unused packages
 - Create konfigkoll
 - Add conversions to nix types

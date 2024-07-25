@@ -1,4 +1,4 @@
-//! Exposing regex to rhai
+//! Exposing regex to rune
 
 use regex::Regex as InnerRegex;
 use rune::{Any, ContextError, Module};
@@ -43,7 +43,7 @@ impl Regex {
     ///
     /// Capture groups can be referred to via `$1`, `$2`, etc. (`$0` is the full match).
     /// Named capture groups are supported via `$name`.
-    /// You can also use `${name}` or `${1}` etc, which is often needed to disambiguate
+    /// You can also use `${name}` or `${1}` etc., which is often needed to disambiguate
     /// when a capture group number is followed by literal text.
     #[rune::function]
     fn replace(&self, text: &str, replace: &str) -> String {
@@ -64,8 +64,8 @@ impl Regex {
     /// * If no match is found returns `None`.
     /// * Otherwise Some(vector of optional strings) where:
     ///     * The first group (index 0) is the full match as `Some(value)`.
-    ///     * The rest are the capture groups. If they didn't match the are `None`.
-    ///       Otherwise they are `Some(value)`.
+    ///     * The rest are the capture groups. If they didn't match they are `None`.
+    ///       Otherwise, they are `Some(value)`.
     #[rune::function]
     fn captures(&self, text: &str) -> Option<Vec<Option<String>>> {
         let captures = self.inner.captures(text)?;
