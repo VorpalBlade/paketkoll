@@ -2,15 +2,17 @@
 
 use std::process::{Command, Stdio};
 
-use crate::utils::package_manager_transaction;
 use anyhow::Context;
+use smallvec::SmallVec;
+
 use paketkoll_types::backend::{Name, PackageManagerError, Packages};
 use paketkoll_types::package::InstallReason;
 use paketkoll_types::{
     intern::{ArchitectureRef, PackageRef},
     package::{Package, PackageInstallStatus, PackageInterned},
 };
-use smallvec::SmallVec;
+
+use crate::utils::package_manager_transaction;
 
 /// Flatpak backend
 #[derive(Debug)]
@@ -168,11 +170,11 @@ fn parse_flatpak_output(
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
+
     use Package;
 
     use super::*;
-
-    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_parse_flatpak_output() {

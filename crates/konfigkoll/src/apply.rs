@@ -3,6 +3,7 @@
 use std::{collections::BTreeMap, sync::Arc};
 
 use either::Either;
+
 use konfigkoll::cli::Paranoia;
 use konfigkoll_core::apply::Applicator;
 use paketkoll_types::{

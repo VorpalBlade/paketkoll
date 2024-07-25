@@ -4,8 +4,9 @@ use std::sync::Arc;
 
 use anyhow::Context;
 use compact_str::CompactString;
-use konfigkoll_types::FsInstruction;
 use ouroboros::self_referencing;
+
+use konfigkoll_types::FsInstruction;
 use paketkoll_core::config::{
     CheckAllFilesConfiguration, CommonFileCheckConfiguration, ConfigFiles,
 };

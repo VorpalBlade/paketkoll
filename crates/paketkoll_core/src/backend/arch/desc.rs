@@ -14,6 +14,7 @@
 use std::io::BufRead;
 
 use compact_str::CompactString;
+
 use paketkoll_types::package::{Dependency, InstallReason, PackageInstallStatus};
 use paketkoll_types::{
     intern::{ArchitectureRef, Interner, PackageRef},
@@ -138,10 +139,11 @@ fn parse_backup(
 
 #[cfg(test)]
 mod tests {
+    use pretty_assertions::assert_eq;
+
+    use paketkoll_types::{intern::Interner, package::Package};
 
     use super::*;
-    use paketkoll_types::{intern::Interner, package::Package};
-    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_parse() {

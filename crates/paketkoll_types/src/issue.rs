@@ -6,9 +6,10 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use smallvec::SmallVec;
+
 use crate::files::{Checksum, DeviceType, Gid, Mode, Uid};
 use crate::intern::PackageRef;
-use smallvec::SmallVec;
 
 /// Type for vector of issues.
 ///

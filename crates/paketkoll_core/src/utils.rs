@@ -1,14 +1,15 @@
 //! Various utility functions
 
-use ahash::{AHashMap, AHashSet};
-use anyhow::Context;
-use compact_str::CompactString;
-use smallvec::SmallVec;
 use std::{
     io::{BufReader, Read},
     os::unix::process::ExitStatusExt,
     path::PathBuf,
 };
+
+use ahash::{AHashMap, AHashSet};
+use anyhow::Context;
+use compact_str::CompactString;
+use smallvec::SmallVec;
 
 /// Helper to do a generic package manager transaction
 pub(crate) fn package_manager_transaction(

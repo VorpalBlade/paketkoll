@@ -1,6 +1,7 @@
 //! Utility misc stuff
-use crate::parser::{ParserError, ParserResult};
 use std::{ffi::OsStr, os::unix::ffi::OsStrExt, time::Duration};
+
+use crate::parser::{ParserError, ParserResult};
 
 /// Helper to parse a number from a slice of u8 in hexadecimal.
 pub trait FromHex: Sized {
@@ -180,8 +181,9 @@ pub fn decode_escapes(buf: &mut [u8]) -> Option<&mut [u8]> {
 
 #[cfg(test)]
 mod tests {
-    use super::{decode_escapes, decode_escapes_path, FromHex};
     use std::path::PathBuf;
+
+    use super::{decode_escapes, decode_escapes_path, FromHex};
 
     #[test]
     fn test_decode_escapes_path() {

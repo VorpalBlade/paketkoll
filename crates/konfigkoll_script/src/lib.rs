@@ -10,11 +10,11 @@
 //! You should use [`konfigkoll`](https://crates.io/crates/konfigkoll) the
 //! command line tool instead.
 
-mod engine;
-mod plugins;
-
 pub use engine::EngineState;
 pub use engine::Phase;
 pub use engine::ScriptEngine;
 pub use plugins::command::Commands;
 pub use plugins::settings::Settings;
+
+mod engine;
+mod plugins;

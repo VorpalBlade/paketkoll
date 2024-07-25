@@ -48,12 +48,12 @@ use std::os::unix::ffi::OsStrExt;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-mod parser;
-mod util;
-
 pub use parser::{FileMode, FileType, Format, ParserError};
 use parser::{Keyword, MTreeLine, SpecialKind};
 use util::decode_escapes_path;
+
+mod parser;
+mod util;
 
 #[cfg(not(unix))]
 compiler_error!("This library currently only supports unix, due to windows using utf-16 for paths");

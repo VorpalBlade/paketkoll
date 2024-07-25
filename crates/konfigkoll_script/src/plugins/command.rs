@@ -8,13 +8,14 @@ use ahash::AHashSet;
 use anyhow::Context;
 use camino::Utf8PathBuf;
 use compact_str::CompactString;
+use rune::{ContextError, Module, Value};
+
 use konfigkoll_core::utils::safe_path_join;
 use konfigkoll_types::{
     FileContents, FsInstruction, FsOp, FsOpDiscriminants, PkgIdent, PkgInstruction,
     PkgInstructions, PkgOp,
 };
 use paketkoll_types::{backend::Backend, files::Mode};
-use rune::{ContextError, Module, Value};
 
 use crate::Phase;
 

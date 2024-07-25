@@ -1,5 +1,6 @@
 use clap::{CommandFactory, Parser, ValueEnum};
 use clap_complete::Shell;
+
 use cli::Commands;
 
 mod cli;

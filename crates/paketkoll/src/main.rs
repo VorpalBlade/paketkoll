@@ -9,6 +9,11 @@ use std::{
 use ahash::AHashSet;
 use anyhow::Context;
 use clap::Parser;
+use proc_exit::{Code, Exit};
+use rayon::prelude::*;
+
+#[cfg(target_env = "musl")]
+use mimalloc::MiMalloc;
 use paketkoll::cli::{Cli, Commands, Format};
 use paketkoll_core::{
     config::CheckAllFilesConfiguration,
@@ -20,11 +25,6 @@ use paketkoll_core::{
     },
 };
 use paketkoll_types::{backend::OriginalFileQuery, package::PackageInterned};
-use proc_exit::{Code, Exit};
-use rayon::prelude::*;
-
-#[cfg(target_env = "musl")]
-use mimalloc::MiMalloc;
 
 #[cfg(target_env = "musl")]
 #[cfg_attr(target_env = "musl", global_allocator)]

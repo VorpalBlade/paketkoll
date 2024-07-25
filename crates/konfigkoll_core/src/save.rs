@@ -4,6 +4,7 @@ use anyhow::Context;
 use camino::Utf8Path;
 use compact_str::{format_compact, CompactString};
 use itertools::Itertools;
+
 use konfigkoll_types::{FileContents, FsInstruction, PkgIdent, PkgInstruction};
 
 /// Save file system changes
@@ -150,14 +151,15 @@ pub fn save_packages<'instructions>(
 
 #[cfg(test)]
 mod tests {
-    use paketkoll_types::backend::Backend;
-    use pretty_assertions::assert_eq;
     use std::collections::HashMap;
 
     use camino::{Utf8Path, Utf8PathBuf};
+    use pretty_assertions::assert_eq;
+
     use konfigkoll_types::{
         FileContents, FsInstruction, FsOp, PkgIdent, PkgInstruction, PkgInstructions, PkgOp,
     };
+    use paketkoll_types::backend::Backend;
 
     use super::*;
 

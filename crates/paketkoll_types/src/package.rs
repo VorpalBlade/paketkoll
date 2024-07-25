@@ -1,8 +1,9 @@
 //! Types and traits for representing data about packages
 
-use crate::intern::{ArchitectureRef, Interner, PackageRef};
 use compact_str::CompactString;
 use smallvec::SmallVec;
+
+use crate::intern::{ArchitectureRef, Interner, PackageRef};
 
 /// The reason a package is installed
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

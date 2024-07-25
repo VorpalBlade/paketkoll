@@ -4,12 +4,13 @@ use std::{collections::BTreeMap, sync::Arc};
 
 use anyhow::Context;
 use itertools::Itertools;
+use rayon::prelude::*;
+
 use konfigkoll_types::PkgInstructions;
 use paketkoll_types::{
     backend::{Backend, PackageBackendMap, PackageMap, PackageMapMap},
     intern::Interner,
 };
-use rayon::prelude::*;
 
 #[tracing::instrument(skip_all)]
 pub(crate) fn load_packages(

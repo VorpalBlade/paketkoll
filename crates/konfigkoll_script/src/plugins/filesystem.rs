@@ -4,12 +4,13 @@ use std::io::{ErrorKind, Read};
 
 use anyhow::Context;
 use camino::Utf8PathBuf;
-use konfigkoll_core::utils::safe_path_join;
 use rune::alloc::fmt::TryWrite;
 use rune::{
     runtime::{Bytes, Formatter},
     vm_write, Any, ContextError, Module,
 };
+
+use konfigkoll_core::utils::safe_path_join;
 
 use crate::engine::CFG_PATH;
 

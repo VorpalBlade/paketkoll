@@ -6,7 +6,6 @@
 //! * Formatting of rune files
 //! * Syntax checking
 use konfigkoll_script::ScriptEngine;
-
 #[cfg(target_env = "musl")]
 use mimalloc::MiMalloc;
 

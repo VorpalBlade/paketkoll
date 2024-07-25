@@ -4,6 +4,9 @@
 //! For now all it provides is a way to check distro installed files for differences.
 //! The plan is detailed in the README.md in the crate directory in the repository.
 
+/// Re-export for downstream to get the correct version
+pub use paketkoll_types;
+
 #[cfg(not(any(feature = "arch_linux", feature = "debian")))]
 compile_error!("At least one backend must be enabled");
 
@@ -12,6 +15,3 @@ pub mod config;
 pub mod file_ops;
 pub mod package_ops;
 pub mod utils;
-
-/// Re-export for downstream to get the correct version
-pub use paketkoll_types;

@@ -8,6 +8,7 @@ use std::{
 use anyhow::Context;
 use camino::Utf8Path;
 use either::Either;
+
 use paketkoll_types::files::Checksum;
 
 /// Describes the contents of a file for the purpose of a [`FsOp`](crate::FsOp).

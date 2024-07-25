@@ -3,6 +3,7 @@
 use std::{collections::BTreeMap, io::BufRead, path::PathBuf};
 
 use anyhow::Context;
+
 use paketkoll_types::intern::{Interner, PackageRef};
 
 /// Describes a diversion by dpkg-divert
@@ -82,9 +83,11 @@ fn parse_diversions(mut input: impl BufRead, interner: &Interner) -> anyhow::Res
 mod tests {
     use std::collections::BTreeMap;
 
-    use super::{parse_diversions, Diversion};
-    use paketkoll_types::intern::{Interner, PackageRef};
     use pretty_assertions::assert_eq;
+
+    use paketkoll_types::intern::{Interner, PackageRef};
+
+    use super::{parse_diversions, Diversion};
 
     #[test]
     fn test_parse_diversions() {

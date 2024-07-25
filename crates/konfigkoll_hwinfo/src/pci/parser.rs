@@ -328,13 +328,13 @@ fn is_hex(s: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use indoc::indoc;
+    use pretty_assertions::assert_eq;
+    use winnow::combinator::terminated;
 
     use crate::pci::{Device, PciIdDb, Subsystem, Vendor};
 
     use super::*;
-    use indoc::indoc;
-    use pretty_assertions::assert_eq;
-    use winnow::combinator::terminated;
 
     #[test]
     fn test_build_hierarchy() {

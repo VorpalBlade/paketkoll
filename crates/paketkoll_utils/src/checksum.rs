@@ -3,6 +3,7 @@
 use std::io::ErrorKind;
 
 use anyhow::Context;
+
 use paketkoll_types::files::Checksum;
 
 pub fn sha256_readable(reader: &mut impl std::io::Read) -> anyhow::Result<Checksum> {

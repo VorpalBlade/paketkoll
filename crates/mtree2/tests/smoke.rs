@@ -1,6 +1,7 @@
-use mtree2::MTree;
 use std::env;
 use std::fs::File;
+
+use mtree2::MTree;
 
 #[test]
 fn run() {

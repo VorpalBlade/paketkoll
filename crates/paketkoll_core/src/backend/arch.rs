@@ -1,9 +1,5 @@
 //! The Arch Linux (and derivatives) backend
 
-mod desc;
-mod mtree;
-mod pacman_conf;
-
 use std::{
     collections::BTreeSet,
     io::BufReader,
@@ -11,22 +7,29 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use super::{FullBackend, PackageFilter};
-use crate::utils::{
-    extract_files, group_queries_by_pkg, locate_package_file, package_manager_transaction,
-};
 use ahash::AHashSet;
 use anyhow::Context;
 use compact_str::format_compact;
 use dashmap::{DashMap, DashSet};
 use either::Either;
+use rayon::prelude::*;
+use regex::RegexSet;
+
 use paketkoll_types::backend::{
     Files, Name, OriginalFileQuery, PackageManagerError, PackageMap, Packages,
 };
 use paketkoll_types::{files::FileEntry, intern::PackageRef};
 use paketkoll_types::{intern::Interner, package::PackageInterned};
-use rayon::prelude::*;
-use regex::RegexSet;
+
+use crate::utils::{
+    extract_files, group_queries_by_pkg, locate_package_file, package_manager_transaction,
+};
+
+use super::{FullBackend, PackageFilter};
+
+mod desc;
+mod mtree;
+mod pacman_conf;
 
 const NAME: &str = "Arch Linux";
 

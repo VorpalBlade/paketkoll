@@ -6,19 +6,21 @@ use std::{
     sync::{Arc, OnceLock},
 };
 
-use crate::plugins::{
-    command::Commands, package_managers::PackageManagers, properties::Properties,
-    settings::Settings,
-};
 use anyhow::Context;
 use camino::{Utf8Path, Utf8PathBuf};
+use rune::{
+    termcolor::{ColorChoice, StandardStream},
+    Diagnostics, Source, Vm,
+};
+
 use paketkoll_types::{
     backend::{Backend, Files, PackageBackendMap, PackageMap},
     intern::Interner,
 };
-use rune::{
-    termcolor::{ColorChoice, StandardStream},
-    Diagnostics, Source, Vm,
+
+use crate::plugins::{
+    command::Commands, package_managers::PackageManagers, properties::Properties,
+    settings::Settings,
 };
 
 /// Describe the phases of script evaluation.

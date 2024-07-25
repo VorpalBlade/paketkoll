@@ -4,8 +4,10 @@ use std::{collections::BTreeMap, fs::Permissions, os::unix::fs::PermissionsExt, 
 
 use ahash::AHashMap;
 use anyhow::Context;
+use console::style;
 use either::Either;
 use itertools::Itertools;
+
 use konfigkoll_types::{FsInstruction, FsOp, FsOpDiscriminants, PkgIdent, PkgInstruction, PkgOp};
 use paketkoll_types::{
     backend::{Backend, Files, OriginalFileQuery, PackageBackendMap, PackageMap, PackageMapMap},
@@ -17,7 +19,6 @@ use crate::{
     diff::show_fs_instr_diff,
     utils::{IdKey, NameToNumericResolveCache},
 };
-use console::style;
 
 /// Applier of system changes
 ///

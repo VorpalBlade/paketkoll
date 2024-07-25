@@ -1,16 +1,18 @@
 //! Declaration of backends
 
-use crate::files::FileEntry;
-use crate::intern::{Interner, PackageRef};
-use crate::package::PackageInterned;
+use std::collections::BTreeMap;
+use std::path::{Path, PathBuf};
+use std::sync::Arc;
+
 use ahash::AHashMap;
 use ahash::AHashSet;
 use anyhow::{anyhow, Context};
 use compact_str::CompactString;
 use dashmap::DashMap;
-use std::collections::BTreeMap;
-use std::path::{Path, PathBuf};
-use std::sync::Arc;
+
+use crate::files::FileEntry;
+use crate::intern::{Interner, PackageRef};
+use crate::package::PackageInterned;
 
 /// Which backend to use for the system package manager
 #[derive(

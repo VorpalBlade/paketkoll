@@ -1,30 +1,34 @@
 //! Backend for Debian and derivatives
-mod divert;
-mod parsers;
-
 use std::fs::{DirEntry, File};
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
 
-use super::FullBackend;
-use crate::backend::PackageFilter;
-use crate::utils::{
-    extract_files, group_queries_by_pkg, locate_package_file, package_manager_transaction,
-    CompressionFormat,
-};
 use anyhow::Context;
 use bstr::ByteSlice;
 use bstr::ByteVec;
 use compact_str::CompactString;
 use dashmap::DashMap;
+use rayon::prelude::*;
+use regex::RegexSet;
+
 use paketkoll_types::backend::{
     Files, Name, OriginalFileQuery, PackageManagerError, PackageMap, Packages,
 };
 use paketkoll_types::files::{FileEntry, Properties};
 use paketkoll_types::intern::{ArchitectureRef, Interner, PackageRef};
 use paketkoll_types::package::PackageInterned;
-use rayon::prelude::*;
-use regex::RegexSet;
+
+use crate::backend::PackageFilter;
+use crate::utils::{
+    extract_files, group_queries_by_pkg, locate_package_file, package_manager_transaction,
+    CompressionFormat,
+};
+
+use super::FullBackend;
+
+mod divert;
+mod parsers;
+
 // Each package has a set of files in DB_PATH:
 // *.list (all installed paths, one per line, including directories)
 // *.md5sums (md5sum<space>path, one per line for all regular files)

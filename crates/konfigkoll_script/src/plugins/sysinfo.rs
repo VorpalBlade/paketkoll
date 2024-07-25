@@ -1,7 +1,8 @@
 //! System information gathering
-use konfigkoll_hwinfo::pci::{PciDevice, PciIdDb};
 use rune::{Any, ContextError, Module};
 use sysinfo::{CpuRefreshKind, MemoryRefreshKind};
+
+use konfigkoll_hwinfo::pci::{PciDevice, PciIdDb};
 
 /// System info access
 #[derive(Debug, Any)]

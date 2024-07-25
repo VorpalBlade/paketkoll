@@ -1,7 +1,5 @@
 //! Helpers for working with /etc/passwd and /etc/groups (as well as shadow files)
 
-mod sysusers;
-
 use std::{
     collections::{BTreeMap, BTreeSet},
     fmt::Write,
@@ -10,12 +8,15 @@ use std::{
 use ahash::{AHashMap, AHashSet};
 use itertools::Itertools;
 use rune::{runtime::Function, Any, ContextError, Module, Value};
-use sysusers::{GroupId, UserId};
 use winnow::Parser;
+
+use sysusers::{GroupId, UserId};
 
 use crate::Commands;
 
 use super::package_managers::PackageManager;
+
+mod sysusers;
 
 type Users = BTreeMap<String, User>;
 type Groups = BTreeMap<String, Group>;

@@ -1,11 +1,12 @@
 //! Stuff for parsing mtree files.
+use std::{fmt, time::Duration};
+
 use smallvec::SmallVec;
 
 use crate::{
     util::{parse_time, FromDec, FromHex},
     Device,
 };
-use std::{fmt, time::Duration};
 
 /// An mtree file is a sequence of lines, each a semantic unit.
 #[derive(Debug)]

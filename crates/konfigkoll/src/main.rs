@@ -1,11 +1,16 @@
+use std::io::BufWriter;
+use std::io::Write;
+use std::sync::Arc;
+
 use ahash::AHashSet;
 use anyhow::Context;
-use apply::create_applicator;
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use clap::Parser;
 use compact_str::CompactString;
 use itertools::Itertools;
+
+use apply::create_applicator;
 use konfigkoll::cli::Cli;
 use konfigkoll::cli::Commands;
 use konfigkoll::cli::Paranoia;
@@ -14,23 +19,19 @@ use konfigkoll_core::apply::apply_packages;
 use konfigkoll_core::diff::show_fs_instr_diff;
 use konfigkoll_core::state::DiffGoal;
 use konfigkoll_script::Phase;
+#[cfg(target_env = "musl")]
+use mimalloc::MiMalloc;
 use paketkoll_cache::OriginalFilesCache;
 use paketkoll_core::backend::ConcreteBackend;
 use paketkoll_core::paketkoll_types::intern::Interner;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::PackageBackendMap;
 use paketkoll_types::backend::Packages;
-use std::io::BufWriter;
-use std::io::Write;
-use std::sync::Arc;
 
 mod apply;
 mod fs_scan;
 mod pkgs;
 mod save;
-
-#[cfg(target_env = "musl")]
-use mimalloc::MiMalloc;
 
 #[cfg(target_env = "musl")]
 #[cfg_attr(target_env = "musl", global_allocator)]

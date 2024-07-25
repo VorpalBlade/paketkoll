@@ -5,13 +5,14 @@ use std::io::BufRead;
 use anyhow::{bail, Context};
 use bstr::{io::BufReadExt, ByteSlice, ByteVec};
 use compact_str::format_compact;
+use smallvec::SmallVec;
+
 use paketkoll_types::intern::{ArchitectureRef, Interner, PackageRef};
 use paketkoll_types::package::{Package, PackageBuilder};
 use paketkoll_types::{
     files::{Checksum, FileEntry, FileFlags, Properties, RegularFileBasic},
     package::{Dependency, InstallReason, PackageInstallStatus, PackageInterned},
 };
-use smallvec::SmallVec;
 
 /// Load lines from a readable as `PathBufs`
 pub(super) fn parse_paths(
@@ -375,11 +376,13 @@ enum ExtendedStatusParsingState {
 
 #[cfg(test)]
 mod tests {
-    use super::{parse_md5sums, parse_paths, parse_status};
+    use pretty_assertions::assert_eq;
+
     use paketkoll_types::files::{Checksum, FileEntry, FileFlags, Properties, RegularFileBasic};
     use paketkoll_types::intern::{ArchitectureRef, Interner, PackageRef};
     use paketkoll_types::package::{Dependency, InstallReason, Package, PackageInstallStatus};
-    use pretty_assertions::assert_eq;
+
+    use super::{parse_md5sums, parse_paths, parse_status};
 
     #[test]
     fn test_parse_paths() {

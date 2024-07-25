@@ -10,6 +10,9 @@ use std::{
 use anyhow::Context;
 use camino::Utf8Path;
 use compact_str::format_compact;
+use parking_lot::Mutex;
+use rayon::prelude::*;
+
 use konfigkoll_types::{
     FileContents, FsInstruction, FsOp, PkgIdent, PkgInstruction, PkgInstructions, PkgOp,
 };
@@ -21,8 +24,6 @@ use paketkoll_types::{
     package::{InstallReason, PackageInterned},
 };
 use paketkoll_utils::{checksum::sha256_readable, MODE_MASK};
-use parking_lot::Mutex;
-use rayon::prelude::*;
 
 use crate::utils::{IdKey, NumericToNameResolveCache};
 
@@ -350,6 +351,7 @@ pub fn convert_packages_to_pkg_instructions(
 #[cfg(test)]
 mod tests {
     use itertools::Itertools;
+
     use paketkoll_types::package::PackageInstallStatus;
 
     use super::*;

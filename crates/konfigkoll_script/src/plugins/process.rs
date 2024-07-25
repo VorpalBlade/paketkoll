@@ -43,12 +43,12 @@
 //! }
 //! ```
 
+use std::io;
+
 use rune::alloc::fmt::TryWrite;
 use rune::alloc::Vec;
 use rune::runtime::{Bytes, Formatter, Mut, Shared, Value, VmResult};
 use rune::{vm_try, vm_write, Any, ContextError, Module};
-
-use std::io;
 use tokio::process;
 
 /// A module for working with processes.

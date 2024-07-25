@@ -4,6 +4,7 @@ use std::{os::unix::ffi::OsStrExt, path::PathBuf};
 
 use anyhow::Context;
 use ignore::{overrides::OverrideBuilder, Match, WalkBuilder, WalkState};
+use rayon::prelude::*;
 
 use paketkoll_types::intern::{Interner, PackageRef};
 use paketkoll_types::{backend::OriginalFileQuery, files::PathMap};
@@ -11,7 +12,6 @@ use paketkoll_types::{
     files::FileEntry,
     issue::{Issue, IssueKind, PackageIssue},
 };
-use rayon::prelude::*;
 
 /// Perform a query of original files
 #[doc(hidden)]

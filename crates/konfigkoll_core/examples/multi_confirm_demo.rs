@@ -1,4 +1,5 @@
 use console::Style;
+
 use konfigkoll_core::confirm::MultiOptionConfirm;
 
 fn main() -> anyhow::Result<()> {

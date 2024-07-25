@@ -3,13 +3,14 @@
 use std::{collections::BTreeMap, str::FromStr, sync::Arc};
 
 use anyhow::Context;
-use paketkoll_types::{
-    backend::{Backend, Files, OriginalFileQuery, PackageBackendMap, PackageMap, Packages},
-    intern::Interner,
-};
 use rune::{
     runtime::{Bytes, Shared},
     Any, ContextError, Module,
+};
+
+use paketkoll_types::{
+    backend::{Backend, Files, OriginalFileQuery, PackageBackendMap, PackageMap, Packages},
+    intern::Interner,
 };
 
 /// Type of map for package managers
