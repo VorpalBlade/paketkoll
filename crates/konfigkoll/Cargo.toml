@@ -12,7 +12,7 @@ license = "MPL-2.0"
 name = "konfigkoll"
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.79.0"
-version = "0.1.0"
+version = "0.1.1"
 
 [[bin]]
 name = "konfigkoll"

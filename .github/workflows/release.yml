@@ -46,13 +46,13 @@ jobs:
       run: cargo binstall --no-confirm --no-symlinks cargo-about
     - run: mkdir target && cargo about generate  about.hbs > target/licenses.html
     - name: Upload licenses.html
-      run: GITHUB_TOKEN="${token}" retry gh release upload "${tag}"  target/licenses.html --clobber
+      run: GITHUB_TOKEN="${token}" gh release upload "${tag}"  target/licenses.html --clobber
       env:
         token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ github.event.release.tag_name }}
 
   upload-paketkoll:
-    name: ${{ matrix.target }}
+    name: "paketkoll: ${{ matrix.target }}"
     if: github.repository_owner == 'VorpalBlade' && startsWith(github.event.release.name, 'paketkoll-v')
     runs-on: ubuntu-22.04
     strategy:
@@ -84,7 +84,7 @@ jobs:
           subject-path: "${{ steps.upload-rust-binary-action.outputs.archive }}.*"
 
   upload-konfigkoll:
-    name: ${{ matrix.target }}
+    name: "konfigkoll: ${{ matrix.target }}"
     if: github.repository_owner == 'VorpalBlade' && startsWith(github.event.release.name, 'konfigkoll-v')
     runs-on: ubuntu-22.04
     strategy:
@@ -108,7 +108,7 @@ jobs:
           bin: konfigkoll, konfigkoll_rune
           target: ${{ matrix.target }}
           # Include version number.
-          archive: $bin-$tag-$target
+          archive: konfigkoll-$tag-$target
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
@@ -139,26 +139,26 @@ jobs:
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: New upstream release (automatic update from GitHub Actions)
 
-  #upload-aur-konfigkoll:
-  #  if: github.repository_owner == 'VorpalBlade' && startsWith(github.event.release.name, 'konfigkoll-v')
-  #  runs-on: ubuntu-latest
-  #  steps:
-  #    - uses: actions/checkout@v4
-  #    - name: Get AUR repo
-  #      run: git clone https://aur.archlinux.org/konfigkoll.git aur
-  #    - name: Update PKGBUILD
-  #      run: |
-  #        sed -i '/^_pkgver/s/=.*$/='${RELEASE_TAG#refs/tags/konfigkoll-v}'/' "aur/PKGBUILD"
-  #        sed -i '/^pkgrel/s/=.*$/=1/' "aur/PKGBUILD"
-  #      env:
-  #        RELEASE_TAG: ${{ github.ref }}
-  #    - name: Publish AUR package
-  #      uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
-  #      with:
-  #        pkgname: konfigkoll
-  #        pkgbuild: aur/PKGBUILD
-  #        updpkgsums: true
-  #        commit_username: ${{ secrets.AUR_USERNAME }}
-  #        commit_email: ${{ secrets.AUR_EMAIL }}
-  #        ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-  #        commit_message: New upstream release (automatic update from GitHub Actions)
+  upload-aur-konfigkoll:
+    if: github.repository_owner == 'VorpalBlade' && startsWith(github.event.release.name, 'konfigkoll-v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get AUR repo
+        run: git clone https://aur.archlinux.org/konfigkoll.git aur
+      - name: Update PKGBUILD
+        run: |
+          sed -i '/^_pkgver/s/=.*$/='${RELEASE_TAG#refs/tags/konfigkoll-v}'/' "aur/PKGBUILD"
+          sed -i '/^pkgrel/s/=.*$/=1/' "aur/PKGBUILD"
+        env:
+          RELEASE_TAG: ${{ github.ref }}
+      - name: Publish AUR package
+        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
+        with:
+          pkgname: konfigkoll
+          pkgbuild: aur/PKGBUILD
+          updpkgsums: true
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: New upstream release (automatic update from GitHub Actions)

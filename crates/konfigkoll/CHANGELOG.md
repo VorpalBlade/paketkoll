@@ -8,6 +8,12 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.1] - 2024-07-25
+
+### 🐛 Bug fixes
+
+- Fix CI build
+
 ## [0.1.0] - 2024-07-25
 
 This is the initial release of the `konfigkoll` crate.
