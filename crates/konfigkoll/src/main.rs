@@ -14,7 +14,7 @@ use konfigkoll_core::apply::apply_packages;
 use konfigkoll_core::diff::show_fs_instr_diff;
 use konfigkoll_core::state::DiffGoal;
 use konfigkoll_script::Phase;
-use paketkoll_cache::FilesCache;
+use paketkoll_cache::OriginalFilesCache;
 use paketkoll_core::backend::ConcreteBackend;
 use paketkoll_core::paketkoll_types::intern::Interner;
 use paketkoll_types::backend::Files;
@@ -117,7 +117,7 @@ async fn main() -> anyhow::Result<()> {
         let backend = b
             .create_files(&backend_cfg, &interner)
             .with_context(|| format!("Failed to create backend {b}"))?;
-        let backend = FilesCache::from_path(backend, proj_dirs.cache_dir())
+        let backend = OriginalFilesCache::from_path(backend, proj_dirs.cache_dir())
             .context("Failed to create disk cache")?;
         Arc::new(backend)
     };
