@@ -2,10 +2,42 @@
 
 All notable changes to this project will be documented in this file.
 Keep in mind that this is only updated when releases are made and the file
-is generated automatically from commit messages.
+is generated automatically from commit messages (and may or may not be lightly
+edited).
 
 For a possibly more edited message focused on the binary please see the github
 releases.
+
+## [0.3.0] - 2024-07-25
+
+This is a massive release, as `konfigkoll` was introduced as a new command.
+While this is not directly part of `paketkoll`, it had knock-on effects on the
+way the source code is organized.
+
+### 🚀 Features
+
+- Add Makefile to help install things. This is needed to get man pages and
+  shell completion files installed. They are not longer generated as part
+  of the build script.
+- Vendor deps by default (instead of linking them dynamically)
+- Rework, only single files backend allowed
+- Add `paketkoll owns` command to quickly find what package owns a file
+
+### 🚜 Refactoring
+
+- Split out `print_packages`
+- Move backend traits to `paketkoll_types`
+- Unify and format Cargo.toml files
+- Revamp public API
+- Use method for resolving string interning newtypes
+
+### 📚 Documentation
+
+- Reorganize README files
+
+### ⚙️ Other stuff
+
+- Fix typos and lints from RustRover
 
 ## [0.2.3] - 2024-06-28
 

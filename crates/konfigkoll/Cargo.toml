@@ -49,7 +49,7 @@ konfigkoll_script = { version = "0.1.0", path = "../konfigkoll_script" }
 konfigkoll_types = { version = "0.1.0", path = "../konfigkoll_types" }
 ouroboros.workspace = true
 paketkoll_cache = { version = "0.1.0", path = "../paketkoll_cache" }
-paketkoll_core = { version = "0.4.1", path = "../paketkoll_core" }
+paketkoll_core = { version = "0.5.0", path = "../paketkoll_core" }
 paketkoll_types = { version = "0.1.0", path = "../paketkoll_types" }
 rayon.workspace = true
 rune = { workspace = true, features = ["cli"] }

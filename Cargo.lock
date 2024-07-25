@@ -1389,7 +1389,7 @@ dependencies = [
 
 [[package]]
 name = "mtree2"
-version = "0.6.1"
+version = "0.6.2"
 dependencies = [
  "bitflags 2.6.0",
  "faster-hex",
@@ -1687,7 +1687,7 @@ checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 
 [[package]]
 name = "paketkoll"
-version = "0.2.3"
+version = "0.3.0"
 dependencies = [
  "ahash",
  "anyhow",
@@ -1720,7 +1720,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_core"
-version = "0.4.1"
+version = "0.5.0"
 dependencies = [
  "ahash",
  "anyhow",
@@ -2721,7 +2721,7 @@ dependencies = [
 
 [[package]]
 name = "systemd_tmpfiles"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "base64-simd",
  "bitflags 2.6.0",

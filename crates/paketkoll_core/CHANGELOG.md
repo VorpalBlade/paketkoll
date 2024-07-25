@@ -2,10 +2,55 @@
 
 All notable changes to this project will be documented in this file.
 Keep in mind that this is only updated when releases are made and the file
-is generated automatically from commit messages.
+is generated automatically from commit messages (and may or may not be lightly
+edited).
 
 For a possibly more edited message focused on the binary please see the github
 releases.
+
+## [0.5.0] - 2024-07-25
+
+### 🚀 Features
+
+- Add Makefile to help install things, vendor deps by default
+- Improve logging
+- Handle removing unused dependencies
+- Backend support for marking as dep/man install and asking to uninstall unused packages
+- Rework, only single files backend allowed
+- Disk cache for original file queries
+- Create konfigkoll
+- Add conversions to nix types
+- Add `paketkoll owns` command to quickly find what package owns a file
+- Include device type in issue
+- Get original files
+- Package manager transactions
+- Split out types from paketkoll_core
+
+### 🐛 Bug fixes
+
+- Handle some cases of restoring more correctly
+- Fix dependency parser for Arch Linux
+- Fix visibility on types that are now exposed in issues
+
+### 🚜 Refactoring
+
+- Move backend traits to paketkoll_types
+- API fixes for konfigkoll
+- Remove unneeded Result
+- Paketkoll changes for konfigkoll
+- Unify and format Cargo.toml files
+- Move some utility functions
+- Revamp public API
+- Use method for resolving string interning newtypes
+
+### ⚡ Performance improvements
+
+- Some small performance fixes
+
+### ⚙️ Other stuff
+
+- Clippy fixes
+- Fix typos and lints from RustRover
 
 ## [0.4.1] - 2024-06-28
 
