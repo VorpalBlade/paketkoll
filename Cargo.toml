@@ -94,7 +94,6 @@ debug = 2
 split-debuginfo = "unpacked"
 
 [profile.release]
-codegen-units = 1
 lto = "thin"
 opt-level = 2
 
