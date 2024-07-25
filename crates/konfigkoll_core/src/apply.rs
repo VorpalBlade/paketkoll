@@ -149,7 +149,17 @@ impl Applicator for InProcessApplicator {
                     let existing = std::fs::symlink_metadata(&instr.path);
                     if let Ok(metadata) = existing {
                         if metadata.is_dir() {
-                            std::fs::remove_dir(&instr.path)?;
+                            match std::fs::remove_dir(&instr.path) {
+                                Ok(_) => (),
+                                Err(err) => match err.raw_os_error() {
+                                    Some(libc::ENOTEMPTY) => {
+                                        Err(err).context("Failed to remove directory: it is not empty (possibly it contains some ignored files). You will have to investigate and resolve this yourself, since we don't want to delete things we shouldn't.")?;
+                                    }
+                                    Some(_) | None => {
+                                        Err(err).context("Failed to remove directory")?;
+                                    }
+                                },
+                            }
                         } else {
                             std::fs::remove_file(&instr.path)?;
                         }
