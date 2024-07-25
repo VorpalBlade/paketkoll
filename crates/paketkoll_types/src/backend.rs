@@ -79,7 +79,7 @@ pub trait Files: Name {
         queries: &[OriginalFileQuery],
         packages: &PackageMap,
         interner: &Interner,
-    ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>>;
+    ) -> anyhow::Result<AHashMap<OriginalFileQuery, Vec<u8>>>;
 }
 
 /// Query type for original file contents

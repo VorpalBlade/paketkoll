@@ -91,7 +91,7 @@ impl Files for SystemdTmpfiles {
         _queries: &[OriginalFileQuery],
         _packages: &PackageMap,
         _interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>> {
+    ) -> anyhow::Result<AHashMap<OriginalFileQuery, Vec<u8>>> {
         anyhow::bail!("Original file queries are not supported for systemd-tmpfiles")
     }
 }

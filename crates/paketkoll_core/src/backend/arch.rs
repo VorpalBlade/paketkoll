@@ -87,10 +87,7 @@ impl Name for ArchLinux {
 }
 
 impl Files for ArchLinux {
-    fn files(
-        &self,
-        interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<Vec<FileEntry>> {
+    fn files(&self, interner: &Interner) -> anyhow::Result<Vec<FileEntry>> {
         let db_path: &Path = Path::new(&self.pacman_config.db_path);
 
         // Load packages
@@ -258,10 +255,7 @@ fn find_files(
 }
 
 impl Packages for ArchLinux {
-    fn packages(
-        &self,
-        interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<Vec<PackageInterned>> {
+    fn packages(&self, interner: &Interner) -> anyhow::Result<Vec<PackageInterned>> {
         let db_root = Path::new(&self.pacman_config.db_path).join("local");
         let results: anyhow::Result<Vec<PackageInterned>> = std::fs::read_dir(db_root)
             .context("Failed to read pacman database directory")?

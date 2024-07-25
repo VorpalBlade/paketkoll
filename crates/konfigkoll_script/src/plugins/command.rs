@@ -161,7 +161,7 @@ impl Commands {
             ));
         }
         self.fs_actions.push(FsInstruction {
-            op: konfigkoll_types::FsOp::Remove,
+            op: FsOp::Remove,
             path: path.into(),
             comment: None,
         });
@@ -204,7 +204,7 @@ impl Commands {
             }
         };
         self.fs_actions.push(FsInstruction {
-            op: konfigkoll_types::FsOp::CreateFile(contents),
+            op: FsOp::CreateFile(contents),
             path: path.into(),
             comment: None,
         });
@@ -220,7 +220,7 @@ impl Commands {
             ));
         }
         self.fs_actions.push(FsInstruction {
-            op: konfigkoll_types::FsOp::CreateSymlink {
+            op: FsOp::CreateSymlink {
                 target: target.into(),
             },
             path: path.into(),
@@ -238,7 +238,7 @@ impl Commands {
             ));
         }
         self.fs_actions.push(FsInstruction {
-            op: konfigkoll_types::FsOp::CreateFile(FileContents::from_literal(contents.into())),
+            op: FsOp::CreateFile(FileContents::from_literal(contents.into())),
             path: path.into(),
             comment: None,
         });
@@ -254,7 +254,7 @@ impl Commands {
             ));
         }
         self.fs_actions.push(FsInstruction {
-            op: konfigkoll_types::FsOp::CreateDirectory,
+            op: FsOp::CreateDirectory,
             path: path.into(),
             comment: None,
         });
@@ -271,7 +271,7 @@ impl Commands {
         }
 
         self.fs_actions.push(FsInstruction {
-            op: konfigkoll_types::FsOp::SetOwner {
+            op: FsOp::SetOwner {
                 owner: owner.into(),
             },
             path: path.into(),
@@ -290,7 +290,7 @@ impl Commands {
         }
 
         self.fs_actions.push(FsInstruction {
-            op: konfigkoll_types::FsOp::SetGroup {
+            op: FsOp::SetGroup {
                 group: group.into(),
             },
             path: path.into(),
@@ -319,7 +319,7 @@ impl Commands {
         };
 
         self.fs_actions.push(FsInstruction {
-            op: konfigkoll_types::FsOp::SetMode { mode: numeric_mode },
+            op: FsOp::SetMode { mode: numeric_mode },
             path: path.into(),
             comment: None,
         });

@@ -99,13 +99,13 @@ impl ConcreteBackend {
         match self {
             #[cfg(feature = "arch_linux")]
             ConcreteBackend::Pacman => Ok(Box::new({
-                let mut builder = crate::backend::arch::ArchLinuxBuilder::default();
+                let mut builder = arch::ArchLinuxBuilder::default();
                 builder.package_filter(configuration.package_filter);
                 builder.build()?
             })),
             #[cfg(feature = "debian")]
             ConcreteBackend::Apt => Ok(Box::new({
-                let mut builder = crate::backend::deb::DebianBuilder::default();
+                let mut builder = deb::DebianBuilder::default();
                 builder.package_filter(configuration.package_filter);
                 builder.build(interner)
             })),
@@ -114,7 +114,7 @@ impl ConcreteBackend {
             )),
             #[cfg(feature = "systemd_tmpfiles")]
             ConcreteBackend::SystemdTmpfiles => Ok(Box::new({
-                let builder = crate::backend::systemd_tmpfiles::SystemdTmpfilesBuilder::default();
+                let builder = systemd_tmpfiles::SystemdTmpfilesBuilder::default();
                 builder.build()
             })),
         }
@@ -129,18 +129,18 @@ impl ConcreteBackend {
         match self {
             #[cfg(feature = "arch_linux")]
             ConcreteBackend::Pacman => Ok(Box::new({
-                let mut builder = crate::backend::arch::ArchLinuxBuilder::default();
+                let mut builder = arch::ArchLinuxBuilder::default();
                 builder.package_filter(configuration.package_filter);
                 builder.build()?
             })),
             #[cfg(feature = "debian")]
             ConcreteBackend::Apt => Ok(Box::new({
-                let mut builder = crate::backend::deb::DebianBuilder::default();
+                let mut builder = deb::DebianBuilder::default();
                 builder.package_filter(configuration.package_filter);
                 builder.build(interner)
             })),
             ConcreteBackend::Flatpak => Ok(Box::new({
-                let builder = crate::backend::flatpak::FlatpakBuilder::default();
+                let builder = flatpak::FlatpakBuilder::default();
                 builder.build()
             })),
             #[cfg(feature = "systemd_tmpfiles")]
@@ -159,13 +159,13 @@ impl ConcreteBackend {
         match self {
             #[cfg(feature = "arch_linux")]
             ConcreteBackend::Pacman => Ok(Box::new({
-                let mut builder = crate::backend::arch::ArchLinuxBuilder::default();
+                let mut builder = arch::ArchLinuxBuilder::default();
                 builder.package_filter(configuration.package_filter);
                 builder.build()?
             })),
             #[cfg(feature = "debian")]
             ConcreteBackend::Apt => Ok(Box::new({
-                let mut builder = crate::backend::deb::DebianBuilder::default();
+                let mut builder = deb::DebianBuilder::default();
                 builder.package_filter(configuration.package_filter);
                 builder.build(interner)
             })),

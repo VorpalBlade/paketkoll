@@ -42,14 +42,14 @@ impl MultiOptionConfirm {
             }
 
             match key {
-                console::Key::Enter => {
+                Key::Enter => {
                     if let Some(default) = self.default {
                         return Ok(default);
                     } else {
                         term.write_line("Please select an option (this prompt has no default)")?;
                     }
                 }
-                console::Key::Char(c) => {
+                Key::Char(c) => {
                     let lower_case: AHashSet<_> = c.to_lowercase().collect();
                     let found = self.options.intersection(&lower_case).count() > 0;
                     if found {
@@ -58,11 +58,11 @@ impl MultiOptionConfirm {
                         term.write_line("Invalid option, try again")?;
                     }
                 }
-                console::Key::Escape => {
+                Key::Escape => {
                     term.write_line("Aborted")?;
                     anyhow::bail!("User aborted with Escape");
                 }
-                console::Key::CtrlC => {
+                Key::CtrlC => {
                     term.write_line("Aborted")?;
                     anyhow::bail!("User aborted with Ctrl-C");
                 }

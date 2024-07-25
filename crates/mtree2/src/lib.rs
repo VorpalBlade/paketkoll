@@ -107,10 +107,9 @@ where
                     panic!("relative without a current working dir");
                 }
                 Some(Entry {
-                    path: util::decode_escapes_path(self.cwd.join(OsStr::from_bytes(path)))
-                        .ok_or_else(|| {
-                            Error::Parser(ParserError("Failed to decode escapes".into()))
-                        })?,
+                    path: decode_escapes_path(self.cwd.join(OsStr::from_bytes(path))).ok_or_else(
+                        || Error::Parser(ParserError("Failed to decode escapes".into())),
+                    )?,
                     params,
                 })
             }
@@ -122,7 +121,7 @@ where
                 let mut params = self.default_params.clone();
                 params.set_list(keywords.into_iter());
                 Some(Entry {
-                    path: util::decode_escapes_path(Path::new(OsStr::from_bytes(path)).to_owned())
+                    path: decode_escapes_path(Path::new(OsStr::from_bytes(path)).to_owned())
                         .ok_or_else(|| {
                             Error::Parser(ParserError("Failed to decode escapes".into()))
                         })?,
@@ -613,8 +612,8 @@ impl From<io::Error> for Error {
     }
 }
 
-impl From<parser::ParserError> for Error {
-    fn from(from: parser::ParserError) -> Error {
+impl From<ParserError> for Error {
+    fn from(from: ParserError) -> Error {
         Error::Parser(from)
     }
 }

@@ -95,7 +95,7 @@ fn main() -> anyhow::Result<Exit> {
                 })?;
 
             for (_query, result) in results {
-                std::io::stdout().write_all(&result)?;
+                stdout().write_all(&result)?;
             }
             Ok(Exit::new(Code::SUCCESS))
         }

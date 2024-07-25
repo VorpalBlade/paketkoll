@@ -30,7 +30,7 @@ impl PackageManagers {
         package_backends: &PackageBackendMap,
         file_backend_id: Backend,
         files_backend: &Arc<dyn Files>,
-        package_maps: &BTreeMap<paketkoll_types::backend::Backend, Arc<PackageMap>>,
+        package_maps: &BTreeMap<Backend, Arc<PackageMap>>,
         interner: &Arc<Interner>,
     ) -> Self {
         let files_backends = [(file_backend_id, files_backend)];

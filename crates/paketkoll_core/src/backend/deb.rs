@@ -217,7 +217,7 @@ impl Files for Debian {
             })?;
 
             // The package is a .deb, which is actually an ar archive
-            let package_file = std::fs::File::open(&package_path)?;
+            let package_file = File::open(&package_path)?;
             let mut archive = ar::Archive::new(package_file);
 
             // We want the data.tar.xz file (or other compression scheme)

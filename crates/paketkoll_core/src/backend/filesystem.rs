@@ -277,7 +277,7 @@ fn check_contents(
     let mut reader = match File::open(path) {
         Ok(file) => file,
         Err(err) => match err.kind() {
-            std::io::ErrorKind::PermissionDenied => {
+            ErrorKind::PermissionDenied => {
                 issues.push(IssueKind::PermissionDenied);
                 return Ok(());
             }

@@ -46,7 +46,7 @@ pub struct OriginalFilesCache {
 }
 
 impl OriginalFilesCache {
-    pub fn from_path(inner: Box<dyn Files>, path: &std::path::Path) -> anyhow::Result<Self> {
+    pub fn from_path(inner: Box<dyn Files>, path: &Path) -> anyhow::Result<Self> {
         let cache = DiskCacheBuilder::new(inner.name())
             .set_refresh(false)
             .set_lifespan(60 * 60 * 24 * 30) // A month
