@@ -387,6 +387,7 @@ impl PartialEq for DiffGoal<'_, '_> {
 }
 
 // Generate a stream of instructions to go from state before to state after
+#[tracing::instrument(level = "debug", skip_all)]
 pub fn diff(
     goal: &DiffGoal<'_, '_>,
     before: FsEntries,
@@ -402,6 +403,7 @@ pub fn diff(
         match entry {
             itertools::EitherOrBoth::Both(before, after) if before.1 == after.1 => {}
             itertools::EitherOrBoth::Both(before, after) => {
+                // tracing::debug!("{:?} -> {:?}", before, after);
                 // Compare the structs and generate a stream of instructions
                 let path = before.0;
                 let before = before.1;
@@ -484,48 +486,51 @@ pub fn diff(
                 }
             }
             itertools::EitherOrBoth::Left(before) => {
+                // tracing::debug!("{:?} -> ()", before);
                 match goal {
                     DiffGoal::Apply(ref _backend_impl, path_map) => {
                         // Figure out what the previous state of this file was:
                         match path_map.get(before.0.as_std_path()) {
                             Some(entry) => {
-                                match entry.properties {
-                                    Properties::RegularFileBasic(_)
-                                    | Properties::RegularFileSystemd(_)
-                                    | Properties::RegularFile(_) => {
-                                        results.push(FsInstruction {
-                                            path: before.0.clone(),
-                                            op: FsOp::Restore,
-                                            comment: before.1.comment,
-                                        });
-                                    }
-                                    Properties::Symlink(ref v) => {
-                                        results.push(FsInstruction {
-                                            path: before.0.clone(),
-                                            op: FsOp::CreateSymlink {
-                                                target: Utf8Path::from_path(&v.target)
-                                                    .ok_or_else(|| anyhow!("Invalid UTF-8"))?
-                                                    .into(),
-                                            },
-                                            comment: before.1.comment,
-                                        });
-                                    }
-                                    Properties::Directory(_) => {
-                                        results.push(FsInstruction {
-                                            path: before.0.clone(),
-                                            op: FsOp::CreateDirectory,
-                                            comment: before.1.comment,
-                                        });
-                                    }
-                                    Properties::Fifo(_)
-                                    | Properties::DeviceNode(_)
-                                    | Properties::Permissions(_)
-                                    | Properties::Special
-                                    | Properties::Removed => {
-                                        anyhow::bail!("{:?} needs to be restored to package manager state, but how do to that is not yet implemented", entry.path)
-                                    }
-                                    Properties::Unknown => {
-                                        anyhow::bail!("{:?} needs to be restored to package manager state, but how do to that is unknown", entry.path)
+                                if before.1.entry != FsEntry::Unchanged {
+                                    match entry.properties {
+                                        Properties::RegularFileBasic(_)
+                                        | Properties::RegularFileSystemd(_)
+                                        | Properties::RegularFile(_) => {
+                                            results.push(FsInstruction {
+                                                path: before.0.clone(),
+                                                op: FsOp::Restore,
+                                                comment: before.1.comment,
+                                            });
+                                        }
+                                        Properties::Symlink(ref v) => {
+                                            results.push(FsInstruction {
+                                                path: before.0.clone(),
+                                                op: FsOp::CreateSymlink {
+                                                    target: Utf8Path::from_path(&v.target)
+                                                        .ok_or_else(|| anyhow!("Invalid UTF-8"))?
+                                                        .into(),
+                                                },
+                                                comment: before.1.comment,
+                                            });
+                                        }
+                                        Properties::Directory(_) => {
+                                            results.push(FsInstruction {
+                                                path: before.0.clone(),
+                                                op: FsOp::CreateDirectory,
+                                                comment: before.1.comment,
+                                            });
+                                        }
+                                        Properties::Fifo(_)
+                                        | Properties::DeviceNode(_)
+                                        | Properties::Permissions(_)
+                                        | Properties::Special
+                                        | Properties::Removed => {
+                                            anyhow::bail!("{:?} needs to be restored to package manager state, but how do to that is not yet implemented", entry.path)
+                                        }
+                                        Properties::Unknown => {
+                                            anyhow::bail!("{:?} needs to be restored to package manager state, but how do to that is unknown", entry.path)
+                                        }
                                     }
                                 }
                                 match (entry.properties.mode(), before.1.mode) {
@@ -593,6 +598,7 @@ pub fn diff(
                 }
             }
             itertools::EitherOrBoth::Right(after) => {
+                // tracing::debug!("() -> {:?}", after);
                 results.extend(after.1.into_instruction(&after.0));
             }
         }

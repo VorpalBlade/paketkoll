@@ -156,7 +156,7 @@ impl Applicator for InProcessApplicator {
                     }
                 }
                 FsOp::CreateDirectory => {
-                    std::fs::create_dir(&instr.path)?;
+                    std::fs::create_dir_all(&instr.path)?;
                 }
                 FsOp::CreateFile(contents) => match contents {
                     konfigkoll_types::FileContents::Literal { checksum: _, data } => {
