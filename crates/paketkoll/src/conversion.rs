@@ -60,6 +60,7 @@ impl TryFrom<&Cli> for paketkoll_core::backend::BackendConfiguration {
             Commands::InstalledPackages => {}
             Commands::OriginalFile { .. } => {}
             Commands::Owns { .. } => {}
+            Commands::DebugPackageFileData { .. } => {}
         }
         Ok(builder.build()?)
     }

@@ -59,6 +59,11 @@ pub enum Commands {
         /// Path to query
         path: String,
     },
+    #[clap(hide = true)]
+    DebugPackageFileData {
+        /// Package to query
+        package: String,
+    },
 }
 
 /// Output format to use

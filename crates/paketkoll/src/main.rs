@@ -118,6 +118,31 @@ fn main() -> anyhow::Result<Exit> {
             }
             Ok(Exit::new(Code::SUCCESS))
         }
+        Commands::DebugPackageFileData { ref package } => {
+            let interner = Interner::new();
+            let backend: paketkoll_core::backend::ConcreteBackend = cli.backend.try_into()?;
+            let backend_impl = backend
+                .create_full(&(&cli).try_into()?, &interner)
+                .context("Failed to create backend")?;
+
+            let package_map = backend_impl
+                .package_map_complete(&interner)
+                .with_context(|| format!("Failed to collect information from backend {backend}"))?;
+
+            let pkg_ref = PackageRef::get_or_intern(&interner, package);
+
+            let files = backend_impl
+                .files_from_archives(&[pkg_ref], &package_map, &interner)
+                .with_context(|| {
+                    format!(
+                        "Failed to collect file information for package {package} from backend {backend}"
+                    )
+                })?;
+
+            println!("{:?}", files);
+
+            Ok(Exit::new(Code::SUCCESS))
+        }
     }
 }
 
