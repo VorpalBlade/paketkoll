@@ -175,24 +175,7 @@ impl Files for ArchLinux {
 
         for (pkg, queries) in queries_by_pkg {
             // We may not have exact package name, try to figure this out:
-            let package_match = if let Some(pkgref) = interner.get(pkg) {
-                // Yay, it is probably installed, we know what to look for
-                if let Some(package) = packages.get(&PackageRef::new(pkgref)) {
-                    format!(
-                        "{}-{}-{}.pkg.tar.zst",
-                        pkg,
-                        package.version,
-                        package
-                            .architecture
-                            .map(|e| e.to_str(interner))
-                            .unwrap_or("*")
-                    )
-                } else {
-                    format!("{}-*-*.pkg.tar.zst", pkg)
-                }
-            } else {
-                format!("{}-*-*.pkg.tar.zst", pkg)
-            };
+            let package_match = guess_pkg_file_name(interner, pkg, packages);
 
             let package_path = locate_package_file(
                 dir_candidates.as_slice(),
@@ -218,6 +201,28 @@ impl Files for ArchLinux {
 
         Ok(results)
     }
+}
+
+fn guess_pkg_file_name(interner: &Interner, pkg: &str, packages: &PackageMap) -> String {
+    let package_match = if let Some(pkgref) = interner.get(pkg) {
+        // Yay, it is probably installed, we know what to look for
+        if let Some(package) = packages.get(&PackageRef::new(pkgref)) {
+            format!(
+                "{}-{}-{}.pkg.tar.zst",
+                pkg,
+                package.version,
+                package
+                    .architecture
+                    .map(|e| e.to_str(interner))
+                    .unwrap_or("*")
+            )
+        } else {
+            format!("{}-*-*.pkg.tar.zst", pkg)
+        }
+    } else {
+        format!("{}-*-*.pkg.tar.zst", pkg)
+    };
+    package_match
 }
 
 fn find_files(

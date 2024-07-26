@@ -190,24 +190,7 @@ impl Files for Debian {
 
         for (pkg, queries) in queries_by_pkg {
             // We may not have exact package name, try to figure this out:
-            let package_match = if let Some(pkgref) = interner.get(pkg) {
-                // Yay, it is probably installed, we know what to look for
-                if let Some(package) = packages.get(&PackageRef::new(pkgref)) {
-                    format!(
-                        "{}_{}_{}.deb",
-                        pkg,
-                        package.version.replace(':', "%3a"),
-                        package
-                            .architecture
-                            .map(|e| e.to_str(interner))
-                            .unwrap_or("*")
-                    )
-                } else {
-                    format!("{}_*_*.deb", pkg)
-                }
-            } else {
-                format!("{}_*_*.deb", pkg)
-            };
+            let package_match = guess_deb_file_name(interner, pkg, packages);
 
             let package_path =
                 locate_package_file(dir_candidates.as_slice(), &package_match, pkg, download_deb)?;
@@ -243,6 +226,28 @@ impl Files for Debian {
         }
 
         Ok(results)
+    }
+}
+
+/// Given a package name, try to figure out the full deb file name
+fn guess_deb_file_name(interner: &Interner, pkg: &str, packages: &PackageMap) -> String {
+    if let Some(pkgref) = interner.get(pkg) {
+        // Yay, it is probably installed, we know what to look for
+        if let Some(package) = packages.get(&PackageRef::new(pkgref)) {
+            format!(
+                "{}_{}_{}.deb",
+                pkg,
+                package.version.replace(':', "%3a"),
+                package
+                    .architecture
+                    .map(|e| e.to_str(interner))
+                    .unwrap_or("*")
+            )
+        } else {
+            format!("{}_*_*.deb", pkg)
+        }
+    } else {
+        format!("{}_*_*.deb", pkg)
     }
 }
 
