@@ -1,4 +1,5 @@
 //! Backend for Debian and derivatives
+use std::borrow::Cow;
 use std::fs::{DirEntry, File};
 use std::io::BufReader;
 use std::path::{Path, PathBuf};
@@ -21,7 +22,7 @@ use paketkoll_types::package::PackageInterned;
 use crate::backend::PackageFilter;
 use crate::utils::{
     convert_archive_entries, extract_files, group_queries_by_pkg, locate_package_file,
-    package_manager_transaction, CompressionFormat,
+    missing_packages, package_manager_transaction, CompressionFormat, PackageQuery,
 };
 
 use super::FullBackend;
@@ -218,7 +219,7 @@ impl Files for Debian {
                     let archive = tar::Archive::new(&mut decompressed);
                     // Now, lets extract the requested files from the package
                     extract_files(archive, &queries, &mut results, pkg, |path| {
-                        path.trim_start_matches('.').into()
+                        Some(path.trim_start_matches('.').into())
                     })?;
                     break;
                 }
@@ -234,17 +235,35 @@ impl Files for Debian {
         package_map: &PackageMap,
         interner: &Interner,
     ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError> {
-        let archives = iterate_deb_archives(filter, package_map, interner);
+        // Handle diversions: (parse output of dpkg-divert --list)
+        log::debug!("Loading diversions");
+        let diversions =
+            divert::get_diversions(interner).context("Failed to get dpkg diversions")?;
+
+        log::info!(
+            "Loading file data from dpkg cache archives for {} packages",
+            filter.len()
+        );
+        let archives = iterate_deb_archives(filter, package_map, interner)?;
+        log::info!("Got list of {} archives, starting extracting information (this may take a while, especially on the first run before the disk cache can help)", filter.len());
         let results: anyhow::Result<Vec<_>> = archives
             .par_bridge()
             .map(|value| {
-                value.and_then(|(pkg_ref, path)| Ok((pkg_ref, archive_to_entries(pkg_ref, &path)?)))
+                value.and_then(|(pkg_ref, path)| {
+                    Ok((pkg_ref, archive_to_entries(pkg_ref, &path, &diversions)?))
+                })
             })
             .collect();
+        log::info!("Extracted information from archives");
 
         let results = results?;
-
         Ok(results)
+    }
+
+    // Debian doesn't have enough info for konfigkoll in files(), use files_from_archives() instead
+    // (and add a cache layer on top, since that is slow)
+    fn prefer_files_from_archive(&self) -> bool {
+        true
     }
 }
 
@@ -253,28 +272,58 @@ fn iterate_deb_archives<'inputs>(
     filter: &'inputs [PackageRef],
     packages: &'inputs PackageMap,
     interner: &'inputs Interner,
-) -> impl Iterator<Item = anyhow::Result<(PackageRef, PathBuf)>> + 'inputs {
-    let package_paths = filter.iter().map(|pkg_ref| {
-        let pkg = packages
-            .get(pkg_ref)
-            .context("Failed to find package in package map")?;
-        // For deb ids[0] always exist and may contain the architecture if it is not the primary
-        let name = pkg.ids[0].to_str(interner);
-        // Get the full deb file name
-        let deb_filename = format_deb_filename(interner, pkg);
+) -> anyhow::Result<impl Iterator<Item = anyhow::Result<(PackageRef, PathBuf)>> + 'inputs> {
+    let intermediate: Vec<_> = filter
+        .iter()
+        .map(|pkg_ref| {
+            let pkg = packages
+                .get(pkg_ref)
+                .expect("Failed to find package in package map");
+            // For deb ids[0] always exist and may contain the architecture if it is not the primary
+            let name = pkg.ids[0].to_str(interner);
+            // Get the full deb file name
+            let deb_filename = format_deb_filename(interner, pkg);
 
-        let package_path = locate_package_file(&[CACHE_PATH], &deb_filename, name, download_deb)?;
-        // Error if we couldn't find the package
-        let package_path = package_path
-            .ok_or_else(|| anyhow::anyhow!("Failed to find or download package file for {name}"))?;
-        Ok((*pkg_ref, package_path))
-    });
+            (pkg_ref, name, deb_filename)
+        })
+        .collect();
 
-    package_paths
+    // Attempt to download all missing packages:
+    let missing = missing_packages(
+        &[CACHE_PATH],
+        intermediate.iter().map(|(_, name, deb)| PackageQuery {
+            package_match: deb,
+            package: name,
+        }),
+    )?;
+
+    if !missing.is_empty() {
+        log::info!("Downloading missing packages (installed but not in local cache)");
+        download_debs(&missing)?;
+    }
+
+    let package_paths = intermediate
+        .into_iter()
+        .map(|(pkg_ref, name, deb_filename)| {
+            let package_path =
+                locate_package_file(&[CACHE_PATH], &deb_filename, name, download_deb)?;
+            // Error if we couldn't find the package
+            let package_path = package_path.ok_or_else(|| {
+                anyhow::anyhow!("Failed to find or download package file for {name}")
+            })?;
+            Ok((*pkg_ref, package_path))
+        });
+
+    Ok(package_paths)
 }
 
 /// Convert deb archives to file entries
-fn archive_to_entries(pkg_ref: PackageRef, deb_file: &Path) -> anyhow::Result<Vec<FileEntry>> {
+fn archive_to_entries(
+    pkg_ref: PackageRef,
+    deb_file: &Path,
+    diversions: &divert::Diversions,
+) -> anyhow::Result<Vec<FileEntry>> {
+    log::debug!("Processing {}", deb_file.display());
     // The package is a .deb, which is actually an ar archive
     let package_file = File::open(deb_file)?;
     let mut archive = ar::Archive::new(package_file);
@@ -291,9 +340,29 @@ fn archive_to_entries(pkg_ref: PackageRef, deb_file: &Path) -> anyhow::Result<Ve
             let mut decompressed = CompressionFormat::from_extension(&extension, &mut entry)?;
             let archive = tar::Archive::new(&mut decompressed);
             // Now, lets extract the requested files from the package
-            return convert_archive_entries(archive, pkg_ref, NAME, |path| {
-                path.trim_start_matches('.').into()
-            });
+            let mut entries = convert_archive_entries(archive, pkg_ref, NAME, |path| {
+                let p = path
+                    .as_os_str()
+                    .as_encoded_bytes()
+                    .trim_start_with(|ch| ch == '.');
+                let p = if p != b"/" {
+                    p.trim_end_with(|ch| ch == '/')
+                } else {
+                    p
+                };
+                Some(Cow::Borrowed(p.to_path().expect("Invalid path")))
+            })?;
+
+            for entry in entries.iter_mut() {
+                // Apply diversions
+                if let Some(diversion) = diversions.get(&entry.path) {
+                    if Some(diversion.by_package) != entry.package {
+                        // This file is diverted
+                        entry.path.clone_from(&diversion.new_path);
+                    }
+                }
+            }
+            return Ok(entries);
         }
     }
     Err(anyhow::anyhow!("Failed to find data.tar in {deb_file:?}"))
@@ -528,9 +597,33 @@ impl Packages for Debian {
 
 impl FullBackend for Debian {}
 
+fn download_debs(pkgs: &[&str]) -> Result<(), anyhow::Error> {
+    let status = std::process::Command::new("apt-get")
+        .args([
+            "install",
+            "--reinstall",
+            "-y",
+            "--no-install-recommends",
+            "-d",
+        ])
+        .args(pkgs)
+        .status()?;
+    if !status.success() {
+        log::warn!("Failed to download package for {pkgs:?}");
+    };
+    Ok(())
+}
+
 fn download_deb(pkg: &str) -> Result<(), anyhow::Error> {
     let status = std::process::Command::new("apt-get")
-        .args(["install", "--reinstall", "-d", pkg])
+        .args([
+            "install",
+            "--reinstall",
+            "-y",
+            "--no-install-recommends",
+            "-d",
+            pkg,
+        ])
         .status()?;
     if !status.success() {
         log::warn!("Failed to download package for {pkg}");

@@ -5,4 +5,3 @@ pub mod files;
 pub mod intern;
 pub mod issue;
 pub mod package;
-mod utils;

@@ -163,15 +163,9 @@ impl std::fmt::Display for Gid {
 #[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
 #[non_exhaustive]
 pub enum Checksum {
-    #[cfg_attr(
-        feature = "serde",
-        serde(serialize_with = "crate::utils::buffer_to_hex")
-    )]
+    #[cfg_attr(feature = "serde", serde(with = "serde_bytes"))]
     Md5([u8; 16]),
-    #[cfg_attr(
-        feature = "serde",
-        serde(serialize_with = "crate::utils::buffer_to_hex")
-    )]
+    #[cfg_attr(feature = "serde", serde(with = "serde_bytes"))]
     Sha256([u8; 32]),
 }
 

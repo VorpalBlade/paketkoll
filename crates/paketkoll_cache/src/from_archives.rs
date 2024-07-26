@@ -80,7 +80,7 @@ pub struct FromArchiveCache {
 
 impl FromArchiveCache {
     pub fn from_path(inner: Box<dyn Files>, path: &Path) -> anyhow::Result<Self> {
-        let cache = DiskCacheBuilder::new(inner.name())
+        let cache = DiskCacheBuilder::new("from_archives")
             .set_refresh(true)
             .set_lifespan(60 * 60 * 24 * 15) // Half a month
             .set_disk_directory(path)
@@ -170,19 +170,30 @@ impl Files for FromArchiveCache {
             }
         }
         // Fetch uncached queries
-        let uncached_results =
-            self.inner
-                .files_from_archives(&uncached_queries, package_map, interner)?;
-
-        // Insert the uncached results into the cache and update the results
-        for (query, result) in uncached_results.into_iter() {
-            let cache_key = cache_keys.remove(&query).context("Cache key not found")?;
-            self.cache
-                .cache_set(cache_key, result.iter().map(Into::into).collect())
-                .context("Cache set failed")?;
-            results.push((query, result));
+        if !uncached_queries.is_empty() {
+            let uncached_results =
+                self.inner
+                    .files_from_archives(&uncached_queries, package_map, interner)?;
+            // Insert the uncached results into the cache and update the results
+            for (query, result) in uncached_results.into_iter() {
+                let cache_key = cache_keys.remove(&query).context("Cache key not found")?;
+                self.cache
+                    .cache_set(cache_key.clone(), result.iter().map(Into::into).collect())
+                    .with_context(|| {
+                        format!(
+                            "Cache set failed: pkg={} cache_key={}",
+                            query.to_str(interner),
+                            cache_key
+                        )
+                    })?;
+                results.push((query, result));
+            }
         }
 
         Ok(results)
+    }
+
+    fn prefer_files_from_archive(&self) -> bool {
+        self.inner.prefer_files_from_archive()
     }
 }

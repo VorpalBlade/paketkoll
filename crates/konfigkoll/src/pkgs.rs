@@ -10,6 +10,7 @@ use konfigkoll_types::PkgInstructions;
 use paketkoll_types::{
     backend::{Backend, PackageBackendMap, PackageMap, PackageMapMap},
     intern::Interner,
+    package::PackageInstallStatus,
 };
 
 #[tracing::instrument(skip_all)]
@@ -31,9 +32,11 @@ pub(crate) fn load_packages(
                         backend.name()
                     )
                 })
-                .map(|backend_pkgs| {
+                .map(|mut backend_pkgs| {
+                    // Because we can have partially installed packages on Debian...
+                    backend_pkgs.retain(|pkg| pkg.status == PackageInstallStatus::Installed);
                     let pkg_map = Arc::new(paketkoll_types::backend::packages_to_package_map(
-                        backend_pkgs.clone(),
+                        backend_pkgs.iter(),
                     ));
                     let pkg_instructions =
                         konfigkoll_core::conversion::convert_packages_to_pkg_instructions(

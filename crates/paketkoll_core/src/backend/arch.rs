@@ -1,6 +1,7 @@
 //! The Arch Linux (and derivatives) backend
 
 use std::{
+    borrow::Cow,
     collections::BTreeSet,
     io::BufReader,
     iter::once,
@@ -9,6 +10,7 @@ use std::{
 
 use ahash::AHashSet;
 use anyhow::Context;
+use bstr::{ByteSlice, ByteVec};
 use compact_str::format_compact;
 use dashmap::{DashMap, DashSet};
 use either::Either;
@@ -196,7 +198,7 @@ impl Files for ArchLinux {
 
             // Now, lets extract the requested files from the package
             extract_files(archive, &queries, &mut results, pkg, |path| {
-                format_compact!("/{path}")
+                Some(format_compact!("/{path}"))
             })?;
         }
 
@@ -209,8 +211,17 @@ impl Files for ArchLinux {
         package_map: &PackageMap,
         interner: &Interner,
     ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError> {
+        log::info!(
+            "Finding archives for {} packages (may take a while)",
+            filter.len()
+        );
         let archives =
             iterate_pkg_archives(filter, package_map, interner, &self.pacman_config.cache_dir);
+
+        log::info!(
+            "Loading files from {} archives (may take a while)",
+            filter.len()
+        );
         let results: anyhow::Result<Vec<_>> = archives
             .par_bridge()
             .map(|value| {
@@ -219,7 +230,6 @@ impl Files for ArchLinux {
             .collect();
 
         let results = results?;
-
         Ok(results)
     }
 }
@@ -257,8 +267,26 @@ fn archive_to_entries(pkg_ref: PackageRef, pkg_file: &Path) -> anyhow::Result<Ve
     let archive = tar::Archive::new(decompressed);
 
     // Now, lets extract the requested files from the package
-    convert_archive_entries(archive, pkg_ref, NAME, |path| format_compact!("/{path}"))
+    convert_archive_entries(archive, pkg_ref, NAME, |path| {
+        let path = path.as_os_str().as_encoded_bytes();
+        if SPECIAL_ARCHIVE_FILES.contains(path) {
+            None
+        } else {
+            let path = path.trim_end_with(|ch| ch == '/');
+            let path = bstr::concat([b"/", path]);
+            Some(Cow::Owned(path.into_path_buf().expect("Invalid path")))
+        }
+    })
 }
+
+/// Files to ignore when reading archives
+const SPECIAL_ARCHIVE_FILES: phf::Set<&'static [u8]> = phf::phf_set! {
+    b".BUILDINFO",
+    b".CHANGELOG",
+    b".PKGINFO",
+    b".INSTALL",
+    b".MTREE",
+};
 
 fn format_pkg_filename(interner: &Interner, package: &PackageInterned) -> String {
     format!(

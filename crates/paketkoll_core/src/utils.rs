@@ -155,6 +155,58 @@ pub(crate) fn locate_package_file(
     Ok(None)
 }
 
+pub(crate) struct PackageQuery<'a> {
+    pub(crate) package_match: &'a str,
+    pub(crate) package: &'a str,
+}
+
+/// Attempt to search a directory based cache and if not found, download the package
+#[cfg(feature = "__extraction")]
+pub(crate) fn missing_packages<'strings>(
+    dir_candidates: &[&str],
+    package_matches: impl Iterator<Item = PackageQuery<'strings>>,
+) -> Result<Vec<&'strings str>, anyhow::Error> {
+    let mut missing = vec![];
+    // Try to locate package
+    for PackageQuery {
+        package_match,
+        package,
+    } in package_matches
+    {
+        for dir in dir_candidates.iter() {
+            let path = format!("{}/{}", dir, package_match);
+            let entries = glob::glob_with(
+                &path,
+                glob::MatchOptions {
+                    case_sensitive: true,
+                    require_literal_separator: true,
+                    require_literal_leading_dot: true,
+                },
+            );
+            match entries {
+                Ok(paths) => {
+                    let mut paths: SmallVec<[_; 5]> = paths.collect::<Result<_, _>>()?;
+                    paths.sort();
+                    if paths.len() > 1 {
+                        log::warn!(
+                            "Found multiple matches for {package}, taking latest in sort order: {}",
+                            paths
+                                .last()
+                                .expect("We know there is at least one")
+                                .display()
+                        );
+                    }
+                    if paths.is_empty() {
+                        missing.push(package);
+                    }
+                }
+                Err(_) => continue,
+            }
+        }
+    }
+    Ok(missing)
+}
+
 /// Extract files from a generic tar archive
 #[cfg(feature = "__extraction")]
 pub(crate) fn extract_files(
@@ -162,7 +214,7 @@ pub(crate) fn extract_files(
     queries: &AHashSet<&str>,
     results: &mut AHashMap<paketkoll_types::backend::OriginalFileQuery, Vec<u8>>,
     pkg: &str,
-    name_mangler: impl Fn(&str) -> CompactString,
+    name_map_filter: impl Fn(&str) -> Option<CompactString>,
 ) -> Result<(), anyhow::Error> {
     let mut seen = AHashSet::new();
 
@@ -175,7 +227,10 @@ pub(crate) fn extract_files(
         let path = path
             .to_str()
             .ok_or_else(|| anyhow::anyhow!("Failed to convert path to string"))?;
-        let path = name_mangler(path);
+        let path = match name_map_filter(path) {
+            Some(v) => v,
+            None => continue,
+        };
         if let Some(pkg_idx) = queries.get(path.as_str()) {
             seen.insert(*pkg_idx);
             let mut contents = Vec::new();
@@ -211,7 +266,7 @@ pub(crate) fn convert_archive_entries(
     mut archive: tar::Archive<impl std::io::Read>,
     pkg_ref: paketkoll_types::intern::PackageRef,
     source: &'static str,
-    name_mangler: impl Fn(&str) -> CompactString,
+    name_map_filter: impl Fn(&std::path::Path) -> Option<std::borrow::Cow<'_, std::path::Path>>,
 ) -> Result<Vec<paketkoll_types::files::FileEntry>, anyhow::Error> {
     use std::time::SystemTime;
 
@@ -220,83 +275,109 @@ pub(crate) fn convert_archive_entries(
     };
     use paketkoll_utils::checksum::sha256_readable;
 
-    let mut results = vec![];
+    let mut results = AHashMap::new();
     for entry in archive
         .entries()
         .context("Failed to read package archive")?
     {
         let mut entry = entry?;
         let path = entry.path()?;
-        let path = path
-            .to_str()
-            .ok_or_else(|| anyhow::anyhow!("Failed to convert path to string"))?;
-        let path: PathBuf = name_mangler(path).into_string().into();
+        let path = path.as_ref();
+        let path = match name_map_filter(path) {
+            Some(v) => v.into_owned(),
+            None => continue,
+        };
         let mode = Mode::new(entry.header().mode()?);
         let owner = Uid::new(entry.header().uid()?.try_into()?);
         let group = Gid::new(entry.header().gid()?.try_into()?);
         match entry.header().entry_type() {
-            tar::EntryType::Regular
-            | tar::EntryType::Link
-            | tar::EntryType::Continuous
-            | tar::EntryType::GNUSparse
-            | tar::EntryType::GNULongName => {
-                let size = entry.header().size()?;
+            tar::EntryType::Regular | tar::EntryType::Continuous => {
+                let size = entry.size();
+                assert_eq!(size, entry.header().size()?);
                 let mtime = entry.header().mtime()?;
-                results.push(FileEntry {
-                    package: Some(pkg_ref),
-                    path,
-                    properties: Properties::RegularFile(RegularFile {
-                        mode,
-                        owner,
-                        group,
-                        size,
-                        mtime: SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(mtime),
-                        checksum: sha256_readable(&mut entry)?,
-                    }),
-                    flags: FileFlags::empty(),
-                    source,
-                    seen: Default::default(),
-                });
+                results.insert(
+                    path.clone(),
+                    FileEntry {
+                        package: Some(pkg_ref),
+                        path,
+                        properties: Properties::RegularFile(RegularFile {
+                            mode,
+                            owner,
+                            group,
+                            size,
+                            mtime: SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(mtime),
+                            checksum: sha256_readable(&mut entry)?,
+                        }),
+                        flags: FileFlags::empty(),
+                        source,
+                        seen: Default::default(),
+                    },
+                );
             }
-            tar::EntryType::Symlink | tar::EntryType::GNULongLink => {
+            tar::EntryType::Link | tar::EntryType::GNULongLink => {
+                let link = entry.link_name()?.expect("No link name");
+                let link = name_map_filter(link.as_ref())
+                    .expect("Filtered link name")
+                    .into_owned();
+                let existing = results
+                    .get(&link)
+                    .expect("Links must refer to already archived files");
+                let mut new = existing.clone();
+                new.path = path.clone();
+                results.insert(path.clone(), new);
+            }
+            tar::EntryType::Symlink => {
                 let link = entry.link_name()?;
-                results.push(FileEntry {
-                    package: Some(pkg_ref),
-                    path,
-                    properties: Properties::Symlink(Symlink {
-                        owner,
-                        group,
-                        target: link
-                            .ok_or(anyhow::anyhow!("Failed to get link target"))?
-                            .into(),
-                    }),
-                    flags: FileFlags::empty(),
-                    source,
-                    seen: Default::default(),
-                });
+                results.insert(
+                    path.clone(),
+                    FileEntry {
+                        package: Some(pkg_ref),
+                        path,
+                        properties: Properties::Symlink(Symlink {
+                            owner,
+                            group,
+                            target: link
+                                .ok_or(anyhow::anyhow!("Failed to get link target"))?
+                                .into(),
+                        }),
+                        flags: FileFlags::empty(),
+                        source,
+                        seen: Default::default(),
+                    },
+                );
             }
             tar::EntryType::Char | tar::EntryType::Block | tar::EntryType::Fifo => {
-                results.push(FileEntry {
-                    package: Some(pkg_ref),
-                    path,
-                    properties: Properties::Special,
-                    flags: FileFlags::empty(),
-                    source,
-                    seen: Default::default(),
-                });
+                results.insert(
+                    path.clone(),
+                    FileEntry {
+                        package: Some(pkg_ref),
+                        path,
+                        properties: Properties::Special,
+                        flags: FileFlags::empty(),
+                        source,
+                        seen: Default::default(),
+                    },
+                );
             }
-            tar::EntryType::Directory => results.push(FileEntry {
-                package: Some(pkg_ref),
-                path,
-                properties: Properties::Directory(Directory { mode, owner, group }),
-                flags: FileFlags::empty(),
-                source,
-                seen: Default::default(),
-            }),
-            tar::EntryType::XGlobalHeader => todo!(),
-            tar::EntryType::XHeader => todo!(),
+            tar::EntryType::Directory => {
+                results.insert(
+                    path.clone(),
+                    FileEntry {
+                        package: Some(pkg_ref),
+                        path,
+                        properties: Properties::Directory(Directory { mode, owner, group }),
+                        flags: FileFlags::empty(),
+                        source,
+                        seen: Default::default(),
+                    },
+                );
+            }
+            tar::EntryType::GNUSparse
+            | tar::EntryType::GNULongName
+            | tar::EntryType::XGlobalHeader
+            | tar::EntryType::XHeader => todo!(),
             _ => todo!(),
         }
     }
-    Ok(results)
+    Ok(results.into_values().collect())
 }

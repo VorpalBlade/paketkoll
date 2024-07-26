@@ -63,6 +63,7 @@ tokio = { workspace = true, features = [
 tracing-log.workspace = true
 tracing-subscriber = { workspace = true, features = ["env-filter", "parking_lot"] }
 tracing.workspace = true
+dashmap.workspace = true
 
 [target.'cfg(target_env = "musl")'.dependencies]
 # The allocator on musl is attrociously slow, so we use a custom one.

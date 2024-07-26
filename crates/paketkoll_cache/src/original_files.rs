@@ -50,7 +50,7 @@ pub struct OriginalFilesCache {
 
 impl OriginalFilesCache {
     pub fn from_path(inner: Box<dyn Files>, path: &Path) -> anyhow::Result<Self> {
-        let cache = DiskCacheBuilder::new(inner.name())
+        let cache = DiskCacheBuilder::new("original_files")
             .set_refresh(true)
             .set_lifespan(60 * 60 * 24 * 30) // A month
             .set_disk_directory(path)
@@ -152,5 +152,9 @@ impl Files for OriginalFilesCache {
     ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError> {
         self.inner
             .files_from_archives(filter, package_map, interner)
+    }
+
+    fn prefer_files_from_archive(&self) -> bool {
+        self.inner.prefer_files_from_archive()
     }
 }

@@ -4,7 +4,10 @@ use std::sync::Arc;
 
 use anyhow::Context;
 use compact_str::CompactString;
+use dashmap::DashMap;
+use itertools::Itertools;
 use ouroboros::self_referencing;
+use rayon::prelude::*;
 
 use konfigkoll_types::FsInstruction;
 use paketkoll_core::config::{
@@ -13,7 +16,7 @@ use paketkoll_core::config::{
 use paketkoll_core::file_ops::{
     canonicalize_file_entries, create_path_map, mismatching_and_unexpected_files,
 };
-use paketkoll_types::backend::Files;
+use paketkoll_types::backend::{Files, PackageMap};
 use paketkoll_types::files::FileEntry;
 use paketkoll_types::files::PathMap;
 use paketkoll_types::intern::Interner;
@@ -30,17 +33,31 @@ pub(crate) struct ScanResult {
 pub(crate) fn scan_fs(
     interner: &Arc<Interner>,
     backend: &Arc<dyn Files>,
+    package_map: &PackageMap,
     ignores: &[CompactString],
     trust_mtime: bool,
 ) -> anyhow::Result<(ScanResult, Vec<FsInstruction>)> {
     tracing::debug!("Scanning filesystem");
     let mut fs_instructions_sys = vec![];
-    let mut files = backend.files(interner).with_context(|| {
-        format!(
-            "Failed to collect information from backend {}",
-            backend.name()
-        )
-    })?;
+    let mut files = if backend.prefer_files_from_archive() {
+        let all = package_map.keys().cloned().collect::<Vec<_>>();
+        let files = backend.files_from_archives(&all, package_map, interner)?;
+        let file_map = DashMap::new();
+        files
+            .into_par_iter()
+            .flat_map_iter(|(_pkg, files)| files)
+            .for_each(|entry| {
+                file_map.insert(entry.path.clone(), entry);
+            });
+        file_map.into_iter().map(|(_, v)| v).collect_vec()
+    } else {
+        backend.files(interner).with_context(|| {
+            format!(
+                "Failed to collect information from backend {}",
+                backend.name()
+            )
+        })?
+    };
     if backend.may_need_canonicalization() {
         tracing::debug!("Canonicalizing file entries");
         canonicalize_file_entries(&mut files);

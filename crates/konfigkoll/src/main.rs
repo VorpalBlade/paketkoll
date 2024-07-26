@@ -21,6 +21,7 @@ use konfigkoll_core::state::DiffGoal;
 use konfigkoll_script::Phase;
 #[cfg(target_env = "musl")]
 use mimalloc::MiMalloc;
+use paketkoll_cache::FromArchiveCache;
 use paketkoll_cache::OriginalFilesCache;
 use paketkoll_core::backend::ConcreteBackend;
 use paketkoll_core::paketkoll_types::intern::Interner;
@@ -118,8 +119,19 @@ async fn main() -> anyhow::Result<()> {
         let backend = b
             .create_files(&backend_cfg, &interner)
             .with_context(|| format!("Failed to create backend {b}"))?;
+        let backend = if backend.prefer_files_from_archive() {
+            tracing::info!("Using archive cache for backend {}", backend.name());
+            // This is slow so we need to cache it
+            Box::new(
+                FromArchiveCache::from_path(backend, proj_dirs.cache_dir())
+                    .context("Failed to create archive disk cache")?,
+            )
+        } else {
+            // This is fast so we don't need to cache it
+            backend
+        };
         let backend = OriginalFilesCache::from_path(backend, proj_dirs.cache_dir())
-            .context("Failed to create disk cache")?;
+            .context("Failed to create original files disk cache")?;
         Arc::new(backend)
     };
 
@@ -132,6 +144,10 @@ async fn main() -> anyhow::Result<()> {
     };
     // Script: Get FS ignores
     script_engine.run_phase(Phase::Ignores).await?;
+
+    tracing::info!("Waiting for package loading results...");
+    let (pkgs_sys, package_maps) = package_loader.await??;
+    tracing::info!("Got package loading results");
 
     // Do FS scan
     tracing::info!("Starting filesystem scan background job");
@@ -146,17 +162,23 @@ async fn main() -> anyhow::Result<()> {
         let trust_mtime = cli.trust_mtime;
         let interner = interner.clone();
         let backends_files = backend_files.clone();
+        let package_map = package_maps
+            .get(&backend_files.as_backend_enum())
+            .expect("No matching package backend?")
+            .clone();
         tokio::task::spawn_blocking(move || {
-            fs_scan::scan_fs(&interner, &backends_files, &ignores, trust_mtime)
+            fs_scan::scan_fs(
+                &interner,
+                &backends_files,
+                &package_map,
+                &ignores,
+                trust_mtime,
+            )
         })
     };
 
     // Script: Do early package phase
     script_engine.run_phase(Phase::ScriptDependencies).await?;
-
-    tracing::info!("Waiting for package loading results...");
-    let (pkgs_sys, package_maps) = package_loader.await??;
-    tracing::info!("Got package loading results");
 
     // Create the set of package managers for use by the script
     script_engine.state_mut().setup_package_managers(

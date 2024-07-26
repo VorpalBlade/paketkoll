@@ -76,6 +76,12 @@ pub trait Files: Name {
         false
     }
 
+    /// True if this backend may benefit from path canonicalization for certain scans
+    /// (i.e. paths may be inaccurate)
+    fn prefer_files_from_archive(&self) -> bool {
+        false
+    }
+
     /// Find the owners of the specified files
     fn owning_packages(
         &self,
@@ -109,7 +115,7 @@ pub trait Packages: Name {
         let packages = self
             .packages(interner)
             .with_context(|| anyhow!("Failed to load package list"))?;
-        Ok(packages_to_package_map(packages))
+        Ok(packages_to_package_map(packages.iter()))
     }
 
     /// Perform installation and uninstallation of a bunch of packages
@@ -143,12 +149,14 @@ pub enum PackageManagerError {
 }
 
 /// Convert a package vector to a package map
-pub fn packages_to_package_map(packages: Vec<PackageInterned>) -> PackageMap {
+pub fn packages_to_package_map<'a>(
+    packages: impl Iterator<Item = &'a PackageInterned>,
+) -> PackageMap {
     let mut package_map =
-        AHashMap::with_capacity_and_hasher(packages.len(), ahash::RandomState::new());
-    for package in packages.into_iter() {
+        AHashMap::with_capacity_and_hasher(packages.size_hint().0, ahash::RandomState::new());
+    for package in packages {
         if package.ids.is_empty() {
-            package_map.insert(package.name, package);
+            package_map.insert(package.name, package.clone());
         } else {
             for id in &package.ids {
                 package_map.insert(*id, package.clone());

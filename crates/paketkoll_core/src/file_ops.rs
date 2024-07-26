@@ -299,7 +299,11 @@ pub fn canonicalize_file_entries(results: &mut Vec<FileEntry>) {
                     }
                 }
             }
-            (None, _) => log::error!("Failed to resolve parent of path: {:?}", file_entry.path),
+            (None, _) => log::error!(
+                "Failed to resolve parent of path: {:?}: {:?}",
+                file_entry.path,
+                file_entry
+            ),
             (_, None) => {
                 log::error!("Failed to resolve filenameI of path: {:?}", file_entry.path);
             }

@@ -18,7 +18,10 @@ cached = { workspace = true, features = [
 ], default-features = false }
 compact_str.workspace = true
 dashmap.workspace = true
-paketkoll_types = { version = "0.1.0", path = "../paketkoll_types" }
+paketkoll_types = { version = "0.1.0", path = "../paketkoll_types", features = [
+    "serde",
+] }
+rayon.workspace = true
 serde = { workspace = true, features = ["derive"] }
 tracing.workspace = true
 
