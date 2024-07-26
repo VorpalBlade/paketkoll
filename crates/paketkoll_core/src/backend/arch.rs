@@ -22,7 +22,8 @@ use paketkoll_types::{files::FileEntry, intern::PackageRef};
 use paketkoll_types::{intern::Interner, package::PackageInterned};
 
 use crate::utils::{
-    extract_files, group_queries_by_pkg, locate_package_file, package_manager_transaction,
+    convert_archive_entries, extract_files, group_queries_by_pkg, locate_package_file,
+    package_manager_transaction,
 };
 
 use super::{FullBackend, PackageFilter};
@@ -201,21 +202,81 @@ impl Files for ArchLinux {
 
         Ok(results)
     }
+
+    fn files_from_archives(
+        &self,
+        filter: &[PackageRef],
+        package_map: &PackageMap,
+        interner: &Interner,
+    ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError> {
+        let archives =
+            iterate_pkg_archives(filter, package_map, interner, &self.pacman_config.cache_dir);
+        let results: anyhow::Result<Vec<_>> = archives
+            .par_bridge()
+            .map(|value| {
+                value.and_then(|(pkg_ref, path)| Ok((pkg_ref, archive_to_entries(pkg_ref, &path)?)))
+            })
+            .collect();
+
+        let results = results?;
+
+        Ok(results)
+    }
+}
+
+/// Find all pkg archives for the given packages
+fn iterate_pkg_archives<'inputs>(
+    filter: &'inputs [PackageRef],
+    packages: &'inputs PackageMap,
+    interner: &'inputs Interner,
+    cache_dir: &'inputs str,
+) -> impl Iterator<Item = anyhow::Result<(PackageRef, PathBuf)>> + 'inputs {
+    let package_paths = filter.iter().map(|pkg_ref| {
+        let pkg = packages
+            .get(pkg_ref)
+            .context("Failed to find package in package map")?;
+        let name = pkg.name.to_str(interner);
+        // Get the full file name
+        let filename = format_pkg_filename(interner, pkg);
+
+        let package_path = locate_package_file(&[cache_dir], &filename, name, download_arch_pkg)?;
+        // Error if we couldn't find the package
+        let package_path = package_path
+            .ok_or_else(|| anyhow::anyhow!("Failed to find or download package file for {name}"))?;
+        Ok((*pkg_ref, package_path))
+    });
+
+    package_paths
+}
+
+/// Convert deb archives to file entries
+fn archive_to_entries(pkg_ref: PackageRef, pkg_file: &Path) -> anyhow::Result<Vec<FileEntry>> {
+    // The package is a .tar.zst
+    let package_file = std::fs::File::open(pkg_file)?;
+    let decompressed = zstd::Decoder::new(package_file)?;
+    let archive = tar::Archive::new(decompressed);
+
+    // Now, lets extract the requested files from the package
+    convert_archive_entries(archive, pkg_ref, NAME, |path| format_compact!("/{path}"))
+}
+
+fn format_pkg_filename(interner: &Interner, package: &PackageInterned) -> String {
+    format!(
+        "{}-{}-{}.pkg.tar.zst",
+        package.name.to_str(interner),
+        package.version,
+        package
+            .architecture
+            .map(|e| e.to_str(interner))
+            .unwrap_or("*")
+    )
 }
 
 fn guess_pkg_file_name(interner: &Interner, pkg: &str, packages: &PackageMap) -> String {
     let package_match = if let Some(pkgref) = interner.get(pkg) {
         // Yay, it is probably installed, we know what to look for
         if let Some(package) = packages.get(&PackageRef::new(pkgref)) {
-            format!(
-                "{}-{}-{}.pkg.tar.zst",
-                pkg,
-                package.version,
-                package
-                    .architecture
-                    .map(|e| e.to_str(interner))
-                    .unwrap_or("*")
-            )
+            format_pkg_filename(interner, package)
         } else {
             format!("{}-*-*.pkg.tar.zst", pkg)
         }

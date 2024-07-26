@@ -20,8 +20,8 @@ use paketkoll_types::package::PackageInterned;
 
 use crate::backend::PackageFilter;
 use crate::utils::{
-    extract_files, group_queries_by_pkg, locate_package_file, package_manager_transaction,
-    CompressionFormat,
+    convert_archive_entries, extract_files, group_queries_by_pkg, locate_package_file,
+    package_manager_transaction, CompressionFormat,
 };
 
 use super::FullBackend;
@@ -159,7 +159,7 @@ impl Files for Debian {
         let re = RegexSet::new(paths)?;
 
         std::fs::read_dir(db_root)
-            .context("Failed to read pacman database directory")?
+            .context("Failed to read dpkg database directory")?
             .par_bridge()
             .for_each(|entry| {
                 if let Ok(entry) = entry {
@@ -227,6 +227,89 @@ impl Files for Debian {
 
         Ok(results)
     }
+
+    fn files_from_archives(
+        &self,
+        filter: &[PackageRef],
+        package_map: &PackageMap,
+        interner: &Interner,
+    ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError> {
+        let archives = iterate_deb_archives(filter, package_map, interner);
+        let results: anyhow::Result<Vec<_>> = archives
+            .par_bridge()
+            .map(|value| {
+                value.and_then(|(pkg_ref, path)| Ok((pkg_ref, archive_to_entries(pkg_ref, &path)?)))
+            })
+            .collect();
+
+        let results = results?;
+
+        Ok(results)
+    }
+}
+
+/// Find all deb archives for the given packages
+fn iterate_deb_archives<'inputs>(
+    filter: &'inputs [PackageRef],
+    packages: &'inputs PackageMap,
+    interner: &'inputs Interner,
+) -> impl Iterator<Item = anyhow::Result<(PackageRef, PathBuf)>> + 'inputs {
+    let package_paths = filter.iter().map(|pkg_ref| {
+        let pkg = packages
+            .get(pkg_ref)
+            .context("Failed to find package in package map")?;
+        // For deb ids[0] always exist and may contain the architecture if it is not the primary
+        let name = pkg.ids[0].to_str(interner);
+        // Get the full deb file name
+        let deb_filename = format_deb_filename(interner, pkg);
+
+        let package_path = locate_package_file(&[CACHE_PATH], &deb_filename, name, download_deb)?;
+        // Error if we couldn't find the package
+        let package_path = package_path
+            .ok_or_else(|| anyhow::anyhow!("Failed to find or download package file for {name}"))?;
+        Ok((*pkg_ref, package_path))
+    });
+
+    package_paths
+}
+
+/// Convert deb archives to file entries
+fn archive_to_entries(pkg_ref: PackageRef, deb_file: &Path) -> anyhow::Result<Vec<FileEntry>> {
+    // The package is a .deb, which is actually an ar archive
+    let package_file = File::open(deb_file)?;
+    let mut archive = ar::Archive::new(package_file);
+
+    // We want the data.tar.xz file (or other compression scheme)
+    while let Some(entry) = archive.next_entry() {
+        let mut entry = entry?;
+        if entry.header().identifier().starts_with(b"data.tar") {
+            let extension: CompactString = std::str::from_utf8(entry.header().identifier())?
+                .split('.')
+                .last()
+                .ok_or_else(|| anyhow::anyhow!("No file extension found"))?
+                .into();
+            let mut decompressed = CompressionFormat::from_extension(&extension, &mut entry)?;
+            let archive = tar::Archive::new(&mut decompressed);
+            // Now, lets extract the requested files from the package
+            return convert_archive_entries(archive, pkg_ref, NAME, |path| {
+                path.trim_start_matches('.').into()
+            });
+        }
+    }
+    Err(anyhow::anyhow!("Failed to find data.tar in {deb_file:?}"))
+}
+
+/// Given a package name, try to figure out the full deb file name
+fn format_deb_filename(interner: &Interner, package: &PackageInterned) -> String {
+    format!(
+        "{}_{}_{}.deb",
+        package.name.to_str(interner),
+        package.version.replace(':', "%3a"),
+        package
+            .architecture
+            .map(|e| e.to_str(interner))
+            .unwrap_or("*")
+    )
 }
 
 /// Given a package name, try to figure out the full deb file name
@@ -234,15 +317,7 @@ fn guess_deb_file_name(interner: &Interner, pkg: &str, packages: &PackageMap) ->
     if let Some(pkgref) = interner.get(pkg) {
         // Yay, it is probably installed, we know what to look for
         if let Some(package) = packages.get(&PackageRef::new(pkgref)) {
-            format!(
-                "{}_{}_{}.deb",
-                pkg,
-                package.version.replace(':', "%3a"),
-                package
-                    .architecture
-                    .map(|e| e.to_str(interner))
-                    .unwrap_or("*")
-            )
+            format_deb_filename(interner, package)
         } else {
             format!("{}_*_*.deb", pkg)
         }
@@ -446,7 +521,7 @@ impl Packages for Debian {
     }
 }
 
-// To get the original package file itno the cache: apt install --reinstall -d pkgname
+// To get the original package file into the cache: apt install --reinstall -d pkgname
 // /var/cache/apt/archives/pkgname_version_arch.deb
 // arch: all, amd64, arm64, ...
 // Epoch separator (normally :) is now %3a (URL encoded)

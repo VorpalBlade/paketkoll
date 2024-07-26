@@ -12,6 +12,8 @@ use cached::IOCached;
 use compact_str::format_compact;
 use compact_str::CompactString;
 
+use paketkoll_types::backend::PackageManagerError;
+use paketkoll_types::files::FileEntry;
 use paketkoll_types::{
     backend::{Backend, Files, Name, OriginalFileQuery, PackageMap},
     intern::{Interner, PackageRef},
@@ -76,7 +78,7 @@ impl Name for OriginalFilesCache {
 }
 
 impl Files for OriginalFilesCache {
-    fn files(&self, interner: &Interner) -> anyhow::Result<Vec<paketkoll_types::files::FileEntry>> {
+    fn files(&self, interner: &Interner) -> anyhow::Result<Vec<FileEntry>> {
         self.inner.files(interner)
     }
 
@@ -151,5 +153,15 @@ impl Files for OriginalFilesCache {
         }
 
         Ok(results)
+    }
+
+    fn files_from_archives(
+        &self,
+        filter: &[PackageRef],
+        package_map: &PackageMap,
+        interner: &Interner,
+    ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError> {
+        self.inner
+            .files_from_archives(filter, package_map, interner)
     }
 }

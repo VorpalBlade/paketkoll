@@ -162,7 +162,7 @@ pub(crate) fn extract_files(
     queries: &AHashSet<&str>,
     results: &mut AHashMap<paketkoll_types::backend::OriginalFileQuery, Vec<u8>>,
     pkg: &str,
-    name_manger: impl Fn(&str) -> CompactString,
+    name_mangler: impl Fn(&str) -> CompactString,
 ) -> Result<(), anyhow::Error> {
     let mut seen = AHashSet::new();
 
@@ -175,7 +175,7 @@ pub(crate) fn extract_files(
         let path = path
             .to_str()
             .ok_or_else(|| anyhow::anyhow!("Failed to convert path to string"))?;
-        let path = name_manger(path);
+        let path = name_mangler(path);
         if let Some(pkg_idx) = queries.get(path.as_str()) {
             seen.insert(*pkg_idx);
             let mut contents = Vec::new();
@@ -203,4 +203,100 @@ pub(crate) fn extract_files(
         anyhow::bail!("Failed to find requested files in package {pkg}");
     };
     Ok(())
+}
+
+/// Convert a stream of tar entries to a list of file entries
+#[cfg(feature = "__extraction")]
+pub(crate) fn convert_archive_entries(
+    mut archive: tar::Archive<impl std::io::Read>,
+    pkg_ref: paketkoll_types::intern::PackageRef,
+    source: &'static str,
+    name_mangler: impl Fn(&str) -> CompactString,
+) -> Result<Vec<paketkoll_types::files::FileEntry>, anyhow::Error> {
+    use std::time::SystemTime;
+
+    use paketkoll_types::files::{
+        Directory, FileEntry, FileFlags, Gid, Mode, Properties, RegularFile, Symlink, Uid,
+    };
+    use paketkoll_utils::checksum::sha256_readable;
+
+    let mut results = vec![];
+    for entry in archive
+        .entries()
+        .context("Failed to read package archive")?
+    {
+        let mut entry = entry?;
+        let path = entry.path()?;
+        let path = path
+            .to_str()
+            .ok_or_else(|| anyhow::anyhow!("Failed to convert path to string"))?;
+        let path: PathBuf = name_mangler(path).into_string().into();
+        let mode = Mode::new(entry.header().mode()?);
+        let owner = Uid::new(entry.header().uid()?.try_into()?);
+        let group = Gid::new(entry.header().gid()?.try_into()?);
+        match entry.header().entry_type() {
+            tar::EntryType::Regular
+            | tar::EntryType::Link
+            | tar::EntryType::Continuous
+            | tar::EntryType::GNUSparse
+            | tar::EntryType::GNULongName => {
+                let size = entry.header().size()?;
+                let mtime = entry.header().mtime()?;
+                results.push(FileEntry {
+                    package: Some(pkg_ref),
+                    path,
+                    properties: Properties::RegularFile(RegularFile {
+                        mode,
+                        owner,
+                        group,
+                        size,
+                        mtime: SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(mtime),
+                        checksum: sha256_readable(&mut entry)?,
+                    }),
+                    flags: FileFlags::empty(),
+                    source,
+                    seen: Default::default(),
+                });
+            }
+            tar::EntryType::Symlink | tar::EntryType::GNULongLink => {
+                let link = entry.link_name()?;
+                results.push(FileEntry {
+                    package: Some(pkg_ref),
+                    path,
+                    properties: Properties::Symlink(Symlink {
+                        owner,
+                        group,
+                        target: link
+                            .ok_or(anyhow::anyhow!("Failed to get link target"))?
+                            .into(),
+                    }),
+                    flags: FileFlags::empty(),
+                    source,
+                    seen: Default::default(),
+                });
+            }
+            tar::EntryType::Char | tar::EntryType::Block | tar::EntryType::Fifo => {
+                results.push(FileEntry {
+                    package: Some(pkg_ref),
+                    path,
+                    properties: Properties::Special,
+                    flags: FileFlags::empty(),
+                    source,
+                    seen: Default::default(),
+                });
+            }
+            tar::EntryType::Directory => results.push(FileEntry {
+                package: Some(pkg_ref),
+                path,
+                properties: Properties::Directory(Directory { mode, owner, group }),
+                flags: FileFlags::empty(),
+                source,
+                seen: Default::default(),
+            }),
+            tar::EntryType::XGlobalHeader => todo!(),
+            tar::EntryType::XHeader => todo!(),
+            _ => todo!(),
+        }
+    }
+    Ok(results)
 }

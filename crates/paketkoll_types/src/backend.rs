@@ -60,6 +60,16 @@ pub trait Files: Name {
     /// any available metadata such as checksums or timestamps about those files
     fn files(&self, interner: &Interner) -> anyhow::Result<Vec<FileEntry>>;
 
+    /// Attempt to get file information from archives in the package cache (if supported)
+    ///
+    /// Additional archives may be downloaded if needed.
+    fn files_from_archives(
+        &self,
+        filter: &[PackageRef],
+        package_map: &PackageMap,
+        interner: &Interner,
+    ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError>;
+
     /// True if this backend may benefit from path canonicalization for certain scans
     /// (i.e. paths may be inaccurate)
     fn may_need_canonicalization(&self) -> bool {
@@ -121,7 +131,7 @@ pub trait Packages: Name {
     fn remove_unused(&self, ask_confirmation: bool) -> Result<(), PackageManagerError>;
 }
 
-/// Errors that package manager transactions can produce
+/// Errors that backends can produce
 #[derive(Debug, thiserror::Error)]
 pub enum PackageManagerError {
     /// This operation isn't supported by this backend

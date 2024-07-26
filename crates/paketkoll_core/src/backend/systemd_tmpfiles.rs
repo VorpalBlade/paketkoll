@@ -12,11 +12,14 @@ use ahash::AHashMap;
 use anyhow::Context;
 use compact_str::CompactString;
 
-use paketkoll_types::backend::PackageMap;
 use paketkoll_types::backend::{Files, Name, OriginalFileQuery};
 use paketkoll_types::files::{
     Checksum, DeviceNode, DeviceType, Directory, Fifo, FileEntry, FileFlags, Gid, Mode,
     Permissions, Properties, RegularFile, RegularFileBasic, RegularFileSystemd, Symlink, Uid,
+};
+use paketkoll_types::{
+    backend::{PackageManagerError, PackageMap},
+    intern::{Interner, PackageRef},
 };
 use paketkoll_utils::checksum::{sha256_buffer, sha256_readable};
 use paketkoll_utils::MODE_MASK;
@@ -93,6 +96,17 @@ impl Files for SystemdTmpfiles {
         _interner: &paketkoll_types::intern::Interner,
     ) -> anyhow::Result<AHashMap<OriginalFileQuery, Vec<u8>>> {
         anyhow::bail!("Original file queries are not supported for systemd-tmpfiles")
+    }
+
+    fn files_from_archives(
+        &self,
+        _filter: &[PackageRef],
+        _package_map: &PackageMap,
+        _interner: &Interner,
+    ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError> {
+        Err(PackageManagerError::UnsupportedOperation(
+            "Operation not supported for systemd-tmpfiles",
+        ))
     }
 }
 
