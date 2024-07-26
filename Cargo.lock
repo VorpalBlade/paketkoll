@@ -1716,6 +1716,7 @@ dependencies = [
  "compact_str",
  "dashmap 6.0.1",
  "paketkoll_types",
+ "serde",
  "tracing",
 ]
 

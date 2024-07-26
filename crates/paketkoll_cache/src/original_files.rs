@@ -9,7 +9,6 @@ use anyhow::Context;
 use cached::stores::DiskCacheBuilder;
 use cached::DiskCache;
 use cached::IOCached;
-use compact_str::format_compact;
 use compact_str::CompactString;
 
 use paketkoll_types::backend::PackageManagerError;
@@ -18,6 +17,8 @@ use paketkoll_types::{
     backend::{Backend, Files, Name, OriginalFileQuery, PackageMap},
     intern::{Interner, PackageRef},
 };
+
+use crate::utils::format_package;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct CacheKey {
@@ -110,19 +111,7 @@ impl Files for OriginalFilesCache {
             // Resolve exact version and ID of packages from the package map
             let cache_key = match packages.get(&PackageRef::get_or_intern(interner, &query.package))
             {
-                Some(p) => {
-                    let ids = p.ids.iter().map(|v| v.to_str(interner));
-                    let ids = ids.collect::<Vec<_>>().join("#");
-                    format_compact!(
-                        "{}:{}:{}:{}",
-                        query.package,
-                        p.architecture
-                            .map(|v| v.to_str(interner))
-                            .unwrap_or_default(),
-                        p.version,
-                        ids
-                    )
-                }
+                Some(p) => format_package(p, interner),
                 None => {
                     tracing::warn!("Package not found: {}", query.package);
                     uncached_queries.push(query.clone());
@@ -147,8 +136,8 @@ impl Files for OriginalFilesCache {
 
         // Insert the uncached results into the cache and update the results
         for (query, result) in uncached_results.into_iter() {
-            let cache_key = cache_keys.get(&query).context("Cache key not found")?;
-            self.cache.cache_set(cache_key.clone(), result.clone())?;
+            let cache_key = cache_keys.remove(&query).context("Cache key not found")?;
+            self.cache.cache_set(cache_key, result.clone())?;
             results.insert(query, result);
         }
 

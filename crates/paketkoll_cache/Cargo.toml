@@ -19,6 +19,7 @@ cached = { workspace = true, features = [
 compact_str.workspace = true
 dashmap.workspace = true
 paketkoll_types = { version = "0.1.0", path = "../paketkoll_types" }
+serde = { workspace = true, features = ["derive"] }
 tracing.workspace = true
 
 [lints]
