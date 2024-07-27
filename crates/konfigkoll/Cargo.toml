@@ -64,6 +64,7 @@ tracing-log.workspace = true
 tracing-subscriber = { workspace = true, features = ["env-filter", "parking_lot"] }
 tracing.workspace = true
 dashmap.workspace = true
+konfigkoll_utils = { version = "0.1.0", path = "../konfigkoll_utils" }
 
 [target.'cfg(target_env = "musl")'.dependencies]
 # The allocator on musl is attrociously slow, so we use a custom one.

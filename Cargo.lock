@@ -1118,6 +1118,7 @@ dependencies = [
  "konfigkoll_core",
  "konfigkoll_script",
  "konfigkoll_types",
+ "konfigkoll_utils",
  "mimalloc",
  "ouroboros",
  "paketkoll_cache",
@@ -1146,6 +1147,7 @@ dependencies = [
  "indoc",
  "itertools 0.13.0",
  "konfigkoll_types",
+ "konfigkoll_utils",
  "libc",
  "nix",
  "paketkoll_types",
@@ -1183,9 +1185,9 @@ dependencies = [
  "glob",
  "indoc",
  "itertools 0.13.0",
- "konfigkoll_core",
  "konfigkoll_hwinfo",
  "konfigkoll_types",
+ "konfigkoll_utils",
  "nix",
  "paketkoll_core",
  "paketkoll_types",
@@ -1218,6 +1220,16 @@ dependencies = [
  "paketkoll_types",
  "paketkoll_utils",
  "strum",
+]
+
+[[package]]
+name = "konfigkoll_utils"
+version = "0.1.0"
+dependencies = [
+ "camino",
+ "compact_str",
+ "regex",
+ "tracing",
 ]
 
 [[package]]

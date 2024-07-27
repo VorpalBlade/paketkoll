@@ -13,7 +13,7 @@ use rune::{
 #[derive(Debug, Default, Any)]
 #[rune(item = ::patch)]
 struct LineEditor {
-    inner: Rc<RefCell<konfigkoll_core::line_edit::EditProgram>>,
+    inner: Rc<RefCell<konfigkoll_utils::line_edit::EditProgram>>,
 }
 
 impl LineEditor {
@@ -84,7 +84,7 @@ enum Selector {
     Function(#[rune(get)] Shared<rune::runtime::Function>),
 }
 
-impl TryFrom<&Selector> for konfigkoll_core::line_edit::Selector {
+impl TryFrom<&Selector> for konfigkoll_utils::line_edit::Selector {
     type Error = anyhow::Error;
 
     fn try_from(value: &Selector) -> Result<Self, Self::Error> {
@@ -168,7 +168,7 @@ impl Action {
     }
 }
 
-impl TryFrom<&Action> for konfigkoll_core::line_edit::Action {
+impl TryFrom<&Action> for konfigkoll_utils::line_edit::Action {
     type Error = anyhow::Error;
 
     fn try_from(value: &Action) -> Result<Self, Self::Error> {

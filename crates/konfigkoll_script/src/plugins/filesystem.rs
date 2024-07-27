@@ -10,7 +10,7 @@ use rune::{
     vm_write, Any, ContextError, Module,
 };
 
-use konfigkoll_core::utils::safe_path_join;
+use konfigkoll_utils::safe_path_join;
 
 use crate::engine::CFG_PATH;
 

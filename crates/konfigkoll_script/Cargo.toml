@@ -24,11 +24,11 @@ camino.workspace = true
 compact_str.workspace = true
 glob.workspace = true
 itertools.workspace = true
-konfigkoll_core = { version = "0.1.0", path = "../konfigkoll_core" }
 konfigkoll_hwinfo = { version = "0.1.0", path = "../konfigkoll_hwinfo", features = [
     "rune",
 ] }
 konfigkoll_types = { version = "0.1.0", path = "../konfigkoll_types" }
+konfigkoll_utils = { version = "0.1.0", path = "../konfigkoll_utils" }
 nix = { workspace = true, features = ["user"] }
 paketkoll_core = { version = "0.5.0", path = "../paketkoll_core" }
 paketkoll_types = { version = "0.1.0", path = "../paketkoll_types", features = [

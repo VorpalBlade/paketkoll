@@ -5,8 +5,8 @@ use std::io::Write;
 use anyhow::Context;
 use camino::Utf8Path;
 
-use konfigkoll_core::utils::safe_path_join;
 use konfigkoll_types::FileContents;
+use konfigkoll_utils::safe_path_join;
 
 /// Copy files to the config directory, under the "files/".
 pub(crate) fn file_data_saver(

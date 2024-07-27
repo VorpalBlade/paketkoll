@@ -1,0 +1,17 @@
+[package]
+description = "Konfigkoll utilities"
+edition = "2021"
+license = "MPL-2.0"
+name = "konfigkoll_utils"
+repository = "https://github.com/VorpalBlade/paketkoll"
+rust-version = "1.79.0"
+version = "0.1.0"
+
+[dependencies]
+camino.workspace = true
+compact_str.workspace = true
+regex.workspace = true
+tracing.workspace = true
+
+[lints]
+workspace = true

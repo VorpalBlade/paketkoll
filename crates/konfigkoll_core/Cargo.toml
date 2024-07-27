@@ -18,6 +18,7 @@ duct.workspace = true
 either.workspace = true
 itertools.workspace = true
 konfigkoll_types = { version = "0.1.0", path = "../konfigkoll_types" }
+konfigkoll_utils = { version = "0.1.0", path = "../konfigkoll_utils" }
 libc.workspace = true
 nix = { workspace = true, features = ["user"] }
 paketkoll_types = { version = "0.1.0", path = "../paketkoll_types" }
