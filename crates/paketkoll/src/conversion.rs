@@ -14,15 +14,20 @@ impl TryFrom<Backend> for paketkoll_core::backend::ConcreteBackend {
                 let info = os_info::get();
                 match info.os_type() {
                     #[cfg(feature = "arch_linux")]
-                    os_info::Type::Arch | os_info::Type::EndeavourOS |
-                    os_info::Type::Manjaro => Ok(Self::Pacman),
+                    os_info::Type::Arch | os_info::Type::EndeavourOS | os_info::Type::Manjaro => {
+                        Ok(Self::Pacman)
+                    }
                     #[cfg(feature = "debian")]
-                    os_info::Type::Debian | os_info::Type::Mint |
-                    os_info::Type::Pop | os_info::Type::Raspbian |
-                    os_info::Type::Ubuntu => Ok(Self::Apt),
+                    os_info::Type::Debian
+                    | os_info::Type::Mint
+                    | os_info::Type::Pop
+                    | os_info::Type::Raspbian
+                    | os_info::Type::Ubuntu => Ok(Self::Apt),
                     _ => Err(anyhow::anyhow!(
-                        "Unknown or unsupported distro: {} (try passing a specific backend if you think it should work)",
-                        info.os_type())),
+                        "Unknown or unsupported distro: {} (try passing a specific backend if you \
+                         think it should work)",
+                        info.os_type()
+                    )),
                 }
             }
             #[cfg(feature = "arch_linux")]

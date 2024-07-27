@@ -135,7 +135,10 @@ impl Applicator for InProcessApplicator {
                 backend.remove_unused(true)?;
             }
             Err(paketkoll_types::backend::PackageManagerError::UnsupportedOperation(_)) => {
-                tracing::info!("Marking unwanted packages as dependencies not supported, using uninstall instead");
+                tracing::info!(
+                    "Marking unwanted packages as dependencies not supported, using uninstall \
+                     instead"
+                );
                 backend.transact(&[], uninstall, true)?;
             }
             Err(e) => return Err(e.into()),
@@ -165,7 +168,12 @@ impl Applicator for InProcessApplicator {
                                 Ok(_) => (),
                                 Err(err) => match err.raw_os_error() {
                                     Some(libc::ENOTEMPTY) => {
-                                        Err(err).context("Failed to remove directory: it is not empty (possibly it contains some ignored files). You will have to investigate and resolve this yourself, since we don't want to delete things we shouldn't.")?;
+                                        Err(err).context(
+                                            "Failed to remove directory: it is not empty \
+                                             (possibly it contains some ignored files). You will \
+                                             have to investigate and resolve this yourself, since \
+                                             we don't want to delete things we shouldn't.",
+                                        )?;
                                     }
                                     Some(_) | None => {
                                         Err(err).context("Failed to remove directory")?;

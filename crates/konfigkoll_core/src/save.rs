@@ -236,7 +236,8 @@ mod tests {
         )
         .unwrap();
 
-        let expected = "    cmds.remove_pkg(\"apt\", \"zsh\")?; // A comment\n    cmds.add_pkg(\"pacman\", \"bash\")?;\n";
+        let expected = "    cmds.remove_pkg(\"apt\", \"zsh\")?; // A comment\n    \
+                        cmds.add_pkg(\"pacman\", \"bash\")?;\n";
         assert_eq!(String::from_utf8(output).unwrap(), expected);
     }
 }

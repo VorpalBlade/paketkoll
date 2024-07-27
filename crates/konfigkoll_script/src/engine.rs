@@ -277,11 +277,15 @@ fn try_format_error(phase: Phase, value: &rune::Value) -> anyhow::Result<()> {
             let ty = try_get_type_info(value, "error");
             let formatted = catch_unwind(AssertUnwindSafe(|| format!("{value:?}")));
             anyhow::bail!(
-                "Got error result from {phase}, but it is a unknown error type: {ty}: {any:?}, formats as: {formatted:?}",
+                "Got error result from {phase}, but it is a unknown error type: {ty}: {any:?}, \
+                 formats as: {formatted:?}",
             );
         }
         rune::runtime::VmResult::Err(not_any) => {
-            tracing::error!("Got error result from {phase}, it was not an Any: {not_any:?}. Trying other approaches at printing the error.");
+            tracing::error!(
+                "Got error result from {phase}, it was not an Any: {not_any:?}. Trying other \
+                 approaches at printing the error."
+            );
         }
     }
     // Attempt to format the error
@@ -293,7 +297,8 @@ fn try_format_error(phase: Phase, value: &rune::Value) -> anyhow::Result<()> {
         Err(_) => {
             let ty = try_get_type_info(value, "error");
             anyhow::bail!(
-                "Got error result from {phase}, but got a panic while attempting to format said error for printing, {ty}",
+                "Got error result from {phase}, but got a panic while attempting to format said \
+                 error for printing, {ty}",
             );
         }
     }

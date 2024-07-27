@@ -568,8 +568,15 @@ mod tests {
             "örootö"
         );
         assert_eq!(
-            super::apply_specifiers("Text %a | %A | %b | %B | %C | %g | %G | %h | %H | %l | %L | %m | %M | %o | %S | %t | %T | %u | %U | %v | %V | %w | %W | %%", &provider).unwrap(),
-            "Text x86-64 | 1.0 | 1234 | rolling | /var/cache | root | 0 | /root | localhost | localhost | /var/log | 1234 | arch | arch | /var/lib | /run | /tmp | root | 0 | 6.9.3-zen1-1-zen | /var/tmp | 1.0 | rolling | %"
+            super::apply_specifiers(
+                "Text %a | %A | %b | %B | %C | %g | %G | %h | %H | %l | %L | %m | %M | %o | %S | \
+                 %t | %T | %u | %U | %v | %V | %w | %W | %%",
+                &provider
+            )
+            .unwrap(),
+            "Text x86-64 | 1.0 | 1234 | rolling | /var/cache | root | 0 | /root | localhost | \
+             localhost | /var/log | 1234 | arch | arch | /var/lib | /run | /tmp | root | 0 | \
+             6.9.3-zen1-1-zen | /var/tmp | 1.0 | rolling | %"
         );
 
         // Test error cases

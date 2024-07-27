@@ -526,7 +526,9 @@ mod tests {
 
     #[test]
     fn test_parse_dependencies() {
-        let input = "libc6 (>= 2.34), libice6 (>= 1:1.0.0), libx11-6, libxaw7 (>= 2:1.0.14), libxcursor1 (>> 1.1.2), libxext6, libxi6, libxmu6 (>= 2:1.1.3), libxmuu1 (>= 2:1.1.3), libxrandr2 (>= 2:1.5.0), libxt6, libxxf86vm1, cpp";
+        let input = "libc6 (>= 2.34), libice6 (>= 1:1.0.0), libx11-6, libxaw7 (>= 2:1.0.14), \
+                     libxcursor1 (>> 1.1.2), libxext6, libxi6, libxmu6 (>= 2:1.1.3), libxmuu1 (>= \
+                     2:1.1.3), libxrandr2 (>= 2:1.5.0), libxt6, libxxf86vm1, cpp";
         let interner = Interner::default();
         let result = super::parse_depends(&interner, input);
 
@@ -549,7 +551,9 @@ mod tests {
             ]
         );
 
-        let input = "python3-attr, python3-importlib-metadata | python3 (>> 3.8), python3-importlib-resources | python3 (>> 3.9), python3-pyrsistent, python3-typing-extensions | python3 (>> 3.8), python3:any";
+        let input = "python3-attr, python3-importlib-metadata | python3 (>> 3.8), \
+                     python3-importlib-resources | python3 (>> 3.9), python3-pyrsistent, \
+                     python3-typing-extensions | python3 (>> 3.8), python3:any";
         let result = super::parse_depends(&interner, input);
 
         assert_eq!(

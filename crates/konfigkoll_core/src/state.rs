@@ -532,10 +532,18 @@ pub fn diff(
                                         | Properties::Permissions(_)
                                         | Properties::Special
                                         | Properties::Removed => {
-                                            anyhow::bail!("{:?} needs to be restored to package manager state, but how do to that is not yet implemented", entry.path)
+                                            anyhow::bail!(
+                                                "{:?} needs to be restored to package manager \
+                                                 state, but how do to that is not yet implemented",
+                                                entry.path
+                                            )
                                         }
                                         Properties::Unknown => {
-                                            anyhow::bail!("{:?} needs to be restored to package manager state, but how do to that is unknown", entry.path)
+                                            anyhow::bail!(
+                                                "{:?} needs to be restored to package manager \
+                                                 state, but how do to that is unknown",
+                                                entry.path
+                                            )
                                         }
                                     }
                                 }

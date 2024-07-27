@@ -75,7 +75,10 @@ impl Files for SystemdTmpfiles {
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
-            .context("Failed to spawn \"systemd-tmpfiles --cat-config\" (is systemd-tmpfiles installed and in PATH?)")?;
+            .context(
+                "Failed to spawn \"systemd-tmpfiles --cat-config\" (is systemd-tmpfiles installed \
+                 and in PATH?)",
+            )?;
         let output = cmd
             .wait_with_output()
             .context("Failed to wait for systemd-tmpfiles --cat-config")?;

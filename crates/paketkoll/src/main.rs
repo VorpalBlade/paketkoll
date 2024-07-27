@@ -137,7 +137,8 @@ fn main() -> anyhow::Result<Exit> {
                 .files_from_archives(&[pkg_ref], &package_map, &interner)
                 .with_context(|| {
                     format!(
-                        "Failed to collect file information for package {package} from backend {backend}"
+                        "Failed to collect file information for package {package} from backend \
+                         {backend}"
                     )
                 })?;
 

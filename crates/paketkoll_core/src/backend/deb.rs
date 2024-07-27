@@ -257,7 +257,11 @@ impl Files for Debian {
             filter.len()
         );
         let archives = iterate_deb_archives(filter, package_map, interner)?;
-        log::info!("Got list of {} archives, starting extracting information (this may take a while, especially on the first run before the disk cache can help)", filter.len());
+        log::info!(
+            "Got list of {} archives, starting extracting information (this may take a while, \
+             especially on the first run before the disk cache can help)",
+            filter.len()
+        );
         let results: anyhow::Result<Vec<_>> = archives
             .par_bridge()
             .map(|value| {

@@ -293,7 +293,11 @@ async fn main() -> anyhow::Result<()> {
             )?;
             output.write_all("}\n".as_bytes())?;
 
-            output.write_all("\n// These are entries in your config that are not applied to the current system\n".as_bytes())?;
+            output.write_all(
+                "\n// These are entries in your config that are not applied to the current \
+                 system\n"
+                    .as_bytes(),
+            )?;
             output.write_all(
                 "// Note that these may not correspond *exactly* to what is in your config\n"
                     .as_bytes(),

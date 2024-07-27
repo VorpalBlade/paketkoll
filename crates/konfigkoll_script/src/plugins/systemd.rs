@@ -115,12 +115,24 @@ impl Unit {
     #[rune::function(path = Self::from_file, keep)]
     pub fn from_file(file: &str, cmds: &Commands) -> anyhow::Result<Self> {
         Ok(Self {
-            unit: file.rsplit_once('/').map(|(_, f)| f).ok_or_else(|| anyhow::anyhow!("No file name found"))?.into(),
+            unit: file
+                .rsplit_once('/')
+                .map(|(_, f)| f)
+                .ok_or_else(|| anyhow::anyhow!("No file name found"))?
+                .into(),
             source: Source::File {
                 path: file.into(),
-                contents: cmds.file_contents(file).ok_or_else(|| {
-                    anyhow::anyhow!("Failed to find file contents of {} (did you add a command that created the file before?)", file)
-                })?.contents()?.into_owned(),
+                contents: cmds
+                    .file_contents(file)
+                    .ok_or_else(|| {
+                        anyhow::anyhow!(
+                            "Failed to find file contents of {} (did you add a command that \
+                             created the file before?)",
+                            file
+                        )
+                    })?
+                    .contents()?
+                    .into_owned(),
             },
             type_: Type::System,
             name: None,
