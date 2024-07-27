@@ -1,7 +1,9 @@
 //! Exposing regex to rune
 
 use regex::Regex as InnerRegex;
-use rune::{Any, ContextError, Module};
+use rune::Any;
+use rune::ContextError;
+use rune::Module;
 
 #[derive(Debug, Clone, Any)]
 #[rune(item = ::regex)]

@@ -1,17 +1,23 @@
 //! Access to system package manager
 
-use std::{collections::BTreeMap, str::FromStr, sync::Arc};
+use std::collections::BTreeMap;
+use std::str::FromStr;
+use std::sync::Arc;
 
 use anyhow::Context;
-use rune::{
-    runtime::{Bytes, Shared},
-    Any, ContextError, Module,
-};
+use rune::runtime::Bytes;
+use rune::runtime::Shared;
+use rune::Any;
+use rune::ContextError;
+use rune::Module;
 
-use paketkoll_types::{
-    backend::{Backend, Files, OriginalFileQuery, PackageBackendMap, PackageMap, Packages},
-    intern::Interner,
-};
+use paketkoll_types::backend::Backend;
+use paketkoll_types::backend::Files;
+use paketkoll_types::backend::OriginalFileQuery;
+use paketkoll_types::backend::PackageBackendMap;
+use paketkoll_types::backend::PackageMap;
+use paketkoll_types::backend::Packages;
+use paketkoll_types::intern::Interner;
 
 /// Type of map for package managers
 pub type PackageManagerMap = BTreeMap<Backend, PackageManager>;

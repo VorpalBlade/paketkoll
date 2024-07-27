@@ -1,18 +1,23 @@
 //! State representation of file system
 
-use std::{collections::BTreeMap, sync::Arc};
+use std::collections::BTreeMap;
+use std::sync::Arc;
 
 use anyhow::anyhow;
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8Path;
+use camino::Utf8PathBuf;
 use compact_str::CompactString;
 
-use konfigkoll_types::{FileContents, FsInstruction, FsOp};
-use paketkoll_types::{
-    backend::Files,
-    files::{Mode, PathMap, Properties},
-};
+use konfigkoll_types::FileContents;
+use konfigkoll_types::FsInstruction;
+use konfigkoll_types::FsOp;
+use paketkoll_types::backend::Files;
+use paketkoll_types::files::Mode;
+use paketkoll_types::files::PathMap;
+use paketkoll_types::files::Properties;
 
-use crate::utils::{IdKey, NumericToNameResolveCache};
+use crate::utils::IdKey;
+use crate::utils::NumericToNameResolveCache;
 
 const DEFAULT_FILE_MODE: Mode = Mode::new(0o644);
 const DEFAULT_DIR_MODE: Mode = Mode::new(0o755);

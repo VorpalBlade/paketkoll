@@ -1,24 +1,29 @@
 //! Logic to take mtree data to `FileEntry`
 
-use std::{
-    collections::BTreeSet,
-    ffi::OsStr,
-    fs::File,
-    io::{BufReader, Read},
-    path::{Path, PathBuf},
-};
+use std::collections::BTreeSet;
+use std::ffi::OsStr;
+use std::fs::File;
+use std::io::BufReader;
+use std::io::Read;
+use std::path::Path;
+use std::path::PathBuf;
 
 use anyhow::Context;
 use dashmap::DashSet;
 use flate2::bufread::GzDecoder;
 
-use mtree2::{self, MTree};
-use paketkoll_types::{
-    files::{
-        Checksum, Directory, FileEntry, FileFlags, Gid, Mode, Properties, RegularFile, Symlink, Uid,
-    },
-    intern::PackageRef,
-};
+use mtree2::MTree;
+use paketkoll_types::files::Checksum;
+use paketkoll_types::files::Directory;
+use paketkoll_types::files::FileEntry;
+use paketkoll_types::files::FileFlags;
+use paketkoll_types::files::Gid;
+use paketkoll_types::files::Mode;
+use paketkoll_types::files::Properties;
+use paketkoll_types::files::RegularFile;
+use paketkoll_types::files::Symlink;
+use paketkoll_types::files::Uid;
+use paketkoll_types::intern::PackageRef;
 
 /// Set of special files to ignore from mtree data
 ///

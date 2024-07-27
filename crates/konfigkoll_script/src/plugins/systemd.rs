@@ -2,9 +2,12 @@
 
 use camino::Utf8PathBuf;
 use compact_str::CompactString;
-use rune::{Any, ContextError, Module};
+use rune::Any;
+use rune::ContextError;
+use rune::Module;
 
-use crate::{Commands, Phase};
+use crate::Commands;
+use crate::Phase;
 
 use super::package_managers::PackageManager;
 

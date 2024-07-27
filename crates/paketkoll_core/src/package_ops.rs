@@ -2,7 +2,8 @@
 
 use anyhow::Context;
 
-use paketkoll_types::{intern::Interner, package::PackageInterned};
+use paketkoll_types::intern::Interner;
+use paketkoll_types::package::PackageInterned;
 
 /// Get a list of all installed packages
 pub fn installed_packages(

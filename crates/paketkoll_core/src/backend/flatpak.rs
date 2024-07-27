@@ -1,16 +1,20 @@
 //! Package backend for flatpak
 
-use std::process::{Command, Stdio};
+use std::process::Command;
+use std::process::Stdio;
 
 use anyhow::Context;
 use smallvec::SmallVec;
 
-use paketkoll_types::backend::{Name, PackageManagerError, Packages};
+use paketkoll_types::backend::Name;
+use paketkoll_types::backend::PackageManagerError;
+use paketkoll_types::backend::Packages;
+use paketkoll_types::intern::ArchitectureRef;
+use paketkoll_types::intern::PackageRef;
 use paketkoll_types::package::InstallReason;
-use paketkoll_types::{
-    intern::{ArchitectureRef, PackageRef},
-    package::{Package, PackageInstallStatus, PackageInterned},
-};
+use paketkoll_types::package::Package;
+use paketkoll_types::package::PackageInstallStatus;
+use paketkoll_types::package::PackageInterned;
 
 use crate::utils::package_manager_transaction;
 

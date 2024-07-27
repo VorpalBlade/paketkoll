@@ -1,30 +1,32 @@
 //! Implements the CLI for paketkoll
 
-use std::{
-    io::{stdout, BufWriter, Write},
-    os::unix::ffi::OsStrExt,
-    path::Path,
-};
+use std::io::stdout;
+use std::io::BufWriter;
+use std::io::Write;
+use std::os::unix::ffi::OsStrExt;
+use std::path::Path;
 
 use ahash::AHashSet;
 use anyhow::Context;
 use clap::Parser;
-use proc_exit::{Code, Exit};
+use proc_exit::Code;
+use proc_exit::Exit;
 use rayon::prelude::*;
 
 #[cfg(target_env = "musl")]
 use mimalloc::MiMalloc;
-use paketkoll::cli::{Cli, Commands, Format};
-use paketkoll_core::{
-    config::CheckAllFilesConfiguration,
-    file_ops, package_ops,
-    paketkoll_types::{
-        intern::{Interner, PackageRef},
-        issue::Issue,
-        package::InstallReason,
-    },
-};
-use paketkoll_types::{backend::OriginalFileQuery, package::PackageInterned};
+use paketkoll::cli::Cli;
+use paketkoll::cli::Commands;
+use paketkoll::cli::Format;
+use paketkoll_core::config::CheckAllFilesConfiguration;
+use paketkoll_core::file_ops;
+use paketkoll_core::package_ops;
+use paketkoll_core::paketkoll_types::intern::Interner;
+use paketkoll_core::paketkoll_types::intern::PackageRef;
+use paketkoll_core::paketkoll_types::issue::Issue;
+use paketkoll_core::paketkoll_types::package::InstallReason;
+use paketkoll_types::backend::OriginalFileQuery;
+use paketkoll_types::package::PackageInterned;
 
 #[cfg(target_env = "musl")]
 #[cfg_attr(target_env = "musl", global_allocator)]

@@ -1,8 +1,10 @@
 //! Backend for Debian and derivatives
 use std::borrow::Cow;
-use std::fs::{DirEntry, File};
+use std::fs::DirEntry;
+use std::fs::File;
 use std::io::BufReader;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 
 use anyhow::Context;
 use bstr::ByteSlice;
@@ -12,18 +14,28 @@ use dashmap::DashMap;
 use rayon::prelude::*;
 use regex::RegexSet;
 
-use paketkoll_types::backend::{
-    Files, Name, OriginalFileQuery, PackageManagerError, PackageMap, Packages,
-};
-use paketkoll_types::files::{FileEntry, Properties};
-use paketkoll_types::intern::{ArchitectureRef, Interner, PackageRef};
+use paketkoll_types::backend::Files;
+use paketkoll_types::backend::Name;
+use paketkoll_types::backend::OriginalFileQuery;
+use paketkoll_types::backend::PackageManagerError;
+use paketkoll_types::backend::PackageMap;
+use paketkoll_types::backend::Packages;
+use paketkoll_types::files::FileEntry;
+use paketkoll_types::files::Properties;
+use paketkoll_types::intern::ArchitectureRef;
+use paketkoll_types::intern::Interner;
+use paketkoll_types::intern::PackageRef;
 use paketkoll_types::package::PackageInterned;
 
 use crate::backend::PackageFilter;
-use crate::utils::{
-    convert_archive_entries, extract_files, group_queries_by_pkg, locate_package_file,
-    missing_packages, package_manager_transaction, CompressionFormat, PackageQuery,
-};
+use crate::utils::convert_archive_entries;
+use crate::utils::extract_files;
+use crate::utils::group_queries_by_pkg;
+use crate::utils::locate_package_file;
+use crate::utils::missing_packages;
+use crate::utils::package_manager_transaction;
+use crate::utils::CompressionFormat;
+use crate::utils::PackageQuery;
 
 use super::FullBackend;
 

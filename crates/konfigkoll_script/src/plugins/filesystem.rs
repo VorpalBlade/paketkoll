@@ -1,14 +1,17 @@
 //! Host file system access
 
-use std::io::{ErrorKind, Read};
+use std::io::ErrorKind;
+use std::io::Read;
 
 use anyhow::Context;
 use camino::Utf8PathBuf;
 use rune::alloc::fmt::TryWrite;
-use rune::{
-    runtime::{Bytes, Formatter},
-    vm_write, Any, ContextError, Module,
-};
+use rune::runtime::Bytes;
+use rune::runtime::Formatter;
+use rune::vm_write;
+use rune::Any;
+use rune::ContextError;
+use rune::Module;
 
 use konfigkoll_utils::safe_path_join;
 

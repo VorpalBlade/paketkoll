@@ -10,13 +10,14 @@ use ouroboros::self_referencing;
 use rayon::prelude::*;
 
 use konfigkoll_types::FsInstruction;
-use paketkoll_core::config::{
-    CheckAllFilesConfiguration, CommonFileCheckConfiguration, ConfigFiles,
-};
-use paketkoll_core::file_ops::{
-    canonicalize_file_entries, create_path_map, mismatching_and_unexpected_files,
-};
-use paketkoll_types::backend::{Files, PackageMap};
+use paketkoll_core::config::CheckAllFilesConfiguration;
+use paketkoll_core::config::CommonFileCheckConfiguration;
+use paketkoll_core::config::ConfigFiles;
+use paketkoll_core::file_ops::canonicalize_file_entries;
+use paketkoll_core::file_ops::create_path_map;
+use paketkoll_core::file_ops::mismatching_and_unexpected_files;
+use paketkoll_types::backend::Files;
+use paketkoll_types::backend::PackageMap;
 use paketkoll_types::files::FileEntry;
 use paketkoll_types::files::PathMap;
 use paketkoll_types::intern::Interner;

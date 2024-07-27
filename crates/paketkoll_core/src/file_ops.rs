@@ -1,17 +1,23 @@
 //! Contain file checking functionality
 
-use std::{os::unix::ffi::OsStrExt, path::PathBuf};
+use std::os::unix::ffi::OsStrExt;
+use std::path::PathBuf;
 
 use anyhow::Context;
-use ignore::{overrides::OverrideBuilder, Match, WalkBuilder, WalkState};
+use ignore::overrides::OverrideBuilder;
+use ignore::Match;
+use ignore::WalkBuilder;
+use ignore::WalkState;
 use rayon::prelude::*;
 
-use paketkoll_types::intern::{Interner, PackageRef};
-use paketkoll_types::{backend::OriginalFileQuery, files::PathMap};
-use paketkoll_types::{
-    files::FileEntry,
-    issue::{Issue, IssueKind, PackageIssue},
-};
+use paketkoll_types::backend::OriginalFileQuery;
+use paketkoll_types::files::FileEntry;
+use paketkoll_types::files::PathMap;
+use paketkoll_types::intern::Interner;
+use paketkoll_types::intern::PackageRef;
+use paketkoll_types::issue::Issue;
+use paketkoll_types::issue::IssueKind;
+use paketkoll_types::issue::PackageIssue;
 
 /// Perform a query of original files
 #[doc(hidden)]

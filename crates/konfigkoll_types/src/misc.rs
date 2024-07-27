@@ -1,9 +1,9 @@
-use std::{
-    borrow::Cow,
-    fs::File,
-    hash::{Hash, Hasher},
-    io::{BufReader, Read},
-};
+use std::borrow::Cow;
+use std::fs::File;
+use std::hash::Hash;
+use std::hash::Hasher;
+use std::io::BufReader;
+use std::io::Read;
 
 use anyhow::Context;
 use camino::Utf8Path;

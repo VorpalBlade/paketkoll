@@ -1,17 +1,19 @@
 //! Package scanning functions
 
-use std::{collections::BTreeMap, sync::Arc};
+use std::collections::BTreeMap;
+use std::sync::Arc;
 
 use anyhow::Context;
 use itertools::Itertools;
 use rayon::prelude::*;
 
 use konfigkoll_types::PkgInstructions;
-use paketkoll_types::{
-    backend::{Backend, PackageBackendMap, PackageMap, PackageMapMap},
-    intern::Interner,
-    package::PackageInstallStatus,
-};
+use paketkoll_types::backend::Backend;
+use paketkoll_types::backend::PackageBackendMap;
+use paketkoll_types::backend::PackageMap;
+use paketkoll_types::backend::PackageMapMap;
+use paketkoll_types::intern::Interner;
+use paketkoll_types::package::PackageInstallStatus;
 
 #[tracing::instrument(skip_all)]
 pub(crate) fn load_packages(

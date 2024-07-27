@@ -1,34 +1,42 @@
 //! The Arch Linux (and derivatives) backend
 
-use std::{
-    borrow::Cow,
-    collections::BTreeSet,
-    io::BufReader,
-    iter::once,
-    path::{Path, PathBuf},
-};
+use std::borrow::Cow;
+use std::collections::BTreeSet;
+use std::io::BufReader;
+use std::iter::once;
+use std::path::Path;
+use std::path::PathBuf;
 
 use ahash::AHashSet;
 use anyhow::Context;
-use bstr::{ByteSlice, ByteVec};
+use bstr::ByteSlice;
+use bstr::ByteVec;
 use compact_str::format_compact;
-use dashmap::{DashMap, DashSet};
+use dashmap::DashMap;
+use dashmap::DashSet;
 use either::Either;
 use rayon::prelude::*;
 use regex::RegexSet;
 
-use paketkoll_types::backend::{
-    Files, Name, OriginalFileQuery, PackageManagerError, PackageMap, Packages,
-};
-use paketkoll_types::{files::FileEntry, intern::PackageRef};
-use paketkoll_types::{intern::Interner, package::PackageInterned};
+use paketkoll_types::backend::Files;
+use paketkoll_types::backend::Name;
+use paketkoll_types::backend::OriginalFileQuery;
+use paketkoll_types::backend::PackageManagerError;
+use paketkoll_types::backend::PackageMap;
+use paketkoll_types::backend::Packages;
+use paketkoll_types::files::FileEntry;
+use paketkoll_types::intern::Interner;
+use paketkoll_types::intern::PackageRef;
+use paketkoll_types::package::PackageInterned;
 
-use crate::utils::{
-    convert_archive_entries, extract_files, group_queries_by_pkg, locate_package_file,
-    package_manager_transaction,
-};
+use crate::utils::convert_archive_entries;
+use crate::utils::extract_files;
+use crate::utils::group_queries_by_pkg;
+use crate::utils::locate_package_file;
+use crate::utils::package_manager_transaction;
 
-use super::{FullBackend, PackageFilter};
+use super::FullBackend;
+use super::PackageFilter;
 
 mod desc;
 mod mtree;

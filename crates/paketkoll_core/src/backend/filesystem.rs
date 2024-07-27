@@ -1,24 +1,39 @@
 //! Generic code for checking files wrt file system
 
-use std::{
-    fs::File,
-    io::{ErrorKind, Read},
-    os::unix::fs::{FileTypeExt, MetadataExt},
-    path::PathBuf,
-};
+use std::fs::File;
+use std::io::ErrorKind;
+use std::io::Read;
+use std::os::unix::fs::FileTypeExt;
+use std::os::unix::fs::MetadataExt;
+use std::path::PathBuf;
 
-use anyhow::{Context, Result};
+use anyhow::Context;
+use anyhow::Result;
 
-use paketkoll_types::{
-    files::{
-        Checksum, DeviceNode, DeviceType, Directory, Fifo, FileEntry, FileFlags, Gid, Mode,
-        Permissions, Properties, RegularFile, RegularFileBasic, RegularFileSystemd, Symlink, Uid,
-    },
-    issue::{EntryType, Issue, IssueKind, IssueVec},
-};
+use paketkoll_types::files::Checksum;
+use paketkoll_types::files::DeviceNode;
+use paketkoll_types::files::DeviceType;
+use paketkoll_types::files::Directory;
+use paketkoll_types::files::Fifo;
+use paketkoll_types::files::FileEntry;
+use paketkoll_types::files::FileFlags;
+use paketkoll_types::files::Gid;
+use paketkoll_types::files::Mode;
+use paketkoll_types::files::Permissions;
+use paketkoll_types::files::Properties;
+use paketkoll_types::files::RegularFile;
+use paketkoll_types::files::RegularFileBasic;
+use paketkoll_types::files::RegularFileSystemd;
+use paketkoll_types::files::Symlink;
+use paketkoll_types::files::Uid;
+use paketkoll_types::issue::EntryType;
+use paketkoll_types::issue::Issue;
+use paketkoll_types::issue::IssueKind;
+use paketkoll_types::issue::IssueVec;
 use paketkoll_utils::MODE_MASK;
 
-use crate::config::{CommonFileCheckConfiguration, ConfigFiles};
+use crate::config::CommonFileCheckConfiguration;
+use crate::config::ConfigFiles;
 
 /// Determine if a given file should be processed
 fn should_process(file: &FileEntry, config: &CommonFileCheckConfiguration) -> bool {

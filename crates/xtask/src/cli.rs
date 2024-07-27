@@ -1,5 +1,6 @@
 use camino::Utf8PathBuf;
-use clap::{Parser, Subcommand};
+use clap::Parser;
+use clap::Subcommand;
 
 #[derive(Debug, Parser)]
 #[command(version, about, long_about = None)]

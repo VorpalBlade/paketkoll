@@ -2,17 +2,28 @@
 
 use std::io::BufRead;
 
-use anyhow::{bail, Context};
-use bstr::{io::BufReadExt, ByteSlice, ByteVec};
+use anyhow::bail;
+use anyhow::Context;
+use bstr::io::BufReadExt;
+use bstr::ByteSlice;
+use bstr::ByteVec;
 use compact_str::format_compact;
 use smallvec::SmallVec;
 
-use paketkoll_types::intern::{ArchitectureRef, Interner, PackageRef};
-use paketkoll_types::package::{Package, PackageBuilder};
-use paketkoll_types::{
-    files::{Checksum, FileEntry, FileFlags, Properties, RegularFileBasic},
-    package::{Dependency, InstallReason, PackageInstallStatus, PackageInterned},
-};
+use paketkoll_types::files::Checksum;
+use paketkoll_types::files::FileEntry;
+use paketkoll_types::files::FileFlags;
+use paketkoll_types::files::Properties;
+use paketkoll_types::files::RegularFileBasic;
+use paketkoll_types::intern::ArchitectureRef;
+use paketkoll_types::intern::Interner;
+use paketkoll_types::intern::PackageRef;
+use paketkoll_types::package::Dependency;
+use paketkoll_types::package::InstallReason;
+use paketkoll_types::package::Package;
+use paketkoll_types::package::PackageBuilder;
+use paketkoll_types::package::PackageInstallStatus;
+use paketkoll_types::package::PackageInterned;
 
 /// Load lines from a readable as `PathBufs`
 pub(super) fn parse_paths(
@@ -378,11 +389,22 @@ enum ExtendedStatusParsingState {
 mod tests {
     use pretty_assertions::assert_eq;
 
-    use paketkoll_types::files::{Checksum, FileEntry, FileFlags, Properties, RegularFileBasic};
-    use paketkoll_types::intern::{ArchitectureRef, Interner, PackageRef};
-    use paketkoll_types::package::{Dependency, InstallReason, Package, PackageInstallStatus};
+    use paketkoll_types::files::Checksum;
+    use paketkoll_types::files::FileEntry;
+    use paketkoll_types::files::FileFlags;
+    use paketkoll_types::files::Properties;
+    use paketkoll_types::files::RegularFileBasic;
+    use paketkoll_types::intern::ArchitectureRef;
+    use paketkoll_types::intern::Interner;
+    use paketkoll_types::intern::PackageRef;
+    use paketkoll_types::package::Dependency;
+    use paketkoll_types::package::InstallReason;
+    use paketkoll_types::package::Package;
+    use paketkoll_types::package::PackageInstallStatus;
 
-    use super::{parse_md5sums, parse_paths, parse_status};
+    use super::parse_md5sums;
+    use super::parse_paths;
+    use super::parse_status;
 
     #[test]
     fn test_parse_paths() {

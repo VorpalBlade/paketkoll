@@ -3,8 +3,11 @@
 use std::io::Write;
 
 use ahash::AHashSet;
-use compact_str::{CompactString, ToCompactString};
-use console::{Key, Style, Term};
+use compact_str::CompactString;
+use compact_str::ToCompactString;
+use console::Key;
+use console::Style;
+use console::Term;
 use itertools::Itertools;
 
 /// A simple multiple choice prompt. Will look something like:

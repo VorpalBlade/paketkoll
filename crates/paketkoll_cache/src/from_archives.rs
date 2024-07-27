@@ -12,14 +12,17 @@ use cached::DiskCache;
 use cached::IOCached;
 use compact_str::CompactString;
 
+use paketkoll_types::backend::Backend;
+use paketkoll_types::backend::Files;
+use paketkoll_types::backend::Name;
+use paketkoll_types::backend::OriginalFileQuery;
 use paketkoll_types::backend::PackageManagerError;
+use paketkoll_types::backend::PackageMap;
 use paketkoll_types::files::FileEntry;
 use paketkoll_types::files::FileFlags;
 use paketkoll_types::files::Properties;
-use paketkoll_types::{
-    backend::{Backend, Files, Name, OriginalFileQuery, PackageMap},
-    intern::{Interner, PackageRef},
-};
+use paketkoll_types::intern::Interner;
+use paketkoll_types::intern::PackageRef;
 
 use crate::utils::format_package;
 

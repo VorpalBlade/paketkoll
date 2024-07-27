@@ -6,7 +6,8 @@ use anyhow::anyhow;
 use clru::CLruCache;
 use compact_str::CompactString;
 
-use paketkoll_types::files::{Gid, Uid};
+use paketkoll_types::files::Gid;
+use paketkoll_types::files::Uid;
 
 /// UID/GID to name resolver / cache
 #[derive(Debug)]

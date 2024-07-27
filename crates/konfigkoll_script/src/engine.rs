@@ -1,27 +1,30 @@
-use std::{
-    collections::BTreeMap,
-    fmt::Display,
-    io::Write,
-    panic::{catch_unwind, AssertUnwindSafe},
-    sync::{Arc, OnceLock},
-};
+use std::collections::BTreeMap;
+use std::fmt::Display;
+use std::io::Write;
+use std::panic::catch_unwind;
+use std::panic::AssertUnwindSafe;
+use std::sync::Arc;
+use std::sync::OnceLock;
 
 use anyhow::Context;
-use camino::{Utf8Path, Utf8PathBuf};
-use rune::{
-    termcolor::{ColorChoice, StandardStream},
-    Diagnostics, Source, Vm,
-};
+use camino::Utf8Path;
+use camino::Utf8PathBuf;
+use rune::termcolor::ColorChoice;
+use rune::termcolor::StandardStream;
+use rune::Diagnostics;
+use rune::Source;
+use rune::Vm;
 
-use paketkoll_types::{
-    backend::{Backend, Files, PackageBackendMap, PackageMap},
-    intern::Interner,
-};
+use paketkoll_types::backend::Backend;
+use paketkoll_types::backend::Files;
+use paketkoll_types::backend::PackageBackendMap;
+use paketkoll_types::backend::PackageMap;
+use paketkoll_types::intern::Interner;
 
-use crate::plugins::{
-    command::Commands, package_managers::PackageManagers, properties::Properties,
-    settings::Settings,
-};
+use crate::plugins::command::Commands;
+use crate::plugins::package_managers::PackageManagers;
+use crate::plugins::properties::Properties;
+use crate::plugins::settings::Settings;
 
 /// Describe the phases of script evaluation.
 ///

@@ -1,16 +1,24 @@
 //! Parser for pci.ids
 
 use ahash::AHashMap;
-use winnow::{
-    ascii::{hex_uint, newline, space1},
-    combinator::{alt, opt, separated, trace},
-    error::{ContextError, StrContext},
-    stream::AsChar,
-    token::{take, take_until},
-    PResult, Parser,
-};
+use winnow::ascii::hex_uint;
+use winnow::ascii::newline;
+use winnow::ascii::space1;
+use winnow::combinator::alt;
+use winnow::combinator::opt;
+use winnow::combinator::separated;
+use winnow::combinator::trace;
+use winnow::error::ContextError;
+use winnow::error::StrContext;
+use winnow::stream::AsChar;
+use winnow::token::take;
+use winnow::token::take_until;
+use winnow::PResult;
+use winnow::Parser;
 
-use super::{Class, ProgrammingInterface, Subclass};
+use super::Class;
+use super::ProgrammingInterface;
+use super::Subclass;
 
 #[derive(Debug, PartialEq, Eq)]
 enum Line<'input> {
@@ -332,7 +340,10 @@ mod tests {
     use pretty_assertions::assert_eq;
     use winnow::combinator::terminated;
 
-    use crate::pci::{Device, PciIdDb, Subsystem, Vendor};
+    use crate::pci::Device;
+    use crate::pci::PciIdDb;
+    use crate::pci::Subsystem;
+    use crate::pci::Vendor;
 
     use super::*;
 

@@ -1,4 +1,5 @@
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8Path;
+use camino::Utf8PathBuf;
 
 /// Safe path join that does not replace when the second path is absolute
 pub fn safe_path_join(left: &Utf8Path, right: &Utf8Path) -> Utf8PathBuf {

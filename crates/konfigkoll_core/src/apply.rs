@@ -1,6 +1,9 @@
 //! Apply a stream of instructions to the current system
 
-use std::{collections::BTreeMap, fs::Permissions, os::unix::fs::PermissionsExt, sync::Arc};
+use std::collections::BTreeMap;
+use std::fs::Permissions;
+use std::os::unix::fs::PermissionsExt;
+use std::sync::Arc;
 
 use ahash::AHashMap;
 use anyhow::Context;
@@ -8,17 +11,25 @@ use console::style;
 use either::Either;
 use itertools::Itertools;
 
-use konfigkoll_types::{FsInstruction, FsOp, FsOpDiscriminants, PkgIdent, PkgInstruction, PkgOp};
-use paketkoll_types::{
-    backend::{Backend, Files, OriginalFileQuery, PackageBackendMap, PackageMap, PackageMapMap},
-    intern::{Interner, PackageRef},
-};
+use konfigkoll_types::FsInstruction;
+use konfigkoll_types::FsOp;
+use konfigkoll_types::FsOpDiscriminants;
+use konfigkoll_types::PkgIdent;
+use konfigkoll_types::PkgInstruction;
+use konfigkoll_types::PkgOp;
+use paketkoll_types::backend::Backend;
+use paketkoll_types::backend::Files;
+use paketkoll_types::backend::OriginalFileQuery;
+use paketkoll_types::backend::PackageBackendMap;
+use paketkoll_types::backend::PackageMap;
+use paketkoll_types::backend::PackageMapMap;
+use paketkoll_types::intern::Interner;
+use paketkoll_types::intern::PackageRef;
 
-use crate::{
-    confirm::MultiOptionConfirm,
-    diff::show_fs_instr_diff,
-    utils::{IdKey, NameToNumericResolveCache},
-};
+use crate::confirm::MultiOptionConfirm;
+use crate::diff::show_fs_instr_diff;
+use crate::utils::IdKey;
+use crate::utils::NameToNumericResolveCache;
 
 /// Applier of system changes
 ///

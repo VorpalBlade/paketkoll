@@ -1,13 +1,16 @@
 //! Facilities to patch a file compared to the default package provided one.
 
-use std::{borrow::Cow, cell::RefCell, rc::Rc};
+use std::borrow::Cow;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 use anyhow::Context;
 use regex::Regex;
-use rune::{
-    runtime::{Shared, VmResult},
-    Any, ContextError, Module,
-};
+use rune::runtime::Shared;
+use rune::runtime::VmResult;
+use rune::Any;
+use rune::ContextError;
+use rune::Module;
 
 /// A simple line editor, like sed
 #[derive(Debug, Default, Any)]

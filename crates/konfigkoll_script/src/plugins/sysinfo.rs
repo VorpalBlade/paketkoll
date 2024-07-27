@@ -1,8 +1,12 @@
 //! System information gathering
-use rune::{Any, ContextError, Module};
-use sysinfo::{CpuRefreshKind, MemoryRefreshKind};
+use rune::Any;
+use rune::ContextError;
+use rune::Module;
+use sysinfo::CpuRefreshKind;
+use sysinfo::MemoryRefreshKind;
 
-use konfigkoll_hwinfo::pci::{PciDevice, PciIdDb};
+use konfigkoll_hwinfo::pci::PciDevice;
+use konfigkoll_hwinfo::pci::PciIdDb;
 
 /// System info access
 #[derive(Debug, Any)]

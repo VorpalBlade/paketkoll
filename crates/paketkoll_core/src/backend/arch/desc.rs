@@ -15,11 +15,13 @@ use std::io::BufRead;
 
 use compact_str::CompactString;
 
-use paketkoll_types::package::{Dependency, InstallReason, PackageInstallStatus};
-use paketkoll_types::{
-    intern::{ArchitectureRef, Interner, PackageRef},
-    package::PackageInterned,
-};
+use paketkoll_types::intern::ArchitectureRef;
+use paketkoll_types::intern::Interner;
+use paketkoll_types::intern::PackageRef;
+use paketkoll_types::package::Dependency;
+use paketkoll_types::package::InstallReason;
+use paketkoll_types::package::PackageInstallStatus;
+use paketkoll_types::package::PackageInterned;
 
 pub(super) fn from_arch_linux_desc(
     mut readable: impl BufRead,
@@ -141,7 +143,8 @@ fn parse_backup(
 mod tests {
     use pretty_assertions::assert_eq;
 
-    use paketkoll_types::{intern::Interner, package::Package};
+    use paketkoll_types::intern::Interner;
+    use paketkoll_types::package::Package;
 
     use super::*;
 

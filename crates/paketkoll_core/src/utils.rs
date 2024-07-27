@@ -1,12 +1,12 @@
 //! Various utility functions
 
-use std::{
-    io::{BufReader, Read},
-    os::unix::process::ExitStatusExt,
-    path::PathBuf,
-};
+use std::io::BufReader;
+use std::io::Read;
+use std::os::unix::process::ExitStatusExt;
+use std::path::PathBuf;
 
-use ahash::{AHashMap, AHashSet};
+use ahash::AHashMap;
+use ahash::AHashSet;
 use anyhow::Context;
 use compact_str::CompactString;
 use smallvec::SmallVec;
@@ -270,9 +270,15 @@ pub(crate) fn convert_archive_entries(
 ) -> Result<Vec<paketkoll_types::files::FileEntry>, anyhow::Error> {
     use std::time::SystemTime;
 
-    use paketkoll_types::files::{
-        Directory, FileEntry, FileFlags, Gid, Mode, Properties, RegularFile, Symlink, Uid,
-    };
+    use paketkoll_types::files::Directory;
+    use paketkoll_types::files::FileEntry;
+    use paketkoll_types::files::FileFlags;
+    use paketkoll_types::files::Gid;
+    use paketkoll_types::files::Mode;
+    use paketkoll_types::files::Properties;
+    use paketkoll_types::files::RegularFile;
+    use paketkoll_types::files::Symlink;
+    use paketkoll_types::files::Uid;
     use paketkoll_utils::checksum::sha256_readable;
 
     let mut results = AHashMap::new();

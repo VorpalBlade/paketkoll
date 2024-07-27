@@ -1,9 +1,17 @@
 //! Parser for systemd sysusers.d files.
 
 use compact_str::CompactString;
-use winnow::ascii::{dec_uint, escaped_transform, newline, space1};
-use winnow::combinator::{alt, delimited, opt, separated, trace};
-use winnow::error::{ContextError, StrContext};
+use winnow::ascii::dec_uint;
+use winnow::ascii::escaped_transform;
+use winnow::ascii::newline;
+use winnow::ascii::space1;
+use winnow::combinator::alt;
+use winnow::combinator::delimited;
+use winnow::combinator::opt;
+use winnow::combinator::separated;
+use winnow::combinator::trace;
+use winnow::error::ContextError;
+use winnow::error::StrContext;
 use winnow::stream::Accumulate;
 use winnow::token::take_till;
 use winnow::PResult;

@@ -1,4 +1,6 @@
-use clap::{CommandFactory, Parser, ValueEnum};
+use clap::CommandFactory;
+use clap::Parser;
+use clap::ValueEnum;
 use clap_complete::Shell;
 
 use cli::Commands;

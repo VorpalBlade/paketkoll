@@ -1,11 +1,12 @@
 //! Conversion from paketkoll issues into konfigkoll instruction stream
 
-use std::{
-    fs::File,
-    io::{BufReader, Read, Seek},
-    os::unix::fs::{FileTypeExt, MetadataExt},
-    sync::atomic::AtomicU32,
-};
+use std::fs::File;
+use std::io::BufReader;
+use std::io::Read;
+use std::io::Seek;
+use std::os::unix::fs::FileTypeExt;
+use std::os::unix::fs::MetadataExt;
+use std::sync::atomic::AtomicU32;
 
 use anyhow::Context;
 use camino::Utf8Path;
@@ -13,19 +14,28 @@ use compact_str::format_compact;
 use parking_lot::Mutex;
 use rayon::prelude::*;
 
-use konfigkoll_types::{
-    FileContents, FsInstruction, FsOp, PkgIdent, PkgInstruction, PkgInstructions, PkgOp,
-};
-use paketkoll_types::{
-    backend::Backend,
-    files::{Checksum, Gid, Mode, Uid},
-    intern::{Interner, PackageRef},
-    issue::Issue,
-    package::{InstallReason, PackageInterned},
-};
-use paketkoll_utils::{checksum::sha256_readable, MODE_MASK};
+use konfigkoll_types::FileContents;
+use konfigkoll_types::FsInstruction;
+use konfigkoll_types::FsOp;
+use konfigkoll_types::PkgIdent;
+use konfigkoll_types::PkgInstruction;
+use konfigkoll_types::PkgInstructions;
+use konfigkoll_types::PkgOp;
+use paketkoll_types::backend::Backend;
+use paketkoll_types::files::Checksum;
+use paketkoll_types::files::Gid;
+use paketkoll_types::files::Mode;
+use paketkoll_types::files::Uid;
+use paketkoll_types::intern::Interner;
+use paketkoll_types::intern::PackageRef;
+use paketkoll_types::issue::Issue;
+use paketkoll_types::package::InstallReason;
+use paketkoll_types::package::PackageInterned;
+use paketkoll_utils::checksum::sha256_readable;
+use paketkoll_utils::MODE_MASK;
 
-use crate::utils::{IdKey, NumericToNameResolveCache};
+use crate::utils::IdKey;
+use crate::utils::NumericToNameResolveCache;
 
 pub fn convert_issues_to_fs_instructions(
     issues: Vec<(Option<PackageRef>, Issue)>,

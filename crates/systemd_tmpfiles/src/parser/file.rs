@@ -1,16 +1,24 @@
 //! Low level parser of the file format
 
 use compact_str::CompactString;
-use winnow::{
-    ascii::{digit1, escaped_transform, newline, space1},
-    combinator::{alt, delimited, opt, separated, trace},
-    error::StrContext,
-    stream::Accumulate,
-    token::{take_till, take_while},
-    PResult, Parser,
-};
+use winnow::ascii::digit1;
+use winnow::ascii::escaped_transform;
+use winnow::ascii::newline;
+use winnow::ascii::space1;
+use winnow::combinator::alt;
+use winnow::combinator::delimited;
+use winnow::combinator::opt;
+use winnow::combinator::separated;
+use winnow::combinator::trace;
+use winnow::error::StrContext;
+use winnow::stream::Accumulate;
+use winnow::token::take_till;
+use winnow::token::take_while;
+use winnow::PResult;
+use winnow::Parser;
 
-use crate::{Id, Mode};
+use crate::Id;
+use crate::Mode;
 
 /// Low level parser that doesn't make a difference between entry types
 #[derive(Debug, Default, PartialEq, Eq)]

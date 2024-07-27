@@ -1,16 +1,21 @@
 //! Helpers for working with /etc/passwd and /etc/groups (as well as shadow files)
 
-use std::{
-    collections::{BTreeMap, BTreeSet},
-    fmt::Write,
-};
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
+use std::fmt::Write;
 
-use ahash::{AHashMap, AHashSet};
+use ahash::AHashMap;
+use ahash::AHashSet;
 use itertools::Itertools;
-use rune::{runtime::Function, Any, ContextError, Module, Value};
+use rune::runtime::Function;
+use rune::Any;
+use rune::ContextError;
+use rune::Module;
+use rune::Value;
 use winnow::Parser;
 
-use sysusers::{GroupId, UserId};
+use sysusers::GroupId;
+use sysusers::UserId;
 
 use crate::Commands;
 

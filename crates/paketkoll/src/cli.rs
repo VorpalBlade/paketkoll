@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
-use clap::{Parser, Subcommand};
+use clap::Parser;
+use clap::Subcommand;
 use compact_str::CompactString;
 
 #[derive(Debug, Parser)]

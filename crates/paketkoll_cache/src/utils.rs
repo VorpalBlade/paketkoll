@@ -1,8 +1,10 @@
 //! Utility functions
 
-use compact_str::{format_compact, CompactString};
+use compact_str::format_compact;
+use compact_str::CompactString;
 
-use paketkoll_types::{intern::Interner, package::PackageInterned};
+use paketkoll_types::intern::Interner;
+use paketkoll_types::package::PackageInterned;
 
 /// Format a package for use in cache keys
 pub(crate) fn format_package(pkg: &PackageInterned, interner: &Interner) -> CompactString {

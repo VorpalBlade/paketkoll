@@ -1,10 +1,13 @@
 //! Parser for dpkg-divert
 
-use std::{collections::BTreeMap, io::BufRead, path::PathBuf};
+use std::collections::BTreeMap;
+use std::io::BufRead;
+use std::path::PathBuf;
 
 use anyhow::Context;
 
-use paketkoll_types::intern::{Interner, PackageRef};
+use paketkoll_types::intern::Interner;
+use paketkoll_types::intern::PackageRef;
 
 /// Describes a diversion by dpkg-divert
 ///
@@ -85,9 +88,11 @@ mod tests {
 
     use pretty_assertions::assert_eq;
 
-    use paketkoll_types::intern::{Interner, PackageRef};
+    use paketkoll_types::intern::Interner;
+    use paketkoll_types::intern::PackageRef;
 
-    use super::{parse_diversions, Diversion};
+    use super::parse_diversions;
+    use super::Diversion;
 
     #[test]
     fn test_parse_diversions() {

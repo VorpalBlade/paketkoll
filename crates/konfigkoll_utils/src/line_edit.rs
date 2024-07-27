@@ -1,6 +1,10 @@
 //! A simple streaming line editor (inspired by sed, but simplified)
 
-use std::{borrow::Cow, cell::RefCell, fmt::Debug, rc::Rc, str::Lines};
+use std::borrow::Cow;
+use std::cell::RefCell;
+use std::fmt::Debug;
+use std::rc::Rc;
+use std::str::Lines;
 
 use compact_str::CompactString;
 use regex::Regex;

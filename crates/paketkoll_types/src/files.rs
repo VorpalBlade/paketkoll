@@ -1,7 +1,8 @@
 //! Types representing things about the file system
 
 use std::fmt::Octal;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 use std::sync::atomic::AtomicBool;
 use std::time::SystemTime;
 

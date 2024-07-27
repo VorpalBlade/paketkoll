@@ -1,14 +1,17 @@
 //! Issue describes the difference between the system and package manager
 
-use std::{
-    fmt::Display,
-    os::unix::fs::FileTypeExt,
-    path::{Path, PathBuf},
-};
+use std::fmt::Display;
+use std::os::unix::fs::FileTypeExt;
+use std::path::Path;
+use std::path::PathBuf;
 
 use smallvec::SmallVec;
 
-use crate::files::{Checksum, DeviceType, Gid, Mode, Uid};
+use crate::files::Checksum;
+use crate::files::DeviceType;
+use crate::files::Gid;
+use crate::files::Mode;
+use crate::files::Uid;
 use crate::intern::PackageRef;
 
 /// Type for vector of issues.

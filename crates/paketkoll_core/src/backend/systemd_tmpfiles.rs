@@ -1,27 +1,41 @@
 //! (File only) backend for systemd-tmpfiles
 
-use std::{
-    borrow::Cow,
-    collections::hash_map::Entry,
-    os::unix::fs::MetadataExt,
-    path::{Path, PathBuf},
-    process::Stdio,
-};
+use std::borrow::Cow;
+use std::collections::hash_map::Entry;
+use std::os::unix::fs::MetadataExt;
+use std::path::Path;
+use std::path::PathBuf;
+use std::process::Stdio;
 
 use ahash::AHashMap;
 use anyhow::Context;
 use compact_str::CompactString;
 
-use paketkoll_types::backend::{Files, Name, OriginalFileQuery};
-use paketkoll_types::files::{
-    Checksum, DeviceNode, DeviceType, Directory, Fifo, FileEntry, FileFlags, Gid, Mode,
-    Permissions, Properties, RegularFile, RegularFileBasic, RegularFileSystemd, Symlink, Uid,
-};
-use paketkoll_types::{
-    backend::{PackageManagerError, PackageMap},
-    intern::{Interner, PackageRef},
-};
-use paketkoll_utils::checksum::{sha256_buffer, sha256_readable};
+use paketkoll_types::backend::Files;
+use paketkoll_types::backend::Name;
+use paketkoll_types::backend::OriginalFileQuery;
+use paketkoll_types::backend::PackageManagerError;
+use paketkoll_types::backend::PackageMap;
+use paketkoll_types::files::Checksum;
+use paketkoll_types::files::DeviceNode;
+use paketkoll_types::files::DeviceType;
+use paketkoll_types::files::Directory;
+use paketkoll_types::files::Fifo;
+use paketkoll_types::files::FileEntry;
+use paketkoll_types::files::FileFlags;
+use paketkoll_types::files::Gid;
+use paketkoll_types::files::Mode;
+use paketkoll_types::files::Permissions;
+use paketkoll_types::files::Properties;
+use paketkoll_types::files::RegularFile;
+use paketkoll_types::files::RegularFileBasic;
+use paketkoll_types::files::RegularFileSystemd;
+use paketkoll_types::files::Symlink;
+use paketkoll_types::files::Uid;
+use paketkoll_types::intern::Interner;
+use paketkoll_types::intern::PackageRef;
+use paketkoll_utils::checksum::sha256_buffer;
+use paketkoll_utils::checksum::sha256_readable;
 use paketkoll_utils::MODE_MASK;
 use systemd_tmpfiles::specifier::Resolve;
 

@@ -43,13 +43,24 @@
 use std::env;
 use std::ffi::OsStr;
 use std::fmt;
-use std::io::{self, BufRead, BufReader, Read, Split};
+use std::io::BufRead;
+use std::io::BufReader;
+use std::io::Read;
+use std::io::Split;
+use std::io::{self};
 use std::os::unix::ffi::OsStrExt;
-use std::path::{Path, PathBuf};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::path::Path;
+use std::path::PathBuf;
+use std::time::SystemTime;
+use std::time::UNIX_EPOCH;
 
-pub use parser::{FileMode, FileType, Format, ParserError};
-use parser::{Keyword, MTreeLine, SpecialKind};
+pub use parser::FileMode;
+pub use parser::FileType;
+pub use parser::Format;
+use parser::Keyword;
+use parser::MTreeLine;
+pub use parser::ParserError;
+use parser::SpecialKind;
 use util::decode_escapes_path;
 
 mod parser;

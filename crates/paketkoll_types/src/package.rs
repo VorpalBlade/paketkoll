@@ -3,7 +3,9 @@
 use compact_str::CompactString;
 use smallvec::SmallVec;
 
-use crate::intern::{ArchitectureRef, Interner, PackageRef};
+use crate::intern::ArchitectureRef;
+use crate::intern::Interner;
+use crate::intern::PackageRef;
 
 /// The reason a package is installed
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

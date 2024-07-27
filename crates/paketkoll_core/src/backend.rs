@@ -2,8 +2,10 @@
 
 use std::fmt::Debug;
 
-use paketkoll_types::backend::{Files, Packages};
-use paketkoll_types::intern::{Interner, PackageRef};
+use paketkoll_types::backend::Files;
+use paketkoll_types::backend::Packages;
+use paketkoll_types::intern::Interner;
+use paketkoll_types::intern::PackageRef;
 
 #[cfg(feature = "arch_linux")]
 pub(crate) mod arch;

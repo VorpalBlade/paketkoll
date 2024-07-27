@@ -1,9 +1,13 @@
 //! Handles resolving specifiers
 
-use std::{borrow::Cow, collections::HashMap};
+use std::borrow::Cow;
+use std::collections::HashMap;
 
 use compact_str::CompactString;
 use thiserror::Error;
+
+#[cfg(feature = "user")]
+pub use user::UserResolver;
 
 use crate::architecture::Architecture;
 
@@ -282,15 +286,15 @@ fn parse_os_release(buffer: &str) -> HashMap<&str, &str> {
 }
 
 #[cfg(feature = "user")]
-pub use user::UserResolver;
-
-#[cfg(feature = "user")]
 mod user {
     use compact_str::CompactString;
 
-    use super::{
-        private, InvariantProvider, ProviderError, Resolve, SystemResolver, VariantProvider,
-    };
+    use super::private;
+    use super::InvariantProvider;
+    use super::ProviderError;
+    use super::Resolve;
+    use super::SystemResolver;
+    use super::VariantProvider;
 
     /// Resolver for user instance of systemd-tmpfiles
     #[derive(Debug, Clone, PartialEq, Eq, Hash)]
