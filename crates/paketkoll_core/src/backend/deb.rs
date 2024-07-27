@@ -548,7 +548,7 @@ impl Packages for Debian {
         if !install.is_empty() {
             package_manager_transaction(
                 "apt-get",
-                &["install"],
+                &["install", "--no-install-recommends"],
                 install,
                 (!ask_confirmation).then_some("-y"),
             )
