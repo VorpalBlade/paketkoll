@@ -3,10 +3,10 @@ description = "Cargo-xtask pattern. Do not upload to crates.io"
 edition = "2021"
 license = "MPL-2.0"
 name = "xtask"
+publish = false
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.79.0"
 version = "0.1.0"
-publish = false
 
 [features]
 # Default features
@@ -32,8 +32,8 @@ clap_complete.workspace = true
 clap_mangen.workspace = true
 env_logger.workspace = true
 konfigkoll = { version = "0.1.0", path = "../konfigkoll" }
-paketkoll = { version = "0.3.0", path = "../paketkoll" }
 log.workspace = true
+paketkoll = { version = "0.3.0", path = "../paketkoll" }
 
 [lints]
 workspace = true

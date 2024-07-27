@@ -9,7 +9,7 @@ version = "0.1.0"
 
 [features]
 # Default features
-default = ["arch_linux", "debian"]
+default = []
 
 # Include the Arch Linux backend    
 arch_linux = ["paketkoll_core/arch_linux"]
@@ -37,8 +37,13 @@ paketkoll_types = { version = "0.1.0", path = "../paketkoll_types", features = [
 paketkoll_utils = { version = "0.1.0", path = "../paketkoll_utils" }
 parking_lot.workspace = true
 regex.workspace = true
+rune-modules = { workspace = true, features = [
+    "process",
+    "json",
+    "toml",
+    "tokio",
+] }
 rune.workspace = true
-rune-modules = { workspace = true, features = ["process", "json", "toml", "tokio"] }
 rust-ini.workspace = true
 smallvec.workspace = true
 sysinfo.workspace = true

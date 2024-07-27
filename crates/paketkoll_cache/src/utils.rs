@@ -1,6 +1,7 @@
 //! Utility functions
 
 use compact_str::{format_compact, CompactString};
+
 use paketkoll_types::{intern::Interner, package::PackageInterned};
 
 /// Format a package for use in cache keys
