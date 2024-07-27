@@ -44,7 +44,7 @@ pub async fn phase_system_discovery(props, settings) {
     // This defines what tasks the system will fulfill
     // (like "video editing" and "gaming")
     props.set("tasks", tasks);
-    Ok(()) 
+    Ok(())
 }
 
 pub async fn phase_main(props, cmds, package_managers) {
@@ -99,7 +99,7 @@ pub struct Context {
     cmds,
     // package_managers::PackageManagers
     package_managers,
-    
+
     // System
     system,
     // Tasks
@@ -225,7 +225,7 @@ async fn do_patch(ctx, patch_path) {
     // Create a temporary directory
     let tmpdir = filesystem::TempDir::new()?;
     let tmpdir_path = tmpdir.path();
-    
+
     // Read the original file
     let orig = ctx.package_managers.files().original_file_contents(pkg, file)?;
     let orig_path = tmpdir.write("orig", orig)?;
@@ -265,7 +265,7 @@ etckeeper
 -Target = etc/*
 +Type = Package
 +Target = *
- 
+
  [Action]
  Description = etckeeper: pre-transaction commit
 ```

@@ -19,3 +19,7 @@
 - [API documentation](./konfigkoll/api.md)
 - [Defaults](./konfigkoll/defaults.md)
 - [Limitations](./konfigkoll/limitations.md)
+
+# For developers
+
+- [Design overview](./konfigkoll/dev/design.md)

@@ -1,5 +1,5 @@
 // This is the main script for konfigkoll
-            
+
 /// System configuration
 ///
 /// Parameters:
@@ -62,7 +62,7 @@ pub async fn phase_script_dependencies(props, cmds) {
 ///
 /// It is recommended to use the "save" sub-command to create an initial
 /// `unsorted.rn` file that you can then copy the parts you want from into here.
-/// 
+///
 /// A tip is to use `konfigkoll -p dry-run save` the first few times to not
 /// *actually* save all the files, this helps you figure out what ignores to add
 /// above in `phase_ignores()` without copying a ton of files. Once you are happy

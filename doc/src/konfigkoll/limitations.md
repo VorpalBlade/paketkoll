@@ -10,17 +10,26 @@ for more potential limitations.
 
 ### Debian
 
-On Debian, `apt`/`dpkg` doesn't provide a lot of information about the files installed by a package.
-In fact, it only provides the MD5 sum of regular files and the list of non-regular files (without info
-about what *type* of non-regular file they are). This means that unlike Arch Linux:
+#### Metadata
 
-* We won't be able to tell if the mode/owner/group is wrong on a file.
-* `--trust-mtime` doesn't work (we have to checksum every file).
+On Debian, `apt`/`dpkg` doesn't provide a lot of information about the files
+installed by a package. In fact, it only provides the MD5 sum of regular files
+and the list of non-regular files (without info about what *type* of non-regular
+file they are). As a workaround we instead pull the data from the cached downloaded
+`.deb` files. There are a number of implications of this:
 
-I have plans how to work around some of these limitations in the future.
+* We need the apt package cache to be populated. We will download missing packages
+  as needed to the cache.
+* Reading the compressed packages is slow (very slow) so we cache the summary
+  data in a disk cache, (typically 50-250 MB depending on the number of
+  installed files). That disk cache will be located in `~/.cache/konfigkoll` by
+  default. If you run with `sudo` it will be root's home directory that contains
+  this.
+
+#### Services
 
 Debian is, unlike Arch Linux, not yet fully systemd-ified. This means that some
-of the integrations (like enabling systemd services) are less useful. Debian
+of the integrations (systemd services, systemd-sysusers) are less useful. Debian
 support is *currently work in progress* and solution for this will be designed
 at later point in time.
 

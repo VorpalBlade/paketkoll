@@ -29,7 +29,7 @@ async fn patch_zsh(cmds, package_managers) {
     // Create a temporary directory to operate in
     let tmpdir = filesystem::TempDir::new()?;
     let tmpdir_path = tmpdir.path();
-    
+
     // Read the original file from the package manager
     let orig = package_managers.files().original_file_contents(pkg, file)?;
     // Write out the original file to the temporary directory, and store the
@@ -93,11 +93,11 @@ For talking to external processes this leaks through into the Rune code (otherwi
 Here is what you have to keep in mind:
 
 * When you see an `async fn` in the API docs, you need to call it like so:
-  
+
   ```rune
   let result = some_async_fn().await;
   ```
-  
+
   This means that when `some_async_fn` is called we should wait for it's output.
 * You can only use async functions from other async functions. That is, you
   can't call an async function from a non-async function. So your `phase_main`
