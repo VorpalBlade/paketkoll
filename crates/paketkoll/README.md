@@ -68,13 +68,13 @@ $ hyperfine -i -N --warmup 1 "paketkoll --trust-mtime check" "paccheck --file-pr
 Benchmark 1: paketkoll --trust-mtime
   Time (mean ± σ):     249.4 ms ±   4.8 ms    [User: 1194.5 ms, System: 1216.2 ms]
   Range (min … max):   242.1 ms … 259.7 ms    12 runs
- 
+
 Benchmark 2: paccheck --file-properties --quiet
   Time (mean ± σ):      2.561 s ±  0.020 s    [User: 1.504 s, System: 1.053 s]
   Range (min … max):    2.527 s …  2.598 s    10 runs
- 
+
   Warning: Ignoring non-zero exit code.
- 
+
 Summary
   paketkoll --trust-mtime ran
    10.27 ± 0.21 times faster than paccheck --file-properties --quiet
@@ -87,13 +87,13 @@ $ hyperfine -i -N --warmup 1 "paketkoll  check" "paccheck --sha256sum --quiet"
 Benchmark 1: paketkoll
   Time (mean ± σ):      9.986 s ±  1.329 s    [User: 17.368 s, System: 19.087 s]
   Range (min … max):    8.196 s … 11.872 s    10 runs
- 
+
 Benchmark 2: paccheck --sha256sum --quiet
   Time (mean ± σ):     68.976 s ±  0.339 s    [User: 16.661 s, System: 17.816 s]
   Range (min … max):   68.413 s … 69.604 s    10 runs
- 
+
   Warning: Ignoring non-zero exit code.
- 
+
 Summary
   paketkoll ran
     6.91 ± 0.92 times faster than paccheck --sha256sum --quiet
@@ -116,13 +116,13 @@ $ hyperfine -i -N --warmup 1 "paketkoll  check" "debsums -c"
 Benchmark 1: paketkoll
   Time (mean ± σ):      2.664 s ±  0.102 s    [User: 3.937 s, System: 1.116 s]
   Range (min … max):    2.543 s …  2.813 s    10 runs
- 
+
 Benchmark 2: debsums -c
   Time (mean ± σ):      8.893 s ±  0.222 s    [User: 5.453 s, System: 1.350 s]
   Range (min … max):    8.637 s …  9.199 s    10 runs
- 
+
   Warning: Ignoring non-zero exit code.
- 
+
 Summary
   'paketkoll' ran
     3.34 ± 0.15 times faster than 'debsums -c'
@@ -144,13 +144,13 @@ $ hyperfine -i -N --warmup 1 "paketkoll  check" "debsums -c"
 Benchmark 1: paketkoll
   Time (mean ± σ):      5.341 s ±  0.174 s    [User: 42.553 s, System: 33.049 s]
   Range (min … max):    5.082 s …  5.586 s    10 runs
- 
+
 Benchmark 2: debsums -c
   Time (mean ± σ):     92.839 s ±  7.332 s    [User: 47.664 s, System: 15.697 s]
   Range (min … max):   82.872 s … 103.710 s    10 runs
- 
+
   Warning: Ignoring non-zero exit code.
- 
+
 Summary
   paketkoll ran
    17.38 ± 1.49 times faster than debsums -c

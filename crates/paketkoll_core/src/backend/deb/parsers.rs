@@ -658,23 +658,23 @@ mod tests {
             Package: ncal
             Architecture: arm64
             Auto-Installed: 1
-            
+
             Package: libqrencode4
             Architecture: arm64
             Auto-Installed: 1
-            
+
             Package: linux-image-6.6.28+rpt-rpi-2712
             Architecture: arm64
             Auto-Installed: 1
-            
+
             Package: linux-image-6.6.28+rpt-rpi-v8
             Architecture: arm64
             Auto-Installed: 1
-            
+
             Package: linux-headers-6.6.28+rpt-common-rpi
             Architecture: arm64
             Auto-Installed: 1
-            
+
             Package: linux-headers-6.6.28+rpt-rpi-v8
             Architecture: arm64
             Auto-Installed: 1

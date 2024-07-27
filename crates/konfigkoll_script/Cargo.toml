@@ -11,7 +11,7 @@ version = "0.1.0"
 # Default features
 default = []
 
-# Include the Arch Linux backend    
+# Include the Arch Linux backend
 arch_linux = ["paketkoll_core/arch_linux"]
 
 # Include support for the Debian backend
