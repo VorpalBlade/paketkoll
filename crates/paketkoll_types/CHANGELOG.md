@@ -8,6 +8,24 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.1] - 2024-07-27
+
+### 🚀 Features
+
+- Disk cache & archive-based files for Debian
+- Get files from downloaded archives
+
+### 📚 Documentation
+
+- Spell check code comments
+
+### ⚙️ Other stuff
+
+- Run rustfmt with nightly `imports_granularity = "Item"`
+- Reformat Cargo.toml files & imports
+- Clean up unneeded paths for imported items
+- Use RustRover Optimise imports
+
 ## [0.1.0] - 2024-07-25
 
 This is code that has been extracted from the `paketkoll_core` crate and is

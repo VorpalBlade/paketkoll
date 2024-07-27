@@ -1104,7 +1104,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "ahash",
  "anyhow",
@@ -1134,7 +1134,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "ahash",
  "anyhow",
@@ -1163,7 +1163,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_hwinfo"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "ahash",
  "anyhow",
@@ -1176,7 +1176,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_script"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "ahash",
  "anyhow",
@@ -1209,7 +1209,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_types"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "ahash",
  "anyhow",
@@ -1403,7 +1403,7 @@ dependencies = [
 
 [[package]]
 name = "mtree2"
-version = "0.6.2"
+version = "0.6.3"
 dependencies = [
  "bitflags 2.6.0",
  "faster-hex",
@@ -1701,7 +1701,7 @@ checksum = "b15813163c1d831bf4a13c3610c05c0d03b39feb07f7e09fa234dac9b15aaf39"
 
 [[package]]
 name = "paketkoll"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "ahash",
  "anyhow",
@@ -1721,7 +1721,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_cache"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "ahash",
  "anyhow",
@@ -1736,7 +1736,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_core"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "ahash",
  "anyhow",
@@ -1781,7 +1781,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_types"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "ahash",
  "anyhow",
@@ -1801,7 +1801,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_utils"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "paketkoll_types",
@@ -2747,7 +2747,7 @@ dependencies = [
 
 [[package]]
 name = "systemd_tmpfiles"
-version = "0.1.2"
+version = "0.1.3"
 dependencies = [
  "base64-simd",
  "bitflags 2.6.0",

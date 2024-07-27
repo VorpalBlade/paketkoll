@@ -8,6 +8,19 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.6.3] - 2024-07-27
+
+### 📚 Documentation
+
+- Spell check code comments
+
+### ⚙️ Other stuff
+
+- Run rustfmt with nightly `imports_granularity = "Item"`
+- Clean up unneeded paths for imported items
+- Follow naming conventions
+- Use RustRover Optimise imports
+
 ## [0.6.2] - 2024-07-25
 
 ### 🚜 Refactoring

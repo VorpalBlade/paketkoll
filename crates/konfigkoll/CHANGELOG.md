@@ -8,6 +8,30 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.3] - 2024-07-27
+
+### 🚀 Features
+
+- Disk cache & archive-based file backend for Debian
+
+### 🚜 Refactoring
+
+- Make `konfigkoll_script` independent of `konfigkoll_core`
+- Restructure `paketkoll_cache`
+
+### 📚 Documentation
+
+- Development docs & misc updates
+- Spell check code comments
+
+### ⚙️ Other stuff
+
+- Format strings using nightly rustfmt
+- Run rustfmt with nightly `imports_granularity = "Item"`
+- Clean up trailing ws
+- Reformat Cargo.toml files & imports
+- Use RustRover Optimise imports
+
 ## [0.1.2] - 2024-07-25
 
 ### 🐛 Bug fixes

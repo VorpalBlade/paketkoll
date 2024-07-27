@@ -8,6 +8,31 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.5.1] - 2024-07-27
+
+### 🚀 Features
+
+- Use --no-install-recommends for Debian backend
+- Disk cache & archive-based files for Debian
+- Get files from downloaded archives
+
+### 🚜 Refactoring
+
+- Refactor `original_files`
+
+### 📚 Documentation
+
+- Spell check code comments
+- Spell check
+
+### ⚙️ Other stuff
+
+- Format strings using nightly rustfmt
+- Run rustfmt with nightly `imports_granularity = "Item"`
+- Clean up trailing ws
+- Clean up unneeded paths for imported items
+- Use RustRover Optimise imports
+
 ## [0.5.0] - 2024-07-25
 
 ### 🚀 Features

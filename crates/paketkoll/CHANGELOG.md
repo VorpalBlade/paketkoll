@@ -8,6 +8,21 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.3.1] - 2024-07-27
+
+### 📚 Documentation
+
+- Spell check code comments
+
+### ⚙️ Other stuff
+
+- Format strings using nightly rustfmt
+- Run rustfmt with nightly `imports_granularity = "Item"`
+- Clean up trailing ws
+- Debug UI for inspecting files from downloaded archives
+- Clean up unneeded paths for imported items
+- Use RustRover Optimise imports
+
 ## [0.3.0] - 2024-07-25
 
 This is a massive release, as `konfigkoll` was introduced as a new command.

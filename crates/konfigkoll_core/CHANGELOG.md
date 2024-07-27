@@ -8,6 +8,23 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.0] - 2024-07-27
+
+### 🚜 Refactoring
+
+- Make `konfigkoll_script` independent of `konfigkoll_core`
+
+### 📚 Documentation
+
+- Spell check code comments
+
+### ⚙️ Other stuff
+
+- Format strings using nightly rustfmt
+- Run rustfmt with nightly `imports_granularity = "Item"`
+- Clean up unneeded paths for imported items
+- Use RustRover Optimise imports
+
 ## [0.1.0] - 2024-07-25
 
 This is the initial release of the `konfigkoll_core` crate.
