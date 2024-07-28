@@ -98,8 +98,17 @@ impl Passwd {
             for user in self.users.values() {
                 if !ids.insert(user.uid) {
                     return Err(anyhow::anyhow!(
-                        "More than one user maps to UID: {}",
-                        user.uid
+                        "More than one user maps to UID: {} ({})",
+                        user.uid,
+                        self.users
+                            .iter()
+                            .filter_map(|(_, v)| if v.uid == user.uid {
+                                Some(v.name.as_str())
+                            } else {
+                                None
+                            })
+                            .collect_vec()
+                            .join(", ")
                     ));
                 }
             }
@@ -109,8 +118,17 @@ impl Passwd {
             for group in self.groups.values() {
                 if !ids.insert(group.gid) {
                     return Err(anyhow::anyhow!(
-                        "More than one group maps to GID: {}",
-                        group.gid
+                        "More than one group maps to GID: {} ({})",
+                        group.gid,
+                        self.groups
+                            .iter()
+                            .filter_map(|(_, v)| if v.gid == group.gid {
+                                Some(v.name.as_str())
+                            } else {
+                                None
+                            })
+                            .collect_vec()
+                            .join(", ")
                     ));
                 }
             }
