@@ -105,7 +105,7 @@ impl Commands {
         }
         let backend = Backend::from_str(package_manager).context("Invalid backend")?;
         if !self.settings.is_pkg_backend_enabled(backend) {
-            tracing::info!("Skipping disabled package manager {}", package_manager);
+            tracing::debug!("Skipping disabled package manager {}", package_manager);
             return Ok(());
         }
         if self

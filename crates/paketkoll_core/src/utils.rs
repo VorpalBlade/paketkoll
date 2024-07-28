@@ -258,7 +258,7 @@ pub(crate) fn extract_files(
     let diff = queries.difference(&*seen);
     let mut has_errors = false;
     for missing in diff {
-        log::error!("Failed to find requested file {missing} in package {pkg}");
+        log::warn!("Failed to find requested file {missing} in package {pkg}");
         has_errors = true;
     }
     if has_errors {
