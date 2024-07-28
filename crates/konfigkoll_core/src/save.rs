@@ -19,6 +19,7 @@ use konfigkoll_types::PkgInstruction;
 ///
 /// Precondition: The instructions are sorted by default sort order (path, op)
 pub fn save_fs_changes<'instruction>(
+    prefix: &str,
     output: &mut dyn std::io::Write,
     mut file_data_saver: impl FnMut(&Utf8Path, &FileContents) -> anyhow::Result<()>,
     instructions: impl Iterator<Item = &'instruction FsInstruction>,
@@ -28,9 +29,10 @@ pub fn save_fs_changes<'instruction>(
             Some(ref comment) => format_compact!(" // {}", comment),
             None => CompactString::default(),
         };
+        let prefix = format!("    {}cmds", prefix);
         match instruction.op {
             konfigkoll_types::FsOp::Remove => {
-                writeln!(output, "    cmds.rm(\"{}\")?;{}", instruction.path, comment)?;
+                writeln!(output, "{prefix}.rm(\"{}\")?;{}", instruction.path, comment)?;
             }
             konfigkoll_types::FsOp::CreateFile(ref contents) => {
                 file_data_saver(&instruction.path, contents).with_context(|| {
@@ -38,49 +40,49 @@ pub fn save_fs_changes<'instruction>(
                 })?;
                 writeln!(
                     output,
-                    "    cmds.copy(\"{}\")?;{}",
+                    "{prefix}.copy(\"{}\")?;{}",
                     instruction.path, comment
                 )?;
             }
             konfigkoll_types::FsOp::CreateSymlink { ref target } => {
                 writeln!(
                     output,
-                    "    cmds.ln(\"{}\", \"{}\")?;{}",
+                    "{prefix}.ln(\"{}\", \"{}\")?;{}",
                     instruction.path, target, comment
                 )?;
             }
             konfigkoll_types::FsOp::CreateDirectory => {
                 writeln!(
                     output,
-                    "    cmds.mkdir(\"{}\")?;{}",
+                    "{prefix}.mkdir(\"{}\")?;{}",
                     instruction.path, comment
                 )?;
             }
             konfigkoll_types::FsOp::CreateFifo => {
                 writeln!(
                     output,
-                    "    cmds.mkfifo(\"{}\")?;{}",
+                    "{prefix}.mkfifo(\"{}\")?;{}",
                     instruction.path, comment
                 )?;
             }
             konfigkoll_types::FsOp::CreateBlockDevice { major, minor } => {
                 writeln!(
                     output,
-                    "    cmds.mknod(\"{}\", \"b\", {}, {})?;{}",
+                    "{prefix}.mknod(\"{}\", \"b\", {}, {})?;{}",
                     instruction.path, major, minor, comment
                 )?;
             }
             konfigkoll_types::FsOp::CreateCharDevice { major, minor } => {
                 writeln!(
                     output,
-                    "    cmds.mknod(\"{}\", \"c\", {}, {})?;{}",
+                    "{prefix}.mknod(\"{}\", \"c\", {}, {})?;{}",
                     instruction.path, major, minor, comment
                 )?;
             }
             konfigkoll_types::FsOp::SetMode { mode } => {
                 writeln!(
                     output,
-                    "    cmds.chmod(\"{}\", 0o{:o})?;{}",
+                    "{prefix}.chmod(\"{}\", 0o{:o})?;{}",
                     instruction.path,
                     mode.as_raw(),
                     comment
@@ -89,14 +91,14 @@ pub fn save_fs_changes<'instruction>(
             konfigkoll_types::FsOp::SetOwner { ref owner } => {
                 writeln!(
                     output,
-                    "    cmds.chown(\"{}\", \"{}\")?;{}",
+                    "{prefix}.chown(\"{}\", \"{}\")?;{}",
                     instruction.path, owner, comment
                 )?;
             }
             konfigkoll_types::FsOp::SetGroup { ref group } => {
                 writeln!(
                     output,
-                    "    cmds.chgrp(\"{}\", \"{}\")?;{}",
+                    "{prefix}.chgrp(\"{}\", \"{}\")?;{}",
                     instruction.path, group, comment
                 )?;
             }
@@ -117,9 +119,11 @@ pub fn save_fs_changes<'instruction>(
 
 /// Save package changes
 pub fn save_packages<'instructions>(
+    prefix: &str,
     output: &mut dyn std::io::Write,
     instructions: impl Iterator<Item = (&'instructions PkgIdent, PkgInstruction)>,
 ) -> anyhow::Result<()> {
+    let prefix = format!("    {}cmds", prefix);
     let instructions = instructions
         .into_iter()
         .sorted_unstable_by(|(ak, av), (bk, bv)| {
@@ -138,14 +142,14 @@ pub fn save_packages<'instructions>(
             konfigkoll_types::PkgOp::Uninstall => {
                 writeln!(
                     output,
-                    "    cmds.remove_pkg(\"{}\", \"{}\")?;{}",
+                    "{prefix}.remove_pkg(\"{}\", \"{}\")?;{}",
                     pkg_ident.package_manager, pkg_ident.identifier, comment
                 )?;
             }
             konfigkoll_types::PkgOp::Install => {
                 writeln!(
                     output,
-                    "    cmds.add_pkg(\"{}\", \"{}\")?;{}",
+                    "{prefix}.add_pkg(\"{}\", \"{}\")?;{}",
                     pkg_ident.package_manager, pkg_ident.identifier, comment
                 )?;
             }
@@ -195,10 +199,10 @@ mod tests {
             },
         ];
 
-        save_fs_changes(&mut output, file_data_saver, instructions.iter()).unwrap();
+        save_fs_changes("A", &mut output, file_data_saver, instructions.iter()).unwrap();
 
         let expected =
-            "    cmds.copy(\"/hello/world\")?;\n    cmds.rm(\"/remove_me\")?; // For reasons!\n";
+            "    Acmds.copy(\"/hello/world\")?;\n    Acmds.rm(\"/remove_me\")?; // For reasons!\n";
         assert_eq!(String::from_utf8(output).unwrap(), expected);
         assert_eq!(
             file_data.get(Utf8Path::new("/hello/world")).unwrap(),
@@ -232,13 +236,14 @@ mod tests {
         );
 
         save_packages(
+            "B",
             &mut output,
             instructions.iter().map(|(a, b)| (a, b.clone())).sorted(),
         )
         .unwrap();
 
-        let expected = "    cmds.remove_pkg(\"apt\", \"zsh\")?; // A comment\n    \
-                        cmds.add_pkg(\"pacman\", \"bash\")?;\n";
+        let expected = "    Bcmds.remove_pkg(\"apt\", \"zsh\")?; // A comment\n    \
+                        Bcmds.add_pkg(\"pacman\", \"bash\")?;\n";
         assert_eq!(String::from_utf8(output).unwrap(), expected);
     }
 }

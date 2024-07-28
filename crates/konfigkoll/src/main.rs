@@ -267,7 +267,8 @@ async fn main() -> anyhow::Result<()> {
                     .as_bytes(),
             )?;
             output.write_all("pub fn unsorted_additions(props, cmds) {\n".as_bytes())?;
-            konfigkoll_core::save::save_packages(&mut output, pkg_additions.into_iter())?;
+            let prefix = script_engine.state().settings().save_prefix();
+            konfigkoll_core::save::save_packages(&prefix, &mut output, pkg_additions.into_iter())?;
             let files_path = config_path.join("files");
             let sensitive_configs: AHashSet<Utf8PathBuf> = script_engine
                 .state()
@@ -275,6 +276,7 @@ async fn main() -> anyhow::Result<()> {
                 .sensitive_configs()
                 .collect();
             konfigkoll_core::save::save_fs_changes(
+                &prefix,
                 &mut output,
                 |path, contents| {
                     if sensitive_configs.contains(path) {
@@ -304,7 +306,7 @@ async fn main() -> anyhow::Result<()> {
             )?;
             output.write_all("// (e.g. write and copy will get mixed up).\n".as_bytes())?;
             output.write_all("pub fn unsorted_removals(props, cmds) {\n".as_bytes())?;
-            konfigkoll_core::save::save_packages(&mut output, pkg_removals.into_iter())?;
+            konfigkoll_core::save::save_packages(&prefix, &mut output, pkg_removals.into_iter())?;
             output.write_all("}\n".as_bytes())?;
         }
         Commands::Apply {} => {

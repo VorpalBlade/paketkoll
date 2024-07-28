@@ -29,6 +29,8 @@ pub struct Settings {
     diff: Mutex<Vec<String>>,
     /// Pager to use, default is to use $PAGER and fall back to `less`
     pager: Mutex<Vec<String>>,
+    /// Save prefix for writing out settings lines
+    save_prefix: Mutex<String>,
 }
 
 impl Default for Settings {
@@ -42,6 +44,7 @@ impl Default for Settings {
             )),
             diff: Mutex::new(vec!["diff".into(), "-Naur".into()]),
             pager: Mutex::new(vec![]),
+            save_prefix: Mutex::new("".into()),
         }
     }
 }
@@ -95,6 +98,12 @@ impl Settings {
         } else {
             vec![std::env::var("PAGER").ok().unwrap_or_else(|| "less".into())]
         }
+    }
+
+    /// Get save prefix
+    pub fn save_prefix(&self) -> String {
+        let guard = self.save_prefix.lock();
+        guard.clone()
     }
 }
 
@@ -198,6 +207,15 @@ impl Settings {
         let mut guard = self.pager.lock();
         *guard = cmd;
     }
+
+    /// Set the prefix for writing out lines in `unsorted.rn`.
+    ///
+    /// This is useful if you wrap `cmds` with a context object of your own.
+    #[rune::function]
+    pub fn set_save_prefix(&self, prefix: &str) {
+        let mut guard = self.save_prefix.lock();
+        *guard = prefix.into();
+    }
 }
 
 #[rune::module(::settings)]
@@ -211,5 +229,6 @@ pub(crate) fn module() -> Result<Module, ContextError> {
     m.function_meta(Settings::sensitive_config)?;
     m.function_meta(Settings::set_diff)?;
     m.function_meta(Settings::set_pager)?;
+    m.function_meta(Settings::set_save_prefix)?;
     Ok(m)
 }
