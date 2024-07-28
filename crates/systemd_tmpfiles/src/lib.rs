@@ -295,6 +295,7 @@ impl Mode {
             Mode::Set { new_only, .. } => *new_only,
         }
     }
+
     pub fn mode(&self) -> libc::mode_t {
         match self {
             Mode::Set { mode, .. } => *mode,
