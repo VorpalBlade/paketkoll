@@ -101,7 +101,7 @@ impl Unit {
                 package,
             } => match package_manager.file_contents(package, &self.unit_file_path()) {
                 Ok(v) => Ok(v),
-                Err(OriginalFilesError::FileNotFound(_)) => {
+                Err(OriginalFilesError::FileNotFound(_, _)) => {
                     // Try again without /usr, because Debian hasn't finished the /usr merge. Still.
                     Ok(package_manager
                         .file_contents(package, &self.unit_file_path().replacen("/usr", "", 1))?)

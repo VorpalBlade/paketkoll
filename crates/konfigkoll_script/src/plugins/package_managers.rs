@@ -158,7 +158,8 @@ impl PackageManager {
             .as_ref()
             .ok_or_else(|| anyhow::anyhow!("No package map for {}", guard.backend))?;
         let results = files
-            .original_files(&queries, package_map, &guard.interner)?;
+            .original_files(&queries, package_map, &guard.interner)
+            .map_err(|e| OriginalFilesError::from_inner(e, path))?;
         if results.len() != 1 {
             Err(anyhow::anyhow!(
                 "Failed original_file_contents({package}, {path}): Got wrong number of results: {}",
@@ -193,8 +194,8 @@ impl PackageManager {
 pub enum OriginalFilesError {
     #[error("Package not found: {0}")]
     PackageNotFound(#[rune(get)] String),
-    #[error("File not found in package: {0}")]
-    FileNotFound(#[rune(get)] String),
+    #[error("File {1} not found in package: {0}")]
+    FileNotFound(#[rune(get)] String, #[rune(get)] String),
     #[error("Failed to get original file: {0}")]
     Other(#[from] anyhow::Error),
 }
@@ -204,16 +205,14 @@ impl OriginalFilesError {
     fn string_debug(&self, f: &mut rune::runtime::Formatter) {
         vm_write!(f, "{:?}", self);
     }
-}
 
-impl From<paketkoll_types::backend::OriginalFileError> for OriginalFilesError {
-    fn from(value: paketkoll_types::backend::OriginalFileError) -> Self {
+    fn from_inner(value: paketkoll_types::backend::OriginalFileError, path: &str) -> Self {
         match value {
             paketkoll_types::backend::OriginalFileError::PackageNotFound(v) => {
                 Self::PackageNotFound(v.into())
             }
             paketkoll_types::backend::OriginalFileError::FileNotFound(v) => {
-                Self::FileNotFound(v.into())
+                Self::FileNotFound(v.into(), path.into())
             }
             paketkoll_types::backend::OriginalFileError::Other(v) => Self::Other(v),
         }

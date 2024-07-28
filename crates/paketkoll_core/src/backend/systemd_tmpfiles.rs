@@ -13,6 +13,7 @@ use compact_str::CompactString;
 
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::Name;
+use paketkoll_types::backend::OriginalFileError;
 use paketkoll_types::backend::OriginalFileQuery;
 use paketkoll_types::backend::PackageManagerError;
 use paketkoll_types::backend::PackageMap;
@@ -111,8 +112,10 @@ impl Files for SystemdTmpfiles {
         _queries: &[OriginalFileQuery],
         _packages: &PackageMap,
         _interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<AHashMap<OriginalFileQuery, Vec<u8>>> {
-        anyhow::bail!("Original file queries are not supported for systemd-tmpfiles")
+    ) -> Result<AHashMap<OriginalFileQuery, Vec<u8>>, OriginalFileError> {
+        Err(anyhow::anyhow!(
+            "Original file queries are not supported for systemd-tmpfiles"
+        ))?
     }
 
     fn files_from_archives(
