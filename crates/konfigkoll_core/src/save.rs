@@ -45,7 +45,7 @@ pub fn save_fs_changes<'instruction>(
             konfigkoll_types::FsOp::CreateSymlink { ref target } => {
                 writeln!(
                     output,
-                    "    cmds.symlink(\"{}\", \"{}\")?;{}",
+                    "    cmds.ln(\"{}\", \"{}\")?;{}",
                     instruction.path, target, comment
                 )?;
             }
