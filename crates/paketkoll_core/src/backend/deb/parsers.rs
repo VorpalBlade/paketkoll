@@ -371,8 +371,8 @@ pub(super) fn parse_extended_status(
                     }
                 };
                 result.insert((pkg, arch), reason);
-                // Because this file is screwy it can say the primary architecture instead of all.
-                // Wtf Debian?
+                // Because this file is screwy it can say the primary architecture instead of
+                // all. Wtf Debian?
                 result.insert((pkg, all_arch), reason);
                 state = ExtendedStatusParsingState::Start;
             }
@@ -730,8 +730,22 @@ mod tests {
             ),
             (
                 (
+                    PackageRef::get_or_intern(&interner, "ncal"),
+                    ArchitectureRef::get_or_intern(&interner, "all"),
+                ),
+                Some(InstallReason::Dependency),
+            ),
+            (
+                (
                     PackageRef::get_or_intern(&interner, "libqrencode4"),
                     ArchitectureRef::get_or_intern(&interner, "arm64"),
+                ),
+                Some(InstallReason::Dependency),
+            ),
+            (
+                (
+                    PackageRef::get_or_intern(&interner, "libqrencode4"),
+                    ArchitectureRef::get_or_intern(&interner, "all"),
                 ),
                 Some(InstallReason::Dependency),
             ),
@@ -744,8 +758,22 @@ mod tests {
             ),
             (
                 (
+                    PackageRef::get_or_intern(&interner, "linux-image-6.6.28+rpt-rpi-2712"),
+                    ArchitectureRef::get_or_intern(&interner, "all"),
+                ),
+                Some(InstallReason::Dependency),
+            ),
+            (
+                (
                     PackageRef::get_or_intern(&interner, "linux-image-6.6.28+rpt-rpi-v8"),
                     ArchitectureRef::get_or_intern(&interner, "arm64"),
+                ),
+                Some(InstallReason::Dependency),
+            ),
+            (
+                (
+                    PackageRef::get_or_intern(&interner, "linux-image-6.6.28+rpt-rpi-v8"),
+                    ArchitectureRef::get_or_intern(&interner, "all"),
                 ),
                 Some(InstallReason::Dependency),
             ),
@@ -758,8 +786,22 @@ mod tests {
             ),
             (
                 (
+                    PackageRef::get_or_intern(&interner, "linux-headers-6.6.28+rpt-common-rpi"),
+                    ArchitectureRef::get_or_intern(&interner, "all"),
+                ),
+                Some(InstallReason::Dependency),
+            ),
+            (
+                (
                     PackageRef::get_or_intern(&interner, "linux-headers-6.6.28+rpt-rpi-v8"),
                     ArchitectureRef::get_or_intern(&interner, "arm64"),
+                ),
+                Some(InstallReason::Dependency),
+            ),
+            (
+                (
+                    PackageRef::get_or_intern(&interner, "linux-headers-6.6.28+rpt-rpi-v8"),
+                    ArchitectureRef::get_or_intern(&interner, "all"),
                 ),
                 Some(InstallReason::Dependency),
             ),
