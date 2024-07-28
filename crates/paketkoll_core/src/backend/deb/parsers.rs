@@ -346,6 +346,7 @@ pub(super) fn parse_extended_status(
 ) -> anyhow::Result<ahash::AHashMap<(PackageRef, ArchitectureRef), Option<InstallReason>>> {
     let mut state = ExtendedStatusParsingState::Start;
 
+    let all_arch = ArchitectureRef::get_or_intern(interner, "all");
     let mut result = ahash::AHashMap::new();
 
     let mut buffer = String::new();
@@ -370,6 +371,9 @@ pub(super) fn parse_extended_status(
                     }
                 };
                 result.insert((pkg, arch), reason);
+                // Because this file is screwy it can say the primary architecture instead of all.
+                // Wtf Debian?
+                result.insert((pkg, all_arch), reason);
                 state = ExtendedStatusParsingState::Start;
             }
         }
