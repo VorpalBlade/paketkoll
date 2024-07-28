@@ -1,7 +1,8 @@
 //! A library for iterating through entries of an mtree.
 //!
-//! *mtree* is a data format used for describing a sequence of files. Their location is record,
-//! along with optional extra values like checksums, size, permissions etc.
+//! *mtree* is a data format used for describing a sequence of files. Their
+//! location is record, along with optional extra values like checksums, size,
+//! permissions etc.
 //!
 //! For details on the spec see [mtree(5)].
 //!
@@ -71,14 +72,15 @@ compiler_error!("This library currently only supports unix, due to windows using
 
 /// An mtree parser (start here).
 ///
-/// This is the main struct for the lib. Semantically, an mtree file is a sequence of filesystem
-/// records. These are provided as an iterator. Use the `from_reader` function to construct an
-/// instance.
+/// This is the main struct for the lib. Semantically, an mtree file is a
+/// sequence of filesystem records. These are provided as an iterator. Use the
+/// `from_reader` function to construct an instance.
 pub struct MTree<R>
 where
     R: Read,
 {
-    /// The iterator over lines (lines are guaranteed to end in \n since we only support unix).
+    /// The iterator over lines (lines are guaranteed to end in \n since we only
+    /// support unix).
     inner: Split<BufReader<R>>,
     /// The current working directory for dir calculations.
     cwd: PathBuf,
@@ -163,7 +165,8 @@ where
 
 /// An entry in the mtree file.
 ///
-/// Entries have a path to the entity in question, and a list of optional params.
+/// Entries have a path to the entity in question, and a list of optional
+/// params.
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Entry {
     /// The path of this entry
@@ -185,8 +188,8 @@ impl Entry {
         self.path.as_ref()
     }
 
-    /// `cksum` The checksum of the file using the default algorithm specified by
-    /// the cksum(1) utility.
+    /// `cksum` The checksum of the file using the default algorithm specified
+    /// by the cksum(1) utility.
     pub fn checksum(&self) -> Option<u64> {
         self.params.checksum
     }
@@ -196,7 +199,8 @@ impl Entry {
         self.params.device.as_ref()
     }
 
-    /// `contents` The full pathname of a file that holds the contents of this file.
+    /// `contents` The full pathname of a file that holds the contents of this
+    /// file.
     pub fn contents(&self) -> Option<&Path> {
         self.params
             .contents
@@ -216,7 +220,8 @@ impl Entry {
 
     /// `gname` The file group as a symbolic name.
     ///
-    /// The name can be up to 32 chars and must match regex `[a-z_][a-z0-9_-]*[$]?`.
+    /// The name can be up to 32 chars and must match regex
+    /// `[a-z_][a-z0-9_-]*[$]?`.
     pub fn gname(&self) -> Option<&[u8]> {
         self.params.gname.as_ref().map(std::convert::AsRef::as_ref)
     }
@@ -241,7 +246,8 @@ impl Entry {
         self.params.md5
     }
 
-    /// `mode` The current file's permissions as a numeric (octal) or symbolic value.
+    /// `mode` The current file's permissions as a numeric (octal) or symbolic
+    /// value.
     pub fn mode(&self) -> Option<FileMode> {
         self.params.mode
     }
@@ -281,17 +287,20 @@ impl Entry {
         self.params.sha1.as_ref().map(std::convert::AsRef::as_ref)
     }
 
-    /// `sha256|sha256digest` The FIPS 180-2 ("SHA-256") message digest of the file.
+    /// `sha256|sha256digest` The FIPS 180-2 ("SHA-256") message digest of the
+    /// file.
     pub fn sha256(&self) -> Option<&[u8; 32]> {
         self.params.sha256.as_ref()
     }
 
-    /// `sha384|sha384digest` The FIPS 180-2 ("SHA-384") message digest of the file.
+    /// `sha384|sha384digest` The FIPS 180-2 ("SHA-384") message digest of the
+    /// file.
     pub fn sha384(&self) -> Option<&[u8; 48]> {
         self.params.sha384.as_ref().map(std::convert::AsRef::as_ref)
     }
 
-    /// `sha512|sha512digest` The FIPS 180-2 ("SHA-512") message digest of the file.
+    /// `sha512|sha512digest` The FIPS 180-2 ("SHA-512") message digest of the
+    /// file.
     pub fn sha512(&self) -> Option<&[u8; 64]> {
         self.params.sha512.as_ref().map(std::convert::AsRef::as_ref)
     }
@@ -318,7 +327,8 @@ impl Entry {
 
     /// The file owner as a symbolic name.
     ///
-    /// The name can be up to 32 chars and must match regex `[a-z_][a-z0-9_-]*[$]?`.
+    /// The name can be up to 32 chars and must match regex
+    /// `[a-z_][a-z0-9_-]*[$]?`.
     pub fn uname(&self) -> Option<&[u8]> {
         self.params.uname.as_ref().map(std::convert::AsRef::as_ref)
     }
@@ -326,16 +336,17 @@ impl Entry {
 
 /// All possible parameters to an entry.
 ///
-/// All parameters are optional. `ignore`, `nochange` and `optional` all have no value, and so
-/// `true` represets their presence.
+/// All parameters are optional. `ignore`, `nochange` and `optional` all have no
+/// value, and so `true` represets their presence.
 #[derive(Default, Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 struct Params {
-    /// `cksum` The checksum of the file using the default algorithm specified by
-    /// the cksum(1) utility.
+    /// `cksum` The checksum of the file using the default algorithm specified
+    /// by the cksum(1) utility.
     pub checksum: Option<u64>,
     /// `device` The device number for *block* or *char* file types.
     pub device: Option<Device>,
-    /// `contents` The full pathname of a file that holds the contents of this file.
+    /// `contents` The full pathname of a file that holds the contents of this
+    /// file.
     pub contents: Option<PathBuf>,
     /// `flags` The file flags as a symbolic name.
     pub flags: Option<Box<[u8]>>,
@@ -343,7 +354,8 @@ struct Params {
     pub gid: Option<u32>,
     /// `gname` The file group as a symbolic name.
     ///
-    /// The name can be up to 32 chars and must match regex `[a-z_][a-z0-9_-]*[$]?`.
+    /// The name can be up to 32 chars and must match regex
+    /// `[a-z_][a-z0-9_-]*[$]?`.
     pub gname: Option<Box<[u8]>>,
     /// `ignore` Ignore any file hierarchy below this line.
     pub ignore: bool,
@@ -353,7 +365,8 @@ struct Params {
     pub link: Option<PathBuf>,
     /// `md5|md5digest` The MD5 message digest of the file.
     pub md5: Option<u128>,
-    /// `mode` The current file's permissions as a numeric (octal) or symbolic value.
+    /// `mode` The current file's permissions as a numeric (octal) or symbolic
+    /// value.
     pub mode: Option<FileMode>,
     /// `nlink` The number of hard links the file is expected to have.
     pub nlink: Option<u64>,
@@ -372,11 +385,14 @@ struct Params {
     pub rmd160: Option<Box<[u8; 20]>>,
     /// `sha1|sha1digest` The FIPS 160-1 ("SHA-1") message digest of the file.
     pub sha1: Option<Box<[u8; 20]>>,
-    /// `sha256|sha256digest` The FIPS 180-2 ("SHA-256") message digest of the file.
+    /// `sha256|sha256digest` The FIPS 180-2 ("SHA-256") message digest of the
+    /// file.
     pub sha256: Option<[u8; 32]>,
-    /// `sha384|sha384digest` The FIPS 180-2 ("SHA-384") message digest of the file.
+    /// `sha384|sha384digest` The FIPS 180-2 ("SHA-384") message digest of the
+    /// file.
     pub sha384: Option<Box<[u8; 48]>>,
-    /// `sha512|sha512digest` The FIPS 180-2 ("SHA-512") message digest of the file.
+    /// `sha512|sha512digest` The FIPS 180-2 ("SHA-512") message digest of the
+    /// file.
     pub sha512: Option<Box<[u8; 64]>>,
     /// `size` The size, in bytes, of the file.
     pub size: Option<u64>,
@@ -388,7 +404,8 @@ struct Params {
     pub uid: Option<u32>,
     /// The file owner as a symbolic name.
     ///
-    /// The name can be up to 32 chars and must match regex `[a-z_][a-z0-9_-]*[$]?`.
+    /// The name can be up to 32 chars and must match regex
+    /// `[a-z_][a-z0-9_-]*[$]?`.
     pub uname: Option<Box<[u8]>>,
 }
 
@@ -589,8 +606,8 @@ pub struct Device {
 
 /// The error type for this crate.
 ///
-/// There are 2 possible ways that this lib can fail - there can be a problem parsing a record, or
-/// there can be a fault in the underlying reader.
+/// There are 2 possible ways that this lib can fail - there can be a problem
+/// parsing a record, or there can be a fault in the underlying reader.
 #[derive(Debug)]
 pub enum Error {
     /// There was an i/o error reading data from the reader.

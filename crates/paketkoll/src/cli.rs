@@ -35,12 +35,13 @@ pub enum Commands {
     },
     /// Check package files and search for unexpected files
     CheckUnexpected {
-        /// Paths to ignore (apart from built in ones). Basic globs are supported.
-        /// Use ** to match any number of path components.
+        /// Paths to ignore (apart from built in ones). Basic globs are
+        /// supported. Use ** to match any number of path components.
         #[arg(long)]
         ignore: Vec<CompactString>,
-        /// Should paths be canonicalized before checking? If you get many false positives, try this.
-        /// Required on Debian due to lack of /usr merge.
+        /// Should paths be canonicalized before checking? If you get many false
+        /// positives, try this. Required on Debian due to lack of /usr
+        /// merge.
         #[arg(long)]
         canonicalize: bool,
     },

@@ -223,7 +223,8 @@ pub enum PackageFilter {
 impl PackageFilter {
     /// Should we include this package?
     ///
-    /// We do de-interning here, since the fast path is to just include everything.
+    /// We do de-interning here, since the fast path is to just include
+    /// everything.
     pub(crate) fn should_include_interned(&self, package: PackageRef, interner: &Interner) -> bool {
         match self {
             PackageFilter::Everything => true,

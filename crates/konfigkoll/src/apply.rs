@@ -24,7 +24,8 @@ pub(crate) fn create_applicator(
     diff_command: Vec<String>,
     pager_command: Vec<String>,
 ) -> Box<dyn Applicator> {
-    // TODO: This is where privilege separation would happen (well, one of the locations)
+    // TODO: This is where privilege separation would happen (well, one of the
+    // locations)
     let inner_applicator = if force_dry_run {
         Either::Left(konfigkoll_core::apply::NoopApplicator::default())
     } else {

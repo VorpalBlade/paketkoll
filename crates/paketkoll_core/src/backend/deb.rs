@@ -50,7 +50,8 @@ mod parsers;
 //
 // Special files: /var/lib/dpkg/info/format (contains "1")
 //
-// Config files have no checksums in md5sums, so we need to parse /var/lib/dpkg/status for that.
+// Config files have no checksums in md5sums, so we need to parse
+// /var/lib/dpkg/status for that.
 
 const DB_PATH: &str = "/var/lib/dpkg/info";
 const STATUS_PATH: &str = "/var/lib/dpkg/status";
@@ -156,7 +157,8 @@ impl Files for Debian {
         paths: &ahash::AHashSet<&Path>,
         interner: &Interner,
     ) -> anyhow::Result<DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>> {
-        // Optimise for speed, go directly into package cache and look for files that contain the given string
+        // Optimise for speed, go directly into package cache and look for files that
+        // contain the given string
         let file_to_package = DashMap::with_hasher(ahash::RandomState::new());
         let db_root = PathBuf::from(DB_PATH);
 
@@ -276,8 +278,9 @@ impl Files for Debian {
         Ok(results)
     }
 
-    // Debian doesn't have enough info for konfigkoll in files(), use files_from_archives() instead
-    // (and add a cache layer on top, since that is slow)
+    // Debian doesn't have enough info for konfigkoll in files(), use
+    // files_from_archives() instead (and add a cache layer on top, since that
+    // is slow)
     fn prefer_files_from_archive(&self) -> bool {
         true
     }
@@ -295,7 +298,8 @@ fn iterate_deb_archives<'inputs>(
             let pkg = packages
                 .get(pkg_ref)
                 .expect("Failed to find package in package map");
-            // For deb ids[0] always exist and may contain the architecture if it is not the primary
+            // For deb ids[0] always exist and may contain the architecture if it is not the
+            // primary
             let name = pkg.ids[0].to_str(interner);
             // Get the full deb file name
             let deb_filename = format_deb_filename(interner, pkg);
@@ -606,8 +610,8 @@ impl Packages for Debian {
     }
 }
 
-// To get the original package file into the cache: apt install --reinstall -d pkgname
-// /var/cache/apt/archives/pkgname_version_arch.deb
+// To get the original package file into the cache: apt install --reinstall -d
+// pkgname /var/cache/apt/archives/pkgname_version_arch.deb
 // arch: all, amd64, arm64, ...
 // Epoch separator (normally :) is now %3a (URL encoded)
 

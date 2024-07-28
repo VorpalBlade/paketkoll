@@ -18,8 +18,8 @@ const DEFAUT_SENSITIVE: &[&str] = &["/etc/shadow", "/etc/gshadow"];
 pub struct Settings {
     file_backend: Mutex<Option<paketkoll_types::backend::Backend>>,
     enabled_pkg_backends: Mutex<AHashSet<paketkoll_types::backend::Backend>>,
-    /// Configuration files (such as `/etc/passwd`) that should be applied early,
-    /// before installing packages.
+    /// Configuration files (such as `/etc/passwd`) that should be applied
+    /// early, before installing packages.
     /// This is useful to assign the same IDs instead of auto assignment
     early_configs: Mutex<AHashSet<Utf8PathBuf>>,
     /// Configuration files that are sensitive and should not be written with
@@ -100,11 +100,12 @@ impl Settings {
 
 /// Rune API
 impl Settings {
-    /// Set a package manager as the data source and target for file system checks.
+    /// Set a package manager as the data source and target for file system
+    /// checks.
     ///
-    /// Unlike package manager backends, there can only be one of these (otherwise
-    /// the semantics would get confusing regarding which files are managed by which
-    /// tool).
+    /// Unlike package manager backends, there can only be one of these
+    /// (otherwise the semantics would get confusing regarding which files
+    /// are managed by which tool).
     ///
     /// Valid values are:
     /// * "pacman" (Arch Linux and derivatives)
@@ -124,9 +125,11 @@ impl Settings {
         Ok(())
     }
 
-    /// Enable a package manager or other backend as a data source and target for package operations.
+    /// Enable a package manager or other backend as a data source and target
+    /// for package operations.
     ///
-    /// Multiple ones can be enabled at the same time (typically flatpak + native package manager).
+    /// Multiple ones can be enabled at the same time (typically flatpak +
+    /// native package manager).
     ///
     /// Valid values are:
     /// * "pacman" (Arch Linux and derivatives)
@@ -148,11 +151,12 @@ impl Settings {
         Ok(())
     }
 
-    /// Add a configuration file that should be applied early (before package installation).
-    /// This is useful for files like `/etc/passwd` to assign the same IDs instead
-    /// of auto assignment at package installation.
+    /// Add a configuration file that should be applied early (before package
+    /// installation). This is useful for files like `/etc/passwd` to assign
+    /// the same IDs instead of auto assignment at package installation.
     ///
-    /// By default, `/etc/passwd`, `/etc/group`, `/etc/shadow`, and `/etc/gshadow` are already added.
+    /// By default, `/etc/passwd`, `/etc/group`, `/etc/shadow`, and
+    /// `/etc/gshadow` are already added.
     #[rune::function]
     pub fn early_config(&self, path: &str) {
         let before = self.early_configs.lock().insert(path.into());

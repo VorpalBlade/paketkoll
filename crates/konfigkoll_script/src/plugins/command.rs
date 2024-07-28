@@ -1,6 +1,7 @@
 //! Commands to change the configuration
 //!
-//! These are the important ones, the ones that describe how the system should be changed.
+//! These are the important ones, the ones that describe how the system should
+//! be changed.
 
 use std::str::FromStr;
 use std::sync::Arc;
@@ -191,7 +192,8 @@ impl Commands {
 
     /// Create a file with the given contents (renaming the file in the process)
     ///
-    /// The rename is useful to copy a file to a different location (e.g. `etc/fstab.hostname` to `etc/fstab`)
+    /// The rename is useful to copy a file to a different location (e.g.
+    /// `etc/fstab.hostname` to `etc/fstab`)
     #[rune::function(keep)]
     pub fn copy_from(&mut self, path: &str, src: &str) -> anyhow::Result<()> {
         if self.phase != Phase::Main {

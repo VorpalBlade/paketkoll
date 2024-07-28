@@ -10,7 +10,8 @@ pub struct Cli {
     /// Path to config directory (if not the current directory)
     #[arg(long, short = 'c')]
     pub config_path: Option<Utf8PathBuf>,
-    /// Trust mtime (don't check checksum if mtime matches (not supported on Debian))
+    /// Trust mtime (don't check checksum if mtime matches (not supported on
+    /// Debian))
     #[arg(long)]
     pub trust_mtime: bool,
     /// How much to ask for confirmation

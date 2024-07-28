@@ -27,7 +27,8 @@ use paketkoll_types::intern::PackageRef;
 
 /// Set of special files to ignore from mtree data
 ///
-/// These don't exist in the file system but do in the binary packages themselves.
+/// These don't exist in the file system but do in the binary packages
+/// themselves.
 const SPECIAL_FILES: phf::Set<&'static [u8]> = phf::phf_set! {
     b"./.BUILDINFO",
     b"./.CHANGELOG",
@@ -150,13 +151,15 @@ fn convert_mtree(
     })
 }
 
-/// Extract the path from an mtree entry, they start with a . which we want to remove
+/// Extract the path from an mtree entry, they start with a . which we want to
+/// remove
 fn extract_path(item: &mtree2::Entry) -> PathBuf {
     let path = item.path();
     let as_bytes = path.as_os_str().as_encoded_bytes();
     if as_bytes[0] == b'.' {
         // SAFETY:
-        // * The encoding is "an unspecified, platform-specific, self-synchronizing superset of UTF-8"
+        // * The encoding is "an unspecified, platform-specific, self-synchronizing
+        //   superset of UTF-8"
         // * We are removing a leading ASCII character here (.).
         // * Thus, the buffer still contains the same superset of UTF-8
         PathBuf::from(unsafe { OsStr::from_encoded_bytes_unchecked(&as_bytes[1..]) })

@@ -13,8 +13,9 @@ use konfigkoll_types::PkgInstruction;
 
 /// Save file system changes
 ///
-/// Takes a fn that is responsible for writing out the file data to a location in the config directory.
-/// It should put the file in the standard location (`files/input_file_path`, e.g `files/etc/fstab`)
+/// Takes a fn that is responsible for writing out the file data to a location
+/// in the config directory. It should put the file in the standard location
+/// (`files/input_file_path`, e.g `files/etc/fstab`)
 ///
 /// Precondition: The instructions are sorted by default sort order (path, op)
 pub fn save_fs_changes<'instruction>(

@@ -16,7 +16,8 @@ use paketkoll_types::files::Checksum;
 pub enum FileContents {
     /// Literal data
     Literal { checksum: Checksum, data: Box<[u8]> },
-    /// From a file, for use when the data is too big to fit comfortably in memory
+    /// From a file, for use when the data is too big to fit comfortably in
+    /// memory
     FromFile {
         checksum: Checksum,
         path: camino::Utf8PathBuf,

@@ -28,7 +28,8 @@ impl LineEditor {
 
     /// Add a new rule to the line editor.
     ///
-    /// Returns a Result<()>, where the error variant can happen on invalid regexes.
+    /// Returns a Result<()>, where the error variant can happen on invalid
+    /// regexes.
     #[rune::function]
     pub fn add(&mut self, selector: &Selector, action: &Action) -> anyhow::Result<()> {
         self.inner
@@ -37,9 +38,11 @@ impl LineEditor {
         Ok(())
     }
 
-    /// Add a new rule where the selector condition has been inverted to the line editor
+    /// Add a new rule where the selector condition has been inverted to the
+    /// line editor
     ///
-    /// Returns a Result<()>, where the error variant can happen on invalid regexes.
+    /// Returns a Result<()>, where the error variant can happen on invalid
+    /// regexes.
     #[rune::function]
     pub fn add_inverted(&mut self, selector: &Selector, action: &Action) -> anyhow::Result<()> {
         self.inner
@@ -54,7 +57,8 @@ impl LineEditor {
         self.inner.borrow().apply(text)
     }
 
-    /// Clone the line editor, allowing "forking it" into two different related variants
+    /// Clone the line editor, allowing "forking it" into two different related
+    /// variants
     #[rune::function]
     fn clone(&self) -> Self {
         Self {
@@ -82,7 +86,8 @@ enum Selector {
     /// A regex to match the line
     #[rune(constructor)]
     Regex(#[rune(get)] String),
-    /// A custom function, passed the line number and current line, returning a bool
+    /// A custom function, passed the line number and current line, returning a
+    /// bool
     #[rune(constructor)]
     Function(#[rune(get)] Shared<rune::runtime::Function>),
 }
@@ -122,19 +127,24 @@ impl TryFrom<&Selector> for konfigkoll_utils::line_edit::Selector {
 #[derive(Debug, Any)]
 #[rune(item = ::patch)]
 enum Action {
-    /// Copy the current line to the output. Only needed when auto-print is disabled.
+    /// Copy the current line to the output. Only needed when auto-print is
+    /// disabled.
     #[rune(constructor)]
     Print,
-    /// Delete the current line and short circuit the rest of the program (immediately go to the next line)
+    /// Delete the current line and short circuit the rest of the program
+    /// (immediately go to the next line)
     #[rune(constructor)]
     Delete,
-    /// Replace pattern space with next line (will print unless auto-print is disabled)
+    /// Replace pattern space with next line (will print unless auto-print is
+    /// disabled)
     #[rune(constructor)]
     NextLine,
-    /// Stop processing the input and program and terminate early (do not print rest of file)
+    /// Stop processing the input and program and terminate early (do not print
+    /// rest of file)
     #[rune(constructor)]
     Stop,
-    /// Stop processing the input and program and terminate early (auto-print rest of file)
+    /// Stop processing the input and program and terminate early (auto-print
+    /// rest of file)
     #[rune(constructor)]
     StopAndPrint,
     /// Insert a new line *before* the current line
@@ -156,9 +166,11 @@ enum Action {
     /// Like `RegexReplace` but replaces all matches on the line.
     #[rune(constructor)]
     RegexReplaceAll(#[rune(get)] String, #[rune(get)] String),
-    /// A sub-program that is executed. Will share pattern space with parent program
+    /// A sub-program that is executed. Will share pattern space with parent
+    /// program
     Subprogram(LineEditor),
-    /// A custom function passed the current pattern buffer, returning a new pattern buffer
+    /// A custom function passed the current pattern buffer, returning a new
+    /// pattern buffer
     #[rune(constructor)]
     Function(#[rune(get)] Shared<rune::runtime::Function>),
 }

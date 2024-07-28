@@ -69,7 +69,8 @@ impl Packages for Flatpak {
         parse_flatpak_output(&output, interner)
     }
 
-    /// Flatpak uses the package ref (or partial ref, i.e. application ID) for installation
+    /// Flatpak uses the package ref (or partial ref, i.e. application ID) for
+    /// installation
     fn transact(
         &self,
         install: &[&str],

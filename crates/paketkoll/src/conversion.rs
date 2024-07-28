@@ -89,7 +89,8 @@ impl TryFrom<&Cli> for paketkoll_core::config::CommonFileCheckConfiguration {
 
 /// Produce a 'static reference to a package filter that will live long enough.
 ///
-/// We intentionally "leak" memory here, it will live as long as the program runs, which is fine.
+/// We intentionally "leak" memory here, it will live as long as the program
+/// runs, which is fine.
 fn convert_filter(packages: Vec<String>) -> &'static paketkoll_core::backend::PackageFilter {
     let packages: AHashSet<String> = AHashSet::from_iter(packages);
     let boxed = Box::new(if packages.is_empty() {

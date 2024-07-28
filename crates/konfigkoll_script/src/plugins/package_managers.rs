@@ -44,7 +44,8 @@ impl PackageManagers {
         // Use itertools::merge_join_by for this.
         let merged =
             itertools::merge_join_by(package_backends, files_backends, |l, r| l.0.cmp(&r.0));
-        // We now know that all keys are present (everything is a package, file or both backend)
+        // We now know that all keys are present (everything is a package, file or both
+        // backend)
         let mut package_managers = PackageManagerMap::new();
         for entry in merged {
             let (backend, packages, files) = match entry {

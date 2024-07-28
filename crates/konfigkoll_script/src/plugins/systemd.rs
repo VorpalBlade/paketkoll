@@ -80,7 +80,8 @@ impl Unit {
         )
     }
 
-    /// Where we expect the file to be (for the purpose of symlink target and finding the file contents)
+    /// Where we expect the file to be (for the purpose of symlink target and
+    /// finding the file contents)
     fn unit_file_path(&self) -> String {
         match &self.source {
             Source::File { path, .. } => path.to_string(),
@@ -101,7 +102,8 @@ impl Unit {
         }
     }
 
-    /// Parse the contents of the unit file, it is a simple INI file, use rust-ini
+    /// Parse the contents of the unit file, it is a simple INI file, use
+    /// rust-ini
     fn parse_unit_file(&self) -> anyhow::Result<ini::Ini> {
         let contents = self.contents()?;
         let contents = std::str::from_utf8(&contents)?;
@@ -164,7 +166,8 @@ impl Unit {
         self
     }
 
-    /// Override the name of the unit. Useful for parameterised units (e.g. `foo@.service`)
+    /// Override the name of the unit. Useful for parameterised units (e.g.
+    /// `foo@.service`)
     #[rune::function(keep)]
     pub fn name(mut self, name: &str) -> Self {
         self.name = Some(name.into());

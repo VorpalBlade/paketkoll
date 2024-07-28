@@ -5,12 +5,13 @@
 // https://github.com/rune-rs/rune/blob/0.13.x/crates/rune-modules/src/process.rs
 // for the original source code.
 //
-// Parts of the documentation is also copied from tokio and the Rust standard library
-// These are *also* dual licensed under the MIT and Apache 2.0 licenses.
-// See:
+// Parts of the documentation is also copied from tokio and the Rust standard
+// library. These are *also* dual licensed under the MIT and Apache 2.0
+// licenses. See:
 // * https://docs.rs/tokio/1.39.1/tokio/process/index.html
 // * https://doc.rust-lang.org/stable/std/process/index.html
-// (The docs were not copied from the source but from the generated documentation)
+// (The docs were not copied from the source but from the generated
+// documentation)
 
 //! The native `process` module for the [Rune Language].
 //!
@@ -62,7 +63,8 @@ use tokio::process;
 
 /// A module for working with processes.
 ///
-/// This allows spawning child processes, capturing their output, and creating pipelines.
+/// This allows spawning child processes, capturing their output, and creating
+/// pipelines.
 #[rune::module(::process)]
 pub fn module(_stdio: bool) -> Result<Module, ContextError> {
     let mut module = Module::from_meta(self::module_meta)?;
@@ -164,24 +166,28 @@ impl Command {
 
     #[cfg(unix)]
     #[rune::function(instance)]
-    /// Set the first process argument, argv[0], to something other than the default executable path. (Unix only)
+    /// Set the first process argument, argv[0], to something other than the
+    /// default executable path. (Unix only)
     fn arg0(&mut self, arg: &str) {
         self.inner.arg0(arg);
     }
 
-    /// Sets configuration for the child process’s standard input (stdin) handle.
+    /// Sets configuration for the child process’s standard input (stdin)
+    /// handle.
     #[rune::function(instance)]
     fn stdin(&mut self, stdio: Stdio) {
         self.inner.stdin(stdio.inner);
     }
 
-    /// Sets configuration for the child process’s standard output (stdout) handle.
+    /// Sets configuration for the child process’s standard output (stdout)
+    /// handle.
     #[rune::function(instance)]
     fn stdout(&mut self, stdio: Stdio) {
         self.inner.stdout(stdio.inner);
     }
 
-    /// Sets configuration for the child process’s standard error (stderr) handle.
+    /// Sets configuration for the child process’s standard error (stderr)
+    /// handle.
     #[rune::function(instance)]
     fn stderr(&mut self, stdio: Stdio) {
         self.inner.stderr(stdio.inner);
@@ -376,7 +382,8 @@ impl ExitStatus {
     }
 }
 
-/// Describes what to do with a standard I/O stream for a child process when passed to the stdin, stdout, and stderr methods of Command.
+/// Describes what to do with a standard I/O stream for a child process when
+/// passed to the stdin, stdout, and stderr methods of Command.
 #[derive(Debug, Any)]
 #[rune(item = ::process)]
 struct Stdio {
@@ -389,7 +396,8 @@ impl Stdio {
         vm_write!(f, "{:?}", self);
     }
 
-    /// This stream will be ignored. This is the equivalent of attaching the stream to /dev/null.
+    /// This stream will be ignored. This is the equivalent of attaching the
+    /// stream to /dev/null.
     #[rune::function(path = Self::null)]
     fn null() -> Self {
         Self {
@@ -397,7 +405,8 @@ impl Stdio {
         }
     }
 
-    /// The child inherits from the corresponding parent descriptor. This is the default.
+    /// The child inherits from the corresponding parent descriptor. This is the
+    /// default.
     #[rune::function(path = Self::inherit)]
     fn inherit() -> Self {
         Self {
@@ -429,7 +438,8 @@ macro_rules! stdio_stream {
                 vm_write!(f, "{:?}", self);
             }
 
-            /// Try to convert into a `Stdio`, which allows creating a pipeline between processes.
+            /// Try to convert into a `Stdio`, which allows creating a pipeline between
+            /// processes.
             ///
             /// This consumes the stream, as it can only be used once.
             ///

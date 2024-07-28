@@ -138,7 +138,8 @@ impl File {
 
     /// Open a file relative to the config directory.
     ///
-    /// This is generally safe (as long as the file exists in the config directory)
+    /// This is generally safe (as long as the file exists in the config
+    /// directory)
     #[rune::function(path = Self::open_from_config)]
     pub fn open_from_config(path: &str) -> anyhow::Result<Self> {
         let p = safe_path_join(CFG_PATH.get().expect("CFG_PATH not set"), path.into());
@@ -199,7 +200,8 @@ fn glob(pattern: &str) -> anyhow::Result<Vec<String>> {
 
 /// Get the path to the configuration directory
 ///
-/// **Prefer `File::open_from_config` instead if you just want to load data from the config directory**
+/// **Prefer `File::open_from_config` instead if you just want to load data from
+/// the config directory**
 ///
 /// This is primarily useful together with the `process` module to pass a
 /// path to a file from the configuration directory to an external command.
@@ -213,10 +215,11 @@ fn config_path() -> String {
 ///
 /// # Host file system access
 ///
-/// Be careful with host file system access, since it can make your configuration non-deterministic.
+/// Be careful with host file system access, since it can make your
+/// configuration non-deterministic.
 ///
-/// The main purpose of this is for things that *shouldn't* be stored in your git
-/// managed configuration, in particular for passwords and other secrets:
+/// The main purpose of this is for things that *shouldn't* be stored in your
+/// git managed configuration, in particular for passwords and other secrets:
 ///
 /// * Hashed passwords from `/etc/shadow`
 /// * Passwords for wireless networks
@@ -227,11 +230,12 @@ fn config_path() -> String {
 ///
 /// # Configuration directory access
 ///
-/// This is generally safe, in order to read files that are part of the configuration
-/// (if you want to use them as templates for example and fill in some values)
+/// This is generally safe, in order to read files that are part of the
+/// configuration (if you want to use them as templates for example and fill in
+/// some values)
 ///
-/// Use `File::open_from_config` for this. In special circumstances (together with the `process` module)
-/// you may also need [`config_path`].
+/// Use `File::open_from_config` for this. In special circumstances (together
+/// with the `process` module) you may also need [`config_path`].
 ///
 /// # Temporary directories
 ///

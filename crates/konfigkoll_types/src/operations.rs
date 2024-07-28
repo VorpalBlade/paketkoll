@@ -36,7 +36,8 @@ pub enum FsOp {
     /// Set the group of a file
     SetGroup { group: CompactString },
 
-    /// Special value for when we want to inform the user about extraneous entries in their config
+    /// Special value for when we want to inform the user about extraneous
+    /// entries in their config
     Comment,
 }
 
@@ -109,7 +110,8 @@ pub struct PkgIdent {
     /// Which package manager to use
     pub package_manager: paketkoll_types::backend::Backend,
     /// Specifier describing which package to install.
-    /// Typically package name, but may be some other sort of identifier (e.g. for flatpak)
+    /// Typically package name, but may be some other sort of identifier (e.g.
+    /// for flatpak)
     pub identifier: CompactString,
 }
 

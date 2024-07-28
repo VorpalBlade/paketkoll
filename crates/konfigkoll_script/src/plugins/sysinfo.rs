@@ -68,8 +68,8 @@ impl SysInfo {
 
     /// The OS version
     ///
-    /// On Linux this corresponds to the `VERSION_ID` field in `/etc/os-release` or
-    /// `DISTRIB_RELEASE` in `/etc/lsb-release`.
+    /// On Linux this corresponds to the `VERSION_ID` field in `/etc/os-release`
+    /// or `DISTRIB_RELEASE` in `/etc/lsb-release`.
     #[rune::function]
     fn os_version(&self) -> Option<String> {
         sysinfo::System::os_version()

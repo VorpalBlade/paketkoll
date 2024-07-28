@@ -83,7 +83,8 @@ pub fn check_installed_files(
     Ok((interner, mismatches))
 }
 
-/// Check file system for differences (including unexpected files) using the given configuration
+/// Check file system for differences (including unexpected files) using the
+/// given configuration
 pub fn check_all_files(
     backend: &crate::backend::ConcreteBackend,
     backend_config: &crate::backend::BackendConfiguration,
@@ -224,7 +225,8 @@ pub fn mismatching_and_unexpected_files<'a>(
     });
 
     log::debug!("Identifying and processing missing files");
-    // Identify missing files (we should have seen them walking through the file system)
+    // Identify missing files (we should have seen them walking through the file
+    // system)
     expected_files.par_iter().for_each(|file_entry| {
         if file_entry.seen.load(std::sync::atomic::Ordering::Relaxed) {
             return;
@@ -291,7 +293,8 @@ pub fn canonicalize_file_entries(results: &mut Vec<FileEntry>) {
             (Some(parent), Some(filename)) => {
                 match parent.canonicalize() {
                     Ok(canonical_parent) => {
-                        // We only need to do work here if the parent path actually changed (saves ~10 ms).
+                        // We only need to do work here if the parent path actually changed (saves
+                        // ~10 ms).
                         if canonical_parent != parent {
                             file_entry.path = canonical_parent.join(filename);
                         }
@@ -319,7 +322,8 @@ pub fn canonicalize_file_entries(results: &mut Vec<FileEntry>) {
 
 /// Attempt to make sense of the errors from the "ignore" crate.
 ///
-/// This involves recursively mapping into some of the variants to find the actual error.
+/// This involves recursively mapping into some of the variants to find the
+/// actual error.
 fn interpret_ignore_error(ignore_err: ignore::Error, context: Option<PathBuf>) -> PackageIssue {
     match ignore_err {
         ignore::Error::Partial(_) | ignore::Error::WithLineNumber { .. } => {

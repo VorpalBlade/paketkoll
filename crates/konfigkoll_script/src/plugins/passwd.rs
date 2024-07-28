@@ -1,4 +1,5 @@
-//! Helpers for working with /etc/passwd and /etc/groups (as well as shadow files)
+//! Helpers for working with /etc/passwd and /etc/groups (as well as shadow
+//! files)
 
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -130,8 +131,10 @@ impl Passwd {
     /// Create a new Passwd instance
     ///
     /// # Arguments
-    /// * `user_ids` - A list of tuples of (username, uid) to use if sysusers files does not specify a UID
-    /// * `group_ids` - A list of tuples of (groupname, gid) to use if sysusers files does not specify a GID
+    /// * `user_ids` - A list of tuples of (username, uid) to use if sysusers
+    ///   files does not specify a UID
+    /// * `group_ids` - A list of tuples of (groupname, gid) to use if sysusers
+    ///   files does not specify a GID
     #[rune::function(path = Self::new)]
     fn new(user_ids: Vec<(String, u32)>, group_ids: Vec<(String, u32)>) -> anyhow::Result<Self> {
         let num_uids = user_ids.len();
@@ -166,7 +169,8 @@ impl Passwd {
         self.users.insert(user.name.clone(), user);
     }
 
-    /// Add a user to the passwd database (and add a matching group with the same ID)
+    /// Add a user to the passwd database (and add a matching group with the
+    /// same ID)
     #[rune::function]
     fn add_user_with_group(&mut self, user: User) {
         let group = Group {
@@ -227,7 +231,8 @@ impl Passwd {
             .expect("Group update call failed");
     }
 
-    /// Read the passwd and group files from the system and update IDs to match the system (based on name)
+    /// Read the passwd and group files from the system and update IDs to match
+    /// the system (based on name)
     #[rune::function]
     fn align_ids_with_system(&mut self) -> anyhow::Result<()> {
         self.sanity_check().inspect_err(|e| {
@@ -269,7 +274,8 @@ impl Passwd {
         Ok(())
     }
 
-    /// Set user passwords to what they are set to on the system for the given users
+    /// Set user passwords to what they are set to on the system for the given
+    /// users
     #[rune::function]
     // Allow because rune doesn't work without the owned vec
     #[allow(clippy::needless_pass_by_value)]
@@ -294,10 +300,12 @@ impl Passwd {
 
     /// Add users and groups declared in a systemd sysusers file
     ///
-    /// You need to provide a map of preferred IDs for any IDs not explicitly set in the sysusers file.
+    /// You need to provide a map of preferred IDs for any IDs not explicitly
+    /// set in the sysusers file.
     ///
     /// # Arguments
-    /// * `package_manager` - The package manager to use for reading the sysusers file
+    /// * `package_manager` - The package manager to use for reading the
+    ///   sysusers file
     /// * `config_file` - The path to the sysusers file
     #[rune::function(keep)]
     fn add_from_sysusers(

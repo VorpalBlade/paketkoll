@@ -9,7 +9,8 @@ use std::str::Lines;
 use compact_str::CompactString;
 use regex::Regex;
 
-/// A program consists of a bunch of commands and can be applied to a string line by line.
+/// A program consists of a bunch of commands and can be applied to a string
+/// line by line.
 ///
 /// Like sed the basic algorithm is to repeatedly (until the input is consumed):
 /// 1. Read a line into a "pattern space" buffer
@@ -52,7 +53,8 @@ impl EditProgram {
         self
     }
 
-    /// Disable the default implicit action of putting the current pattern space into the output.
+    /// Disable the default implicit action of putting the current pattern space
+    /// into the output.
     pub fn disable_default_printing(&mut self) -> &mut Self {
         self.print_default = false;
         self
@@ -284,15 +286,20 @@ impl Debug for Selector {
 #[derive(Clone)]
 #[non_exhaustive]
 pub enum Action {
-    /// Copy the current line to the output. Only needed when auto-print is disabled.
+    /// Copy the current line to the output. Only needed when auto-print is
+    /// disabled.
     Print,
-    /// Delete the current line and short circuit the rest of the program (immediately go to the next line)
+    /// Delete the current line and short circuit the rest of the program
+    /// (immediately go to the next line)
     Delete,
-    /// Replace pattern space with next line (will print unless auto-print is disabled)
+    /// Replace pattern space with next line (will print unless auto-print is
+    /// disabled)
     NextLine,
-    /// Stop processing the input and program and terminate early (do not print rest of file)
+    /// Stop processing the input and program and terminate early (do not print
+    /// rest of file)
     Stop,
-    /// Stop processing the input and program and terminate early (auto-print rest of file)
+    /// Stop processing the input and program and terminate early (auto-print
+    /// rest of file)
     StopAndPrint,
     /// Insert a new line *before* the current line
     InsertBefore(CompactString),
@@ -302,13 +309,15 @@ pub enum Action {
     Replace(CompactString),
     /// Do a regex search and replace in the current line
     ///
-    /// Capture groups in the replacement string works as with [`Regex::replace`].
+    /// Capture groups in the replacement string works as with
+    /// [`Regex::replace`].
     RegexReplace {
         regex: Regex,
         replacement: CompactString,
         replace_all: bool,
     },
-    /// A sub-program that is executed. Will share pattern space with parent program
+    /// A sub-program that is executed. Will share pattern space with parent
+    /// program
     Subprogram(Rc<RefCell<EditProgram>>),
     /// Call a custom function to determine the new line
     #[allow(clippy::type_complexity)]

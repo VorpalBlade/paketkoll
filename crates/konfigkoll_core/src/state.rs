@@ -339,7 +339,8 @@ impl FsEntries {
         }
     }
 
-    /// Replace a node, taking into account if it was removed before being added back.
+    /// Replace a node, taking into account if it was removed before being added
+    /// back.
     fn replace_node(&mut self, path: Utf8PathBuf, new_node: FsNode) {
         self.add_missing_parents(&path);
         let entry = self.fs.entry(path).or_insert(FsNode {
@@ -607,7 +608,8 @@ pub fn diff(
                             op: FsOp::Remove,
                             comment: before.1.comment,
                         });
-                        // TODO: Do something special when the before instruction is a removal one?I
+                        // TODO: Do something special when the before
+                        // instruction is a removal one?I
                     }
                 }
             }

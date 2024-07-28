@@ -481,7 +481,8 @@ pub fn apply_files<'instructions>(
     // Process each chunk separately
     for (_discr, chunk) in chunked_instructions.into_iter() {
         let chunk = chunk.cloned().collect_vec();
-        // Removing things has to be sorted reverse, so we remove contents before the directory they are containers of
+        // Removing things has to be sorted reverse, so we remove contents before the
+        // directory they are containers of
         let chunk = match chunk[0].op {
             FsOp::Remove => chunk.into_iter().rev().collect_vec(),
             _ => chunk,
@@ -515,7 +516,8 @@ pub fn apply_packages<'instructions>(
         let sub_map = package_maps
             .get(&backend)
             .ok_or_else(|| anyhow::anyhow!("No package map for backend {:?}", backend))?;
-        // Deal with the case where a package is installed as a dependency and we want it explicit
+        // Deal with the case where a package is installed as a dependency and we want
+        // it explicit
         let pkg_ref = PackageRef::get_or_intern(interner, pkg.identifier.as_str());
         let has_pkg = sub_map.get(&pkg_ref).is_some();
         match (instr.op, has_pkg) {

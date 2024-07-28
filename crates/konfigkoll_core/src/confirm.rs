@@ -19,7 +19,8 @@ use itertools::Itertools;
 /// Letters that trigger:
 /// * Must be unique
 /// * Must be available as a unique code point in both upper and lower case.
-/// * The convention is to put the trigger letter in uppercase in the string for the option.
+/// * The convention is to put the trigger letter in uppercase in the string for
+///   the option.
 #[derive(Debug, Clone)]
 pub struct MultiOptionConfirm {
     prompt: CompactString,

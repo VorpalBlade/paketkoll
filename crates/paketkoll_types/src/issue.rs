@@ -123,7 +123,8 @@ impl Issue {
 pub enum IssueKind {
     /// Missing entity from file system
     Missing,
-    /// Entry on file system exists, but shouldn't (it is being actively removed)
+    /// Entry on file system exists, but shouldn't (it is being actively
+    /// removed)
     Exists,
     /// Extra unexpected entity on file system
     Unexpected,
@@ -154,7 +155,8 @@ pub enum IssueKind {
         actual: (DeviceType, u64, u64),
         expected: (DeviceType, u64, u64),
     },
-    /// Some sort of parsing error for this entry (from the package manager backend)
+    /// Some sort of parsing error for this entry (from the package manager
+    /// backend)
     #[cfg_attr(feature = "serde", serde(serialize_with = "serialize_error"))]
     MetadataError(Box<anyhow::Error>),
     /// Some sort of unexpected error when processing the file system

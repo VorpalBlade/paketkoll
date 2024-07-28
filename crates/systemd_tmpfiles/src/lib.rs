@@ -13,7 +13,6 @@ pub mod specifier;
 /// [`Directive::CreateFile`] with fields to differentiate between the two.
 /// Similarly, all of v, q and Q are mapped to [`Directive::CreateSubvolume`],
 /// and so on.
-///
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[non_exhaustive]
 pub enum Directive {
@@ -49,7 +48,8 @@ pub enum Directive {
     },
     /// v (systemd 219+) / q/Q (systemd 228+)
     CreateSubvolume {
-        /// `None` corresponds to v, and `Some(_)` corresponds to the two variants of q/Q.
+        /// `None` corresponds to v, and `Some(_)` corresponds to the two
+        /// variants of q/Q.
         quota: Option<SubvolumeQuota>,
         mode: Option<Mode>,
         user: Id,
@@ -338,7 +338,8 @@ impl Id {
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[non_exhaustive]
 pub struct Age {
-    /// This field is complicated, and we don't need to parse it for our use case.
+    /// This field is complicated, and we don't need to parse it for our use
+    /// case.
     specifier: CompactString,
 }
 

@@ -109,9 +109,10 @@ impl Files for ArchLinux {
         log::debug!("Loading mtrees");
         // Directories are duplicated across packages, we deduplicate them here
         let seen_directories = DashSet::new();
-        // It is counter-intuitive, but we are faster if we collect into a vec here and start
-        // over later on with a new parallel iteration. No idea why. (241 ms vs 264 ms according
-        // to hyperfine on my machine, stdev < 4 ms in both cases).
+        // It is counter-intuitive, but we are faster if we collect into a vec here and
+        // start over later on with a new parallel iteration. No idea why. (241
+        // ms vs 264 ms according to hyperfine on my machine, stdev < 4 ms in
+        // both cases).
         let results: anyhow::Result<Vec<FileEntry>> = pkgs_and_paths
             .into_par_iter()
             .flat_map_iter(|entry| match entry {
@@ -142,7 +143,8 @@ impl Files for ArchLinux {
         paths: &AHashSet<&Path>,
         interner: &Interner,
     ) -> anyhow::Result<DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>> {
-        // Optimise for speed, go directly into package cache and look for files that contain the given string
+        // Optimise for speed, go directly into package cache and look for files that
+        // contain the given string
         let file_to_package = DashMap::with_hasher(ahash::RandomState::new());
         let db_root = PathBuf::from(self.pacman_config.db_path.as_str()).join("local");
 

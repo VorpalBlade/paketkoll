@@ -16,15 +16,16 @@ pub enum MTreeLine<'a> {
     Blank,
     /// Lines starting with a '#' are ignored.
     Comment,
-    /// Special commands (starting with '/') alter the behavior of later entries.
+    /// Special commands (starting with '/') alter the behavior of later
+    /// entries.
     Special(SpecialKind, SmallVec<[Keyword<'a>; 5]>),
     /// If the first word does not contain a '/', it is a file in the current
     /// directory.
     Relative(&'a [u8], SmallVec<[Keyword<'a>; 5]>),
     /// Change the current directory to the parent of the current directory.
     DotDot,
-    /// If the first word does contain a '/', it is a file relative to the starting
-    /// (not current) directory.
+    /// If the first word does contain a '/', it is a file relative to the
+    /// starting (not current) directory.
     Full(&'a [u8], SmallVec<[Keyword<'a>; 5]>),
 }
 
@@ -101,14 +102,15 @@ impl SpecialKind {
 /// Each entry may have one or more key word
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub enum Keyword<'a> {
-    /// `cksum` The checksum of the file using the default algorithm specified by
-    /// the cksum(1) utility.
+    /// `cksum` The checksum of the file using the default algorithm specified
+    /// by the cksum(1) utility.
     // I'm pretty sure u32 is big enough, but I'm using u64 because I'm not sure that this is
     // guaranteed.
     Checksum(u64),
     /// `device` The device number for *block* or *char* file types.
     DeviceRef(DeviceRef<'a>),
-    /// `contents` The full pathname of a file that holds the contents of this file.
+    /// `contents` The full pathname of a file that holds the contents of this
+    /// file.
     Contents(&'a [u8]),
     /// `flags` The file flags as a symbolic name.
     ///
@@ -126,7 +128,8 @@ pub enum Keyword<'a> {
     Link(&'a [u8]),
     /// `md5|md5digest` The MD5 message digest of the file.
     Md5(u128),
-    /// `mode` The current file's permissions as a numeric (octal) or symbolic value.
+    /// `mode` The current file's permissions as a numeric (octal) or symbolic
+    /// value.
     Mode(FileMode),
     /// `nlink` The number of hard links the file is expected to have.
     NLink(u64),
@@ -145,15 +148,19 @@ pub enum Keyword<'a> {
     Rmd160([u8; 20]),
     /// `sha1|sha1digest` The FIPS 160-1 ("SHA-1") message digest of the file.
     Sha1([u8; 20]),
-    /// `sha256|sha256digest` The FIPS 180-2 ("SHA-256") message digest of the file.
+    /// `sha256|sha256digest` The FIPS 180-2 ("SHA-256") message digest of the
+    /// file.
     Sha256([u8; 32]),
-    /// `sha384|sha384digest` The FIPS 180-2 ("SHA-384") message digest of the file.
+    /// `sha384|sha384digest` The FIPS 180-2 ("SHA-384") message digest of the
+    /// file.
     Sha384([u8; 48]),
-    /// `sha512|sha512digest` The FIPS 180-2 ("SHA-512") message digest of the file.
+    /// `sha512|sha512digest` The FIPS 180-2 ("SHA-512") message digest of the
+    /// file.
     Sha512([u8; 64]),
     /// `size` The size, in bytes, of the file.
     Size(u64),
-    /// `time` The last modification time of the file, as a duration since the unix epoch.
+    /// `time` The last modification time of the file, as a duration since the
+    /// unix epoch.
     // The last modification time of the file, in seconds and nanoseconds. The value should
     // include a period character and exactly nine digits after the period.
     Time(Duration),
@@ -362,8 +369,8 @@ fn test_format_from_butes() {
 
 /// The type of an entry.
 ///
-/// In an mtree file, entries can be files, directories, and some other special unix types like
-/// block/character devices.
+/// In an mtree file, entries can be files, directories, and some other special
+/// unix types like block/character devices.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum FileType {
     /// A unix block device.

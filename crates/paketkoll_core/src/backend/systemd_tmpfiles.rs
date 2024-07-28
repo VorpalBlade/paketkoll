@@ -127,7 +127,8 @@ impl Files for SystemdTmpfiles {
     }
 }
 
-/// Parse the systemd-tmpfiles output into [`FileEntry`]s that are usable by the shared later stages.
+/// Parse the systemd-tmpfiles output into [`FileEntry`]s that are usable by the
+/// shared later stages.
 fn parse_systemd_tmpfiles_output(output: &str) -> Result<Vec<FileEntry>, anyhow::Error> {
     let parsed = systemd_tmpfiles::parser::parse_str(output)
         .context("Failed to parse systemd-tmpfiles output")?;
@@ -139,8 +140,9 @@ fn parse_systemd_tmpfiles_output(output: &str) -> Result<Vec<FileEntry>, anyhow:
     let resolver = systemd_tmpfiles::specifier::SystemResolver::new_from_running_system()
         .context("Failed to create systemd-tmpfiles specifier resolver")?;
 
-    // Note! It may be tempting to parallelise this, but unfortunately it is "last item wins"
-    // (at least per file), including possibly modifying previous entries.
+    // Note! It may be tempting to parallelise this, but unfortunately it is "last
+    // item wins" (at least per file), including possibly modifying previous
+    // entries.
     for entry in parsed.iter() {
         process_entry(entry, &mut files, &mut id_cache, &resolver)
             .with_context(|| format!("Failed to process entry for {}", entry.path()))?;
@@ -149,7 +151,8 @@ fn parse_systemd_tmpfiles_output(output: &str) -> Result<Vec<FileEntry>, anyhow:
     Ok(files.into_values().collect())
 }
 
-/// Process a single entry from the systemd-tmpfiles output, converting it to a [`FileEntry`].
+/// Process a single entry from the systemd-tmpfiles output, converting it to a
+/// [`FileEntry`].
 fn process_entry<'entry>(
     entry: &'entry systemd_tmpfiles::Entry,
     files: &mut AHashMap<PathBuf, FileEntry>,
@@ -561,7 +564,8 @@ impl IdCacheKey<'_> {
 }
 
 impl<'a> IdCache<'a> {
-    /// Look up in ID cache, and if not found use the provided resolver to resolve and insert the ID
+    /// Look up in ID cache, and if not found use the provided resolver to
+    /// resolve and insert the ID
     fn lookup(
         &mut self,
         key: IdCacheKey<'a>,

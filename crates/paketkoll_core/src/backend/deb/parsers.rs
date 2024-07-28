@@ -95,7 +95,10 @@ pub(super) fn parse_md5sums(
 }
 
 /// Parse depends lines like:
-/// Depends: libc6 (>= 2.34), libice6 (>= 1:1.0.0), libx11-6, libxaw7 (>= 2:1.0.14), libxcursor1 (>> 1.1.2), libxext6, libxi6, libxmu6 (>= 2:1.1.3), libxmuu1 (>= 2:1.1.3), libxrandr2 (>= 2:1.5.0), libxt6, libxxf86vm1, cpp
+///
+/// Depends: libc6 (>= 2.34), libice6 (>= 1:1.0.0), libx11-6, libxaw7 (>=
+/// 2:1.0.14), libxcursor1 (>> 1.1.2), libxext6, libxi6, libxmu6 (>= 2:1.1.3),
+/// libxmuu1 (>= 2:1.1.3), libxrandr2 (>= 2:1.5.0), libxt6, libxxf86vm1, cpp
 fn parse_depends(interner: &Interner, input: &str) -> Vec<Dependency<PackageRef>> {
     let mut result = vec![];
     for segment in input.split(',') {
@@ -159,7 +162,8 @@ pub(super) fn parse_status(
     // This file is UTF-8 at least
     let mut buffer = String::new();
     while input.read_line(&mut buffer)? > 0 {
-        // Ensure that the buffer is cleared on every iteration regardless of where we exit the loop.
+        // Ensure that the buffer is cleared on every iteration regardless of where we
+        // exit the loop.
         let guard = scopeguard::guard(&mut buffer, |buf| {
             buf.clear();
         });
@@ -176,7 +180,8 @@ pub(super) fn parse_status(
                 packages.push(package);
             }
             package_builder = Some(PackageInterned::builder());
-            // This will be updated later with the correct reason when we parse extended status
+            // This will be updated later with the correct reason when we parse extended
+            // status
             package_builder
                 .as_mut()
                 .expect("Invalid internal state")
@@ -227,7 +232,8 @@ pub(super) fn parse_status(
                 state = StatusParsingState::InPackage(pkg);
             }
         }
-        // Separate if statement, so we process the next line when exiting parsing conf files
+        // Separate if statement, so we process the next line when exiting parsing conf
+        // files
         if let Some(stripped) = line.strip_prefix("Version: ") {
             package_builder
                 .as_mut()

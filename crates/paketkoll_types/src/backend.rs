@@ -48,7 +48,8 @@ pub type PackageBackendMap = BTreeMap<Backend, Arc<dyn Packages>>;
 /// Type of map of file backends
 pub type FilesBackendMap = BTreeMap<Backend, Arc<dyn Files>>;
 
-/// Get the name of a backend (useful in dynamic dispatch for generating reports)
+/// Get the name of a backend (useful in dynamic dispatch for generating
+/// reports)
 pub trait Name: Send + Sync + std::fmt::Debug {
     /// The name of the backend (for logging and debugging purposes)
     fn name(&self) -> &'static str;
@@ -63,7 +64,8 @@ pub trait Files: Name {
     /// any available metadata such as checksums or timestamps about those files
     fn files(&self, interner: &Interner) -> anyhow::Result<Vec<FileEntry>>;
 
-    /// Attempt to get file information from archives in the package cache (if supported)
+    /// Attempt to get file information from archives in the package cache (if
+    /// supported)
     ///
     /// Additional archives may be downloaded if needed.
     fn files_from_archives(
@@ -73,14 +75,14 @@ pub trait Files: Name {
         interner: &Interner,
     ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError>;
 
-    /// True if this backend may benefit from path canonicalization for certain scans
-    /// (i.e. paths may be inaccurate)
+    /// True if this backend may benefit from path canonicalization for certain
+    /// scans (i.e. paths may be inaccurate)
     fn may_need_canonicalization(&self) -> bool {
         false
     }
 
-    /// True if this backend may benefit from path canonicalization for certain scans
-    /// (i.e. paths may be inaccurate)
+    /// True if this backend may benefit from path canonicalization for certain
+    /// scans (i.e. paths may be inaccurate)
     fn prefer_files_from_archive(&self) -> bool {
         false
     }
@@ -136,7 +138,8 @@ pub trait Packages: Name {
 
     /// Ask package manager to uninstall unused packages
     ///
-    /// If needed, this should internally repeat until no more packages can be removed (or the used aborted)
+    /// If needed, this should internally repeat until no more packages can be
+    /// removed (or the used aborted)
     fn remove_unused(&self, ask_confirmation: bool) -> Result<(), PackageManagerError>;
 }
 

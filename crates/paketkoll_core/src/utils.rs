@@ -103,7 +103,8 @@ pub(crate) fn group_queries_by_pkg(
     queries_by_pkg
 }
 
-/// Attempt to search a directory based cache and if not found, download the package
+/// Attempt to search a directory based cache and if not found, download the
+/// package
 #[cfg(feature = "__extraction")]
 pub(crate) fn locate_package_file(
     dir_candidates: &[&str],
@@ -160,7 +161,8 @@ pub(crate) struct PackageQuery<'a> {
     pub(crate) package: &'a str,
 }
 
-/// Attempt to search a directory based cache and if not found, download the package
+/// Attempt to search a directory based cache and if not found, download the
+/// package
 #[cfg(feature = "__extraction")]
 pub(crate) fn missing_packages<'strings>(
     dir_candidates: &[&str],
