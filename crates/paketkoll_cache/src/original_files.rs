@@ -14,6 +14,7 @@ use compact_str::CompactString;
 use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::Name;
+use paketkoll_types::backend::OriginalFileError;
 use paketkoll_types::backend::OriginalFileQuery;
 use paketkoll_types::backend::PackageManagerError;
 use paketkoll_types::backend::PackageMap;
@@ -104,7 +105,7 @@ impl Files for OriginalFilesCache {
         queries: &[OriginalFileQuery],
         packages: &PackageMap,
         interner: &Interner,
-    ) -> anyhow::Result<AHashMap<OriginalFileQuery, Vec<u8>>> {
+    ) -> Result<AHashMap<OriginalFileQuery, Vec<u8>>, OriginalFileError> {
         // Build up lists of cached and uncached queries
         let mut results = AHashMap::new();
         let mut uncached_queries = Vec::new();
@@ -122,7 +123,11 @@ impl Files for OriginalFilesCache {
                 }
             };
             let cache_key = CacheKey::new(inner_name, cache_key, query.path.clone());
-            match self.cache.cache_get(&cache_key)? {
+            match self
+                .cache
+                .cache_get(&cache_key)
+                .context("Failed cache query")?
+            {
                 Some(v) => {
                     results.insert(query.clone(), v);
                 }
@@ -140,7 +145,9 @@ impl Files for OriginalFilesCache {
         // Insert the uncached results into the cache and update the results
         for (query, result) in uncached_results.into_iter() {
             let cache_key = cache_keys.remove(&query).context("Cache key not found")?;
-            self.cache.cache_set(cache_key, result.clone())?;
+            self.cache
+                .cache_set(cache_key, result.clone())
+                .context("Failed cache insertion")?;
             results.insert(query, result);
         }
 

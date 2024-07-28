@@ -9,6 +9,7 @@ use rune::Module;
 use crate::Commands;
 use crate::Phase;
 
+use super::package_managers::OriginalFilesError;
 use super::package_managers::PackageManager;
 
 /// A systemd Unit file
@@ -98,7 +99,15 @@ impl Unit {
             Source::Package {
                 package_manager,
                 package,
-            } => package_manager.file_contents(package, &self.unit_file_path()),
+            } => match package_manager.file_contents(package, &self.unit_file_path()) {
+                Ok(v) => Ok(v),
+                Err(OriginalFilesError::FileNotFound(_)) => {
+                    // Try again without /usr, because Debian hasn't finished the /usr merge. Still.
+                    Ok(package_manager
+                        .file_contents(package, &self.unit_file_path().replacen("/usr", "", 1))?)
+                }
+                Err(e) => Err(e)?,
+            },
         }
     }
 

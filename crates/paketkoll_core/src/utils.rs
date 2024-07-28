@@ -111,7 +111,7 @@ pub(crate) fn locate_package_file(
     package_match: &str,
     pkg: &str,
     download_pkg: impl Fn(&str) -> Result<(), anyhow::Error>,
-) -> Result<Option<PathBuf>, anyhow::Error> {
+) -> Result<Option<PathBuf>, paketkoll_types::backend::OriginalFileError> {
     for downloaded in [false, true] {
         // Try to locate package
         for dir in dir_candidates.iter() {
@@ -126,7 +126,8 @@ pub(crate) fn locate_package_file(
             );
             match entries {
                 Ok(paths) => {
-                    let mut paths: SmallVec<[_; 5]> = paths.collect::<Result<_, _>>()?;
+                    let mut paths: SmallVec<[_; 5]> =
+                        paths.collect::<Result<_, _>>().context("Glob error")?;
                     paths.sort();
                     if paths.len() > 1 {
                         log::warn!(
@@ -217,15 +218,17 @@ pub(crate) fn extract_files(
     results: &mut AHashMap<paketkoll_types::backend::OriginalFileQuery, Vec<u8>>,
     pkg: &str,
     name_map_filter: impl Fn(&str) -> Option<CompactString>,
-) -> Result<(), anyhow::Error> {
+) -> Result<(), paketkoll_types::backend::OriginalFileError> {
+    use paketkoll_types::backend::OriginalFileError;
+
     let mut seen = AHashSet::new();
 
     for entry in archive
         .entries()
         .context("Failed to read package archive")?
     {
-        let mut entry = entry?;
-        let path = entry.path()?;
+        let mut entry = entry.context("TAR parsing error (entry)")?;
+        let path = entry.path().context("TAR parsing error (path)")?;
         let path = path
             .to_str()
             .ok_or_else(|| anyhow::anyhow!("Failed to convert path to string"))?;
@@ -236,7 +239,9 @@ pub(crate) fn extract_files(
         if let Some(pkg_idx) = queries.get(path.as_str()) {
             seen.insert(*pkg_idx);
             let mut contents = Vec::new();
-            entry.read_to_end(&mut contents)?;
+            entry
+                .read_to_end(&mut contents)
+                .context("TAR parsing error (file contents)")?;
             results.insert(
                 paketkoll_types::backend::OriginalFileQuery {
                     package: pkg.into(),
@@ -257,7 +262,7 @@ pub(crate) fn extract_files(
         has_errors = true;
     }
     if has_errors {
-        anyhow::bail!("Failed to find requested files in package {pkg}");
+        return Err(OriginalFileError::FileNotFound(pkg.into()));
     };
     Ok(())
 }

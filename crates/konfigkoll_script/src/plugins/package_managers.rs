@@ -5,8 +5,10 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use anyhow::Context;
+use rune::alloc::fmt::TryWrite;
 use rune::runtime::Bytes;
 use rune::runtime::Shared;
+use rune::vm_write;
 use rune::Any;
 use rune::ContextError;
 use rune::Module;
@@ -138,12 +140,15 @@ impl PackageManager {
     }
 
     /// Get the original file contents of a package from Rust code
-    pub fn file_contents(&self, package: &str, path: &str) -> anyhow::Result<Vec<u8>> {
+    pub fn file_contents(&self, package: &str, path: &str) -> Result<Vec<u8>, OriginalFilesError> {
         let queries: [_; 1] = [OriginalFileQuery {
             package: package.into(),
             path: path.into(),
         }];
-        let guard = self.inner.borrow_ref()?;
+        let guard = self
+            .inner
+            .borrow_ref()
+            .context("Failed to get inner object")?;
         let files = guard
             .files
             .as_ref()
@@ -153,13 +158,12 @@ impl PackageManager {
             .as_ref()
             .ok_or_else(|| anyhow::anyhow!("No package map for {}", guard.backend))?;
         let results = files
-            .original_files(&queries, package_map, &guard.interner)
-            .with_context(|| format!("Failed original_file_contents({package}, {path})"))?;
+            .original_files(&queries, package_map, &guard.interner)?;
         if results.len() != 1 {
-            anyhow::bail!(
+            Err(anyhow::anyhow!(
                 "Failed original_file_contents({package}, {path}): Got wrong number of results: {}",
                 results.len()
-            );
+            ))?;
         }
         let result = results
             .into_iter()
@@ -177,10 +181,42 @@ impl PackageManager {
 // Rune API
 impl PackageManager {
     /// Get the original file contents of a package as a `Result<Bytes>`
-    #[rune::function]
+    #[rune::function(keep)]
     fn original_file_contents(&self, package: &str, path: &str) -> anyhow::Result<Bytes> {
         let result = self.file_contents(package, path)?;
         Ok(Bytes::from_vec(result.try_into()?))
+    }
+}
+
+#[derive(Debug, Any, thiserror::Error)]
+#[rune(item = ::package_managers)]
+pub enum OriginalFilesError {
+    #[error("Package not found: {0}")]
+    PackageNotFound(#[rune(get)] String),
+    #[error("File not found in package: {0}")]
+    FileNotFound(#[rune(get)] String),
+    #[error("Failed to get original file: {0}")]
+    Other(#[from] anyhow::Error),
+}
+
+impl OriginalFilesError {
+    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    fn string_debug(&self, f: &mut rune::runtime::Formatter) {
+        vm_write!(f, "{:?}", self);
+    }
+}
+
+impl From<paketkoll_types::backend::OriginalFileError> for OriginalFilesError {
+    fn from(value: paketkoll_types::backend::OriginalFileError) -> Self {
+        match value {
+            paketkoll_types::backend::OriginalFileError::PackageNotFound(v) => {
+                Self::PackageNotFound(v.into())
+            }
+            paketkoll_types::backend::OriginalFileError::FileNotFound(v) => {
+                Self::FileNotFound(v.into())
+            }
+            paketkoll_types::backend::OriginalFileError::Other(v) => Self::Other(v),
+        }
     }
 }
 
@@ -189,9 +225,10 @@ impl PackageManager {
 pub(crate) fn module() -> Result<Module, ContextError> {
     let mut m = Module::from_meta(self::module_meta)?;
     m.ty::<PackageManager>()?;
-    m.function_meta(PackageManager::original_file_contents)?;
+    m.function_meta(PackageManager::original_file_contents__meta)?;
     m.ty::<PackageManagers>()?;
     m.function_meta(PackageManagers::get)?;
     m.function_meta(PackageManagers::files)?;
+    m.ty::<OriginalFilesError>()?;
     Ok(m)
 }

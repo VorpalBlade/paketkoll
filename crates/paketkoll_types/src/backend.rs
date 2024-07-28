@@ -100,7 +100,7 @@ pub trait Files: Name {
         queries: &[OriginalFileQuery],
         packages: &PackageMap,
         interner: &Interner,
-    ) -> anyhow::Result<AHashMap<OriginalFileQuery, Vec<u8>>>;
+    ) -> Result<AHashMap<OriginalFileQuery, Vec<u8>>, OriginalFileError>;
 }
 
 /// Query type for original file contents
@@ -108,6 +108,16 @@ pub trait Files: Name {
 pub struct OriginalFileQuery {
     pub package: CompactString,
     pub path: CompactString,
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum OriginalFileError {
+    #[error("Failed to find or download package: {0}")]
+    PackageNotFound(CompactString),
+    #[error("Failed to find file(s) in package: {0}")]
+    FileNotFound(CompactString),
+    #[error("Failed to get original file: {0}")]
+    Other(#[from] anyhow::Error),
 }
 
 /// A package manager backend (reading list of packages)

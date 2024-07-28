@@ -15,6 +15,7 @@ use compact_str::format_compact;
 use dashmap::DashMap;
 use dashmap::DashSet;
 use either::Either;
+use paketkoll_types::backend::OriginalFileError;
 use rayon::prelude::*;
 use regex::RegexSet;
 
@@ -178,7 +179,7 @@ impl Files for ArchLinux {
         queries: &[OriginalFileQuery],
         packages: &PackageMap,
         interner: &Interner,
-    ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>> {
+    ) -> Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>, OriginalFileError> {
         let queries_by_pkg = group_queries_by_pkg(queries);
 
         let mut results = ahash::AHashMap::new();
@@ -197,13 +198,14 @@ impl Files for ArchLinux {
                 download_arch_pkg,
             )?;
             // Error if we couldn't find the package
-            let package_path = package_path.ok_or_else(|| {
-                anyhow::anyhow!("Failed to find or download package file for {pkg}")
-            })?;
+            let package_path = package_path
+                .ok_or_else(|| OriginalFileError::PackageNotFound(format_compact!("{pkg}")))?;
 
             // The package is a .tar.zst
-            let package_file = std::fs::File::open(&package_path)?;
-            let decompressed = zstd::Decoder::new(package_file)?;
+            let package_file =
+                std::fs::File::open(&package_path).context("Failed to open archive")?;
+            let decompressed =
+                zstd::Decoder::new(package_file).context("Failed to create zstd decompressor")?;
             let archive = tar::Archive::new(decompressed);
 
             // Now, lets extract the requested files from the package

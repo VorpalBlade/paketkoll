@@ -338,10 +338,12 @@ impl Passwd {
                             return Err(anyhow::anyhow!("Cannot yet handle user IDs from path"))
                         }
                         None => {
-                            let uid = self
-                                .user_ids
-                                .get(user.name.as_str())
-                                .ok_or_else(|| anyhow::anyhow!("No ID for user {}", user.name))?;
+                            let uid = self.user_ids.get(user.name.as_str()).ok_or_else(|| {
+                                anyhow::anyhow!(
+                                    "No ID for user {} (needed by sysusers.d)",
+                                    user.name
+                                )
+                            })?;
                             (*uid, None, user.name.clone())
                         }
                     };
@@ -385,7 +387,12 @@ impl Passwd {
                             .group_ids
                             .get(group.name.as_str())
                             .copied()
-                            .ok_or_else(|| anyhow::anyhow!("No ID for group {}", group.name))?,
+                            .ok_or_else(|| {
+                                anyhow::anyhow!(
+                                    "No ID for group {} (needed by sysusers.d)",
+                                    group.name
+                                )
+                            })?,
                     };
                     self.groups
                         .entry(group.name.clone().into_string())

@@ -9,8 +9,10 @@ use std::path::PathBuf;
 use anyhow::Context;
 use bstr::ByteSlice;
 use bstr::ByteVec;
+use compact_str::format_compact;
 use compact_str::CompactString;
 use dashmap::DashMap;
+use paketkoll_types::backend::OriginalFileError;
 use rayon::prelude::*;
 use regex::RegexSet;
 
@@ -196,7 +198,7 @@ impl Files for Debian {
         queries: &[OriginalFileQuery],
         packages: &PackageMap,
         interner: &Interner,
-    ) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>> {
+    ) -> Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>, OriginalFileError> {
         let queries_by_pkg = group_queries_by_pkg(queries);
         let mut results = ahash::AHashMap::new();
 
@@ -210,24 +212,23 @@ impl Files for Debian {
             let package_path =
                 locate_package_file(dir_candidates.as_slice(), &package_match, pkg, download_deb)?;
             // Error if we couldn't find the package
-            let package_path = package_path.ok_or_else(|| {
-                anyhow::anyhow!("Failed to find or download package file for {pkg}")
-            })?;
+            let package_path = package_path
+                .ok_or_else(|| OriginalFileError::PackageNotFound(format_compact!("{pkg}")))?;
 
             // The package is a .deb, which is actually an ar archive
-            let package_file = File::open(&package_path)?;
+            let package_file = File::open(&package_path).context("Failed to open archive")?;
             let mut archive = ar::Archive::new(package_file);
 
             // We want the data.tar.xz file (or other compression scheme)
             while let Some(entry) = archive.next_entry() {
-                let mut entry = entry?;
+                let mut entry = entry.context("Failed to process entry in .deb (ar level)")?;
                 if entry.header().identifier().starts_with(b"data.tar") {
-                    let extension: CompactString =
-                        std::str::from_utf8(entry.header().identifier())?
-                            .split('.')
-                            .last()
-                            .ok_or_else(|| anyhow::anyhow!("No file extension found"))?
-                            .into();
+                    let extension: CompactString = std::str::from_utf8(entry.header().identifier())
+                        .context("Failed to parse file entry (ar level) as UTF-8")?
+                        .split('.')
+                        .last()
+                        .ok_or_else(|| anyhow::anyhow!("No file extension found"))?
+                        .into();
                     let mut decompressed =
                         CompressionFormat::from_extension(&extension, &mut entry)?;
                     let archive = tar::Archive::new(&mut decompressed);
