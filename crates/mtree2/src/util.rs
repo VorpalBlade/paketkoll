@@ -134,10 +134,10 @@ pub fn parse_time(input: &[u8]) -> ParserResult<Duration> {
         )
         .into()
     };
-    let mut time_iter = input.splitn(2, |ch| *ch == b'.');
-    let sec = time_iter.next().ok_or_else(error)?;
+    let offset = memchr::memchr(b'.', input).ok_or_else(error)?;
+    let sec = &input[..offset];
+    let nano = &input[offset + 1..];
     let sec = u64::from_dec(sec)?;
-    let nano = time_iter.next().ok_or_else(error)?;
     let nano = u32::from_dec(nano)?;
     Ok(Duration::new(sec, nano))
 }
@@ -241,6 +241,14 @@ mod tests {
     use super::decode_escapes;
     use super::decode_escapes_path;
     use super::FromHex;
+
+    #[test]
+    fn test_parse_time() {
+        assert_eq!(
+            std::time::Duration::new(123, 456),
+            super::parse_time(b"123.456").unwrap()
+        );
+    }
 
     #[test]
     fn test_decode_escapes_path() {
