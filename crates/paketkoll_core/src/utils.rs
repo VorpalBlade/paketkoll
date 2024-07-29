@@ -162,8 +162,8 @@ pub(crate) struct PackageQuery<'a> {
     pub(crate) package: &'a str,
 }
 
-/// Attempt to search a directory based cache and if not found, download the
-/// package
+/// Attempt to search a directory based cache and return which packages are
+/// missing
 #[cfg(feature = "__extraction")]
 pub(crate) fn missing_packages<'strings>(
     dir_candidates: &[&str],

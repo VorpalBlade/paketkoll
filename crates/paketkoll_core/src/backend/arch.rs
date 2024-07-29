@@ -50,6 +50,11 @@ const NAME: &str = "Arch Linux";
 pub(crate) struct ArchLinux {
     pacman_config: pacman_conf::PacmanConfig,
     package_filter: &'static PackageFilter,
+    /// Mutex protecting calls to the package manager
+    ///
+    /// Yes it is strange with a mutex over (), but this doesn't protect an
+    /// actual rust resource.
+    pkgmgr_mutex: parking_lot::Mutex<()>,
 }
 
 #[derive(Debug, Default)]
@@ -84,6 +89,7 @@ impl ArchLinuxBuilder {
             package_filter: self
                 .package_filter
                 .unwrap_or_else(|| &PackageFilter::Everything),
+            pkgmgr_mutex: parking_lot::Mutex::new(()),
         })
     }
 }
@@ -191,12 +197,11 @@ impl Files for ArchLinux {
             // We may not have exact package name, try to figure this out:
             let package_match = guess_pkg_file_name(interner, pkg, packages);
 
-            let package_path = locate_package_file(
-                dir_candidates.as_slice(),
-                &package_match,
-                pkg,
-                download_arch_pkg,
-            )?;
+            let package_path =
+                locate_package_file(dir_candidates.as_slice(), &package_match, pkg, |pkg| {
+                    let _guard = self.pkgmgr_mutex.lock();
+                    download_arch_pkg(pkg)
+                })?;
             // Error if we couldn't find the package
             let package_path = package_path
                 .ok_or_else(|| OriginalFileError::PackageNotFound(format_compact!("{pkg}")))?;
@@ -227,8 +232,7 @@ impl Files for ArchLinux {
             "Finding archives for {} packages (may take a while)",
             filter.len()
         );
-        let archives =
-            iterate_pkg_archives(filter, package_map, interner, &self.pacman_config.cache_dir);
+        let archives = self.iterate_pkg_archives(filter, package_map, interner);
 
         log::info!(
             "Loading files from {} archives (may take a while)",
@@ -246,29 +250,36 @@ impl Files for ArchLinux {
     }
 }
 
-/// Find all pkg archives for the given packages
-fn iterate_pkg_archives<'inputs>(
-    filter: &'inputs [PackageRef],
-    packages: &'inputs PackageMap,
-    interner: &'inputs Interner,
-    cache_dir: &'inputs str,
-) -> impl Iterator<Item = anyhow::Result<(PackageRef, PathBuf)>> + 'inputs {
-    let package_paths = filter.iter().map(|pkg_ref| {
-        let pkg = packages
-            .get(pkg_ref)
-            .context("Failed to find package in package map")?;
-        let name = pkg.name.to_str(interner);
-        // Get the full file name
-        let filename = format_pkg_filename(interner, pkg);
+impl ArchLinux {
+    /// Find all pkg archives for the given packages
+    fn iterate_pkg_archives<'inputs>(
+        &'inputs self,
+        filter: &'inputs [PackageRef],
+        packages: &'inputs PackageMap,
+        interner: &'inputs Interner,
+    ) -> impl Iterator<Item = anyhow::Result<(PackageRef, PathBuf)>> + 'inputs {
+        let package_paths = filter.iter().map(|pkg_ref| {
+            let pkg = packages
+                .get(pkg_ref)
+                .context("Failed to find package in package map")?;
+            let name = pkg.name.to_str(interner);
+            // Get the full file name
+            let filename = format_pkg_filename(interner, pkg);
 
-        let package_path = locate_package_file(&[cache_dir], &filename, name, download_arch_pkg)?;
-        // Error if we couldn't find the package
-        let package_path = package_path
-            .ok_or_else(|| anyhow::anyhow!("Failed to find or download package file for {name}"))?;
-        Ok((*pkg_ref, package_path))
-    });
+            let package_path =
+                locate_package_file(&[&self.pacman_config.cache_dir], &filename, name, |pkg| {
+                    let _guard = self.pkgmgr_mutex.lock();
+                    download_arch_pkg(pkg)
+                })?;
+            // Error if we couldn't find the package
+            let package_path = package_path.ok_or_else(|| {
+                anyhow::anyhow!("Failed to find or download package file for {name}")
+            })?;
+            Ok((*pkg_ref, package_path))
+        });
 
-    package_paths
+        package_paths
+    }
 }
 
 /// Convert deb archives to file entries
@@ -384,6 +395,7 @@ impl Packages for ArchLinux {
         uninstall: &[&str],
         ask_confirmation: bool,
     ) -> Result<(), PackageManagerError> {
+        let _guard = self.pkgmgr_mutex.lock();
         if !install.is_empty() {
             package_manager_transaction(
                 "pacman",
@@ -406,6 +418,7 @@ impl Packages for ArchLinux {
     }
 
     fn mark(&self, dependencies: &[&str], manual: &[&str]) -> Result<(), PackageManagerError> {
+        let _guard = self.pkgmgr_mutex.lock();
         if !dependencies.is_empty() {
             package_manager_transaction("pacman", &["-D", "--asdeps"], dependencies, None)
                 .context("Failed to mark dependencies with pacman")?;
@@ -418,6 +431,7 @@ impl Packages for ArchLinux {
     }
 
     fn remove_unused(&self, ask_confirmation: bool) -> Result<(), PackageManagerError> {
+        let _guard = self.pkgmgr_mutex.lock();
         let mut query_cmd = std::process::Command::new("pacman");
         query_cmd.args(["-Qttdq"]);
 

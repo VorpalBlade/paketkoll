@@ -99,6 +99,7 @@ nix = { workspace = true, features = ["user"], optional = true }
 num_cpus.workspace = true
 paketkoll_types = { version = "0.1.1", path = "../paketkoll_types" }
 paketkoll_utils = { version = "0.1.1", path = "../paketkoll_utils" }
+parking_lot.workspace = true
 phf = { workspace = true, features = ["macros"] }
 rayon.workspace = true
 regex.workspace = true

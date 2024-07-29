@@ -65,6 +65,11 @@ const NAME: &str = "Debian";
 pub(crate) struct Debian {
     package_filter: &'static PackageFilter,
     primary_architecture: ArchitectureRef,
+    /// Mutex protecting calls to the package manager
+    ///
+    /// Yes it is strange with a mutex over (), but this doesn't protect an
+    /// actual rust resource.
+    pkgmgr_mutex: parking_lot::Mutex<()>,
 }
 
 #[derive(Debug, Default)]
@@ -92,6 +97,7 @@ impl DebianBuilder {
                 .package_filter
                 .unwrap_or_else(|| &PackageFilter::Everything),
             primary_architecture,
+            pkgmgr_mutex: parking_lot::Mutex::new(()),
         }
     }
 }
@@ -210,7 +216,10 @@ impl Files for Debian {
             let package_match = guess_deb_file_name(interner, pkg, packages);
 
             let package_path =
-                locate_package_file(dir_candidates.as_slice(), &package_match, pkg, download_deb)?;
+                locate_package_file(dir_candidates.as_slice(), &package_match, pkg, |pkg| {
+                    let _guard = self.pkgmgr_mutex.lock();
+                    download_deb(pkg)
+                })?;
             // Error if we couldn't find the package
             let package_path = package_path
                 .ok_or_else(|| OriginalFileError::PackageNotFound(format_compact!("{pkg}")))?;
@@ -259,7 +268,7 @@ impl Files for Debian {
             "Loading file data from dpkg cache archives for {} packages",
             filter.len()
         );
-        let archives = iterate_deb_archives(filter, package_map, interner)?;
+        let archives = self.iterate_deb_archives(filter, package_map, interner)?;
         log::info!(
             "Got list of {} archives, starting extracting information (this may take a while, \
              especially on the first run before the disk cache can help)",
@@ -287,55 +296,62 @@ impl Files for Debian {
     }
 }
 
-/// Find all deb archives for the given packages
-fn iterate_deb_archives<'inputs>(
-    filter: &'inputs [PackageRef],
-    packages: &'inputs PackageMap,
-    interner: &'inputs Interner,
-) -> anyhow::Result<impl Iterator<Item = anyhow::Result<(PackageRef, PathBuf)>> + 'inputs> {
-    let intermediate: Vec<_> = filter
-        .iter()
-        .map(|pkg_ref| {
-            let pkg = packages
-                .get(pkg_ref)
-                .expect("Failed to find package in package map");
-            // For deb ids[0] always exist and may contain the architecture if it is not the
-            // primary
-            let name = pkg.ids[0].to_str(interner);
-            // Get the full deb file name
-            let deb_filename = format_deb_filename(interner, pkg);
+impl Debian {
+    /// Find all deb archives for the given packages
+    fn iterate_deb_archives<'inputs>(
+        &'inputs self,
+        filter: &'inputs [PackageRef],
+        packages: &'inputs PackageMap,
+        interner: &'inputs Interner,
+    ) -> anyhow::Result<impl Iterator<Item = anyhow::Result<(PackageRef, PathBuf)>> + 'inputs> {
+        let intermediate: Vec<_> = filter
+            .iter()
+            .map(|pkg_ref| {
+                let pkg = packages
+                    .get(pkg_ref)
+                    .expect("Failed to find package in package map");
+                // For deb ids[0] always exist and may contain the architecture if it is not the
+                // primary
+                let name = pkg.ids[0].to_str(interner);
+                // Get the full deb file name
+                let deb_filename = format_deb_filename(interner, pkg);
 
-            (pkg_ref, name, deb_filename)
-        })
-        .collect();
+                (pkg_ref, name, deb_filename)
+            })
+            .collect();
 
-    // Attempt to download all missing packages:
-    let missing = missing_packages(
-        &[CACHE_PATH],
-        intermediate.iter().map(|(_, name, deb)| PackageQuery {
-            package_match: deb,
-            package: name,
-        }),
-    )?;
+        // Attempt to download all missing packages:
+        let missing = missing_packages(
+            &[CACHE_PATH],
+            intermediate.iter().map(|(_, name, deb)| PackageQuery {
+                package_match: deb,
+                package: name,
+            }),
+        )?;
 
-    if !missing.is_empty() {
-        log::info!("Downloading missing packages (installed but not in local cache)");
-        download_debs(&missing)?;
+        if !missing.is_empty() {
+            let _guard = self.pkgmgr_mutex.lock();
+            log::info!("Downloading missing packages (installed but not in local cache)");
+            download_debs(&missing)?;
+        }
+
+        let package_paths = intermediate
+            .into_iter()
+            .map(|(pkg_ref, name, deb_filename)| {
+                let package_path =
+                    locate_package_file(&[CACHE_PATH], &deb_filename, name, |pkg| {
+                        let _guard = self.pkgmgr_mutex.lock();
+                        download_deb(pkg)
+                    })?;
+                // Error if we couldn't find the package
+                let package_path = package_path.ok_or_else(|| {
+                    anyhow::anyhow!("Failed to find or download package file for {name}")
+                })?;
+                Ok((*pkg_ref, package_path))
+            });
+
+        Ok(package_paths)
     }
-
-    let package_paths = intermediate
-        .into_iter()
-        .map(|(pkg_ref, name, deb_filename)| {
-            let package_path =
-                locate_package_file(&[CACHE_PATH], &deb_filename, name, download_deb)?;
-            // Error if we couldn't find the package
-            let package_path = package_path.ok_or_else(|| {
-                anyhow::anyhow!("Failed to find or download package file for {name}")
-            })?;
-            Ok((*pkg_ref, package_path))
-        });
-
-    Ok(package_paths)
 }
 
 /// Convert deb archives to file entries
@@ -566,6 +582,7 @@ impl Packages for Debian {
         uninstall: &[&str],
         ask_confirmation: bool,
     ) -> Result<(), PackageManagerError> {
+        let _guard = self.pkgmgr_mutex.lock();
         if !install.is_empty() {
             package_manager_transaction(
                 "apt-get",
@@ -588,6 +605,7 @@ impl Packages for Debian {
     }
 
     fn mark(&self, dependencies: &[&str], manual: &[&str]) -> Result<(), PackageManagerError> {
+        let _guard = self.pkgmgr_mutex.lock();
         if !dependencies.is_empty() {
             package_manager_transaction("apt-mark", &["auto"], dependencies, None)
                 .context("Failed to mark auto-installed with apt-mark")?;
@@ -600,6 +618,7 @@ impl Packages for Debian {
     }
 
     fn remove_unused(&self, ask_confirmation: bool) -> Result<(), PackageManagerError> {
+        let _guard = self.pkgmgr_mutex.lock();
         package_manager_transaction(
             "apt-get",
             &["autoremove"],
