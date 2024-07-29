@@ -1,0 +1,139 @@
+name: Release (helper)
+
+permissions:
+  attestations: write
+  contents: write
+  id-token: write
+
+on:
+  workflow_call:
+    inputs:
+      release_name:
+        type: string
+        required: true
+      project:
+        type: string
+        required: true
+      archive_prefix:
+        type: string
+        required: true
+      binaries:
+        type: string
+        required: true
+    secrets:
+      AUR_USERNAME:
+        required: true
+      AUR_EMAIL:
+        required: true
+      AUR_SSH_PRIVATE_KEY:
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
+  CARGO_NET_RETRY: 10
+  CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 1
+  CARGO_PROFILE_RELEASE_LTO: true
+  CARGO_PROFILE_RELEASE_OPT_LEVEL: 2
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  CC: clang
+  RUSTFLAGS: -D warnings -Clink-arg=-Wl,--compress-debug-sections=zlib
+  RUSTUP_MAX_RETRIES: 10
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  cargo-about:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup Rust
+      run: rustup update stable && rustup default stable && rustup component add clippy
+    - name: Get cargo-binstall
+      run: |
+        curl -L https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-musl.tgz | tar -zxf - && mv cargo-binstall $HOME/.cargo/bin/
+    - name: Install required cargo addons
+      run: cargo binstall --no-confirm --no-symlinks cargo-about
+    - run: mkdir target && cargo about generate  about.hbs > target/licenses.html
+    - name: Upload licenses.html
+      run: GITHUB_TOKEN="${token}" gh release upload "${tag}" target/licenses.html --clobber
+      env:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ inputs.release_name }}
+
+  upload:
+    name: "Upload ${{ inputs.project }}: ${{ matrix.target }}"
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-unknown-linux-musl
+            extra_rustflags:
+            name: aarch64-unknown-linux-musl
+          - target: armv7-unknown-linux-musleabihf
+            extra_rustflags:
+            name: armv7-unknown-linux-musleabihf
+          - target: i686-unknown-linux-musl
+            extra_rustflags:
+            name: i686-unknown-linux-musl
+          - target: riscv64gc-unknown-linux-gnu
+            extra_rustflags:
+            name: riscv64gc-unknown-linux-gnu
+          - target: x86_64-unknown-linux-musl
+            extra_rustflags:
+            name: x86_64-unknown-linux-musl
+          - target: x86_64-unknown-linux-musl
+            extra_rustflags: -C target-cpu=x86-64-v3
+            name: x86_64_v3-unknown-linux-musl
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@cross
+      - uses: taiki-e/upload-rust-binary-action@v1.21.1
+        id: upload-rust-binary-action
+        with:
+          bin: ${{ inputs.binaries }}
+          target: ${{ matrix.target }}
+          # Include version number.
+          archive: ${{ inputs.archive_prefix }}-${{ matrix.name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          RUSTFLAGS: -D warnings -Clink-arg=-Wl,--compress-debug-sections=zlib ${{ matrix.extra_rustflags }}
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: "${{ steps.upload-rust-binary-action.outputs.archive }}.*"
+
+  upload-aur:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get AUR repo
+        run: git clone https://aur.archlinux.org/${{ inputs.project }}.git aur
+      - name: Update PKGBUILD
+        run: |
+          sed -i '/^_pkgver/s/=.*$/='${RELEASE_TAG#refs/tags/${{ inputs.project }}-v}'/' "aur/PKGBUILD"
+          sed -i '/^pkgrel/s/=.*$/=1/' "aur/PKGBUILD"
+        env:
+          RELEASE_TAG: ${{ github.ref }}
+      - name: Publish AUR package
+        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
+        with:
+          pkgname: ${{ inputs.project }}
+          pkgbuild: aur/PKGBUILD
+          updpkgsums: true
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: New upstream release (automatic update from GitHub Actions)

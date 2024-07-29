@@ -13,152 +13,36 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
-env:
-  CARGO_INCREMENTAL: 0
-  CARGO_NET_GIT_FETCH_WITH_CLI: true
-  CARGO_NET_RETRY: 10
-  CARGO_PROFILE_RELEASE_CODEGEN_UNITS: 1
-  CARGO_PROFILE_RELEASE_LTO: true
-  CARGO_PROFILE_RELEASE_OPT_LEVEL: 2
-  CARGO_TERM_COLOR: always
-  RUST_BACKTRACE: 1
-  CC: clang
-  RUSTFLAGS: -D warnings -Clink-arg=-Wl,--compress-debug-sections=zlib
-  RUSTUP_MAX_RETRIES: 10
-
 defaults:
   run:
     shell: bash
 
 jobs:
 
-  cargo-about:
-    if: github.repository_owner == 'VorpalBlade' && (startsWith(github.event.release.name, 'paketkoll-v') || startsWith(github.event.release.name, 'konfigkoll-v'))
-    runs-on: ubuntu-22.04
-    steps:
-    - uses: actions/checkout@v4
-    - name: Setup Rust
-      run: rustup update stable && rustup default stable && rustup component add clippy
-    - name: Get cargo-binstall
-      run: |
-        curl -L https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-musl.tgz | tar -zxf - && mv cargo-binstall $HOME/.cargo/bin/
-    - name: Install required cargo addons
-      run: cargo binstall --no-confirm --no-symlinks cargo-about
-    - run: mkdir target && cargo about generate  about.hbs > target/licenses.html
-    - name: Upload licenses.html
-      run: GITHUB_TOKEN="${token}" gh release upload "${tag}"  target/licenses.html --clobber
-      env:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        tag: ${{ github.event.release.tag_name }}
-
-  upload-paketkoll:
-    name: "paketkoll: ${{ matrix.target }}"
+  paketkoll:
+    name: "Release paketkoll"
     if: github.repository_owner == 'VorpalBlade' && startsWith(github.event.release.name, 'paketkoll-v')
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        include:
-          - target: aarch64-unknown-linux-musl
-          - target: armv7-unknown-linux-musleabihf
-          - target: i686-unknown-linux-musl
-          - target: riscv64gc-unknown-linux-gnu
-          - target: x86_64-unknown-linux-musl
-    timeout-minutes: 60
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-      - uses: taiki-e/install-action@cross
-      - uses: taiki-e/upload-rust-binary-action@v1.21.1
-        id: upload-rust-binary-action
-        with:
-          bin: paketkoll
-          target: ${{ matrix.target }}
-          # Include version number.
-          archive: $tag-$target
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v1
-        with:
-          subject-path: "${{ steps.upload-rust-binary-action.outputs.archive }}.*"
+    uses: ./.github/workflows/action_build_release.yml
+    with:
+      release_name: ${{ github.event.release.name }}
+      project: paketkoll
+      archive_prefix: ${{ github.event.release.name }}
+      binaries: paketkoll
+    secrets:
+      AUR_USERNAME: ${{ secrets.AUR_USERNAME }}
+      AUR_EMAIL: ${{ secrets.AUR_EMAIL }}
+      AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
 
-  upload-konfigkoll:
-    name: "konfigkoll: ${{ matrix.target }}"
+  konfigkoll:
+    name: "Release konfigkoll"
     if: github.repository_owner == 'VorpalBlade' && startsWith(github.event.release.name, 'konfigkoll-v')
-    runs-on: ubuntu-22.04
-    strategy:
-      matrix:
-        include:
-          - target: aarch64-unknown-linux-musl
-          - target: armv7-unknown-linux-musleabihf
-          - target: i686-unknown-linux-musl
-          - target: riscv64gc-unknown-linux-gnu
-          - target: x86_64-unknown-linux-musl
-    timeout-minutes: 60
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-      - uses: taiki-e/install-action@cross
-      - uses: taiki-e/upload-rust-binary-action@v1.21.1
-        id: upload-rust-binary-action
-        with:
-          bin: konfigkoll,konfigkoll-rune
-          target: ${{ matrix.target }}
-          # Include version number.
-          archive: $tag-$target
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v1
-        with:
-          subject-path: "${{ steps.upload-rust-binary-action.outputs.archive }}.*"
-
-  upload-aur-paketkoll:
-    if: github.repository_owner == 'VorpalBlade' && startsWith(github.event.release.name, 'paketkoll-v')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Get AUR repo
-        run: git clone https://aur.archlinux.org/paketkoll.git aur
-      - name: Update PKGBUILD
-        run: |
-          sed -i '/^_pkgver/s/=.*$/='${RELEASE_TAG#refs/tags/paketkoll-v}'/' "aur/PKGBUILD"
-          sed -i '/^pkgrel/s/=.*$/=1/' "aur/PKGBUILD"
-        env:
-          RELEASE_TAG: ${{ github.ref }}
-      - name: Publish AUR package
-        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
-        with:
-          pkgname: paketkoll
-          pkgbuild: aur/PKGBUILD
-          updpkgsums: true
-          commit_username: ${{ secrets.AUR_USERNAME }}
-          commit_email: ${{ secrets.AUR_EMAIL }}
-          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          commit_message: New upstream release (automatic update from GitHub Actions)
-
-  upload-aur-konfigkoll:
-    if: github.repository_owner == 'VorpalBlade' && startsWith(github.event.release.name, 'konfigkoll-v')
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Get AUR repo
-        run: git clone https://aur.archlinux.org/konfigkoll.git aur
-      - name: Update PKGBUILD
-        run: |
-          sed -i '/^_pkgver/s/=.*$/='${RELEASE_TAG#refs/tags/konfigkoll-v}'/' "aur/PKGBUILD"
-          sed -i '/^pkgrel/s/=.*$/=1/' "aur/PKGBUILD"
-        env:
-          RELEASE_TAG: ${{ github.ref }}
-      - name: Publish AUR package
-        uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
-        with:
-          pkgname: konfigkoll
-          pkgbuild: aur/PKGBUILD
-          updpkgsums: true
-          commit_username: ${{ secrets.AUR_USERNAME }}
-          commit_email: ${{ secrets.AUR_EMAIL }}
-          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          commit_message: New upstream release (automatic update from GitHub Actions)
+    uses: ./.github/workflows/action_build_release.yml
+    with:
+      release_name: ${{ github.event.release.name }}
+      project: konfigkoll
+      archive_prefix: ${{ github.event.release.name }}
+      binaries: konfigkoll,konfigkoll-rune
+    secrets:
+      AUR_USERNAME: ${{ secrets.AUR_USERNAME }}
+      AUR_EMAIL: ${{ secrets.AUR_EMAIL }}
+      AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
