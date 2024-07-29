@@ -31,8 +31,7 @@ pub enum MTreeLine<'a> {
 
 impl<'a> MTreeLine<'a> {
     pub fn from_bytes(input: &'a [u8]) -> ParserResult<MTreeLine<'a>> {
-        let mut parts = input
-            .split(|ch| *ch == b' ')
+        let mut parts = crate::util::MemchrSplitter::new(b' ', input)
             .filter(|word| !word.is_empty());
         // Blank
         let first = match parts.next() {

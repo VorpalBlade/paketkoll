@@ -118,7 +118,7 @@ fn from_dec_ch(i: u8) -> Option<u8> {
 
 /// If possible, quickly convert a character of a hexadecimal number into a u8.
 #[inline]
-pub fn from_oct_ch(i: u8) -> Option<u8> {
+fn from_oct_ch(i: u8) -> Option<u8> {
     match i {
         b'0'..=b'7' => Some(i - b'0'),
         _ => None,
@@ -182,6 +182,58 @@ pub fn decode_escapes(buf: &mut [u8]) -> Option<&mut [u8]> {
     Some(&mut buf[..write_idx])
 }
 
+/// A splitter using memchr to find the separators
+#[derive(Debug)]
+pub struct MemchrSplitter<'haystack> {
+    inner: memchr::Memchr<'haystack>,
+    haystack: &'haystack [u8],
+    last: usize,
+    done: bool,
+}
+
+impl<'haystack> MemchrSplitter<'haystack> {
+    pub fn new(needle: u8, haystack: &'haystack [u8]) -> MemchrSplitter<'haystack> {
+        Self {
+            inner: memchr::memchr_iter(needle, haystack),
+            haystack,
+            last: 0,
+            done: false,
+        }
+    }
+}
+
+impl<'haystack> Iterator for MemchrSplitter<'haystack> {
+    type Item = &'haystack [u8];
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        // Code here is based on bstr::ByteSlice::split_str, but thanks to using memchr
+        // instead of memmem this is much faster.
+        match self.inner.next() {
+            Some(start) => {
+                let next = &self.haystack[self.last..start];
+                self.last = start + 1;
+                Some(next)
+            }
+            None => {
+                if self.last >= self.haystack.len() {
+                    if !self.done {
+                        self.done = true;
+                        Some(b"")
+                    } else {
+                        None
+                    }
+                } else {
+                    let s = &self.haystack[self.last..];
+                    self.last = self.haystack.len();
+                    self.done = true;
+                    Some(s)
+                }
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
@@ -238,5 +290,32 @@ mod tests {
             )
             .unwrap()
         );
+    }
+
+    #[test]
+    fn test_memchr_splitter() {
+        let data = b"hello world";
+        let mut splitter = super::MemchrSplitter::new(b' ', data);
+        assert_eq!(splitter.next(), Some(b"hello".as_slice()));
+        assert_eq!(splitter.next(), Some(b"world".as_slice()));
+        assert_eq!(splitter.next(), None);
+
+        let data = b"hello world ";
+        let mut splitter = super::MemchrSplitter::new(b' ', data);
+        assert_eq!(splitter.next(), Some(b"hello".as_slice()));
+        assert_eq!(splitter.next(), Some(b"world".as_slice()));
+        assert_eq!(splitter.next(), Some(b"".as_slice()));
+        assert_eq!(splitter.next(), None);
+
+        let data = b"";
+        let mut splitter = super::MemchrSplitter::new(b' ', data);
+        assert_eq!(splitter.next(), Some(b"".as_slice()));
+        assert_eq!(splitter.next(), None);
+
+        let data = b" ";
+        let mut splitter = super::MemchrSplitter::new(b' ', data);
+        assert_eq!(splitter.next(), Some(b"".as_slice()));
+        assert_eq!(splitter.next(), Some(b"".as_slice()));
+        assert_eq!(splitter.next(), None);
     }
 }
