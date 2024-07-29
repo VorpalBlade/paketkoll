@@ -8,6 +8,17 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.6.4] - 2024-07-29
+
+### ⚡ Performance improvements
+
+- Improve time parsing
+- Improve mtree parsing performance
+
+### ⚙️ Other stuff
+
+- Fix formatting
+
 ## [0.6.3] - 2024-07-27
 
 ### 📚 Documentation

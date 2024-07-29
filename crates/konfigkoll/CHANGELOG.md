@@ -8,6 +8,29 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.4] - 2024-07-29
+
+### 🚀 Features
+
+- Save prefix (for when you wrap cmds in a context object)
+- Try systemd lookup with /lib if /usr/lib fails, to support Debian
+
+### 🐛 Bug fixes
+
+- Fix race condition on package manager
+- Fix parsing of extended status for Debian
+- Fix typo in save output
+
+### ⚡ Performance improvements
+
+- Improve mtime time parsing (relevant to Arch Linux)
+- Improve mtree parsing performance (relevant to Arch Linux)
+
+### ⚙️ Other stuff
+
+- Better error messages
+- Make disabled package manager quieter and adjust other log levels
+
 ## [0.1.3] - 2024-07-27
 
 ### 🚀 Features

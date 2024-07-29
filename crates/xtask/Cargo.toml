@@ -31,9 +31,9 @@ clap = { workspace = true, features = ["derive"] }
 clap_complete.workspace = true
 clap_mangen.workspace = true
 env_logger.workspace = true
-konfigkoll = { version = "0.1.3", path = "../konfigkoll" }
+konfigkoll = { version = "0.1.4", path = "../konfigkoll" }
 log.workspace = true
-paketkoll = { version = "0.3.1", path = "../paketkoll" }
+paketkoll = { version = "0.3.2", path = "../paketkoll" }
 
 [lints]
 workspace = true

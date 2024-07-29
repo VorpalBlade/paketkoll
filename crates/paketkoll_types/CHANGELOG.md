@@ -8,6 +8,12 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.2] - 2024-07-29
+
+### 🚀 Features
+
+- Try systemd lookup with /lib if /usr/lib fails, to support Debian
+
 ## [0.1.1] - 2024-07-27
 
 ### 🚀 Features

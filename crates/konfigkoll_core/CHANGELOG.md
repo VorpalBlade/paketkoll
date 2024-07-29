@@ -8,6 +8,16 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.3.0] - 2024-07-29
+
+### 🚀 Features
+
+- Save prefix (for when you wrap cmds in a context object)
+
+### 🐛 Bug fixes
+
+- Fix typo in save
+
 ## [0.2.0] - 2024-07-27
 
 ### 🚜 Refactoring

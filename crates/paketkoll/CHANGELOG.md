@@ -8,6 +8,17 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.3.2] - 2024-07-29
+
+### 🐛 Bug fixes
+
+- Fix parsing of extended status for Debian
+
+### ⚡ Performance improvements
+
+- Improve mtime time parsing (relevant to Arch Linux)
+- Improve mtree parsing performance (relevant to Arch Linux)
+
 ## [0.3.1] - 2024-07-27
 
 ### 📚 Documentation

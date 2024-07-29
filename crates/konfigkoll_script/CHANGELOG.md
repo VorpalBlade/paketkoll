@@ -8,6 +8,19 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.2] - 2024-07-29
+
+### 🚀 Features
+
+- Save prefix (for when you wrap cmds in a context object)
+- Try systemd lookup with /lib if /usr/lib fails, to support Debian
+
+### ⚙️ Other stuff
+
+- Better error message
+- Fix build and better errors
+- Make disabled package manager quieter and adjust other log levels
+
 ## [0.1.1] - 2024-07-27
 
 ### 🚜 Refactoring
