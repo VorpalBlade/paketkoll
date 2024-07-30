@@ -1,6 +1,7 @@
 //! Helpers for working with /etc/passwd and /etc/groups (as well as shadow
 //! files)
 
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::fmt::Write;
@@ -382,10 +383,9 @@ impl Passwd {
                             group: group.into(),
                             gecos: user.gecos.map(Into::into).unwrap_or_default(),
                             home: user.home.map(Into::into).unwrap_or_else(|| "/".into()),
-                            shell: user
-                                .shell
-                                .map(Into::into)
-                                .unwrap_or_else(|| "/usr/bin/nologin".into()),
+                            shell: user.shell.map(Into::into).unwrap_or_else(|| {
+                                DEFAULT_NOLOGIN_PATH.read().clone().into_owned()
+                            }),
                             passwd: "!*".into(),
                             change: None,
                             min: None,
@@ -564,14 +564,14 @@ impl User {
     /// * No password expiration/age/warning/etc.
     /// * No account expiration
     #[rune::function(path = Self::new)]
-    fn new(uid: u32, name: String, group: String, gecos: String) -> Self {
+    fn new(uid: u32, name: &str, group: &str, gecos: &str) -> Self {
         Self {
             uid,
-            name,
-            group,
-            gecos,
+            name: name.to_string(),
+            group: group.to_string(),
+            gecos: gecos.to_string(),
             home: "/".into(),
-            shell: "/usr/bin/nologin".into(),
+            shell: DEFAULT_NOLOGIN_PATH.read().clone().into_owned(),
             passwd: "!*".into(),
             change: None,
             min: None,
@@ -654,6 +654,18 @@ impl Group {
     }
 }
 
+static DEFAULT_NOLOGIN_PATH: parking_lot::RwLock<Cow<'static, str>> =
+    parking_lot::RwLock::new(Cow::Borrowed("/usr/bin/nologin"));
+
+/// Set the default path to `nologin`
+///
+/// By default this is `/usr/bin/nologin`, but for Debian it should
+/// be `/usr/sbin/nologin` for example.
+#[rune::function]
+fn set_nologin_path(path: &str) {
+    *DEFAULT_NOLOGIN_PATH.write() = Cow::Owned(path.to_string());
+}
+
 #[rune::module(::passwd)]
 /// Utilities for patching file contents conveniently.
 pub(crate) fn module() -> Result<Module, ContextError> {
@@ -676,6 +688,8 @@ pub(crate) fn module() -> Result<Module, ContextError> {
     m.function_meta(Passwd::apply)?;
     m.function_meta(User::new)?;
     m.function_meta(Group::new)?;
+
+    m.function_meta(set_nologin_path)?;
 
     Ok(m)
 }
