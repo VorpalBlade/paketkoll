@@ -61,6 +61,18 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install Rust
         run: rustup install --profile minimal ${{ matrix.rust }} && rustup default ${{ matrix.rust }}
+      - name: Print environment info
+        run: |
+          echo "# Rust"
+          rustc -Vv
+          echo "# Cargo"
+          cargo -Vv
+          echo "# GCC"
+          gcc -v
+          echo "# Clang"
+          clang -v
+          echo "# Ld"
+          ld -v
       - name: Install cross
         uses: taiki-e/install-action@cross
       - name: Cache builds
