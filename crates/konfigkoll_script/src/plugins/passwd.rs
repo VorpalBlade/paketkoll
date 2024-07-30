@@ -643,7 +643,7 @@ impl Group {
 impl Group {
     /// Create a new group
     #[rune::function(path = Self::new)]
-    fn new(name: String, gid: u32) -> Self {
+    fn new(gid: u32, name: String) -> Self {
         Self {
             name,
             gid,
