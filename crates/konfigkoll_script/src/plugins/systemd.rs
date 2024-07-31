@@ -1,5 +1,7 @@
 //! Helpers for working with systemd units
 
+use std::borrow::Cow;
+
 use camino::Utf8PathBuf;
 use compact_str::CompactString;
 use rune::Any;
@@ -87,7 +89,12 @@ impl Unit {
         match &self.source {
             Source::File { path, .. } => path.to_string(),
             Source::Package { .. } => {
-                format!("/usr/lib/systemd/{}/{}", self.type_.as_str(), self.unit)
+                format!(
+                    "{}/{}/{}",
+                    SYSTEM_UNIT_BASE_PATH.read(),
+                    self.type_.as_str(),
+                    self.unit
+                )
             }
         }
     }
@@ -102,9 +109,14 @@ impl Unit {
             } => match package_manager.file_contents(package, &self.unit_file_path()) {
                 Ok(v) => Ok(v),
                 Err(OriginalFilesError::FileNotFound(_, _)) => {
-                    // Try again without /usr, because Debian hasn't finished the /usr merge. Still.
-                    Ok(package_manager
-                        .file_contents(package, &self.unit_file_path().replacen("/usr", "", 1))?)
+                    // Try again with/without /usr, because Debian hasn't finished the /usr merge.
+                    // Still.
+                    let alt_path = if SYSTEM_UNIT_BASE_PATH.read().as_ref() == "/usr/lib/systemd" {
+                        self.unit_file_path().replacen("/usr", "", 1)
+                    } else {
+                        format!("/usr{}", self.unit_file_path())
+                    };
+                    Ok(package_manager.file_contents(package, &alt_path)?)
                 }
                 Err(e) => Err(e)?,
             },
@@ -249,6 +261,19 @@ impl Unit {
     }
 }
 
+/// Because of lack of usr merge in Debian
+static SYSTEM_UNIT_BASE_PATH: parking_lot::RwLock<Cow<'static, str>> =
+    parking_lot::RwLock::new(Cow::Borrowed("/usr/lib/systemd"));
+
+/// Set the base path for package installed systemd units.
+///
+/// Normally this is `/usr/lib/systemd`, but on Debian you might need to set it
+/// to `/lib/systemd`.
+#[rune::function(keep)]
+fn set_system_unit_base_path(path: &str) {
+    *SYSTEM_UNIT_BASE_PATH.write() = Cow::Owned(path.into());
+}
+
 #[rune::module(::systemd)]
 /// Functionality to simplify working with systemd
 pub(crate) fn module() -> Result<Module, ContextError> {
@@ -262,5 +287,7 @@ pub(crate) fn module() -> Result<Module, ContextError> {
     m.function_meta(Unit::skip_wanted_by__meta)?;
     m.function_meta(Unit::enable__meta)?;
     m.function_meta(Unit::mask__meta)?;
+
+    m.function_meta(set_system_unit_base_path__meta)?;
     Ok(m)
 }
