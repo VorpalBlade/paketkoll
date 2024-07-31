@@ -178,12 +178,14 @@ pub struct FsEntries {
 
 impl FsEntries {
     /// Apply a stream of instructions to this `FsEntries`
+    #[tracing::instrument(level = "debug", skip(self, instructions))]
     pub fn apply_instructions(
         &mut self,
         instructions: impl Iterator<Item = FsInstruction>,
         warn_redundant: bool,
     ) {
         for instr in instructions {
+            tracing::debug!("{:?}", instr);
             match instr.op {
                 FsOp::Remove => {
                     self.fs.insert(
@@ -411,7 +413,7 @@ pub fn diff(
         match entry {
             itertools::EitherOrBoth::Both(before, after) if before.1 == after.1 => {}
             itertools::EitherOrBoth::Both(before, after) => {
-                // tracing::debug!("{:?} -> {:?}", before, after);
+                tracing::debug!("{:?} -> {:?}", before, after);
                 // Compare the structs and generate a stream of instructions
                 let path = before.0;
                 let before = before.1;
@@ -494,7 +496,7 @@ pub fn diff(
                 }
             }
             itertools::EitherOrBoth::Left(before) => {
-                // tracing::debug!("{:?} -> ()", before);
+                tracing::debug!("{:?} -> ()", before);
                 match goal {
                     DiffGoal::Apply(ref _backend_impl, path_map) => {
                         // Figure out what the previous state of this file was:
@@ -615,7 +617,7 @@ pub fn diff(
                 }
             }
             itertools::EitherOrBoth::Right(after) => {
-                // tracing::debug!("() -> {:?}", after);
+                tracing::debug!("() -> {:?}", after);
                 results.extend(after.1.into_instruction(&after.0));
             }
         }
