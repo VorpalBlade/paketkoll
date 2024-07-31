@@ -10,7 +10,12 @@ use rune::ContextError;
 use rune::Module;
 
 const DEFAULT_EARLY: &[&str] = &["/etc/passwd", "/etc/group", "/etc/shadow", "/etc/gshadow"];
-const DEFAUT_SENSITIVE: &[&str] = &["/etc/shadow", "/etc/gshadow"];
+const DEFAUT_SENSITIVE: &[&str] = &[
+    "/etc/shadow",
+    "/etc/shadow-",
+    "/etc/gshadow",
+    "/etc/gshadow-",
+];
 
 /// Configuration of how konfigkoll should behave.
 #[derive(Debug, rune::Any)]
