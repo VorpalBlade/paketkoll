@@ -606,10 +606,28 @@ pub fn diff(
                     }
                     DiffGoal::Save => {
                         // Generate instructions to remove the entry
+                        let reason = match &before.1.entry {
+                            FsEntry::Removed => ".rm() in config should be removed",
+                            FsEntry::Unchanged => "Owner/group/mode in config should be removed",
+                            FsEntry::Directory => {
+                                ".mkdir() in config should be removed. NOTE: mkdir may be implicit \
+                                 from changes to contained files"
+                            }
+                            FsEntry::File(_) => {
+                                "On the system, this file is either unchanged or doesn't exist at \
+                                 all"
+                            }
+                            FsEntry::Symlink { .. } => ".ln() in config should be removed",
+                            FsEntry::Fifo => ".mkfifo() in config should be removed",
+                            FsEntry::BlockDevice { .. } => {
+                                ".blockdev() in config should be removed"
+                            }
+                            FsEntry::CharDevice { .. } => ".chardev() in config should be removed",
+                        };
                         results.push(FsInstruction {
                             path: before.0,
-                            op: FsOp::Remove,
-                            comment: before.1.comment,
+                            op: FsOp::Comment,
+                            comment: Some(reason.into()),
                         });
                         // TODO: Do something special when the before
                         // instruction is a removal one?I
