@@ -1,6 +1,5 @@
 //! Apply a stream of instructions to the current system
 
-use std::collections::BTreeMap;
 use std::fs::Permissions;
 use std::os::unix::fs::PermissionsExt;
 use std::sync::Arc;
@@ -21,7 +20,6 @@ use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::OriginalFileQuery;
 use paketkoll_types::backend::PackageBackendMap;
-use paketkoll_types::backend::PackageMap;
 use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::intern::PackageRef;
@@ -83,7 +81,7 @@ pub struct InProcessApplicator {
     package_backends: PackageBackendMap,
     file_backend: Arc<dyn Files>,
     interner: Arc<Interner>,
-    package_maps: BTreeMap<Backend, Arc<PackageMap>>,
+    package_maps: PackageMapMap,
     id_resolver: NameToNumericResolveCache,
 }
 
@@ -91,7 +89,7 @@ impl InProcessApplicator {
     pub fn new(
         package_backends: PackageBackendMap,
         interner: &Arc<Interner>,
-        package_maps: &BTreeMap<Backend, Arc<PackageMap>>,
+        package_maps: &PackageMapMap,
         file_backend: &Arc<dyn Files>,
     ) -> Self {
         Self {

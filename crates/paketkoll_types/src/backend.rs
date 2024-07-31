@@ -48,6 +48,12 @@ pub type PackageBackendMap = BTreeMap<Backend, Arc<dyn Packages>>;
 /// Type of map of file backends
 pub type FilesBackendMap = BTreeMap<Backend, Arc<dyn Files>>;
 
+/// Type of return value of owning packages queries
+pub type OwningPackagesResult = DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>;
+
+/// Type of return value of original files queries
+pub type OriginalFilesResult = AHashMap<OriginalFileQuery, Vec<u8>>;
+
 /// Get the name of a backend (useful in dynamic dispatch for generating
 /// reports)
 pub trait Name: Send + Sync + std::fmt::Debug {
@@ -92,7 +98,7 @@ pub trait Files: Name {
         &self,
         paths: &AHashSet<&Path>,
         interner: &Interner,
-    ) -> anyhow::Result<DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>>;
+    ) -> anyhow::Result<OwningPackagesResult>;
 
     /// Get the original contents of files
     fn original_files(
@@ -100,7 +106,7 @@ pub trait Files: Name {
         queries: &[OriginalFileQuery],
         packages: &PackageMap,
         interner: &Interner,
-    ) -> Result<AHashMap<OriginalFileQuery, Vec<u8>>, OriginalFileError>;
+    ) -> Result<OriginalFilesResult, OriginalFileError>;
 }
 
 /// Query type for original file contents
@@ -169,7 +175,7 @@ pub fn packages_to_package_map<'a>(
     packages: impl Iterator<Item = &'a PackageInterned>,
 ) -> PackageMap {
     let mut package_map =
-        AHashMap::with_capacity_and_hasher(packages.size_hint().0, ahash::RandomState::new());
+        PackageMap::with_capacity_and_hasher(packages.size_hint().0, ahash::RandomState::new());
     for package in packages {
         if package.ids.is_empty() {
             package_map.insert(package.name, package.clone());

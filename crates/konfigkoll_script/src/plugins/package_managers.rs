@@ -18,6 +18,7 @@ use paketkoll_types::backend::Files;
 use paketkoll_types::backend::OriginalFileQuery;
 use paketkoll_types::backend::PackageBackendMap;
 use paketkoll_types::backend::PackageMap;
+use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::backend::Packages;
 use paketkoll_types::intern::Interner;
 
@@ -38,7 +39,7 @@ impl PackageManagers {
         package_backends: &PackageBackendMap,
         file_backend_id: Backend,
         files_backend: &Arc<dyn Files>,
-        package_maps: &BTreeMap<Backend, Arc<PackageMap>>,
+        package_maps: &PackageMapMap,
         interner: &Arc<Interner>,
     ) -> Self {
         let files_backends = [(file_backend_id, files_backend)];

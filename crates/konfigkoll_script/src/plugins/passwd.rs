@@ -175,8 +175,8 @@ impl Passwd {
             log_and_error!("Duplicate group IDs in group ID mapping");
         }
         Ok(Self {
-            users: BTreeMap::new(),
-            groups: BTreeMap::new(),
+            users: Users::new(),
+            groups: Groups::new(),
             user_ids: uids,
             group_ids: gids,
         })

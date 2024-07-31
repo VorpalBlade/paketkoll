@@ -1,6 +1,5 @@
 //! Package scanning functions
 
-use std::collections::BTreeMap;
 use std::sync::Arc;
 
 use anyhow::Context;
@@ -8,9 +7,7 @@ use itertools::Itertools;
 use rayon::prelude::*;
 
 use konfigkoll_types::PkgInstructions;
-use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::PackageBackendMap;
-use paketkoll_types::backend::PackageMap;
 use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::package::PackageInstallStatus;
@@ -20,8 +17,8 @@ pub(crate) fn load_packages(
     interner: &Arc<Interner>,
     backends_pkg: &PackageBackendMap,
 ) -> anyhow::Result<(PkgInstructions, PackageMapMap)> {
-    let mut pkgs_sys = BTreeMap::new();
-    let mut package_maps: BTreeMap<Backend, Arc<PackageMap>> = BTreeMap::new();
+    let mut pkgs_sys = PkgInstructions::new();
+    let mut package_maps: PackageMapMap = PackageMapMap::new();
     let backend_maps: Vec<_> = backends_pkg
         .values()
         .par_bridge()

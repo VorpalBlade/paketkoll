@@ -1,4 +1,3 @@
-use std::collections::BTreeMap;
 use std::fmt::Display;
 use std::io::Write;
 use std::panic::catch_unwind;
@@ -18,7 +17,7 @@ use rune::Vm;
 use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::PackageBackendMap;
-use paketkoll_types::backend::PackageMap;
+use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::intern::Interner;
 
 use crate::plugins::command::Commands;
@@ -97,7 +96,7 @@ impl EngineState {
         package_backends: &PackageBackendMap,
         file_backend_id: Backend,
         files_backend: &Arc<dyn Files>,
-        package_maps: &BTreeMap<Backend, Arc<PackageMap>>,
+        package_maps: &PackageMapMap,
         interner: &Arc<Interner>,
     ) {
         self.package_managers = Some(PackageManagers::create_from(

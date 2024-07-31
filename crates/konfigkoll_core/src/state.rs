@@ -172,6 +172,7 @@ enum FsEntry {
 
 #[derive(Debug, Default, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct FsEntries {
+    /// This must be an ordered map, [`diff`] depends on it
     fs: BTreeMap<Utf8PathBuf, FsNode>,
 }
 

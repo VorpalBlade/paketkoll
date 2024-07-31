@@ -8,6 +8,7 @@ use ignore::overrides::OverrideBuilder;
 use ignore::Match;
 use ignore::WalkBuilder;
 use ignore::WalkState;
+use paketkoll_types::backend::OriginalFilesResult;
 use rayon::prelude::*;
 
 use paketkoll_types::backend::OriginalFileQuery;
@@ -25,7 +26,7 @@ pub fn original_files(
     backend: &crate::backend::ConcreteBackend,
     backend_config: &crate::backend::BackendConfiguration,
     queries: &[OriginalFileQuery],
-) -> anyhow::Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>> {
+) -> anyhow::Result<OriginalFilesResult> {
     let interner = Interner::new();
     let backend_impl = backend
         .create_full(backend_config, &interner)

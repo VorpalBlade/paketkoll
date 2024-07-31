@@ -16,6 +16,8 @@ use dashmap::DashMap;
 use dashmap::DashSet;
 use either::Either;
 use paketkoll_types::backend::OriginalFileError;
+use paketkoll_types::backend::OriginalFilesResult;
+use paketkoll_types::backend::OwningPackagesResult;
 use rayon::prelude::*;
 use regex::RegexSet;
 
@@ -149,7 +151,7 @@ impl Files for ArchLinux {
         &self,
         paths: &AHashSet<&Path>,
         interner: &Interner,
-    ) -> anyhow::Result<DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>> {
+    ) -> anyhow::Result<OwningPackagesResult> {
         // Optimise for speed, go directly into package cache and look for files that
         // contain the given string
         let file_to_package = DashMap::with_hasher(ahash::RandomState::new());
@@ -185,10 +187,10 @@ impl Files for ArchLinux {
         queries: &[OriginalFileQuery],
         packages: &PackageMap,
         interner: &Interner,
-    ) -> Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>, OriginalFileError> {
+    ) -> Result<OriginalFilesResult, OriginalFileError> {
         let queries_by_pkg = group_queries_by_pkg(queries);
 
-        let mut results = ahash::AHashMap::new();
+        let mut results = OriginalFilesResult::new();
 
         // List of directories to search for the package
         let dir_candidates = smallvec::smallvec_inline![self.pacman_config.cache_dir.as_str()];
@@ -342,7 +344,7 @@ fn find_files(
     interner: &Interner,
     re: &RegexSet,
     paths: &[String],
-    output: &DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>,
+    output: &OwningPackagesResult,
 ) -> anyhow::Result<()> {
     if !entry.file_type()?.is_dir() {
         return Ok(());

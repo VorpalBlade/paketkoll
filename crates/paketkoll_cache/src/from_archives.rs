@@ -17,6 +17,7 @@ use paketkoll_types::backend::Files;
 use paketkoll_types::backend::Name;
 use paketkoll_types::backend::OriginalFileError;
 use paketkoll_types::backend::OriginalFileQuery;
+use paketkoll_types::backend::OriginalFilesResult;
 use paketkoll_types::backend::PackageManagerError;
 use paketkoll_types::backend::PackageMap;
 use paketkoll_types::files::FileEntry;
@@ -135,7 +136,7 @@ impl Files for FromArchiveCache {
         queries: &[OriginalFileQuery],
         packages: &PackageMap,
         interner: &Interner,
-    ) -> Result<AHashMap<OriginalFileQuery, Vec<u8>>, OriginalFileError> {
+    ) -> Result<OriginalFilesResult, OriginalFileError> {
         self.inner.original_files(queries, packages, interner)
     }
 

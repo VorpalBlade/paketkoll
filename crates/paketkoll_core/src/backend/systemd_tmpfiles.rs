@@ -15,6 +15,7 @@ use paketkoll_types::backend::Files;
 use paketkoll_types::backend::Name;
 use paketkoll_types::backend::OriginalFileError;
 use paketkoll_types::backend::OriginalFileQuery;
+use paketkoll_types::backend::OriginalFilesResult;
 use paketkoll_types::backend::PackageManagerError;
 use paketkoll_types::backend::PackageMap;
 use paketkoll_types::files::Checksum;
@@ -112,7 +113,7 @@ impl Files for SystemdTmpfiles {
         _queries: &[OriginalFileQuery],
         _packages: &PackageMap,
         _interner: &paketkoll_types::intern::Interner,
-    ) -> Result<AHashMap<OriginalFileQuery, Vec<u8>>, OriginalFileError> {
+    ) -> Result<OriginalFilesResult, OriginalFileError> {
         Err(anyhow::anyhow!(
             "Original file queries are not supported for systemd-tmpfiles"
         ))?

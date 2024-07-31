@@ -160,8 +160,7 @@ pub fn save_packages<'instructions>(
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
+    use ahash::AHashMap;
     use camino::Utf8Path;
     use camino::Utf8PathBuf;
     use pretty_assertions::assert_eq;
@@ -180,7 +179,7 @@ mod tests {
     #[test]
     fn test_save_fs_changes() {
         let mut output = Vec::new();
-        let mut file_data = HashMap::new();
+        let mut file_data = AHashMap::new();
         let file_data_saver = |path: &Utf8Path, contents: &FileContents| {
             file_data.insert(path.to_owned(), contents.clone());
             Ok(())

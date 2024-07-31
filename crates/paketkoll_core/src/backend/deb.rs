@@ -13,6 +13,8 @@ use compact_str::format_compact;
 use compact_str::CompactString;
 use dashmap::DashMap;
 use paketkoll_types::backend::OriginalFileError;
+use paketkoll_types::backend::OriginalFilesResult;
+use paketkoll_types::backend::OwningPackagesResult;
 use rayon::prelude::*;
 use regex::RegexSet;
 
@@ -164,7 +166,7 @@ impl Files for Debian {
         &self,
         paths: &ahash::AHashSet<&Path>,
         interner: &Interner,
-    ) -> anyhow::Result<DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>> {
+    ) -> anyhow::Result<OwningPackagesResult> {
         // Optimise for speed, go directly into package cache and look for files that
         // contain the given string
         let file_to_package = DashMap::with_hasher(ahash::RandomState::new());
@@ -204,9 +206,9 @@ impl Files for Debian {
         queries: &[OriginalFileQuery],
         packages: &PackageMap,
         interner: &Interner,
-    ) -> Result<ahash::AHashMap<OriginalFileQuery, Vec<u8>>, OriginalFileError> {
+    ) -> Result<OriginalFilesResult, OriginalFileError> {
         let queries_by_pkg = group_queries_by_pkg(queries);
-        let mut results = ahash::AHashMap::new();
+        let mut results = OriginalFilesResult::new();
 
         // List of directories to search for the package
         let dir_candidates = smallvec::smallvec_inline![CACHE_PATH];
@@ -437,7 +439,7 @@ fn is_file_match(
     interner: &Interner,
     re: &RegexSet,
     paths: &[String],
-    output: &DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>,
+    output: &OwningPackagesResult,
 ) -> anyhow::Result<()> {
     let contents = std::fs::read_to_string(list_path)
         .with_context(|| format!("Failed to read {list_path:?}"))?;

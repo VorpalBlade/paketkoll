@@ -16,6 +16,7 @@ use paketkoll_types::backend::Files;
 use paketkoll_types::backend::Name;
 use paketkoll_types::backend::OriginalFileError;
 use paketkoll_types::backend::OriginalFileQuery;
+use paketkoll_types::backend::OriginalFilesResult;
 use paketkoll_types::backend::PackageManagerError;
 use paketkoll_types::backend::PackageMap;
 use paketkoll_types::files::FileEntry;
@@ -105,9 +106,9 @@ impl Files for OriginalFilesCache {
         queries: &[OriginalFileQuery],
         packages: &PackageMap,
         interner: &Interner,
-    ) -> Result<AHashMap<OriginalFileQuery, Vec<u8>>, OriginalFileError> {
+    ) -> Result<OriginalFilesResult, OriginalFileError> {
         // Build up lists of cached and uncached queries
-        let mut results = AHashMap::new();
+        let mut results = OriginalFilesResult::new();
         let mut uncached_queries = Vec::new();
         let mut cache_keys = AHashMap::new();
         let inner_name = self.name();

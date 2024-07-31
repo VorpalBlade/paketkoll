@@ -1,16 +1,14 @@
 //! Code for applying the configuration to the system.
 
-use std::collections::BTreeMap;
 use std::sync::Arc;
 
 use either::Either;
 
 use konfigkoll::cli::Paranoia;
 use konfigkoll_core::apply::Applicator;
-use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::PackageBackendMap;
-use paketkoll_types::backend::PackageMap;
+use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::intern::Interner;
 
 #[allow(clippy::too_many_arguments)]
@@ -19,7 +17,7 @@ pub(crate) fn create_applicator(
     force_dry_run: bool,
     backend_map: &PackageBackendMap,
     interner: &Arc<Interner>,
-    package_maps: &BTreeMap<Backend, Arc<PackageMap>>,
+    package_maps: &PackageMapMap,
     files_backend: &Arc<dyn Files>,
     diff_command: Vec<String>,
     pager_command: Vec<String>,

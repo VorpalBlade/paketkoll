@@ -32,7 +32,7 @@ pub(super) fn get_diversions(interner: &Interner) -> anyhow::Result<Diversions> 
 
 /// Parse output from dpkg-divert --list
 fn parse_diversions(mut input: impl BufRead, interner: &Interner) -> anyhow::Result<Diversions> {
-    let mut results = BTreeMap::new();
+    let mut results = Diversions::new();
 
     let re = regex::Regex::new(r"^diversion of (?<orig>.+) to (?<new>.+) by (?<pkg>.+)$")?;
 
@@ -84,8 +84,6 @@ fn parse_diversions(mut input: impl BufRead, interner: &Interner) -> anyhow::Res
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeMap;
-
     use pretty_assertions::assert_eq;
 
     use paketkoll_types::intern::Interner;
@@ -93,6 +91,7 @@ mod tests {
 
     use super::parse_diversions;
     use super::Diversion;
+    use super::Diversions;
 
     #[test]
     fn test_parse_diversions() {
@@ -108,7 +107,7 @@ mod tests {
         let interner = Interner::new();
         let parsed = parse_diversions(input.as_bytes(), &interner).unwrap();
 
-        let expected = BTreeMap::from_iter(vec![
+        let expected = Diversions::from_iter(vec![
             (
                 "/usr/lib/python3.11/EXTERNALLY-MANAGED".into(),
                 Diversion {

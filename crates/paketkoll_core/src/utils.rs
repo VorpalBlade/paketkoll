@@ -215,7 +215,7 @@ pub(crate) fn missing_packages<'strings>(
 pub(crate) fn extract_files(
     mut archive: tar::Archive<impl Read>,
     queries: &AHashSet<&str>,
-    results: &mut AHashMap<paketkoll_types::backend::OriginalFileQuery, Vec<u8>>,
+    results: &mut paketkoll_types::backend::OriginalFilesResult,
     pkg: &str,
     name_map_filter: impl Fn(&str) -> Option<CompactString>,
 ) -> Result<(), paketkoll_types::backend::OriginalFileError> {
