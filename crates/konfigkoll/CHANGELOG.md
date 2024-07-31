@@ -8,6 +8,29 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.5] - 2024-07-31
+
+### 🚀 Features
+
+- Early/sensitive configurations can now be globs
+- Filter for save to only save a few of the files
+
+### 🚜 Refactoring
+
+- Use type aliases properly
+- Fix variable name
+- Split main
+- Move init_directory to separate file
+
+### ⚡ Performance improvements
+
+- Don't drop data just before exiting, let the OS do that.
+
+### ⚙️ Other stuff
+
+- Improve save message to describe what is happening
+- Improve template
+
 ## [0.1.4] - 2024-07-29
 
 ### 🚀 Features

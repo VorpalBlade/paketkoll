@@ -12,7 +12,7 @@ license = "MPL-2.0"
 name = "konfigkoll"
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.79.0"
-version = "0.1.4"
+version = "0.1.5"
 
 [[bin]]
 name = "konfigkoll"
@@ -45,14 +45,14 @@ dashmap.workspace = true
 directories.workspace = true
 either.workspace = true
 itertools.workspace = true
-konfigkoll_core = { version = "0.3.0", path = "../konfigkoll_core" }
-konfigkoll_script = { version = "0.1.2", path = "../konfigkoll_script" }
-konfigkoll_types = { version = "0.1.2", path = "../konfigkoll_types" }
+konfigkoll_core = { version = "0.3.1", path = "../konfigkoll_core" }
+konfigkoll_script = { version = "0.1.3", path = "../konfigkoll_script" }
+konfigkoll_types = { version = "0.1.3", path = "../konfigkoll_types" }
 konfigkoll_utils = { version = "0.1.1", path = "../konfigkoll_utils" }
 ouroboros.workspace = true
-paketkoll_cache = { version = "0.2.1", path = "../paketkoll_cache" }
-paketkoll_core = { version = "0.5.2", path = "../paketkoll_core" }
-paketkoll_types = { version = "0.1.2", path = "../paketkoll_types" }
+paketkoll_cache = { version = "0.2.2", path = "../paketkoll_cache" }
+paketkoll_core = { version = "0.5.3", path = "../paketkoll_core" }
+paketkoll_types = { version = "0.1.3", path = "../paketkoll_types" }
 rayon.workspace = true
 rune = { workspace = true, features = ["cli"] }
 tokio = { workspace = true, features = [

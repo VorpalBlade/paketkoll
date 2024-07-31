@@ -8,6 +8,12 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.3.3] - 2024-07-31
+
+### ⚙️ Other stuff
+
+- Updated the following local packages: paketkoll_types, paketkoll_core
+
 ## [0.3.2] - 2024-07-29
 
 ### 🐛 Bug fixes
