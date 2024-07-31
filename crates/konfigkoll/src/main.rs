@@ -306,9 +306,22 @@ async fn main() -> anyhow::Result<()> {
                     show_fs_instr_diff(&change, &diff_cmd, &pager_cmd)?;
                 }
             }
+            // Let the OS clean these up, freeing in the program is slower
+            std::mem::forget(pkg_diff);
         }
         Commands::Check {} | Commands::Init {} => unreachable!(),
     }
+
+    // Let the OS clean these up, freeing in the program is slower (~35 ms on Intel
+    // Skylake)
+    std::mem::forget(backend_files);
+    std::mem::forget(backends_pkg);
+    std::mem::forget(fs_scan_result);
+    std::mem::forget(interner);
+    std::mem::forget(package_maps);
+    std::mem::forget(pkgs_sys);
+    std::mem::forget(proj_dirs);
+    std::mem::forget(script_engine);
 
     Ok(())
 }
@@ -449,6 +462,9 @@ fn cmd_apply_changes(
 
     // Apply rest of file system
     apply_files(applicator.as_mut(), late_fs_changes.iter())?;
+
+    std::mem::forget(early_fs_changes);
+    std::mem::forget(late_fs_changes);
     Ok(())
 }
 
