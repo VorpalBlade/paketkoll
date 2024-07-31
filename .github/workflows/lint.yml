@@ -61,8 +61,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install Rust
-      run: rustup install --profile minimal stable && rustup default stable && rustup component add rustfmt
-    - run: cargo fmt -- --check
+      run: rustup install --profile minimal nightly && rustup default nightly && rustup component add rustfmt
+    - run: cargo +nightly fmt -- --check
 
   cargo-deny:
     runs-on: ubuntu-22.04
