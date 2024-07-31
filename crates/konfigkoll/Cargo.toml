@@ -55,13 +55,7 @@ paketkoll_core = { version = "0.5.2", path = "../paketkoll_core" }
 paketkoll_types = { version = "0.1.2", path = "../paketkoll_types" }
 rayon.workspace = true
 rune = { workspace = true, features = ["cli"] }
-tokio = { workspace = true, features = [
-    "macros",
-    "parking_lot",
-    "process",
-    "rt",
-    "sync",
-] }
+tokio.workspace = true
 tracing-log.workspace = true
 tracing-subscriber = { workspace = true, features = [
     "env-filter",

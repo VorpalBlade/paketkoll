@@ -12,7 +12,7 @@ ahash.workspace = true
 anyhow.workspace = true
 itertools.workspace = true
 rune = { workspace = true, optional = true }
-winnow = { workspace = true, features = ["simd"] }
+winnow.workspace = true
 
 [lints]
 workspace = true
