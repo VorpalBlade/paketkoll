@@ -5,6 +5,8 @@ use std::str::FromStr;
 use ahash::AHashSet;
 use anyhow::Context;
 use camino::Utf8PathBuf;
+use globset::Glob;
+use globset::GlobSet;
 use parking_lot::Mutex;
 use rune::ContextError;
 use rune::Module;
@@ -77,16 +79,26 @@ impl Settings {
         v.into_iter()
     }
 
-    pub fn early_configs(&self) -> impl Iterator<Item = Utf8PathBuf> {
+    pub fn early_configs(&self) -> anyhow::Result<GlobSet> {
         let guard = self.early_configs.lock();
-        let v: Vec<_> = guard.iter().cloned().collect();
-        v.into_iter()
+        let mut builder = GlobSet::builder();
+        for p in guard.iter() {
+            builder.add(Glob::new(p.as_str()).context(
+                "Failed to parse one or more early configuration path as a regular expressions",
+            )?);
+        }
+        Ok(builder.build()?)
     }
 
-    pub fn sensitive_configs(&self) -> impl Iterator<Item = Utf8PathBuf> {
+    pub fn sensitive_configs(&self) -> anyhow::Result<GlobSet> {
         let guard = self.sensitive_configs.lock();
-        let v: Vec<_> = guard.iter().cloned().collect();
-        v.into_iter()
+        let mut builder = GlobSet::builder();
+        for p in guard.iter() {
+            builder.add(Glob::new(p.as_str()).context(
+                "Failed to parse one or more sensitive configuration path as a regular expressions",
+            )?);
+        }
+        Ok(builder.build()?)
     }
 
     /// Get diff tool to use
@@ -171,6 +183,8 @@ impl Settings {
     ///
     /// By default, `/etc/passwd`, `/etc/group`, `/etc/shadow`, and
     /// `/etc/gshadow` are already added.
+    ///
+    /// The parameter is interpeted as a glob.
     #[rune::function]
     pub fn early_config(&self, path: &str) {
         let before = self.early_configs.lock().insert(path.into());
@@ -186,6 +200,8 @@ impl Settings {
     /// (those are sensitive by default) to prevent accidental leaks.
     ///
     /// You can add more such files with this function.
+    ///
+    /// The parameter is interpeted as a glob.
     #[rune::function]
     pub fn sensitive_config(&self, path: &str) {
         let before = self.sensitive_configs.lock().insert(path.into());

@@ -2,7 +2,6 @@ use std::io::BufWriter;
 use std::io::Write;
 use std::sync::Arc;
 
-use ahash::AHashSet;
 use anyhow::Context;
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
@@ -360,16 +359,12 @@ fn cmd_save_changes(
     let prefix = script_engine.state().settings().save_prefix();
     konfigkoll_core::save::save_packages(&prefix, &mut output, pkg_additions.into_iter())?;
     let files_path = config_path.join("files");
-    let sensitive_configs: AHashSet<Utf8PathBuf> = script_engine
-        .state()
-        .settings()
-        .sensitive_configs()
-        .collect();
+    let sensitive_configs = script_engine.state().settings().sensitive_configs()?;
     konfigkoll_core::save::save_fs_changes(
         &prefix,
         &mut output,
         |path, contents| {
-            if sensitive_configs.contains(path) {
+            if sensitive_configs.is_match(path.as_str()) {
                 tracing::warn!(
                     "{} has changes, but it is marked sensitive, won't auto-save",
                     path
@@ -437,12 +432,11 @@ fn cmd_apply_changes(
     );
 
     // Split into early / late file changes based on settings
-    let early_configs: AHashSet<Utf8PathBuf> =
-        script_engine.state().settings().early_configs().collect();
+    let early_configs = script_engine.state().settings().early_configs()?;
     let mut early_fs_changes = vec![];
     let mut late_fs_changes = vec![];
     for change in fs_changes {
-        if early_configs.contains(&change.path) {
+        if early_configs.is_match(change.path.as_str()) {
             early_fs_changes.push(change);
         } else {
             late_fs_changes.push(change);

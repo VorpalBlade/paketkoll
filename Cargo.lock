@@ -1183,6 +1183,7 @@ dependencies = [
  "camino",
  "compact_str",
  "glob",
+ "globset",
  "indoc",
  "itertools 0.13.0",
  "konfigkoll_hwinfo",
