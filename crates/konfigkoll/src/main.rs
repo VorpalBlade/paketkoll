@@ -252,6 +252,12 @@ async fn main() -> anyhow::Result<()> {
                 }
             });
 
+            if !fs_additions.is_empty() || !pkg_additions.is_empty() || !pkg_removals.is_empty() {
+                tracing::warn!("There are changes (saved to unsorted.rn)");
+            } else {
+                tracing::info!("No changes to save, you are up to date!");
+            }
+
             // Open output file (for appending) in config dir
             let output_path = config_path.join("unsorted.rn");
             let mut output = BufWriter::new(
