@@ -12,6 +12,10 @@ on:
     types:
       - completed
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   release-plz:
     name: Release-plz
