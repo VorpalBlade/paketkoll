@@ -58,6 +58,7 @@ async fn main() -> anyhow::Result<()> {
         None => std::env::current_dir()?.try_into()?,
     };
 
+    // This must be done before we instantiate the script engine
     if let Commands::Init {} = cli.command {
         init_directory(&config_path)?;
         return Ok(());
@@ -66,7 +67,7 @@ async fn main() -> anyhow::Result<()> {
     let mut script_engine = konfigkoll_script::ScriptEngine::new_with_files(&config_path)?;
 
     match cli.command {
-        Commands::Init {} | Commands::Save {} | Commands::Apply {} | Commands::Diff { .. } => (),
+        Commands::Init {} | Commands::Save { .. } | Commands::Apply {} | Commands::Diff { .. } => {}
         Commands::Check {} => {
             println!("Scripts loaded successfully");
             return Ok(());
@@ -233,7 +234,7 @@ async fn main() -> anyhow::Result<()> {
 
     // At the end, decide what we want to do with the results
     match cli.command {
-        Commands::Save {} => {
+        Commands::Save { filter } => {
             tracing::info!("Saving changes");
             // Split out additions and removals
             let mut fs_additions =
@@ -286,9 +287,16 @@ async fn main() -> anyhow::Result<()> {
                         );
                         return Ok(());
                     }
-                    match cli.confirmation == Paranoia::DryRun {
-                        true => save::noop_file_data_saver(path),
-                        false => save::file_data_saver(&files_path, path, contents),
+                    match (cli.confirmation == Paranoia::DryRun, &filter) {
+                        (true, _) => save::noop_file_data_saver(path),
+                        (false, Some(filter)) => {
+                            if path.starts_with(filter) {
+                                save::file_data_saver(&files_path, path, contents)
+                            } else {
+                                save::filtered_file_data_saver(path)
+                            }
+                        }
+                        (false, None) => save::file_data_saver(&files_path, path, contents),
                     }
                 },
                 fs_additions.iter(),

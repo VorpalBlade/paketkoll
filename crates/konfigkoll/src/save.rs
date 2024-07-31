@@ -35,3 +35,11 @@ pub(crate) fn noop_file_data_saver(path: &Utf8Path) -> Result<(), anyhow::Error>
     tracing::info!("Would save file data for {}", path);
     Ok(())
 }
+
+pub(crate) fn filtered_file_data_saver(path: &Utf8Path) -> Result<(), anyhow::Error> {
+    tracing::info!(
+        "Would have saved file data for {} (but it is filtered)",
+        path
+    );
+    Ok(())
+}

@@ -30,7 +30,11 @@ pub enum Commands {
     /// Create a new template config directory
     Init {},
     /// Save config to unsorted.rn script (for you to merge into your config)
-    Save {},
+    Save {
+        /// Filter for path prefix to actually save (write out files for)
+        #[arg(long)]
+        filter: Option<Utf8PathBuf>,
+    },
     /// Check package files and search for unexpected files
     Apply {},
     /// Check for syntax errors and other issues
