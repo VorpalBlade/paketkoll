@@ -4,7 +4,6 @@ use std::sync::Arc;
 
 use ahash::AHashSet;
 use anyhow::Context;
-use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use clap::Parser;
 use compact_str::CompactString;
@@ -31,6 +30,7 @@ use paketkoll_types::backend::Packages;
 
 mod apply;
 mod fs_scan;
+mod init;
 mod pkgs;
 mod save;
 
@@ -60,7 +60,7 @@ async fn main() -> anyhow::Result<()> {
 
     // This must be done before we instantiate the script engine
     if let Commands::Init {} = cli.command {
-        init_directory(&config_path)?;
+        init::init_directory(&config_path)?;
         return Ok(());
     }
 
@@ -235,7 +235,7 @@ async fn main() -> anyhow::Result<()> {
     // At the end, decide what we want to do with the results
     match cli.command {
         Commands::Save { filter } => {
-            tracing::info!("Saving changes");
+            tracing::debug!("Computing changes to save");
             // Split out additions and removals
             let mut fs_additions =
                 konfigkoll_core::state::diff(&DiffGoal::Save, script_fs, sys_fs)?.collect_vec();
@@ -253,9 +253,9 @@ async fn main() -> anyhow::Result<()> {
             });
 
             if !fs_additions.is_empty() || !pkg_additions.is_empty() || !pkg_removals.is_empty() {
-                tracing::warn!("There are changes (saved to unsorted.rn)");
+                tracing::warn!("There are differences (saving to unsorted.rn)");
             } else {
-                tracing::info!("No changes to save, you are up to date!");
+                tracing::info!("No differences to save, you are up to date!");
             }
 
             // Open output file (for appending) in config dir
@@ -324,7 +324,7 @@ async fn main() -> anyhow::Result<()> {
             output.write_all("}\n".as_bytes())?;
         }
         Commands::Apply {} => {
-            tracing::info!("Applying changes");
+            tracing::debug!("Computing changes to apply");
             let mut fs_changes = konfigkoll_core::state::diff(
                 &DiffGoal::Apply(backend_files.clone(), fs_scan_result.borrow_path_map()),
                 sys_fs,
@@ -333,11 +333,19 @@ async fn main() -> anyhow::Result<()> {
             .collect_vec();
             fs_changes.sort();
 
-            let pkgs_changes = pkg_diff.filter_map(|v| match v {
-                itertools::EitherOrBoth::Both(_, _) => None,
-                itertools::EitherOrBoth::Left((id, instr)) => Some((id, instr.inverted())),
-                itertools::EitherOrBoth::Right((id, instr)) => Some((id, instr.clone())),
-            });
+            let pkgs_changes = pkg_diff
+                .filter_map(|v| match v {
+                    itertools::EitherOrBoth::Both(_, _) => None,
+                    itertools::EitherOrBoth::Left((id, instr)) => Some((id, instr.inverted())),
+                    itertools::EitherOrBoth::Right((id, instr)) => Some((id, instr.clone())),
+                })
+                .collect_vec();
+
+            if fs_changes.is_empty() && pkgs_changes.is_empty() {
+                tracing::info!("No system changes to apply, you are up-to-date");
+            } else {
+                tracing::warn!("Applying changes");
+            }
 
             let mut applicator = create_applicator(
                 cli.confirmation,
@@ -367,7 +375,12 @@ async fn main() -> anyhow::Result<()> {
             apply_files(applicator.as_mut(), early_fs_changes.iter())?;
 
             // Apply packages
-            apply_packages(applicator.as_mut(), pkgs_changes, &package_maps, &interner)?;
+            apply_packages(
+                applicator.as_mut(),
+                pkgs_changes.into_iter(),
+                &package_maps,
+                &interner,
+            )?;
 
             // Apply rest of file system
             apply_files(applicator.as_mut(), late_fs_changes.iter())?;
@@ -390,38 +403,6 @@ async fn main() -> anyhow::Result<()> {
             }
         }
         Commands::Check {} | Commands::Init {} => unreachable!(),
-    }
-
-    Ok(())
-}
-
-fn init_directory(config_path: &Utf8Path) -> anyhow::Result<()> {
-    std::fs::create_dir_all(config_path).context("Failed to create config directory")?;
-    std::fs::create_dir_all(config_path.join("files"))?;
-
-    // Create skeleton main script
-    let main_script = config_path.join("main.rn");
-    if !main_script.exists() {
-        std::fs::write(&main_script, include_bytes!("../data/template/main.rn"))?;
-    }
-    // Create skeleton unsorted script
-    let unsorted_script = config_path.join("unsorted.rn");
-    if !unsorted_script.exists() {
-        std::fs::write(
-            &unsorted_script,
-            include_bytes!("../data/template/unsorted.rn"),
-        )?;
-    }
-    // Gitignore
-    let gitignore = config_path.join(".gitignore");
-    if !gitignore.exists() {
-        std::fs::write(&gitignore, include_bytes!("../data/template/_gitignore"))?;
-    }
-
-    // Add an empty Rune.toml
-    let runetoml = config_path.join("Rune.toml");
-    if !runetoml.exists() {
-        std::fs::write(&runetoml, b"")?;
     }
 
     Ok(())
