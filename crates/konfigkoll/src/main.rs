@@ -245,7 +245,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Save { filter } => {
             tracing::debug!("Computing changes to save");
             // Split out additions and removals
-            let fs_additions = fs_state_diff_save(script_fs, sys_fs)?;
+            let fs_changes = fs_state_diff_save(script_fs, sys_fs)?;
 
             let mut pkg_additions = vec![];
             let mut pkg_removals = vec![];
@@ -264,7 +264,7 @@ async fn main() -> anyhow::Result<()> {
                 &config_path,
                 &script_engine,
                 &filter,
-                &fs_additions,
+                &fs_changes,
                 pkg_additions,
                 pkg_removals,
             )?;
@@ -319,11 +319,11 @@ fn cmd_save_changes(
     config_path: &Utf8Path,
     script_engine: &ScriptEngine,
     filter: &Option<Utf8PathBuf>,
-    fs_additions: &[FsInstruction],
+    fs_changes: &[FsInstruction],
     pkg_additions: Vec<(&PkgIdent, PkgInstruction)>,
     pkg_removals: Vec<(&PkgIdent, PkgInstruction)>,
 ) -> anyhow::Result<()> {
-    if !fs_additions.is_empty() || !pkg_additions.is_empty() || !pkg_removals.is_empty() {
+    if !fs_changes.is_empty() || !pkg_additions.is_empty() || !pkg_removals.is_empty() {
         tracing::warn!("There are differences (saving to unsorted.rn)");
     } else {
         tracing::info!("No differences to save, you are up to date!");
@@ -375,7 +375,7 @@ fn cmd_save_changes(
                 (false, None) => save::file_data_saver(&files_path, path, contents),
             }
         },
-        fs_additions.iter(),
+        fs_changes.iter(),
     )?;
     output.write_all("}\n".as_bytes())?;
 
