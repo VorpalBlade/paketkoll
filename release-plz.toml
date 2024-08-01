@@ -15,14 +15,20 @@ publish_features = ["arch_linux", "debian", "serde"]
 
 # We only want GH releases for the binaries
 [[package]]
-name = "konfigkoll"
+changelog_include = [
+    "konfigkoll_script",
+    "konfigkoll_core",
+    "konfigkoll_cache",
+    "konfigkoll_hwinfo",
+]
 git_release_enable = true
 git_release_type = "auto"
+name = "konfigkoll"
 
 [[package]]
-name = "paketkoll"
 git_release_enable = true
 git_release_type = "auto"
+name = "paketkoll"
 
 [changelog]
 body = """
@@ -61,10 +67,10 @@ commit_preprocessors = [
 commit_parsers = [
     { message = "^feat", group = "<!-- 0 -->🚀 Features" },
     { message = "^fix", group = "<!-- 1 -->🐛 Bug fixes" },
-    { message = "^docs?", group = "<!-- 3 -->📚 Documentation" },
-    { message = "^perf", group = "<!-- 4 -->⚡ Performance improvements" },
-    { message = "^refactor", group = "<!-- 2 -->🚜 Refactoring" },
-    { message = "^style", group = "<!-- 5 -->🎨 Styling" },
+    { message = "^docs?", group = "<!-- 2 -->📚 Documentation" },
+    { message = "^perf", group = "<!-- 3 -->⚡ Performance improvements" },
+    { message = "^diag", group = "<!-- 4 -->🩺 Diagnostics & output formatting" },
+    { message = "^refactor", group = "<!-- 5 -->🚜 Refactoring" },
     { message = "^test", group = "<!-- 6 -->🧪 Testing" },
     { message = "^(churn|chore)\\(release\\): prepare for", skip = true },
     { message = "^(churn|chore)\\(deps.*\\)", skip = true },
