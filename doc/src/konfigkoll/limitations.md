@@ -33,6 +33,26 @@ of the integrations (systemd services, systemd-sysusers) are less useful. Debian
 support is *currently work in progress* and solution for this will be designed
 at later point in time.
 
+#### Configuration files
+
+Unlike Arch Linux, Debian has multiple ways to handle configuration files:
+
+* As part of package, installed with apt/dpkg: This will work like on Arch Linux,
+  where you can patch files. Crucially if you run `dpkg-query -S /etc/some/file`
+  and it returns a package name, it is this case.
+* UCF, where post install actions copy/merge the file from somewhere in
+  `/usr/share` to `/etc`. You will have to emulate this with a copy from the
+  same location in your configuration. Try grepping for the config file of
+  interest in `/var/lib/dpkg/info/*.postinst` to find out what is going on.
+* Like UCF but free form: Basically the same but with ad-hoc logic instead of
+  the `ucf` commands. Same solution (but slightly more annoying to figure out
+  as it isn't standardised).
+* Like the above case but with no source file: Sometimes the post install script
+  just checks if the config file exists on the system, and if not echos some
+  embedded text into the config file. There is nothing to copy from here,
+  original file queries will not help you. You will simply have to maintain your
+  own copy of the file. There is no sane solution for this case, unfortunately.
+
 ## Limitations due to not yet being implemented
 
 * Certain errors can be delayed from when they happen to they are reported.
