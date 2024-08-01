@@ -8,7 +8,6 @@ use ahash::AHashMap;
 use anyhow::Context;
 use console::style;
 use either::Either;
-use itertools::Itertools;
 
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::FsOp;
@@ -46,7 +45,7 @@ pub trait Applicator {
     ) -> anyhow::Result<()>;
 
     /// Apply file changes
-    fn apply_files(&mut self, instructions: &[&FsInstruction]) -> anyhow::Result<()>;
+    fn apply_files(&mut self, instructions: &[FsInstruction]) -> anyhow::Result<()>;
 }
 
 impl<L, R> Applicator for Either<L, R>
@@ -67,7 +66,7 @@ where
         }
     }
 
-    fn apply_files(&mut self, instructions: &[&FsInstruction]) -> anyhow::Result<()> {
+    fn apply_files(&mut self, instructions: &[FsInstruction]) -> anyhow::Result<()> {
         match self {
             Either::Left(inner) => inner.apply_files(instructions),
             Either::Right(inner) => inner.apply_files(instructions),
@@ -145,7 +144,7 @@ impl Applicator for InProcessApplicator {
         Ok(())
     }
 
-    fn apply_files(&mut self, instructions: &[&FsInstruction]) -> anyhow::Result<()> {
+    fn apply_files(&mut self, instructions: &[FsInstruction]) -> anyhow::Result<()> {
         let pkg_map = self
             .package_maps
             .get(&self.file_backend.as_backend_enum())
@@ -157,6 +156,11 @@ impl Applicator for InProcessApplicator {
             })?;
         for instr in instructions {
             tracing::info!("Applying: {}: {}", instr.path, instr.op);
+            if instr.op != FsOp::Comment && instr.op != FsOp::Remove {
+                if let Some(parent) = instr.path.parent() {
+                    std::fs::create_dir_all(parent).context("Failed to create parent directory")?;
+                }
+            }
             match &instr.op {
                 FsOp::Remove => {
                     let existing = std::fs::symlink_metadata(&instr.path);
@@ -186,16 +190,21 @@ impl Applicator for InProcessApplicator {
                 FsOp::CreateDirectory => {
                     std::fs::create_dir_all(&instr.path)?;
                 }
-                FsOp::CreateFile(contents) => match contents {
-                    konfigkoll_types::FileContents::Literal { checksum: _, data } => {
-                        std::fs::write(&instr.path, data)?;
+                FsOp::CreateFile(contents) => {
+                    match contents {
+                        konfigkoll_types::FileContents::Literal { checksum: _, data } => {
+                            std::fs::write(&instr.path, data)
+                                .context("Failed to write file data")?;
+                        }
+                        konfigkoll_types::FileContents::FromFile { checksum: _, path } => {
+                            // TODO: This copies permissions, replace
+                            std::fs::copy(path, &instr.path).context("Failed to copy file")?;
+                        }
                     }
-                    konfigkoll_types::FileContents::FromFile { checksum: _, path } => {
-                        std::fs::copy(path, &instr.path)?;
-                    }
-                },
+                }
                 FsOp::CreateSymlink { target } => {
-                    std::os::unix::fs::symlink(target, &instr.path)?;
+                    std::os::unix::fs::symlink(target, &instr.path)
+                        .context("Failed to create symlink")?;
                 }
                 FsOp::CreateFifo => {
                     // Since we split out mode in general, we don't know what to put here.
@@ -357,7 +366,7 @@ impl<Inner: Applicator + std::fmt::Debug> Applicator for InteractiveApplicator<I
         }
     }
 
-    fn apply_files(&mut self, instructions: &[&FsInstruction]) -> anyhow::Result<()> {
+    fn apply_files(&mut self, instructions: &[FsInstruction]) -> anyhow::Result<()> {
         tracing::info!("Will apply {} file instructions", instructions.len());
         loop {
             match self.fs_confirmer.prompt()? {
@@ -390,7 +399,7 @@ impl<Inner: Applicator + std::fmt::Debug> Applicator for InteractiveApplicator<I
 impl<Inner: Applicator + std::fmt::Debug> InteractiveApplicator<Inner> {
     fn interactive_apply_single_file(
         &mut self,
-        instr: &&FsInstruction,
+        instr: &FsInstruction,
     ) -> Result<(), anyhow::Error> {
         println!(
             "Under consideration: {} with change {}",
@@ -401,7 +410,7 @@ impl<Inner: Applicator + std::fmt::Debug> InteractiveApplicator<Inner> {
             match self.interactive_confirmer.prompt()? {
                 'y' => {
                     tracing::info!("Applying change to {}", instr.path);
-                    return self.inner.apply_files(&[instr]);
+                    return self.inner.apply_files(&[instr.clone()]);
                 }
                 'a' => {
                     tracing::info!("Aborting");
@@ -456,7 +465,7 @@ impl Applicator for NoopApplicator {
         Ok(())
     }
 
-    fn apply_files(&mut self, instructions: &[&FsInstruction]) -> anyhow::Result<()> {
+    fn apply_files(&mut self, instructions: &[FsInstruction]) -> anyhow::Result<()> {
         tracing::info!("Would apply {} file instructions", instructions.len());
         for instr in instructions {
             tracing::info!(" {}: {}", instr.path, instr.op);
@@ -465,27 +474,28 @@ impl Applicator for NoopApplicator {
     }
 }
 
-pub fn apply_files<'instructions>(
+pub fn apply_files(
     applicator: &mut dyn Applicator,
-    instructions: impl Iterator<Item = &'instructions FsInstruction>,
+    instructions: &mut [FsInstruction],
 ) -> anyhow::Result<()> {
     // Sort and group by type of operation, to make changes easier to review
-    let instructions = instructions
-        .sorted_by(|a, b| a.op.cmp(&b.op).then_with(|| a.path.cmp(&b.path)))
-        .collect_vec();
+    instructions.sort_by(|a, b| {
+        FsOpDiscriminants::from(&a.op)
+            .cmp(&FsOpDiscriminants::from(&b.op))
+            .then_with(|| a.path.cmp(&b.path))
+    });
     let chunked_instructions = instructions
-        .iter()
-        .chunk_by(|e| FsOpDiscriminants::from(&e.op));
+        .chunk_by_mut(|a, b| FsOpDiscriminants::from(&a.op) == FsOpDiscriminants::from(&b.op));
     // Process each chunk separately
-    for (_discr, chunk) in chunked_instructions.into_iter() {
-        let chunk = chunk.cloned().collect_vec();
+    for chunk in chunked_instructions {
         // Removing things has to be sorted reverse, so we remove contents before the
         // directory they are containers of
-        let chunk = match chunk[0].op {
-            FsOp::Remove => chunk.into_iter().rev().collect_vec(),
-            _ => chunk,
+        if chunk[0].op == FsOp::Remove {
+            chunk.reverse();
         };
-        applicator.apply_files(chunk.as_slice())?;
+        applicator
+            .apply_files(&*chunk)
+            .context("Error while applying files")?;
     }
     Ok(())
 }
@@ -527,12 +537,14 @@ pub fn apply_packages<'instructions>(
 
     // Apply with applicator
     for (backend, operations) in sorted {
-        applicator.apply_pkgs(
-            backend,
-            &operations.install,
-            &operations.mark_as_manual,
-            &operations.uninstall,
-        )?;
+        applicator
+            .apply_pkgs(
+                backend,
+                &operations.install,
+                &operations.mark_as_manual,
+                &operations.uninstall,
+            )
+            .with_context(|| format!("Error while applying packages with {backend}"))?;
     }
     Ok(())
 }

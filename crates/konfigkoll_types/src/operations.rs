@@ -8,6 +8,7 @@ use crate::FileContents;
 
 /// An operation to be performed on a file system entry
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, strum::EnumDiscriminants)]
+#[strum_discriminants(derive(PartialOrd, Ord))]
 pub enum FsOp {
     /// Remove a file
     Remove,

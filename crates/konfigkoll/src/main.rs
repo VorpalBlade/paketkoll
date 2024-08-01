@@ -444,7 +444,7 @@ fn cmd_apply_changes(
     }
 
     // Apply early file system
-    apply_files(applicator.as_mut(), early_fs_changes.iter())?;
+    apply_files(applicator.as_mut(), &mut early_fs_changes)?;
 
     // Apply packages
     apply_packages(
@@ -455,7 +455,7 @@ fn cmd_apply_changes(
     )?;
 
     // Apply rest of file system
-    apply_files(applicator.as_mut(), late_fs_changes.iter())?;
+    apply_files(applicator.as_mut(), &mut late_fs_changes)?;
 
     std::mem::forget(early_fs_changes);
     std::mem::forget(late_fs_changes);
