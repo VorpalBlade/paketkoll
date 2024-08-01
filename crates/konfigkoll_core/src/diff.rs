@@ -169,11 +169,20 @@ fn show_file_diff(
     let pipeline = diff.pipe(duct::cmd(&pager_command[0], pager_command[1..].iter()));
     match pipeline.run() {
         Ok(output) => {
-            if !output.status.success() {
-                tracing::warn!(
-                    "Diff or pager exited with non-zero status: {}",
-                    output.status
-                );
+            match output.status.code() {
+                Some(0) => {
+                    tracing::warn!(
+                        "Diff/pager indicates no changes (you may not need to patch {sys_path} \
+                         file any more)"
+                    );
+                }
+                Some(1) => {}
+                Some(value) => {
+                    tracing::warn!("Diff/pager indicates trouble (exit code {value})");
+                }
+                None => {
+                    tracing::warn!("Diff/pager terminated by signal");
+                }
             }
             Ok(())
         }
