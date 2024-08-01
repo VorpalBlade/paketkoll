@@ -75,6 +75,16 @@ impl Commands {
                 _ => unreachable!(),
             })
     }
+
+    fn verify_path(&self, path: &str) -> anyhow::Result<()> {
+        if path.contains("..") {
+            return Err(anyhow::anyhow!("Path {} contains '..'", path));
+        }
+        if !path.starts_with('/') {
+            return Err(anyhow::anyhow!("Path {} is not absolute", path));
+        }
+        Ok(())
+    }
 }
 
 /// Rune API
@@ -201,6 +211,8 @@ impl Commands {
                 "File system actions are only possible in the 'main' phase"
             ));
         }
+        self.verify_path(path)?;
+        self.verify_path(src)?;
         let contents = FileContents::from_file(&safe_path_join(&self.base_files_path, src.into()));
         let contents = match contents {
             Ok(v) => v,
@@ -229,6 +241,7 @@ impl Commands {
                 "File system actions are only possible in the 'main' phase"
             ));
         }
+        self.verify_path(path)?;
         self.fs_actions.push(FsInstruction {
             op: FsOp::CreateSymlink {
                 target: target.into(),
@@ -247,6 +260,7 @@ impl Commands {
                 "File system actions are only possible in the 'main' phase"
             ));
         }
+        self.verify_path(path)?;
         self.fs_actions.push(FsInstruction {
             op: FsOp::CreateFile(FileContents::from_literal(contents.into())),
             path: path.into(),
@@ -263,6 +277,7 @@ impl Commands {
                 "File system actions are only possible in the 'main' phase"
             ));
         }
+        self.verify_path(path)?;
         self.fs_actions.push(FsInstruction {
             op: FsOp::CreateDirectory,
             path: path.into(),
@@ -279,7 +294,7 @@ impl Commands {
                 "File system actions are only possible in the 'main' phase"
             ));
         }
-
+        self.verify_path(path)?;
         self.fs_actions.push(FsInstruction {
             op: FsOp::SetOwner {
                 owner: owner.into(),
@@ -298,7 +313,7 @@ impl Commands {
                 "File system actions are only possible in the 'main' phase"
             ));
         }
-
+        self.verify_path(path)?;
         self.fs_actions.push(FsInstruction {
             op: FsOp::SetGroup {
                 group: group.into(),
@@ -317,7 +332,7 @@ impl Commands {
                 "File system actions are only possible in the 'main' phase"
             ));
         }
-
+        self.verify_path(path)?;
         let numeric_mode = match mode {
             Value::Integer(m) => Mode::new(m as u32),
             Value::String(str) => {
