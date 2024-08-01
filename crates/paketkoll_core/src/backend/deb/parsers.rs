@@ -158,6 +158,7 @@ pub(super) fn parse_status(
     let mut packages = vec![];
 
     let mut package_builder: Option<PackageBuilder<PackageRef, ArchitectureRef>> = None;
+    let mut depends = vec![];
 
     // This file is UTF-8 at least
     let mut buffer = String::new();
@@ -169,7 +170,8 @@ pub(super) fn parse_status(
         });
         let line = guard.trim_end();
         if let Some(stripped) = line.strip_prefix("Package: ") {
-            if let Some(builder) = package_builder {
+            if let Some(mut builder) = package_builder {
+                builder.depends(std::mem::take(&mut depends));
                 let mut package = builder.build()?;
                 fixup_pkg_ids(
                     &mut package,
@@ -249,11 +251,10 @@ pub(super) fn parse_status(
                 .as_mut()
                 .expect("Invalid internal state")
                 .desc(Some(stripped.into()));
+        } else if let Some(stripped) = line.strip_prefix("Pre-Depends: ") {
+            depends.extend(parse_depends(interner, stripped));
         } else if let Some(stripped) = line.strip_prefix("Depends: ") {
-            package_builder
-                .as_mut()
-                .expect("Invalid internal state")
-                .depends(parse_depends(interner, stripped));
+            depends.extend(parse_depends(interner, stripped));
         } else if let Some(stripped) = line.strip_prefix("Provides: ") {
             package_builder
                 .as_mut()
@@ -285,7 +286,8 @@ pub(super) fn parse_status(
         }
     }
 
-    if let Some(builder) = package_builder {
+    if let Some(mut builder) = package_builder {
+        builder.depends(std::mem::take(&mut depends));
         let mut package = builder.build()?;
         fixup_pkg_ids(
             &mut package,
@@ -602,6 +604,7 @@ mod tests {
             Source: glibc
             Version: 2.36-9+rpt2+deb12u4
             Depends: libgcc, something-else
+            Pre-Depends: dummy
             Recommends: something (>= 2.0.5~)
             Suggests: glibc-doc, debconf | debconf-2.0
             Breaks: another-package (<< 1.0), yet-another-package (<< 2.0-2~)
@@ -627,6 +630,7 @@ mod tests {
                 depends: vec![
                     Dependency::Single(PackageRef::get_or_intern(&interner, "libgcc")),
                     Dependency::Single(PackageRef::get_or_intern(&interner, "something-else")),
+                    Dependency::Single(PackageRef::get_or_intern(&interner, "dummy")),
                 ],
                 provides: vec![],
                 reason: Some(InstallReason::Explicit),
