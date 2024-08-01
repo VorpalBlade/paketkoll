@@ -80,6 +80,7 @@ fn convert_issue(
 ) -> Result<(), anyhow::Error> {
     let path: &Utf8Path = issue.path().try_into()?;
     for kind in issue.kinds() {
+        tracing::debug!("{:?}", issue);
         match kind {
             paketkoll_types::issue::IssueKind::Missing => results.push(FsInstruction {
                 path: path.into(),
