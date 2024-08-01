@@ -40,9 +40,16 @@ pub(crate) fn scan_fs(
 ) -> anyhow::Result<(ScanResult, Vec<FsInstruction>)> {
     tracing::debug!("Scanning filesystem");
     let mut fs_instructions_sys = vec![];
-    let mut files = if backend.prefer_files_from_archive() {
+    let files = if backend.prefer_files_from_archive() {
+        tracing::debug!("Using files from archives");
         let all = package_map.keys().cloned().collect::<Vec<_>>();
-        let files = backend.files_from_archives(&all, package_map, interner)?;
+        let mut files = backend.files_from_archives(&all, package_map, interner)?;
+        if backend.may_need_canonicalization() {
+            tracing::debug!("Canonicalizing file entries");
+            files.par_iter_mut().for_each(|entry| {
+                canonicalize_file_entries(&mut entry.1);
+            });
+        }
         let file_map = DashMap::new();
         files
             .into_par_iter()
@@ -52,17 +59,18 @@ pub(crate) fn scan_fs(
             });
         file_map.into_iter().map(|(_, v)| v).collect_vec()
     } else {
-        backend.files(interner).with_context(|| {
+        let mut files = backend.files(interner).with_context(|| {
             format!(
                 "Failed to collect information from backend {}",
                 backend.name()
             )
-        })?
+        })?;
+        if backend.may_need_canonicalization() {
+            tracing::debug!("Canonicalizing file entries");
+            canonicalize_file_entries(&mut files);
+        }
+        files
     };
-    if backend.may_need_canonicalization() {
-        tracing::debug!("Canonicalizing file entries");
-        canonicalize_file_entries(&mut files);
-    }
     // Drop mutability
     let files = files;
 
