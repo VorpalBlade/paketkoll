@@ -1,6 +1,7 @@
 //! Helpers for working with systemd units
 
-use std::borrow::Cow;
+use std::str::FromStr;
+use std::sync::LazyLock;
 
 use camino::Utf8PathBuf;
 use compact_str::CompactString;
@@ -86,15 +87,14 @@ impl Unit {
     /// Where we expect the file to be (for the purpose of symlink target and
     /// finding the file contents)
     fn unit_file_path(&self) -> String {
+        let base_path = match self.type_ {
+            Type::System => BASE_PATHS.0.as_path(),
+            Type::User => BASE_PATHS.1.as_path(),
+        };
         match &self.source {
             Source::File { path, .. } => path.to_string(),
             Source::Package { .. } => {
-                format!(
-                    "{}/{}/{}",
-                    SYSTEM_UNIT_BASE_PATH.read(),
-                    self.type_.as_str(),
-                    self.unit
-                )
+                format!("{}/{}", base_path, self.unit)
             }
         }
     }
@@ -106,20 +106,23 @@ impl Unit {
             Source::Package {
                 package_manager,
                 package,
-            } => match package_manager.file_contents(package, &self.unit_file_path()) {
-                Ok(v) => Ok(v),
-                Err(OriginalFilesError::FileNotFound(_, _)) => {
-                    // Try again with/without /usr, because Debian hasn't finished the /usr merge.
-                    // Still.
-                    let alt_path = if SYSTEM_UNIT_BASE_PATH.read().as_ref() == "/usr/lib/systemd" {
-                        self.unit_file_path().replacen("/usr", "", 1)
-                    } else {
-                        format!("/usr{}", self.unit_file_path())
-                    };
-                    Ok(package_manager.file_contents(package, &alt_path)?)
+            } => {
+                let path = &self.unit_file_path();
+                match package_manager.file_contents(package, path) {
+                    Ok(v) => Ok(v),
+                    Err(OriginalFilesError::FileNotFound(_, _)) => {
+                        // Try again with/without /usr, because Debian hasn't finished the /usr
+                        // merge. Still.
+                        let alt_path = if path.starts_with("/usr") {
+                            self.unit_file_path().replacen("/usr", "", 1)
+                        } else {
+                            format!("/usr{}", self.unit_file_path())
+                        };
+                        Ok(package_manager.file_contents(package, &alt_path)?)
+                    }
+                    Err(e) => Err(e)?,
                 }
-                Err(e) => Err(e)?,
-            },
+            }
         }
     }
 
@@ -261,18 +264,19 @@ impl Unit {
     }
 }
 
-/// Because of lack of usr merge in Debian
-static SYSTEM_UNIT_BASE_PATH: parking_lot::RwLock<Cow<'static, str>> =
-    parking_lot::RwLock::new(Cow::Borrowed("/usr/lib/systemd"));
-
-/// Set the base path for package installed systemd units.
-///
-/// Normally this is `/usr/lib/systemd`, but on Debian you might need to set it
-/// to `/lib/systemd`.
-#[rune::function(keep)]
-fn set_system_unit_base_path(path: &str) {
-    *SYSTEM_UNIT_BASE_PATH.write() = Cow::Owned(path.into());
-}
+static BASE_PATHS: LazyLock<(Utf8PathBuf, Utf8PathBuf)> = LazyLock::new(|| {
+    let mut cmd = std::process::Command::new("systemd-path");
+    cmd.args(["systemd-system-unit", "systemd-user-unit"]);
+    let output = cmd.output().expect("Failed to run systemd-path");
+    let mut paths = output.stdout.split(|&b| b == b'\n').map(|b| {
+        Utf8PathBuf::from_str(std::str::from_utf8(b).expect("Failed to parse as UTF-8"))
+            .expect("Ill-formed path")
+    });
+    (
+        paths.next().expect("Not even one line"),
+        paths.next().expect("Two lines"),
+    )
+});
 
 #[rune::module(::systemd)]
 /// Functionality to simplify working with systemd
@@ -287,7 +291,5 @@ pub(crate) fn module() -> Result<Module, ContextError> {
     m.function_meta(Unit::skip_wanted_by__meta)?;
     m.function_meta(Unit::enable__meta)?;
     m.function_meta(Unit::mask__meta)?;
-
-    m.function_meta(set_system_unit_base_path__meta)?;
     Ok(m)
 }
