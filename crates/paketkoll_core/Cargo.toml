@@ -6,7 +6,7 @@ keywords = ["apt", "arch-linux", "debian", "pacman", "package-management"]
 license = "MPL-2.0"
 name = "paketkoll_core"
 repository = "https://github.com/VorpalBlade/paketkoll"
-rust-version = "1.79.0"
+rust-version = "1.80.0"
 version = "0.5.2"
 
     [package.metadata.docs.rs]

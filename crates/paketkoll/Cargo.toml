@@ -7,7 +7,7 @@ license = "MPL-2.0"
 name = "paketkoll"
 readme = "README.md"
 repository = "https://github.com/VorpalBlade/paketkoll"
-rust-version = "1.79.0"
+rust-version = "1.80.0"
 version = "0.3.2"
 
 [features]

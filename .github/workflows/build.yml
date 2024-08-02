@@ -122,12 +122,12 @@ jobs:
           - --no-default-features --features=debian
           - --all-features
         rust:
-          - 1.79.0
+          - 1.80.0
           - stable
         include:
           # MSRV with default features too
           - features:
-            rust: 1.79.0
+            rust: 1.80.0
           # Nightly will all features
           - features: --all-features
             rust: nightly
