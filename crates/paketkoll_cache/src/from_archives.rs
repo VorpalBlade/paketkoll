@@ -181,7 +181,9 @@ impl Files for FromArchiveCache {
                     .files_from_archives(&uncached_queries, package_map, interner)?;
             // Insert the uncached results into the cache and update the results
             for (query, result) in uncached_results.into_iter() {
-                let cache_key = cache_keys.remove(&query).context("Cache key not found")?;
+                let cache_key = cache_keys
+                    .remove(&query)
+                    .with_context(|| format!("Cache key not found (archive): {query:?}"))?;
                 self.cache
                     .cache_set(cache_key.clone(), result.iter().map(Into::into).collect())
                     .with_context(|| {
