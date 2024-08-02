@@ -1,6 +1,7 @@
 //! Apply a stream of instructions to the current system
 
 use std::fs::Permissions;
+use std::os::unix::fs::OpenOptionsExt;
 use std::os::unix::fs::PermissionsExt;
 use std::sync::Arc;
 
@@ -197,8 +198,20 @@ impl Applicator for InProcessApplicator {
                                 .context("Failed to write file data")?;
                         }
                         konfigkoll_types::FileContents::FromFile { checksum: _, path } => {
-                            // TODO: This copies permissions, replace
-                            std::fs::copy(path, &instr.path).context("Failed to copy file")?;
+                            // std::fs::copy copies permissions, which we don't want (we want the
+                            // file to be owned by root with default permissions until an
+                            // instruction says otherwise), so we can't use it.
+                            let mut target_file = std::fs::OpenOptions::new()
+                                .write(true)
+                                .truncate(true)
+                                .create(true)
+                                .mode(0o644)
+                                .open(&instr.path)
+                                .context("Failed to open target file for writing")?;
+                            let mut source_file = std::fs::File::open(path)
+                                .context("Failed to open source file for reading")?;
+                            std::io::copy(&mut source_file, &mut target_file)
+                                .context("Failed to copy file contents")?;
                         }
                     }
                 }
