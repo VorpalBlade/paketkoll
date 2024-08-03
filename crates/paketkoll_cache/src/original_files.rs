@@ -118,7 +118,10 @@ impl Files for OriginalFilesCache {
             {
                 Some(p) => format_package(p, interner),
                 None => {
-                    tracing::warn!("Package not found: {}", query.package);
+                    tracing::warn!(
+                        "Package not found (likely not installed): {}",
+                        query.package
+                    );
                     uncached_queries.push(query.clone());
                     continue;
                 }
@@ -130,9 +133,11 @@ impl Files for OriginalFilesCache {
                 .context("Failed cache query")?
             {
                 Some(v) => {
+                    tracing::trace!("Cache hit: {}", cache_key);
                     results.insert(query.clone(), v);
                 }
                 None => {
+                    tracing::trace!("Cache miss: {}", cache_key);
                     uncached_queries.push(query.clone());
                     cache_keys.insert(query.clone(), cache_key);
                 }
@@ -141,16 +146,24 @@ impl Files for OriginalFilesCache {
         // Fetch uncached queries
         let uncached_results = self
             .inner
-            .original_files(&uncached_queries, packages, interner)?;
+            .original_files(&uncached_queries, packages, interner)
+            .with_context(|| format!("Inner query of {uncached_queries:?} failed"))?;
 
         // Insert the uncached results into the cache and update the results
         for (query, result) in uncached_results.into_iter() {
-            let cache_key = cache_keys
-                .remove(&query)
-                .with_context(|| format!("Cache key not found (original files): {query:?}"))?;
-            self.cache
-                .cache_set(cache_key, result.clone())
-                .context("Failed cache insertion")?;
+            match cache_keys.remove(&query) {
+                Some(cache_key) => {
+                    self.cache
+                        .cache_set(cache_key, result.clone())
+                        .context("Failed cache insertion")?;
+                }
+                None => {
+                    tracing::warn!(
+                        "Could not find cache key for query \"{query:?}\", will not be able to \
+                         cache it (likely cause: providing package is not (yet) installed)",
+                    );
+                }
+            };
             results.insert(query, result);
         }
 
