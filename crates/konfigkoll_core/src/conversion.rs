@@ -73,14 +73,15 @@ pub fn convert_issues_to_fs_instructions(
     Ok(converted)
 }
 
+#[tracing::instrument(level = "debug", skip(results, id_resolver))]
 fn convert_issue(
     issue: &Issue,
     results: &mut Vec<FsInstruction>,
     id_resolver: &Mutex<NumericToNameResolveCache>,
 ) -> Result<(), anyhow::Error> {
+    tracing::debug!("Converting issue");
     let path: &Utf8Path = issue.path().try_into()?;
     for kind in issue.kinds() {
-        tracing::debug!("{:?}", issue);
         match kind {
             paketkoll_types::issue::IssueKind::Missing => results.push(FsInstruction {
                 path: path.into(),
@@ -302,7 +303,15 @@ fn from_fs(
 
 /// Load real contents from file system
 fn fs_load_contents(path: &Utf8Path, checksum: Option<&Checksum>) -> anyhow::Result<FileContents> {
-    let mut reader = BufReader::new(File::open(path)?);
+    let f = File::open(path)?;
+    let size = f.metadata()?.size();
+    if size > 1024 * 1024 * 200 {
+        tracing::warn!(
+            "Hashing very large file (> 200 MB), it will be slow, consider adding an ignore \
+             (path: {path:?})"
+        );
+    }
+    let mut reader = BufReader::new(f);
     // Always use sha256, recompute if we were given an MD5.
     // This is needed to normalise the checksums for diffing later on.
     let checksum = match checksum {
