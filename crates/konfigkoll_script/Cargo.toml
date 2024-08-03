@@ -5,7 +5,7 @@ license = "MPL-2.0"
 name = "konfigkoll_script"
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.80.0"
-version = "0.1.2"
+version = "0.1.3"
 
 [features]
 # Default features
@@ -25,17 +25,17 @@ compact_str.workspace = true
 glob.workspace = true
 globset.workspace = true
 itertools.workspace = true
-konfigkoll_hwinfo = { version = "0.1.1", path = "../konfigkoll_hwinfo", features = [
+konfigkoll_hwinfo = { version = "0.1.2", path = "../konfigkoll_hwinfo", features = [
     "rune",
 ] }
-konfigkoll_types = { version = "0.1.2", path = "../konfigkoll_types" }
-konfigkoll_utils = { version = "0.1.1", path = "../konfigkoll_utils" }
+konfigkoll_types = { version = "0.1.3", path = "../konfigkoll_types" }
+konfigkoll_utils = { version = "0.1.2", path = "../konfigkoll_utils" }
 nix = { workspace = true, features = ["user"] }
-paketkoll_core = { version = "0.5.2", path = "../paketkoll_core" }
-paketkoll_types = { version = "0.1.2", path = "../paketkoll_types", features = [
+paketkoll_core = { version = "0.5.3", path = "../paketkoll_core" }
+paketkoll_types = { version = "0.1.3", path = "../paketkoll_types", features = [
     "serde",
 ] }
-paketkoll_utils = { version = "0.1.2", path = "../paketkoll_utils" }
+paketkoll_utils = { version = "0.1.3", path = "../paketkoll_utils" }
 parking_lot.workspace = true
 regex.workspace = true
 rune-modules = { workspace = true, features = [

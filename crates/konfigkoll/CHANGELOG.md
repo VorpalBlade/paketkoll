@@ -8,6 +8,41 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.5] - 2024-08-03
+
+### 🚀 Features
+
+- Early/sensitive configurations can now be globs (useful for Debian, where you want `/etc/apt/sources.list.d/*` to be early)
+- Filter for save to only save a few of the files (useful when incrementally building up the configuration)
+- Error check path in commands for common mistakes
+- Align parameter order between groups and users
+- Add ability to set path to `nologin` (useful for distros that haven't yet merged `bin` and `sbin`)
+- Debug tracing for state input and output
+
+### 🐛 Bug fixes
+
+- Fix broken sorting in apply
+- Fix duplicated file entries due to canonicalization happening too late
+- Systemd paths are now acquired by running `systemd-paths` on first access
+- `gshadow-` and `shadow-` should also be sensitive by default
+- When `apply` copies a file it no longer copies permissions
+- Provide more sensible directions in save when the correct action is to remove an entry from your configuration
+
+### ⚡ Performance improvements
+
+- Don't drop data just before exiting, let the OS do that.
+
+### 🩺 Diagnostics & output formatting
+
+- Warn when attempting to hash big files
+- Improved message on no-op change during apply/diff
+- Improve save message to describe what is happening
+
+### ⚙️ Other stuff
+
+- Bump mimumum required Rust version to 1.80.0
+- Improve template
+
 ## [0.1.4] - 2024-07-29
 
 ### 🚀 Features

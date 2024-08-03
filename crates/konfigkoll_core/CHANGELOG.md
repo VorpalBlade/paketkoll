@@ -8,6 +8,32 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.3.1] - 2024-08-03
+
+### 🚀 Features
+
+- Debug tracing for state input and output
+
+### 🐛 Bug fixes
+
+- Apply copying a file should not copy permissions
+- Fix broken sorting in apply
+- More sensible directions in save when the correct action is to remove an entry
+
+### 🩺 Diagnostics & output formatting
+
+- Warn when attempting to hash big files
+- Improved message on no-op change during apply/diff
+
+### 🚜 Refactoring
+
+- Use type aliases properly
+
+### ⚙️ Other stuff
+
+- Bump MSRV
+- Debug prints for conversion
+
 ## [0.3.0] - 2024-07-29
 
 ### 🚀 Features

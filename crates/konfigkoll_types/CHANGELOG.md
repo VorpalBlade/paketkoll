@@ -8,6 +8,16 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.3] - 2024-08-03
+
+### 🐛 Bug fixes
+
+- Fix broken sorting in apply
+
+### ⚙️ Other stuff
+
+- Bump MSRV
+
 ## [0.1.1] - 2024-07-27
 
 ### ⚙️ Other stuff

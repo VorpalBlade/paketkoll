@@ -8,6 +8,20 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.5.3] - 2024-08-03
+
+### 🐛 Bug fixes
+
+- Correct Pre-Depends handling on Debian
+
+### 🚜 Refactoring
+
+- Use type aliases properly
+
+### ⚙️ Other stuff
+
+- Bump MSRV
+
 ## [0.5.2] - 2024-07-29
 
 ### 🚀 Features

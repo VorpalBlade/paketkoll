@@ -8,6 +8,29 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.3] - 2024-08-03
+
+### 🚀 Features
+
+- Error check path in commands for common mistakes
+- Early/sensitive configurations can now be globs
+- Systemd paths differ on Debian
+- Align parameter order between groups and users
+- Add ability to set path to nologin
+
+### 🐛 Bug fixes
+
+- Systemd paths are now acquired by running `systemd-paths` on first access
+- Gshadow- and shadow- should also be sensitive
+
+### 🚜 Refactoring
+
+- Use type aliases properly
+
+### ⚙️ Other stuff
+
+- Bump MSRV
+
 ## [0.1.2] - 2024-07-29
 
 ### 🚀 Features

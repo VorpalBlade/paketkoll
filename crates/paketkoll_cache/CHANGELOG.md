@@ -8,6 +8,21 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.2] - 2024-08-03
+
+### 🩺 Diagnostics & output formatting
+
+- Better cache message when package is not installed
+- Improve cache key lookup error message
+
+### 🚜 Refactoring
+
+- Use type aliases properly
+
+### ⚙️ Other stuff
+
+- Bump MSRV
+
 ## [0.2.1] - 2024-07-29
 
 ### 🚀 Features
