@@ -130,7 +130,7 @@ fn parse_provides(interner: &Interner, input: &str) -> Vec<PackageRef> {
     result
 }
 
-fn dependency_name(segment: &str, interner: &lasso::ThreadedRodeo) -> PackageRef {
+fn dependency_name(segment: &str, interner: &Interner) -> PackageRef {
     // We throw away version info, that is not relevant to this library
     let name = match segment.split_once(' ') {
         Some((name, _)) => name.trim(),
@@ -305,7 +305,7 @@ fn fixup_pkg_ids(
     package: &mut Package<PackageRef, ArchitectureRef>,
     primary_architecture: ArchitectureRef,
     all_architecture: ArchitectureRef,
-    interner: &lasso::ThreadedRodeo,
+    interner: &Interner,
 ) {
     match package.architecture {
         Some(arch) if arch == primary_architecture || arch == all_architecture => {

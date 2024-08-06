@@ -7,6 +7,9 @@ repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.80.0"
 version = "0.1.2"
 
+[features]
+rune = ["dep:rune"]
+
 [dependencies]
 ahash.workspace = true
 anyhow.workspace = true
@@ -20,6 +23,3 @@ workspace = true
 [dev-dependencies]
 indoc.workspace = true
 pretty_assertions = { workspace = true }
-
-[features]
-rune = ["dep:rune"]

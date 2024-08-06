@@ -36,9 +36,9 @@ debian = ["paketkoll_core/debian"]
 vendored = ["paketkoll_core/vendored"]
 
 [dependencies]
-anyhow = { workspace = true, features = ["backtrace"] }
+anyhow.workspace = true
 camino.workspace = true
-clap = { workspace = true, features = ["derive"] }
+clap.workspace = true
 compact_str.workspace = true
 dashmap.workspace = true
 directories.workspace = true
@@ -56,10 +56,7 @@ rayon.workspace = true
 rune = { workspace = true, features = ["cli"] }
 tokio.workspace = true
 tracing-log.workspace = true
-tracing-subscriber = { workspace = true, features = [
-    "env-filter",
-    "parking_lot",
-] }
+tracing-subscriber.workspace = true
 tracing.workspace = true
 
 [target.'cfg(target_env = "musl")'.dependencies]

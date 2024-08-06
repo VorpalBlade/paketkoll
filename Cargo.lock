@@ -1743,7 +1743,6 @@ dependencies = [
  "glob",
  "ignore",
  "indoc",
- "lasso",
  "libc",
  "log",
  "md-5",

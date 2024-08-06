@@ -29,12 +29,7 @@ paketkoll_types = { version = "0.1.3", path = "../paketkoll_types", features = [
 ] }
 parking_lot.workspace = true
 regex.workspace = true
-rune-modules = { workspace = true, features = [
-    "process",
-    "json",
-    "toml",
-    "tokio",
-] }
+rune-modules.workspace = true
 rune.workspace = true
 rust-ini.workspace = true
 sysinfo.workspace = true

@@ -26,14 +26,10 @@ bitflags.workspace = true
 compact_str.workspace = true
 dashmap.workspace = true
 derive_builder.workspace = true
-faster-hex = { workspace = true, features = ["std"] }
-lasso = { workspace = true, features = [
-    "ahasher",
-    "inline-more",
-    "multi-threaded",
-] }
+faster-hex.workspace = true
+lasso.workspace = true
 nix = { workspace = true, features = ["fs", "user"] }
-serde = { workspace = true, optional = true, features = ["derive"] }
+serde = { workspace = true, optional = true }
 serde_bytes = { workspace = true, optional = true }
 smallvec.workspace = true
 strum.workspace = true

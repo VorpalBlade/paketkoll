@@ -25,9 +25,9 @@ json = ["paketkoll/json"]
 systemd_tmpfiles = ["paketkoll/systemd_tmpfiles"]
 
 [dependencies]
-anyhow = { workspace = true, features = ["backtrace"] }
+anyhow.workspace = true
 camino.workspace = true
-clap = { workspace = true, features = ["derive"] }
+clap.workspace = true
 clap_complete.workspace = true
 clap_mangen.workspace = true
 env_logger.workspace = true

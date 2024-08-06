@@ -71,25 +71,20 @@ __extraction = ["dep:glob", "dep:tar"]
 
 [dependencies]
 ahash.workspace = true
-anyhow = { workspace = true, features = ["backtrace"] }
+anyhow.workspace = true
 ar = { workspace = true, optional = true }
 bstr.workspace = true
 bzip2 = { workspace = true, optional = true }
 cfg-if.workspace = true
-compact_str = { workspace = true, features = ["smallvec"] }
+compact_str.workspace = true
 dashmap.workspace = true
 derive_builder.workspace = true
 either.workspace = true
-faster-hex = { workspace = true, features = ["std"] }
+faster-hex.workspace = true
 flate2 = { workspace = true, optional = true }
 flume.workspace = true
 glob = { workspace = true, optional = true }
-ignore = { workspace = true, features = ["simd-accel"] }
-lasso = { workspace = true, features = [
-    "ahasher",
-    "inline-more",
-    "multi-threaded",
-] }
+ignore.workspace = true
 libc.workspace = true
 log.workspace = true
 md-5 = { workspace = true, optional = true }
@@ -99,7 +94,7 @@ num_cpus.workspace = true
 paketkoll_types = { version = "0.1.3", path = "../paketkoll_types" }
 paketkoll_utils = { version = "0.1.3", path = "../paketkoll_utils" }
 parking_lot.workspace = true
-phf = { workspace = true, features = ["macros"] }
+phf.workspace = true
 rayon.workspace = true
 regex.workspace = true
 ring = { workspace = true, optional = true }
