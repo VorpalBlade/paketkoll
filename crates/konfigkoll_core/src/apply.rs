@@ -24,6 +24,7 @@ use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::intern::PackageRef;
 
+use crate::confirm::Choices;
 use crate::confirm::MultiOptionConfirm;
 use crate::diff::show_fs_instr_diff;
 use crate::utils::IdKey;
@@ -292,13 +293,72 @@ impl Applicator for InProcessApplicator {
     }
 }
 
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+enum PkgPromptChoices {
+    Yes,
+    Abort,
+    Skip,
+}
+
+impl Choices for PkgPromptChoices {
+    fn options() -> &'static [(char, &'static str, Self)] {
+        &[
+            ('y', "Yes", PkgPromptChoices::Yes),
+            ('a', "Abort", PkgPromptChoices::Abort),
+            ('s', "Skip", PkgPromptChoices::Skip),
+        ]
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+enum FsPromptChoices {
+    Yes,
+    Abort,
+    Skip,
+    Interactive,
+}
+
+impl Choices for FsPromptChoices {
+    fn options() -> &'static [(char, &'static str, Self)] {
+        &[
+            ('y', "Yes", FsPromptChoices::Yes),
+            ('a', "Abort", FsPromptChoices::Abort),
+            ('s', "Skip", FsPromptChoices::Skip),
+            (
+                'i',
+                "Interactive (change by change)",
+                FsPromptChoices::Interactive,
+            ),
+        ]
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+enum InteractivePromptChoices {
+    Yes,
+    Abort,
+    Skip,
+    ShowDiff,
+}
+
+impl Choices for InteractivePromptChoices {
+    fn options() -> &'static [(char, &'static str, Self)] {
+        &[
+            ('y', "Yes", InteractivePromptChoices::Yes),
+            ('a', "Abort", InteractivePromptChoices::Abort),
+            ('s', "Skip", InteractivePromptChoices::Skip),
+            ('d', "show Diff", InteractivePromptChoices::ShowDiff),
+        ]
+    }
+}
+
 /// An applicator that asks for confirmation before applying changes
 #[derive(Debug)]
 pub struct InteractiveApplicator<Inner: std::fmt::Debug> {
     inner: Inner,
-    pkg_confirmer: MultiOptionConfirm,
-    fs_confirmer: MultiOptionConfirm,
-    interactive_confirmer: MultiOptionConfirm,
+    pkg_confirmer: MultiOptionConfirm<PkgPromptChoices>,
+    fs_confirmer: MultiOptionConfirm<FsPromptChoices>,
+    interactive_confirmer: MultiOptionConfirm<InteractivePromptChoices>,
     diff_command: Vec<String>,
     pager_command: Vec<String>,
 }
@@ -306,28 +366,14 @@ pub struct InteractiveApplicator<Inner: std::fmt::Debug> {
 impl<Inner: std::fmt::Debug> InteractiveApplicator<Inner> {
     pub fn new(inner: Inner, diff_command: Vec<String>, pager_command: Vec<String>) -> Self {
         let mut prompt_builder = MultiOptionConfirm::builder();
-        prompt_builder
-            .prompt("Do you want to apply these changes?")
-            .option('y', "Yes")
-            .option('n', "No")
-            .option('s', "Skip");
+        prompt_builder.prompt("Do you want to apply these changes?");
         let pkg_confirmer = prompt_builder.build();
         let mut prompt_builder = MultiOptionConfirm::builder();
-        prompt_builder
-            .prompt("Do you want to apply these changes?")
-            .option('y', "Yes")
-            .option('n', "No")
-            .option('s', "Skip")
-            .option('i', "Interactive (change by change)");
+        prompt_builder.prompt("Do you want to apply these changes?");
         let fs_confirmer = prompt_builder.build();
 
         let mut prompt_builder = MultiOptionConfirm::builder();
-        prompt_builder
-            .prompt("Apply changes to this file?")
-            .option('y', "Yes")
-            .option('a', "Abort")
-            .option('s', "Skip")
-            .option('d', "show Diff");
+        prompt_builder.prompt("Apply changes to this file?");
         let interactive_confirmer = prompt_builder.build();
 
         Self {
@@ -358,20 +404,19 @@ impl<Inner: Applicator + std::fmt::Debug> Applicator for InteractiveApplicator<I
         show_pkg_diff(backend, install, mark_explicit, uninstall);
 
         match self.pkg_confirmer.prompt()? {
-            'y' => {
+            PkgPromptChoices::Yes => {
                 tracing::info!("Applying changes");
                 self.inner
                     .apply_pkgs(backend, install, mark_explicit, uninstall)
             }
-            'n' => {
+            PkgPromptChoices::Abort => {
                 tracing::error!("Aborting");
                 Err(anyhow::anyhow!("User aborted"))
             }
-            's' => {
+            PkgPromptChoices::Skip => {
                 tracing::warn!("Skipping");
                 Ok(())
             }
-            _ => Err(anyhow::anyhow!("Unexpected branch (internal error)")),
         }
     }
 
@@ -379,25 +424,24 @@ impl<Inner: Applicator + std::fmt::Debug> Applicator for InteractiveApplicator<I
         tracing::info!("Will apply {} file instructions", instructions.len());
         show_fs_diff(instructions);
         match self.fs_confirmer.prompt()? {
-            'y' => {
+            FsPromptChoices::Yes => {
                 tracing::info!("Applying changes");
                 self.inner.apply_files(instructions)
             }
-            'n' => {
+            FsPromptChoices::Abort => {
                 tracing::error!("Aborting");
                 Err(anyhow::anyhow!("User aborted"))
             }
-            's' => {
+            FsPromptChoices::Skip => {
                 tracing::warn!("Skipping");
                 Ok(())
             }
-            'i' => {
+            FsPromptChoices::Interactive => {
                 for instr in instructions {
                     self.interactive_apply_single_file(instr)?;
                 }
                 Ok(())
             }
-            _ => Err(anyhow::anyhow!("Unexpected branch (internal error)")),
         }
     }
 }
@@ -434,26 +478,25 @@ impl<Inner: Applicator + std::fmt::Debug> InteractiveApplicator<Inner> {
         );
         loop {
             match self.interactive_confirmer.prompt()? {
-                'y' => {
+                InteractivePromptChoices::Yes => {
                     tracing::info!("Applying change to {}", instr.path);
                     return self.inner.apply_files(&[instr.clone()]);
                 }
-                'a' => {
+                InteractivePromptChoices::Abort => {
                     tracing::info!("Aborting");
                     return Err(anyhow::anyhow!("User aborted"));
                 }
-                's' => {
+                InteractivePromptChoices::Skip => {
                     tracing::info!("Skipping {}", instr.path);
                     return Ok(());
                 }
-                'd' => {
+                InteractivePromptChoices::ShowDiff => {
                     show_fs_instr_diff(
                         instr,
                         self.diff_command.as_slice(),
                         self.pager_command.as_slice(),
                     )?;
                 }
-                _ => return Err(anyhow::anyhow!("Unexpected branch (internal error)")),
             };
         }
     }

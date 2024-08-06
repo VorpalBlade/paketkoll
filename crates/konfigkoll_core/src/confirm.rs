@@ -2,6 +2,7 @@
 
 use std::io::Write;
 
+use ahash::AHashMap;
 use ahash::AHashSet;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
@@ -9,6 +10,19 @@ use console::Key;
 use console::Style;
 use console::Term;
 use itertools::Itertools;
+
+/// Trait to be implemented for enums that represent user prompt choices.
+pub trait Choices: Copy + PartialEq + Eq {
+    /// Enumerates all possible choices
+    ///
+    /// The tuple is (trigger character, user text, enum variant)
+    fn options() -> &'static [(char, &'static str, Self)];
+
+    /// Get the default choice (if any)
+    fn default() -> Option<Self> {
+        None
+    }
+}
 
 /// A simple multiple choice prompt. Will look something like:
 ///
@@ -22,136 +36,103 @@ use itertools::Itertools;
 /// * The convention is to put the trigger letter in uppercase in the string for
 ///   the option.
 #[derive(Debug, Clone)]
-pub struct MultiOptionConfirm {
+pub struct MultiOptionConfirm<T: Choices> {
     prompt: CompactString,
     default: Option<char>,
-    options: AHashSet<char>,
+    options: AHashMap<char, T>,
 }
 
-impl MultiOptionConfirm {
+impl<T: Choices + 'static> MultiOptionConfirm<T> {
     /// Create a builder for this type
-    pub fn builder() -> MultiOptionConfirmBuilder {
+    pub fn builder() -> MultiOptionConfirmBuilder<T> {
         MultiOptionConfirmBuilder::new()
     }
+}
 
-    /// Run the prompt and return the user choice
-    pub fn prompt(&self) -> anyhow::Result<char> {
-        let mut term = Term::stdout();
-        loop {
-            term.write_all(self.prompt.as_bytes())?;
-            let key = term.read_key()?;
-            match key {
-                Key::Char(c) => term.write_line(format!("{c}").as_str())?,
-                _ => term.write_line("")?,
+/// Inner function to reduce monomorphization
+fn inner_prompt(
+    term: &mut Term,
+    prompt: &CompactString,
+    default: Option<char>,
+) -> anyhow::Result<char> {
+    loop {
+        term.write_all(prompt.as_bytes())?;
+        let key = term.read_key()?;
+        match key {
+            Key::Char(c) => term.write_line(format!("{c}").as_str())?,
+            _ => term.write_line("")?,
+        }
+
+        match key {
+            Key::Enter => {
+                if let Some(default) = default {
+                    return Ok(default);
+                } else {
+                    term.write_line("Please select an option (this prompt has no default)")?;
+                }
             }
-
-            match key {
-                Key::Enter => {
-                    if let Some(default) = self.default {
-                        return Ok(default);
-                    } else {
-                        term.write_line("Please select an option (this prompt has no default)")?;
-                    }
-                }
-                Key::Char(c) => {
-                    let lower_case: AHashSet<_> = c.to_lowercase().collect();
-                    let found = self.options.intersection(&lower_case).count() > 0;
-                    if found {
-                        return Ok(c);
-                    } else {
-                        term.write_line("Invalid option, try again")?;
-                    }
-                }
-                Key::Escape => {
-                    term.write_line("Aborted")?;
-                    anyhow::bail!("User aborted with Escape");
-                }
-                Key::CtrlC => {
-                    term.write_line("Aborted")?;
-                    anyhow::bail!("User aborted with Ctrl-C");
-                }
-                _ => {
-                    term.write_line("Unknown input, try again")?;
-                }
+            Key::Char(c) => return Ok(c),
+            Key::Escape => {
+                term.write_line("Aborted")?;
+                anyhow::bail!("User aborted with Escape");
+            }
+            Key::CtrlC => {
+                term.write_line("Aborted")?;
+                anyhow::bail!("User aborted with Ctrl-C");
+            }
+            _ => {
+                term.write_line("Unknown input, try again")?;
             }
         }
     }
 }
 
-/// Builder for [`MultiOptionConfirm`].
-///
-/// Use [`MultiOptionConfirm::builder()`] to create a new instance.
-///
-/// The default style uses colours and highlights the default option with bold.
+impl<T: Choices> MultiOptionConfirm<T> {
+    /// Run the prompt and return the user choice
+    pub fn prompt(&self) -> anyhow::Result<T> {
+        loop {
+            let mut term = Term::stdout();
+            let ch = inner_prompt(&mut term, &self.prompt, self.default)?;
+            let lower_case: AHashSet<_> = ch.to_lowercase().collect();
+            let found = AHashSet::from_iter(self.options.keys().cloned())
+                .intersection(&lower_case)
+                .cloned()
+                .collect_vec();
+            if found.len() == 1 {
+                return Ok(self.options[&ch]);
+            } else {
+                term.write_line("Invalid option, try again")?;
+            }
+        }
+    }
+}
+
+/// Inner builder for [`MultiOptionConfirm`] to reduce monomorphization bloat.
 #[derive(Debug, Clone)]
-pub struct MultiOptionConfirmBuilder {
+struct InnerBuilder {
     prompt: Option<CompactString>,
-    default: Option<char>,
     prompt_style: Style,
     options_style: Style,
     default_option_style: Style,
-    options: Vec<(char, CompactString)>,
 }
 
-impl MultiOptionConfirmBuilder {
-    fn new() -> Self {
+impl Default for InnerBuilder {
+    fn default() -> Self {
         Self {
             prompt: None,
-            default: None,
             prompt_style: Style::new().green(),
             options_style: Style::new().cyan(),
             default_option_style: Style::new().cyan().bold(),
-            options: Vec::new(),
         }
     }
+}
 
-    /// Set prompt to use. Required.
-    pub fn prompt(&mut self, prompt: &str) -> &mut Self {
-        self.prompt = Some(prompt.to_compact_string());
-        self
-    }
-
-    /// Set default choice. Optional.
-    pub fn default(&mut self, default: char) -> &mut Self {
-        self.default = Some(
-            default
-                .to_lowercase()
-                .next()
-                .expect("Letter is not available as lower case"),
-        );
-        self
-    }
-
-    /// Add an option. At least two are required.
-    pub fn option(&mut self, key: char, value: &str) -> &mut Self {
-        self.options.push((
-            key.to_lowercase()
-                .next()
-                .expect("Letter is not available as lower case"),
-            value.to_compact_string(),
-        ));
-        self
-    }
-
-    /// Set style for question part of the prompt.
-    pub fn prompt_style(&mut self, style: Style) -> &mut Self {
-        self.prompt_style = style;
-        self
-    }
-
-    /// Set style for the options.
-    pub fn options_style(&mut self, style: Style) -> &mut Self {
-        self.options_style = style;
-        self
-    }
-
-    /// Set style for the default option.
-    pub fn default_option_style(&mut self, style: Style) -> &mut Self {
-        self.default_option_style = style;
-        self
-    }
-
-    fn render_prompt(&self) -> CompactString {
+impl InnerBuilder {
+    fn render_prompt(
+        &self,
+        default: Option<char>,
+        options: &mut dyn Iterator<Item = (char, &'static str)>,
+    ) -> CompactString {
         let mut prompt = self
             .prompt_style
             .apply_to(&self.prompt.as_ref().expect("A prompt must be set"))
@@ -163,8 +144,8 @@ impl MultiOptionConfirmBuilder {
                 .to_compact_string()
                 .as_str(),
         );
-        let formatted = self.options.iter().map(|(key, description)| {
-            if Some(*key) == self.default {
+        let formatted = options.map(|(key, description)| {
+            if Some(key) == default {
                 self.default_option_style
                     .apply_to(description)
                     .to_compact_string()
@@ -186,15 +167,77 @@ impl MultiOptionConfirmBuilder {
         );
         prompt
     }
+}
 
-    pub fn build(&self) -> MultiOptionConfirm {
-        if self.options.len() < 2 {
+/// Builder for [`MultiOptionConfirm`].
+///
+/// Use [`MultiOptionConfirm::builder()`] to create a new instance.
+///
+/// The default style uses colours and highlights the default option with bold.
+#[derive(Debug, Clone)]
+pub struct MultiOptionConfirmBuilder<T: Choices> {
+    inner: InnerBuilder,
+    _phantom: std::marker::PhantomData<T>,
+}
+
+impl<T: Choices + 'static> MultiOptionConfirmBuilder<T> {
+    fn new() -> Self {
+        Self {
+            inner: InnerBuilder::default(),
+            _phantom: Default::default(),
+        }
+    }
+
+    /// Set prompt to use. Required.
+    pub fn prompt(&mut self, prompt: &str) -> &mut Self {
+        self.inner.prompt = Some(prompt.to_compact_string());
+        self
+    }
+
+    /// Set style for question part of the prompt.
+    pub fn prompt_style(&mut self, style: Style) -> &mut Self {
+        self.inner.prompt_style = style;
+        self
+    }
+
+    /// Set style for the options.
+    pub fn options_style(&mut self, style: Style) -> &mut Self {
+        self.inner.options_style = style;
+        self
+    }
+
+    /// Set style for the default option.
+    pub fn default_option_style(&mut self, style: Style) -> &mut Self {
+        self.inner.default_option_style = style;
+        self
+    }
+
+    pub fn build(&self) -> MultiOptionConfirm<T> {
+        if T::options().len() < 2 {
             panic!("At least two options are required");
         }
+        let mut default_char = None;
+        let default = T::default();
+        let options: AHashMap<char, T> = T::options()
+            .iter()
+            .inspect(|(key, _, val)| {
+                // Using inspect for side effects, not sure if it is overly clever or just plain
+                // stupid. But it means we only have to iterate over the options once.
+                if Some(*val) == default {
+                    default_char = Some(*key);
+                }
+                assert!(key.is_lowercase());
+            })
+            .map(|(key, _, val)| (*key, *val))
+            .collect();
+        let prompt = self.inner.render_prompt(
+            default_char,
+            &mut T::options().iter().map(|(key, desc, _)| (*key, *desc)),
+        );
         MultiOptionConfirm {
-            prompt: self.render_prompt(),
-            default: self.default,
-            options: self.options.iter().map(|(key, _)| *key).collect(),
+            prompt,
+            default: default_char,
+            options,
         }
     }
 }
