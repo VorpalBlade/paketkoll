@@ -36,7 +36,6 @@ anyhow = { workspace = true, features = ["backtrace"] }
 clap = { workspace = true, features = ["derive"] }
 compact_str.workspace = true
 env_logger.workspace = true
-log.workspace = true
 os_info.workspace = true
 paketkoll_core = { version = "0.5.3", path = "../paketkoll_core" }
 paketkoll_types = { version = "0.1.3", path = "../paketkoll_types" }

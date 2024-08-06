@@ -32,7 +32,6 @@ clap_complete.workspace = true
 clap_mangen.workspace = true
 env_logger.workspace = true
 konfigkoll = { version = "0.1.5", path = "../konfigkoll" }
-log.workspace = true
 paketkoll = { version = "0.3.3", path = "../paketkoll" }
 
 [lints]

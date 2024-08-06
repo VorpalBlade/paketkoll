@@ -27,16 +27,15 @@ path = "src/bin/rune.rs"
 default = ["arch_linux", "debian", "vendored"]
 
 # Include the Arch Linux backend
-arch_linux = ["konfigkoll_script/arch_linux"]
+arch_linux = ["paketkoll_core/arch_linux"]
 
 # Include support for the Debian backend
-debian = ["konfigkoll_script/debian"]
+debian = ["paketkoll_core/debian"]
 
 # Vendor C/C++ dependencies instead of linking them dynamically
 vendored = ["paketkoll_core/vendored"]
 
 [dependencies]
-ahash.workspace = true
 anyhow = { workspace = true, features = ["backtrace"] }
 camino.workspace = true
 clap = { workspace = true, features = ["derive"] }

@@ -47,7 +47,6 @@ systemd_tmpfiles = ["__sha256", "dep:systemd_tmpfiles", "dep:nix"]
 # Include support for serde on public datatypes
 serde = [
     "compact_str/serde",
-    "dep:serde",
     "paketkoll_types/serde",
     "smallvec/serde",
 ]
@@ -106,7 +105,6 @@ regex.workspace = true
 ring = { workspace = true, optional = true }
 rust-ini = { workspace = true, optional = true }
 scopeguard.workspace = true
-serde = { workspace = true, optional = true, features = ["derive"] }
 smallvec.workspace = true
 strum.workspace = true
 systemd_tmpfiles = { version = "0.1.5", path = "../systemd_tmpfiles", optional = true }

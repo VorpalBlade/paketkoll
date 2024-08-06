@@ -11,12 +11,6 @@ version = "0.1.3"
 # Default features
 default = []
 
-# Include the Arch Linux backend
-arch_linux = ["paketkoll_core/arch_linux"]
-
-# Include support for the Debian backend
-debian = ["paketkoll_core/debian"]
-
 [dependencies]
 ahash.workspace = true
 anyhow.workspace = true
@@ -30,12 +24,9 @@ konfigkoll_hwinfo = { version = "0.1.2", path = "../konfigkoll_hwinfo", features
 ] }
 konfigkoll_types = { version = "0.1.3", path = "../konfigkoll_types" }
 konfigkoll_utils = { version = "0.1.2", path = "../konfigkoll_utils" }
-nix = { workspace = true, features = ["user"] }
-paketkoll_core = { version = "0.5.3", path = "../paketkoll_core" }
 paketkoll_types = { version = "0.1.3", path = "../paketkoll_types", features = [
     "serde",
 ] }
-paketkoll_utils = { version = "0.1.3", path = "../paketkoll_utils" }
 parking_lot.workspace = true
 regex.workspace = true
 rune-modules = { workspace = true, features = [
@@ -46,7 +37,6 @@ rune-modules = { workspace = true, features = [
 ] }
 rune.workspace = true
 rust-ini.workspace = true
-smallvec.workspace = true
 sysinfo.workspace = true
 tempfile.workspace = true
 thiserror.workspace = true
