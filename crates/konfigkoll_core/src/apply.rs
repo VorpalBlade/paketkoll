@@ -310,9 +310,15 @@ impl<Inner: std::fmt::Debug> InteractiveApplicator<Inner> {
             .prompt("Do you want to apply these changes?")
             .option('y', "Yes")
             .option('n', "No")
-            .option('d', "show Diff");
+            .option('s', "Skip");
         let pkg_confirmer = prompt_builder.build();
-        prompt_builder.option('i', "Interactive (change by change)");
+        let mut prompt_builder = MultiOptionConfirm::builder();
+        prompt_builder
+            .prompt("Do you want to apply these changes?")
+            .option('y', "Yes")
+            .option('n', "No")
+            .option('s', "Skip")
+            .option('i', "Interactive (change by change)");
         let fs_confirmer = prompt_builder.build();
 
         let mut prompt_builder = MultiOptionConfirm::builder();
@@ -349,63 +355,71 @@ impl<Inner: Applicator + std::fmt::Debug> Applicator for InteractiveApplicator<I
             mark_explicit.len(),
             uninstall.len(),
         );
+        show_pkg_diff(backend, install, mark_explicit, uninstall);
 
-        loop {
-            match self.pkg_confirmer.prompt()? {
-                'y' => {
-                    tracing::info!("Applying changes");
-                    return self
-                        .inner
-                        .apply_pkgs(backend, install, mark_explicit, uninstall);
-                }
-                'n' => {
-                    tracing::info!("Aborting");
-                    return Err(anyhow::anyhow!("User aborted"));
-                }
-                'd' => {
-                    println!("With package manager {backend}:");
-                    for pkg in install {
-                        println!(" {} {}", style("+").green(), pkg);
-                    }
-                    for pkg in mark_explicit {
-                        println!(" {} {} (mark explicit)", style("E").green(), pkg);
-                    }
-                    for pkg in uninstall {
-                        println!(" {} {}", style("-").red(), pkg);
-                    }
-                }
-                _ => return Err(anyhow::anyhow!("Unexpected branch (internal error)")),
+        match self.pkg_confirmer.prompt()? {
+            'y' => {
+                tracing::info!("Applying changes");
+                self
+                    .inner
+                    .apply_pkgs(backend, install, mark_explicit, uninstall)
             }
+            'n' => {
+                tracing::error!("Aborting");
+                Err(anyhow::anyhow!("User aborted"))
+            }
+            's' => {
+                tracing::warn!("Skipping");
+                Ok(())
+            }
+            _ => Err(anyhow::anyhow!("Unexpected branch (internal error)")),
         }
     }
 
     fn apply_files(&mut self, instructions: &[FsInstruction]) -> anyhow::Result<()> {
         tracing::info!("Will apply {} file instructions", instructions.len());
-        loop {
-            match self.fs_confirmer.prompt()? {
-                'y' => {
-                    tracing::info!("Applying changes");
-                    return self.inner.apply_files(instructions);
-                }
-                'n' => {
-                    tracing::info!("Aborting");
-                    return Err(anyhow::anyhow!("User aborted"));
-                }
-                'd' => {
-                    println!("With file system:");
-                    for instr in instructions {
-                        println!(" {}: {}", style(instr.path.as_str()).blue(), instr.op);
-                    }
-                }
-                'i' => {
-                    for instr in instructions {
-                        self.interactive_apply_single_file(instr)?;
-                    }
-                    return Ok(());
-                }
-                _ => return Err(anyhow::anyhow!("Unexpected branch (internal error)")),
+        show_fs_diff(instructions);
+        match self.fs_confirmer.prompt()? {
+            'y' => {
+                tracing::info!("Applying changes");
+                self.inner.apply_files(instructions)
             }
+            'n' => {
+                tracing::error!("Aborting");
+                Err(anyhow::anyhow!("User aborted"))
+            }
+            's' => {
+                tracing::warn!("Skipping");
+                Ok(())
+            }
+            'i' => {
+                for instr in instructions {
+                    self.interactive_apply_single_file(instr)?;
+                }
+                Ok(())
+            }
+            _ => Err(anyhow::anyhow!("Unexpected branch (internal error)")),
         }
+    }
+}
+
+fn show_fs_diff(instructions: &[FsInstruction]) {
+    println!("Would apply file system changes:");
+    for instr in instructions {
+        println!(" {}: {}", style(instr.path.as_str()).blue(), instr.op);
+    }
+}
+
+fn show_pkg_diff(backend: Backend, install: &[&str], mark_explicit: &[&str], uninstall: &[&str]) {
+    println!("With package manager {backend}:");
+    for pkg in install {
+        println!(" {} {}", style("+").green(), pkg);
+    }
+    for pkg in mark_explicit {
+        println!(" {} {} (mark explicit)", style("E").green(), pkg);
+    }
+    for pkg in uninstall {
+        println!(" {} {}", style("-").red(), pkg);
     }
 }
 
