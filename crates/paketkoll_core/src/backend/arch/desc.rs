@@ -109,7 +109,7 @@ fn parse_package_list(
             break;
         }
         let pkg = trimmed_line
-            .split_once(|ch| ch == '=' || ch == '>' || ch == '<')
+            .split_once(['=', '>', '<'])
             .map(|(name, _)| name)
             .unwrap_or(trimmed_line);
         to_fill.push(PackageRef::get_or_intern(interner, pkg));

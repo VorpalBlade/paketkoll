@@ -236,7 +236,7 @@ impl Entry {
 
     /// True if the path appears to be a glob
     pub fn path_is_glob(&self) -> bool {
-        self.directive.can_be_glob() && self.path().contains(|c| c == '*' || c == '?' || c == '[')
+        self.directive.can_be_glob() && self.path().contains(['*', '?', '['])
     }
 
     /// Get the directive of the entry

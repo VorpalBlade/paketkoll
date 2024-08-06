@@ -360,8 +360,7 @@ impl<Inner: Applicator + std::fmt::Debug> Applicator for InteractiveApplicator<I
         match self.pkg_confirmer.prompt()? {
             'y' => {
                 tracing::info!("Applying changes");
-                self
-                    .inner
+                self.inner
                     .apply_pkgs(backend, install, mark_explicit, uninstall)
             }
             'n' => {
