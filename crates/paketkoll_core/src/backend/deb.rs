@@ -623,7 +623,7 @@ impl Packages for Debian {
         let _guard = self.pkgmgr_mutex.lock();
         package_manager_transaction(
             "apt-get",
-            &["autoremove"],
+            &["autoremove", "-o", "APT::Autoremove::SuggestsImportant=0"],
             &[],
             (!ask_confirmation).then_some("-y"),
         )
