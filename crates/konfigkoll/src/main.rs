@@ -8,6 +8,8 @@ use camino::Utf8PathBuf;
 use clap::Parser;
 use compact_str::CompactString;
 use itertools::Itertools;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
 
 use crate::fs_scan::ScanResult;
 use apply::create_applicator;
@@ -51,12 +53,10 @@ async fn main() -> anyhow::Result<()> {
     let filter = tracing_subscriber::EnvFilter::builder()
         .with_default_directive(tracing::level_filters::LevelFilter::INFO.into())
         .from_env()?;
-    let subscriber = tracing_subscriber::fmt::Subscriber::builder()
-        .with_env_filter(filter)
-        .finish();
-    tracing::subscriber::set_global_default(subscriber)?;
-    // Compatibility for log crate
-    tracing_log::LogTracer::init()?;
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
+        .with(filter)
+        .init();
 
     let cli = Cli::parse();
 
