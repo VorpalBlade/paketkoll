@@ -82,7 +82,6 @@ impl<'archive, R: Read + 'archive> Read for CompressionFormat<'archive, R> {
     }
 }
 
-#[cfg(feature = "__extraction")]
 pub(crate) fn group_queries_by_pkg(
     queries: &[paketkoll_types::backend::OriginalFileQuery],
 ) -> AHashMap<&str, AHashSet<&str>> {
@@ -105,7 +104,6 @@ pub(crate) fn group_queries_by_pkg(
 
 /// Attempt to search a directory based cache and if not found, download the
 /// package
-#[cfg(feature = "__extraction")]
 pub(crate) fn locate_package_file(
     dir_candidates: &[&str],
     package_match: &str,
@@ -164,7 +162,6 @@ pub(crate) struct PackageQuery<'a> {
 
 /// Attempt to search a directory based cache and return which packages are
 /// missing
-#[cfg(feature = "__extraction")]
 pub(crate) fn missing_packages<'strings>(
     dir_candidates: &[&str],
     package_matches: impl Iterator<Item = PackageQuery<'strings>>,
@@ -211,7 +208,6 @@ pub(crate) fn missing_packages<'strings>(
 }
 
 /// Extract files from a generic tar archive
-#[cfg(feature = "__extraction")]
 pub(crate) fn extract_files(
     mut archive: tar::Archive<impl Read>,
     queries: &AHashSet<&str>,
@@ -268,7 +264,6 @@ pub(crate) fn extract_files(
 }
 
 /// Convert a stream of tar entries to a list of file entries
-#[cfg(feature = "__extraction")]
 pub(crate) fn convert_archive_entries(
     mut archive: tar::Archive<impl std::io::Read>,
     pkg_ref: paketkoll_types::intern::PackageRef,

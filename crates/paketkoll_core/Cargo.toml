@@ -21,7 +21,6 @@ default = []
 
 # Include the Arch Linux backend
 arch_linux = [
-    "__extraction",
     "__gzip",
     "__sha256",
     "__zstd",
@@ -32,7 +31,6 @@ arch_linux = [
 # Include support for the Debian backend
 debian = [
     "__bzip2",
-    "__extraction",
     "__gzip",
     "__md5",
     "__xz",
@@ -59,8 +57,6 @@ __gzip = ["dep:flate2"]
 __xz = ["dep:xz2"]
 # Internal feature for decompression
 __zstd = ["dep:zstd"]
-# Internal feature for package extraction
-__extraction = ["dep:glob", "dep:tar"]
 
 [dependencies]
 ahash.workspace = true
@@ -76,7 +72,7 @@ either.workspace = true
 faster-hex.workspace = true
 flate2 = { workspace = true, optional = true }
 flume.workspace = true
-glob = { workspace = true, optional = true }
+glob.workspace = true
 ignore.workspace = true
 libc.workspace = true
 log.workspace = true
@@ -96,7 +92,7 @@ scopeguard.workspace = true
 smallvec.workspace = true
 strum.workspace = true
 systemd_tmpfiles = { version = "0.1.5", path = "../systemd_tmpfiles", optional = true }
-tar = { workspace = true, optional = true }
+tar.workspace = true
 xz2 = { workspace = true, optional = true }
 zstd = { workspace = true, optional = true }
 
