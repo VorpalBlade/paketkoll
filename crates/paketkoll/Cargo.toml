@@ -24,8 +24,7 @@ debian = ["paketkoll_core/debian"]
 systemd_tmpfiles = ["paketkoll_core/systemd_tmpfiles"]
 
 # Include support for exporting to JSON
-json = ["dep:serde_json", "paketkoll_core/serde", "serde"]
-serde = ["dep:serde"]
+json = ["dep:serde_json", "dep:serde"]
 
 # Vendor C/C++ dependencies instead of linking them dynamically
 vendored = ["paketkoll_core/vendored"]
@@ -41,7 +40,7 @@ paketkoll_core = { version = "0.5.3", path = "../paketkoll_core" }
 paketkoll_types = { version = "0.1.3", path = "../paketkoll_types" }
 proc-exit.workspace = true
 rayon.workspace = true
-serde = { workspace = true, optional = true, features = ["derive"] }
+serde = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 
 [target.'cfg(target_env = "musl")'.dependencies]

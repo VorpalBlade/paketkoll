@@ -23,9 +23,8 @@ pub type IssueVec = SmallVec<[IssueKind; 1]>;
 pub type PackageIssue = (Option<PackageRef>, Issue);
 
 /// Type of entry (used to report mismatches)
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize)]
+#[serde(rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum EntryType {
     RegularFile,
@@ -80,8 +79,7 @@ impl Display for EntryType {
 }
 
 /// A found difference between the file system and the package database
-#[derive(Debug)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
+#[derive(Debug, serde::Serialize)]
 pub struct Issue {
     path: PathBuf,
     kinds: IssueVec,
@@ -118,8 +116,8 @@ impl Issue {
 /// of file system entity (e.g. file, directory, symlink, device node, ...)
 #[derive(Debug)]
 #[non_exhaustive]
-#[cfg_attr(feature = "serde", derive(serde::Serialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
+#[derive(serde::Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum IssueKind {
     /// Missing entity from file system
     Missing,
@@ -157,10 +155,10 @@ pub enum IssueKind {
     },
     /// Some sort of parsing error for this entry (from the package manager
     /// backend)
-    #[cfg_attr(feature = "serde", serde(serialize_with = "serialize_error"))]
+    #[serde(serialize_with = "serialize_error")]
     MetadataError(Box<anyhow::Error>),
     /// Some sort of unexpected error when processing the file system
-    #[cfg_attr(feature = "serde", serde(serialize_with = "serialize_error"))]
+    #[serde(serialize_with = "serialize_error")]
     FsCheckError(Box<anyhow::Error>),
 }
 
@@ -226,7 +224,6 @@ fn format_error(f: &mut std::fmt::Formatter<'_>, err: &anyhow::Error) -> std::fm
     Ok(())
 }
 
-#[cfg(feature = "serde")]
 fn serialize_error<S>(err: &anyhow::Error, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: serde::Serializer,

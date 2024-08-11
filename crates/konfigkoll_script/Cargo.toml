@@ -24,9 +24,7 @@ konfigkoll_hwinfo = { version = "0.1.2", path = "../konfigkoll_hwinfo", features
 ] }
 konfigkoll_types = { version = "0.1.3", path = "../konfigkoll_types" }
 konfigkoll_utils = { version = "0.1.2", path = "../konfigkoll_utils" }
-paketkoll_types = { version = "0.1.3", path = "../paketkoll_types", features = [
-    "serde",
-] }
+paketkoll_types = { version = "0.1.3", path = "../paketkoll_types" }
 parking_lot.workspace = true
 regex.workspace = true
 rune-modules.workspace = true

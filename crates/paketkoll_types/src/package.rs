@@ -8,18 +8,16 @@ use crate::intern::Interner;
 use crate::intern::PackageRef;
 
 /// The reason a package is installed
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum InstallReason {
     Explicit,
     Dependency,
 }
 
 /// The status of the installed package
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum PackageInstallStatus {
     /// Fully installed, as expected
     Installed,
@@ -94,7 +92,6 @@ where
     }
 }
 
-#[cfg(feature = "serde")]
 impl PackageInterned {
     /// Convert to direct representation
     pub fn into_direct(self, interner: &Interner) -> PackageDirect {
@@ -127,7 +124,6 @@ impl PackageInterned {
     }
 }
 
-#[cfg(feature = "serde")]
 impl serde::Serialize for PackageDirect {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -178,7 +174,6 @@ impl Dependency<PackageRef> {
         }
     }
 
-    #[cfg(feature = "serde")]
     fn to_direct(&self, interner: &Interner) -> Dependency<CompactString> {
         match self {
             Dependency::Single(pkg) => Dependency::Single(pkg.to_str(interner).into()),
@@ -192,7 +187,6 @@ impl Dependency<PackageRef> {
     }
 }
 
-#[cfg(feature = "serde")]
 impl serde::Serialize for Dependency<CompactString> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where

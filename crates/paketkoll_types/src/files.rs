@@ -9,8 +9,9 @@ use std::time::SystemTime;
 use crate::intern::PackageRef;
 
 /// Unix file mode (permissions)
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(
+    Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize,
+)]
 #[repr(transparent)]
 pub struct Mode(u32);
 
@@ -84,8 +85,9 @@ impl From<Mode> for nix::sys::stat::Mode {
 }
 
 /// A POSIX UID
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(
+    Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize,
+)]
 #[repr(transparent)]
 pub struct Uid(u32);
 
@@ -120,8 +122,9 @@ impl From<&Uid> for nix::unistd::Uid {
 }
 
 /// A POSIX GID
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(
+    Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize,
+)]
 #[repr(transparent)]
 pub struct Gid(u32);
 
@@ -159,14 +162,15 @@ impl std::fmt::Display for Gid {
 ///
 /// Which checksum types are used depend on the feature flags.
 /// For example currently: Arch uses SHA256, and Debian uses MD5.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
+#[derive(
+    Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize,
+)]
+#[serde(rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum Checksum {
-    #[cfg_attr(feature = "serde", serde(with = "serde_bytes"))]
+    #[serde(with = "serde_bytes")]
     Md5([u8; 16]),
-    #[cfg_attr(feature = "serde", serde(with = "serde_bytes"))]
+    #[serde(with = "serde_bytes")]
     Sha256([u8; 32]),
 }
 
@@ -180,16 +184,14 @@ impl std::fmt::Display for Checksum {
 }
 
 /// A regular file with just checksum info (as Debian gives us)
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub struct RegularFileBasic {
     pub size: Option<u64>,
     pub checksum: Checksum,
 }
 
 /// A regular file with all info (as Arch Linux has)
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub struct RegularFile {
     pub mode: Mode,
     pub owner: Uid,
@@ -200,8 +202,7 @@ pub struct RegularFile {
 }
 
 /// A regular file with all info (as Arch Linux has)
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub struct RegularFileSystemd {
     pub mode: Mode,
     pub owner: Uid,
@@ -212,8 +213,7 @@ pub struct RegularFileSystemd {
 }
 
 /// A FIFO
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub struct Fifo {
     pub mode: Mode,
     pub owner: Uid,
@@ -221,8 +221,7 @@ pub struct Fifo {
 }
 
 /// A device node
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub struct DeviceNode {
     pub mode: Mode,
     pub owner: Uid,
@@ -233,8 +232,7 @@ pub struct DeviceNode {
 }
 
 /// Type of device node (block or char)
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum DeviceType {
     Block,
     Char,
@@ -250,8 +248,7 @@ impl std::fmt::Display for DeviceType {
 }
 
 /// A symlink
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub struct Symlink {
     pub owner: Uid,
     pub group: Gid,
@@ -260,8 +257,7 @@ pub struct Symlink {
 }
 
 /// A directory
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub struct Directory {
     pub mode: Mode,
     pub owner: Uid,
@@ -312,7 +308,7 @@ impl PartialEq for FileEntry {
 bitflags::bitflags! {
     /// Bitmask of flags for a file entry
     #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-    #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+    #[derive(serde::Serialize, serde::Deserialize)]
     pub struct FileFlags : u16 {
         /// This file is considered a configuration file by the package manager
         const CONFIG = 0b0000_0000_0000_0001;
@@ -322,9 +318,8 @@ bitflags::bitflags! {
 }
 
 /// File properties from the package database(s)
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-#[cfg_attr(feature = "serde", serde(rename_all = "snake_case"))]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Properties {
     /// A regular file with just checksum info (as Debian gives us)
     RegularFileBasic(RegularFileBasic),
@@ -435,8 +430,7 @@ impl Properties {
 }
 
 /// A set of permissions
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub struct Permissions {
     pub mode: Mode,
     pub owner: Uid,
