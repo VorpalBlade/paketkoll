@@ -107,6 +107,12 @@ pub trait Files: Name {
         packages: &PackageMap,
         interner: &Interner,
     ) -> Result<OriginalFilesResult, OriginalFileError>;
+
+    /// A version number such that the lookup cache can be invalidated on
+    /// breaking changes or critical bug fixes.
+    fn cache_version(&self) -> u16 {
+        1
+    }
 }
 
 /// Query type for original file contents

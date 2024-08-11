@@ -31,18 +31,27 @@ use crate::utils::format_package;
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct CacheKey {
     backend: &'static str,
+    cache_version: u16,
     package: CompactString,
 }
 
 impl CacheKey {
-    pub fn new(backend: &'static str, package: CompactString) -> Self {
-        Self { backend, package }
+    pub fn new(backend: &'static str, cache_version: u16, package: CompactString) -> Self {
+        Self {
+            backend,
+            cache_version,
+            package,
+        }
     }
 }
 
 impl Display for CacheKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}:{}", self.backend, self.package)
+        write!(
+            f,
+            "{}:{}:{}",
+            self.backend, self.cache_version, self.package
+        )
     }
 }
 
@@ -147,6 +156,7 @@ impl Files for FromArchiveCache {
         interner: &Interner,
     ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError> {
         let inner_name = self.name();
+        let cache_version = self.cache_version();
         let mut results = Vec::new();
         let mut uncached_queries = Vec::new();
         let mut cache_keys = AHashMap::new();
@@ -154,7 +164,7 @@ impl Files for FromArchiveCache {
         for pkg_ref in filter {
             let pkg = package_map.get(pkg_ref).context("Package not found")?;
             let cache_key = format_package(pkg, interner);
-            let cache_key = CacheKey::new(inner_name, cache_key);
+            let cache_key = CacheKey::new(inner_name, cache_version, cache_key);
             match self
                 .cache
                 .cache_get(&cache_key)
@@ -202,5 +212,9 @@ impl Files for FromArchiveCache {
 
     fn prefer_files_from_archive(&self) -> bool {
         self.inner.prefer_files_from_archive()
+    }
+
+    fn cache_version(&self) -> u16 {
+        self.inner.cache_version()
     }
 }

@@ -266,6 +266,8 @@ impl Files for Debian {
         let diversions =
             divert::get_diversions(interner).context("Failed to get dpkg diversions")?;
 
+        log::debug!("List of diversions: {diversions:?}");
+
         log::info!(
             "Loading file data from dpkg cache archives for {} packages",
             filter.len()
@@ -280,7 +282,10 @@ impl Files for Debian {
             .par_bridge()
             .map(|value| {
                 value.and_then(|(pkg_ref, path)| {
-                    Ok((pkg_ref, archive_to_entries(pkg_ref, &path, &diversions)?))
+                    Ok((
+                        pkg_ref,
+                        archive_to_entries(pkg_ref, &path, &diversions, package_map, interner)?,
+                    ))
                 })
             })
             .collect();
@@ -361,6 +366,8 @@ fn archive_to_entries(
     pkg_ref: PackageRef,
     deb_file: &Path,
     diversions: &divert::Diversions,
+    packages: &PackageMap,
+    interner: &Interner,
 ) -> anyhow::Result<Vec<FileEntry>> {
     log::debug!("Processing {}", deb_file.display());
     // The package is a .deb, which is actually an ar archive
@@ -392,11 +399,22 @@ fn archive_to_entries(
                 Some(Cow::Borrowed(p.to_path().expect("Invalid path")))
             })?;
 
+            let self_pkg = packages
+                .get(&pkg_ref)
+                .expect("Failed to find package in package map");
             for entry in entries.iter_mut() {
                 // Apply diversions
                 if let Some(diversion) = diversions.get(&entry.path) {
-                    if Some(diversion.by_package) != entry.package {
+                    if !self_pkg.ids.contains(&diversion.by_package) {
                         // This file is diverted
+                        log::debug!(
+                            "Diverted file: {opath} -> {npath} by {diverting_pkg} while \
+                             processing {pkg}",
+                            opath = entry.path.display(),
+                            npath = diversion.new_path.display(),
+                            diverting_pkg = diversion.by_package.to_str(interner),
+                            pkg = pkg_ref.to_str(interner),
+                        );
                         entry.path.clone_from(&diversion.new_path);
                     }
                 }

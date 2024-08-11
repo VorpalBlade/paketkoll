@@ -28,14 +28,21 @@ use crate::utils::format_package;
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct CacheKey {
     backend: &'static str,
+    cache_version: u16,
     package: CompactString,
     path: CompactString,
 }
 
 impl CacheKey {
-    pub fn new(backend: &'static str, package: CompactString, path: CompactString) -> Self {
+    pub fn new(
+        backend: &'static str,
+        cache_version: u16,
+        package: CompactString,
+        path: CompactString,
+    ) -> Self {
         Self {
             backend,
+            cache_version,
             package,
             path,
         }
@@ -44,7 +51,11 @@ impl CacheKey {
 
 impl Display for CacheKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}:{}:{}", self.backend, self.package, self.path)
+        write!(
+            f,
+            "{}:{}:{}:{}",
+            self.backend, self.cache_version, self.package, self.path
+        )
     }
 }
 
@@ -112,6 +123,7 @@ impl Files for OriginalFilesCache {
         let mut uncached_queries = Vec::new();
         let mut cache_keys = AHashMap::new();
         let inner_name = self.name();
+        let cache_version = self.cache_version();
         for query in queries.iter() {
             // Resolve exact version and ID of packages from the package map
             let cache_key = match packages.get(&PackageRef::get_or_intern(interner, &query.package))
@@ -126,7 +138,7 @@ impl Files for OriginalFilesCache {
                     continue;
                 }
             };
-            let cache_key = CacheKey::new(inner_name, cache_key, query.path.clone());
+            let cache_key = CacheKey::new(inner_name, cache_version, cache_key, query.path.clone());
             match self
                 .cache
                 .cache_get(&cache_key)
@@ -182,5 +194,9 @@ impl Files for OriginalFilesCache {
 
     fn prefer_files_from_archive(&self) -> bool {
         self.inner.prefer_files_from_archive()
+    }
+
+    fn cache_version(&self) -> u16 {
+        self.inner.cache_version()
     }
 }
