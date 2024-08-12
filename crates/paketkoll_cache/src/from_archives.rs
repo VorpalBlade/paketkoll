@@ -12,6 +12,8 @@ use cached::DiskCache;
 use cached::IOCached;
 use compact_str::CompactString;
 
+use paketkoll_types::backend::ArchiveQueryError;
+use paketkoll_types::backend::ArchiveResult;
 use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::Name;
@@ -25,6 +27,7 @@ use paketkoll_types::files::FileFlags;
 use paketkoll_types::files::Properties;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::intern::PackageRef;
+use smallvec::SmallVec;
 
 use crate::utils::format_package;
 
@@ -87,9 +90,16 @@ impl From<&FileEntry> for FileEntryCache {
     }
 }
 
+/// Wrapper to handle missing entries (for packages outside repositories)
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+enum FileEntryCacheWrapper {
+    Cached(Vec<FileEntryCache>),
+    Missing(CompactString, SmallVec<[CompactString; 4]>),
+}
+
 pub struct FromArchiveCache {
     inner: Box<dyn Files>,
-    cache: DiskCache<CacheKey, Vec<FileEntryCache>>,
+    cache: DiskCache<CacheKey, FileEntryCacheWrapper>,
 }
 
 impl FromArchiveCache {
@@ -154,7 +164,7 @@ impl Files for FromArchiveCache {
         filter: &[PackageRef],
         package_map: &PackageMap,
         interner: &Interner,
-    ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError> {
+    ) -> Result<Vec<ArchiveResult>, PackageManagerError> {
         let inner_name = self.name();
         let cache_version = self.cache_version();
         let mut results = Vec::new();
@@ -170,14 +180,26 @@ impl Files for FromArchiveCache {
                 .cache_get(&cache_key)
                 .context("Cache query failed")?
             {
-                Some(v) => {
-                    results.push((
-                        *pkg_ref,
-                        v.into_iter()
-                            .map(|e| e.into_full_entry(*pkg_ref, inner_name))
-                            .collect(),
-                    ));
-                }
+                Some(v) => match v {
+                    FileEntryCacheWrapper::Cached(v) => {
+                        results.push(Ok((
+                            *pkg_ref,
+                            v.into_iter()
+                                .map(|e| e.into_full_entry(*pkg_ref, inner_name))
+                                .collect(),
+                        )));
+                    }
+                    FileEntryCacheWrapper::Missing(main_ref, refs) => {
+                        let refs = refs
+                            .into_iter()
+                            .map(|e| PackageRef::get_or_intern(interner, &e))
+                            .collect();
+                        results.push(Err(ArchiveQueryError::PackageMissing {
+                            query: PackageRef::get_or_intern(interner, main_ref),
+                            alternates: refs,
+                        }));
+                    }
+                },
                 None => {
                     uncached_queries.push(*pkg_ref);
                     cache_keys.insert(pkg_ref, cache_key);
@@ -190,20 +212,57 @@ impl Files for FromArchiveCache {
                 self.inner
                     .files_from_archives(&uncached_queries, package_map, interner)?;
             // Insert the uncached results into the cache and update the results
-            for (query, result) in uncached_results.into_iter() {
-                let cache_key = cache_keys
-                    .remove(&query)
-                    .with_context(|| format!("Cache key not found (archive): {query:?}"))?;
-                self.cache
-                    .cache_set(cache_key.clone(), result.iter().map(Into::into).collect())
-                    .with_context(|| {
-                        format!(
-                            "Cache set failed: pkg={} cache_key={}",
-                            query.to_str(interner),
-                            cache_key
-                        )
-                    })?;
-                results.push((query, result));
+            for inner_result in uncached_results.into_iter() {
+                match inner_result {
+                    Ok((query, result)) => {
+                        let cache_key = cache_keys
+                            .remove(&query)
+                            .with_context(|| format!("Cache key not found (archive): {query:?}"))?;
+                        self.cache
+                            .cache_set(
+                                cache_key.clone(),
+                                FileEntryCacheWrapper::Cached(
+                                    result.iter().map(Into::into).collect(),
+                                ),
+                            )
+                            .with_context(|| {
+                                format!(
+                                    "Cache set failed: pkg={} cache_key={}",
+                                    query.to_str(interner),
+                                    cache_key
+                                )
+                            })?;
+                        results.push(Ok((query, result)));
+                    }
+                    Err(ArchiveQueryError::PackageMissing { query, alternates }) => {
+                        let pkgs: SmallVec<[CompactString; 4]> = alternates
+                            .iter()
+                            .map(|e| e.to_str(interner).into())
+                            .collect();
+                        let cache_key = cache_keys
+                            .remove(&query)
+                            .with_context(|| format!("Cache key not found (archive): {pkgs:?}"))?;
+                        self.cache
+                            .cache_set(
+                                cache_key.clone(),
+                                FileEntryCacheWrapper::Missing(
+                                    query.to_str(interner).into(),
+                                    pkgs.clone(),
+                                ),
+                            )
+                            .with_context(|| {
+                                format!(
+                                    "Negative cache set failed: pkgs={:?} cache_key={}",
+                                    pkgs, cache_key
+                                )
+                            })?;
+                        results.push(Err(ArchiveQueryError::PackageMissing { query, alternates }));
+                    }
+
+                    Err(e) => {
+                        results.push(Err(e));
+                    }
+                }
             }
         }
 

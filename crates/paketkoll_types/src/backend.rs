@@ -11,6 +11,7 @@ use anyhow::anyhow;
 use anyhow::Context;
 use compact_str::CompactString;
 use dashmap::DashMap;
+use smallvec::SmallVec;
 
 use crate::files::FileEntry;
 use crate::intern::Interner;
@@ -79,7 +80,7 @@ pub trait Files: Name {
         filter: &[PackageRef],
         package_map: &PackageMap,
         interner: &Interner,
-    ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError>;
+    ) -> Result<Vec<ArchiveResult>, PackageManagerError>;
 
     /// True if this backend may benefit from path canonicalization for certain
     /// scans (i.e. paths may be inaccurate)
@@ -115,6 +116,8 @@ pub trait Files: Name {
     }
 }
 
+pub type ArchiveResult = Result<(PackageRef, Vec<FileEntry>), ArchiveQueryError>;
+
 /// Query type for original file contents
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct OriginalFileQuery {
@@ -129,6 +132,23 @@ pub enum OriginalFileError {
     #[error("Failed to find file(s) in package: {0}")]
     FileNotFound(CompactString),
     #[error("Failed to get original file: {0}")]
+    Other(#[from] anyhow::Error),
+}
+
+/// Errors that backends can produce
+#[derive(Debug, thiserror::Error)]
+pub enum ArchiveQueryError {
+    /// Failed to find/download the package
+    #[error("Failed to find/download package")]
+    PackageMissing {
+        query: PackageRef,
+        alternates: SmallVec<[PackageRef; 4]>,
+    },
+    /// Original file query error
+    #[error("{0:?}")]
+    OriginalFileError(#[from] OriginalFileError),
+    /// All other errors
+    #[error("{0:?}")]
     Other(#[from] anyhow::Error),
 }
 

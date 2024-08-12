@@ -538,16 +538,17 @@ pub fn diff(
                                         | Properties::Removed => {
                                             anyhow::bail!(
                                                 "{:?} needs to be restored to package manager \
-                                                 state, but how do to that is not yet implemented",
+                                                 state, but how do to do that is not yet \
+                                                 implemented",
                                                 entry.path
                                             )
                                         }
                                         Properties::Unknown => {
-                                            anyhow::bail!(
-                                                "{:?} needs to be restored to package manager \
-                                                 state, but how do to that is unknown",
-                                                entry.path
-                                            )
+                                            tracing::error!(
+                                                "{} needs to be restored to package manager \
+                                                 state, but how do to do that is unknown",
+                                                entry.path.display()
+                                            );
                                         }
                                     }
                                 }

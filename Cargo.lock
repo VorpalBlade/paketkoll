@@ -1106,6 +1106,7 @@ dependencies = [
 name = "konfigkoll"
 version = "0.1.5"
 dependencies = [
+ "ahash",
  "anyhow",
  "camino",
  "clap",
@@ -1720,6 +1721,7 @@ dependencies = [
  "dashmap 6.0.1",
  "paketkoll_types",
  "serde",
+ "smallvec",
  "tracing",
 ]
 

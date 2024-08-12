@@ -11,6 +11,7 @@ use cached::DiskCache;
 use cached::IOCached;
 use compact_str::CompactString;
 
+use paketkoll_types::backend::ArchiveResult;
 use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::Name;
@@ -187,7 +188,7 @@ impl Files for OriginalFilesCache {
         filter: &[PackageRef],
         package_map: &PackageMap,
         interner: &Interner,
-    ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError> {
+    ) -> Result<Vec<ArchiveResult>, PackageManagerError> {
         self.inner
             .files_from_archives(filter, package_map, interner)
     }

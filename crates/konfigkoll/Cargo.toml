@@ -36,6 +36,7 @@ debian = ["paketkoll_core/debian"]
 vendored = ["paketkoll_core/vendored"]
 
 [dependencies]
+ahash.workspace = true
 anyhow.workspace = true
 camino.workspace = true
 clap.workspace = true

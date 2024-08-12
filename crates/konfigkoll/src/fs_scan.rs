@@ -2,11 +2,14 @@
 
 use std::sync::Arc;
 
+use ahash::AHashSet;
 use anyhow::Context;
 use compact_str::CompactString;
 use dashmap::DashMap;
 use itertools::Itertools;
 use ouroboros::self_referencing;
+use paketkoll_types::backend::ArchiveQueryError;
+use paketkoll_types::intern::PackageRef;
 use rayon::prelude::*;
 
 use konfigkoll_types::FsInstruction;
@@ -44,6 +47,47 @@ pub(crate) fn scan_fs(
         tracing::debug!("Using files from archives");
         let all = package_map.keys().cloned().collect::<Vec<_>>();
         let mut files = backend.files_from_archives(&all, package_map, interner)?;
+        // For all the failures, attempt to resolve them with the traditional backend
+        let missing: AHashSet<PackageRef> = files
+            .iter()
+            .filter_map(|e| match e {
+                Ok(_) => None,
+                Err(ArchiveQueryError::PackageMissing {
+                    query: _,
+                    alternates,
+                }) => Some(alternates),
+                Err(err) => {
+                    tracing::error!("Unknown error: {err}");
+                    None
+                }
+            })
+            .flatten()
+            .cloned()
+            .collect();
+        let mut extra_files = vec![];
+        if !missing.is_empty() {
+            files.retain(Result::is_ok);
+            tracing::warn!(
+                "Attempting to resolve missing files with traditional backend (going to take \
+                 extra time)"
+            );
+            let traditional_files = backend.files(interner)?;
+            for file in traditional_files.into_iter() {
+                if let Some(pkg_ref) = file.package {
+                    if missing.contains(&pkg_ref) {
+                        extra_files.push(file);
+                    }
+                }
+            }
+            if backend.may_need_canonicalization() {
+                tracing::debug!("Canonicalizing file entries");
+                canonicalize_file_entries(&mut extra_files);
+            }
+        }
+        let mut files: Vec<_> = files
+            .into_iter()
+            .map(|e| e.expect("All errors should be filtered out by now"))
+            .collect();
         if backend.may_need_canonicalization() {
             tracing::debug!("Canonicalizing file entries");
             files.par_iter_mut().for_each(|entry| {
@@ -57,6 +101,14 @@ pub(crate) fn scan_fs(
             .for_each(|entry| {
                 file_map.insert(entry.path.clone(), entry);
             });
+        extra_files.into_iter().for_each(|entry| {
+            let old = file_map.insert(entry.path.clone(), entry);
+            if let Some(old) = old {
+                if old.properties.is_dir() == Some(false) {
+                    tracing::warn!("Duplicate file entry for {}", old.path.display());
+                }
+            }
+        });
         file_map.into_iter().map(|(_, v)| v).collect_vec()
     } else {
         let mut files = backend.files(interner).with_context(|| {

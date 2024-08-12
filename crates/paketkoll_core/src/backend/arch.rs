@@ -15,6 +15,8 @@ use compact_str::format_compact;
 use dashmap::DashMap;
 use dashmap::DashSet;
 use either::Either;
+use paketkoll_types::backend::ArchiveQueryError;
+use paketkoll_types::backend::ArchiveResult;
 use paketkoll_types::backend::OriginalFileError;
 use paketkoll_types::backend::OriginalFilesResult;
 use paketkoll_types::backend::OwningPackagesResult;
@@ -229,7 +231,7 @@ impl Files for ArchLinux {
         filter: &[PackageRef],
         package_map: &PackageMap,
         interner: &Interner,
-    ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError> {
+    ) -> Result<Vec<ArchiveResult>, PackageManagerError> {
         log::info!(
             "Finding archives for {} packages (may take a while)",
             filter.len()
@@ -240,14 +242,12 @@ impl Files for ArchLinux {
             "Loading files from {} archives (may take a while)",
             filter.len()
         );
-        let results: anyhow::Result<Vec<_>> = archives
+        let results: Vec<_> = archives
             .par_bridge()
             .map(|value| {
                 value.and_then(|(pkg_ref, path)| Ok((pkg_ref, archive_to_entries(pkg_ref, &path)?)))
             })
             .collect();
-
-        let results = results?;
         Ok(results)
     }
 }
@@ -259,7 +259,7 @@ impl ArchLinux {
         filter: &'inputs [PackageRef],
         packages: &'inputs PackageMap,
         interner: &'inputs Interner,
-    ) -> impl Iterator<Item = anyhow::Result<(PackageRef, PathBuf)>> + 'inputs {
+    ) -> impl Iterator<Item = Result<(PackageRef, PathBuf), ArchiveQueryError>> + 'inputs {
         let package_paths = filter.iter().map(|pkg_ref| {
             let pkg = packages
                 .get(pkg_ref)
@@ -274,8 +274,9 @@ impl ArchLinux {
                     download_arch_pkg(pkg)
                 })?;
             // Error if we couldn't find the package
-            let package_path = package_path.ok_or_else(|| {
-                anyhow::anyhow!("Failed to find or download package file for {name}")
+            let package_path = package_path.ok_or_else(|| ArchiveQueryError::PackageMissing {
+                query: *pkg_ref,
+                alternates: smallvec::smallvec![*pkg_ref],
             })?;
             Ok((*pkg_ref, package_path))
         });

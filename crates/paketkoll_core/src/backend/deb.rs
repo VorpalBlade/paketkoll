@@ -12,6 +12,8 @@ use bstr::ByteVec;
 use compact_str::format_compact;
 use compact_str::CompactString;
 use dashmap::DashMap;
+use paketkoll_types::backend::ArchiveQueryError;
+use paketkoll_types::backend::ArchiveResult;
 use paketkoll_types::backend::OriginalFileError;
 use paketkoll_types::backend::OriginalFilesResult;
 use paketkoll_types::backend::OwningPackagesResult;
@@ -260,7 +262,7 @@ impl Files for Debian {
         filter: &[PackageRef],
         package_map: &PackageMap,
         interner: &Interner,
-    ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError> {
+    ) -> Result<Vec<ArchiveResult>, PackageManagerError> {
         // Handle diversions: (parse output of dpkg-divert --list)
         log::debug!("Loading diversions");
         let diversions =
@@ -278,7 +280,7 @@ impl Files for Debian {
              especially on the first run before the disk cache can help)",
             filter.len()
         );
-        let results: anyhow::Result<Vec<_>> = archives
+        let results: Vec<_> = archives
             .par_bridge()
             .map(|value| {
                 value.and_then(|(pkg_ref, path)| {
@@ -290,8 +292,6 @@ impl Files for Debian {
             })
             .collect();
         log::info!("Extracted information from archives");
-
-        let results = results?;
         Ok(results)
     }
 
@@ -310,7 +310,9 @@ impl Debian {
         filter: &'inputs [PackageRef],
         packages: &'inputs PackageMap,
         interner: &'inputs Interner,
-    ) -> anyhow::Result<impl Iterator<Item = anyhow::Result<(PackageRef, PathBuf)>> + 'inputs> {
+    ) -> anyhow::Result<
+        impl Iterator<Item = Result<(PackageRef, PathBuf), ArchiveQueryError>> + 'inputs,
+    > {
         let intermediate: Vec<_> = filter
             .iter()
             .map(|pkg_ref| {
@@ -351,9 +353,11 @@ impl Debian {
                         download_deb(pkg)
                     })?;
                 // Error if we couldn't find the package
-                let package_path = package_path.ok_or_else(|| {
-                    anyhow::anyhow!("Failed to find or download package file for {name}")
-                })?;
+                let package_path =
+                    package_path.ok_or_else(|| ArchiveQueryError::PackageMissing {
+                        query: *pkg_ref,
+                        alternates: packages[pkg_ref].ids.clone(),
+                    })?;
                 Ok((*pkg_ref, package_path))
             });
 
@@ -386,18 +390,8 @@ fn archive_to_entries(
             let mut decompressed = CompressionFormat::from_extension(&extension, &mut entry)?;
             let archive = tar::Archive::new(&mut decompressed);
             // Now, lets extract the requested files from the package
-            let mut entries = convert_archive_entries(archive, pkg_ref, NAME, |path| {
-                let p = path
-                    .as_os_str()
-                    .as_encoded_bytes()
-                    .trim_start_with(|ch| ch == '.');
-                let p = if p != b"/" {
-                    p.trim_end_with(|ch| ch == '/')
-                } else {
-                    p
-                };
-                Some(Cow::Borrowed(p.to_path().expect("Invalid path")))
-            })?;
+            let mut entries =
+                convert_archive_entries(archive, pkg_ref, NAME, convert_deb_archive_path)?;
 
             let self_pkg = packages
                 .get(&pkg_ref)
@@ -423,6 +417,29 @@ fn archive_to_entries(
         }
     }
     Err(anyhow::anyhow!("Failed to find data.tar in {deb_file:?}"))
+}
+
+/// Convert Debian archive paths to normal paths
+fn convert_deb_archive_path(path: &Path) -> Option<Cow<'_, Path>> {
+    // Remove leading .
+    let p = path
+        .as_os_str()
+        .as_encoded_bytes()
+        .trim_start_with(|ch| ch == '.');
+    // If this is the root path, do not process it further (to prevent empty path)
+    if p == b"/" {
+        return Some(Cow::Borrowed(p.to_path().expect("Invalid path")));
+    }
+    // Otherwise strip any trailing slashes
+    let p = p.trim_end_with(|ch| ch == '/');
+    // Normally we don't need to add a leading / but some third party packages are
+    // broken in this respect
+    if p.starts_with(b"/") {
+        return Some(Cow::Borrowed(p.to_path().expect("Invalid path")));
+    } else {
+        let p = bstr::concat([b"/", p]);
+        return Some(Cow::Owned(p.into_path_buf().expect("Invalid path")));
+    }
 }
 
 /// Given a package name, try to figure out the full deb file name

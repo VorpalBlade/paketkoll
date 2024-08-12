@@ -17,6 +17,7 @@ compact_str.workspace = true
 dashmap.workspace = true
 paketkoll_types = { version = "0.1.3", path = "../paketkoll_types" }
 serde.workspace = true
+smallvec.workspace = true
 tracing.workspace = true
 
 [lints]

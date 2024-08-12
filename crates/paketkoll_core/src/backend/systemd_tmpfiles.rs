@@ -11,6 +11,7 @@ use ahash::AHashMap;
 use anyhow::Context;
 use compact_str::CompactString;
 
+use paketkoll_types::backend::ArchiveResult;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::Name;
 use paketkoll_types::backend::OriginalFileError;
@@ -124,7 +125,7 @@ impl Files for SystemdTmpfiles {
         _filter: &[PackageRef],
         _package_map: &PackageMap,
         _interner: &Interner,
-    ) -> Result<Vec<(PackageRef, Vec<FileEntry>)>, PackageManagerError> {
+    ) -> Result<Vec<ArchiveResult>, PackageManagerError> {
         Err(PackageManagerError::UnsupportedOperation(
             "Operation not supported for systemd-tmpfiles",
         ))
