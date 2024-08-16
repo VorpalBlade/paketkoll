@@ -69,7 +69,7 @@ pub(crate) struct ArchLinuxBuilder {
 impl ArchLinuxBuilder {
     /// Load pacman config
     fn load_config(&mut self) -> anyhow::Result<pacman_conf::PacmanConfig> {
-        log::debug!("Loading pacman config");
+        tracing::debug!("Loading pacman config");
         let mut readable = BufReader::new(std::fs::File::open("/etc/pacman.conf")?);
         let pacman_config: pacman_conf::PacmanConfig =
             pacman_conf::PacmanConfig::new(&mut readable)?;
@@ -113,11 +113,11 @@ impl Files for ArchLinux {
         let db_path: &Path = Path::new(&self.pacman_config.db_path);
 
         // Load packages
-        log::debug!("Loading packages");
+        tracing::debug!("Loading packages");
         let pkgs_and_paths = get_mtree_paths(db_path, interner, self.package_filter)?;
 
         // Load mtrees
-        log::debug!("Loading mtrees");
+        tracing::debug!("Loading mtrees");
         // Directories are duplicated across packages, we deduplicate them here
         let seen_directories = DashSet::new();
         // It is counter-intuitive, but we are faster if we collect into a vec here and
@@ -176,7 +176,7 @@ impl Files for ArchLinux {
             .for_each(|entry| {
                 if let Ok(entry) = entry {
                     if let Err(e) = find_files(&entry, interner, &re, paths, &file_to_package) {
-                        log::error!("Failed to parse package data: {e}");
+                        tracing::error!("Failed to parse package data: {e}");
                     }
                 }
             });
@@ -232,13 +232,13 @@ impl Files for ArchLinux {
         package_map: &PackageMap,
         interner: &Interner,
     ) -> Result<Vec<ArchiveResult>, PackageManagerError> {
-        log::info!(
+        tracing::info!(
             "Finding archives for {} packages (may take a while)",
             filter.len()
         );
         let archives = self.iterate_pkg_archives(filter, package_map, interner);
 
-        log::info!(
+        tracing::info!(
             "Loading files from {} archives (may take a while)",
             filter.len()
         );
@@ -477,7 +477,7 @@ fn download_arch_pkg(pkg: &str) -> Result<(), anyhow::Error> {
         .args(["-Sw", "--noconfirm", pkg])
         .status()?;
     if !status.success() {
-        log::warn!("Failed to download package for {pkg}");
+        tracing::warn!("Failed to download package for {pkg}");
     };
     Ok(())
 }

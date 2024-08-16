@@ -128,7 +128,7 @@ pub(crate) fn locate_package_file(
                         paths.collect::<Result<_, _>>().context("Glob error")?;
                     paths.sort();
                     if paths.len() > 1 {
-                        log::warn!(
+                        tracing::warn!(
                             "Found multiple matches for {pkg}, taking latest in sort order: {}",
                             paths
                                 .last()
@@ -146,9 +146,9 @@ pub(crate) fn locate_package_file(
 
         // Nothing found, try downloading the package
         if downloaded {
-            log::error!("Failed to find package for {pkg}");
+            tracing::error!("Failed to find package for {pkg}");
         } else {
-            log::info!("Downloading package for {pkg}");
+            tracing::info!("Downloading package for {pkg}");
             download_pkg(pkg)?;
         }
     }
@@ -188,7 +188,7 @@ pub(crate) fn missing_packages<'strings>(
                     let mut paths: SmallVec<[_; 5]> = paths.collect::<Result<_, _>>()?;
                     paths.sort();
                     if paths.len() > 1 {
-                        log::warn!(
+                        tracing::warn!(
                             "Found multiple matches for {package}, taking latest in sort order: {}",
                             paths
                                 .last()
@@ -254,7 +254,7 @@ pub(crate) fn extract_files(
     let diff = queries.difference(&*seen);
     let mut has_errors = false;
     for missing in diff {
-        log::warn!("Failed to find requested file {missing} in package {pkg}");
+        tracing::warn!("Failed to find requested file {missing} in package {pkg}");
         has_errors = true;
     }
     if has_errors {

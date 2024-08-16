@@ -714,29 +714,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a357d28ed41a50f9c765dbfe56cbc04a64e53e5fc58ba79fbc34c10ef3df831f"
 
 [[package]]
-name = "env_filter"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4f2c92ceda6ceec50f43169f9ee8424fe2db276791afde7b2cd8bc084cb376ab"
-dependencies = [
- "log",
- "regex",
-]
-
-[[package]]
-name = "env_logger"
-version = "0.11.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e13fa619b91fb2381732789fc5de83b45675e882f66623b7d8cb4f643017018d"
-dependencies = [
- "anstream",
- "anstyle",
- "env_filter",
- "humantime",
- "log",
-]
-
-[[package]]
 name = "equivalent"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -968,12 +945,6 @@ checksum = "e3d1354bf6b7235cb4a0576c2619fd4ed18183f689b12b006a0ee7329eeff9a5"
 dependencies = [
  "windows-sys 0.52.0",
 ]
-
-[[package]]
-name = "humantime"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 
 [[package]]
 name = "ident_case"
@@ -1699,7 +1670,6 @@ dependencies = [
  "anyhow",
  "clap",
  "compact_str",
- "env_logger",
  "mimalloc",
  "os_info",
  "paketkoll_core",
@@ -1708,6 +1678,8 @@ dependencies = [
  "rayon",
  "serde",
  "serde_json",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -1746,7 +1718,6 @@ dependencies = [
  "ignore",
  "indoc",
  "libc",
- "log",
  "md-5",
  "mtree2",
  "nix",
@@ -1765,6 +1736,7 @@ dependencies = [
  "strum",
  "systemd_tmpfiles",
  "tar",
+ "tracing",
  "xz2",
  "zstd",
 ]
@@ -3539,9 +3511,10 @@ dependencies = [
  "clap",
  "clap_complete",
  "clap_mangen",
- "env_logger",
  "konfigkoll",
  "paketkoll",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]

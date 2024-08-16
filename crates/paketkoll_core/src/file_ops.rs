@@ -58,7 +58,7 @@ pub fn check_installed_files(
         .files(&interner)
         .with_context(|| format!("Failed to collect information from backend {backend}"))?;
 
-    log::debug!("Checking file system");
+    tracing::debug!("Checking file system");
     // For all file entries, check on file system
     // Par-bridge is used here to avoid batching. We do too much work for
     // batching to be useful, and this way we avoid pathological cases with
@@ -104,11 +104,11 @@ pub fn check_all_files(
 
     // Possibly canonicalize paths
     if unexpected_cfg.canonicalize_paths {
-        log::debug!("Canonicalizing paths");
+        tracing::debug!("Canonicalizing paths");
         canonicalize_file_entries(&mut expected_files);
     }
 
-    log::debug!("Preparing data structures");
+    tracing::debug!("Preparing data structures");
     // We want a hashmap from path to data here.
     let path_map = create_path_map(&expected_files);
 
@@ -139,7 +139,7 @@ pub fn mismatching_and_unexpected_files<'a>(
     filecheck_config: &crate::config::CommonFileCheckConfiguration,
     unexpected_cfg: &crate::config::CheckAllFilesConfiguration,
 ) -> anyhow::Result<Vec<(Option<PackageRef>, Issue)>> {
-    log::debug!("Building ignores");
+    tracing::debug!("Building ignores");
     // Build glob set of ignores
     let overrides = {
         let mut builder = OverrideBuilder::new("/");
@@ -154,7 +154,7 @@ pub fn mismatching_and_unexpected_files<'a>(
         builder.build()?
     };
 
-    log::debug!("Walking file system");
+    tracing::debug!("Walking file system");
     let walker = WalkBuilder::new("/")
         .hidden(false)
         .parents(false)
@@ -225,7 +225,7 @@ pub fn mismatching_and_unexpected_files<'a>(
         })
     });
 
-    log::debug!("Identifying and processing missing files");
+    tracing::debug!("Identifying and processing missing files");
     // Identify missing files (we should have seen them walking through the file
     // system)
     expected_files.par_iter().for_each(|file_entry| {
@@ -258,7 +258,7 @@ pub fn mismatching_and_unexpected_files<'a>(
             .expect("Unbounded queue");
     });
 
-    log::debug!("Collecting results");
+    tracing::debug!("Collecting results");
     // Collect all items from queue into vec
     let mut mismatches = Vec::new();
     for item in collected_issues.drain() {
@@ -301,7 +301,7 @@ pub fn canonicalize_file_entries(results: &mut Vec<FileEntry>) {
                         }
                     }
                     Err(err) => {
-                        log::error!(
+                        tracing::error!(
                             "Failed to canonicalize path: {:?} ({:?})",
                             file_entry.path,
                             err
@@ -309,13 +309,13 @@ pub fn canonicalize_file_entries(results: &mut Vec<FileEntry>) {
                     }
                 }
             }
-            (None, _) => log::error!(
+            (None, _) => tracing::error!(
                 "Failed to resolve parent of path: {:?}: {:?}",
                 file_entry.path,
                 file_entry
             ),
             (_, None) => {
-                log::error!("Failed to resolve filenameI of path: {:?}", file_entry.path);
+                tracing::error!("Failed to resolve filenameI of path: {:?}", file_entry.path);
             }
         }
     });

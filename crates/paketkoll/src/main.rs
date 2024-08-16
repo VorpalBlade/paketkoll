@@ -12,9 +12,9 @@ use clap::Parser;
 use proc_exit::Code;
 use proc_exit::Exit;
 use rayon::prelude::*;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
 
-#[cfg(target_env = "musl")]
-use mimalloc::MiMalloc;
 use paketkoll::cli::Cli;
 use paketkoll::cli::Commands;
 use paketkoll::cli::Format;
@@ -29,13 +29,20 @@ use paketkoll_types::backend::OriginalFileQuery;
 use paketkoll_types::package::PackageInterned;
 
 #[cfg(target_env = "musl")]
-#[cfg_attr(target_env = "musl", global_allocator)]
-static GLOBAL: MiMalloc = MiMalloc;
+mod _musl {
+    use mimalloc::MiMalloc;
+    #[global_allocator]
+    static GLOBAL: MiMalloc = MiMalloc;
+}
 
 fn main() -> anyhow::Result<Exit> {
-    let mut builder =
-        env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("warn"));
-    builder.init();
+    let filter = tracing_subscriber::EnvFilter::builder()
+        .with_default_directive(tracing::level_filters::LevelFilter::INFO.into())
+        .from_env()?;
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
+        .with(filter)
+        .init();
     let cli = Cli::parse();
 
     match cli.command {

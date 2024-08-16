@@ -30,9 +30,10 @@ camino.workspace = true
 clap.workspace = true
 clap_complete.workspace = true
 clap_mangen.workspace = true
-env_logger.workspace = true
 konfigkoll = { version = "0.1.5", path = "../konfigkoll" }
 paketkoll = { version = "0.3.3", path = "../paketkoll" }
+tracing-subscriber.workspace = true
+tracing.workspace = true
 
 [lints]
 workspace = true

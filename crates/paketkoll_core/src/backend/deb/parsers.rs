@@ -326,7 +326,7 @@ fn fixup_pkg_ids(
             ));
         }
         None => {
-            log::error!(
+            tracing::error!(
                 "Package {} has no architecture",
                 package.name.to_str(interner)
             );
@@ -368,7 +368,7 @@ pub(super) fn parse_extended_status(
                     "1" => Some(InstallReason::Dependency),
                     "0" => Some(InstallReason::Explicit),
                     _ => {
-                        log::warn!("Unknown auto-installed value: {}", stripped);
+                        tracing::warn!("Unknown auto-installed value: {}", stripped);
                         None
                     }
                 };

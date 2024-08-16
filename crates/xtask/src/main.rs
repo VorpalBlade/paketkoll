@@ -2,15 +2,21 @@ use clap::CommandFactory;
 use clap::Parser;
 use clap::ValueEnum;
 use clap_complete::Shell;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
 
 use cli::Commands;
 
 mod cli;
 
 fn main() -> anyhow::Result<()> {
-    let mut builder =
-        env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info"));
-    builder.init();
+    let filter = tracing_subscriber::EnvFilter::builder()
+        .with_default_directive(tracing::level_filters::LevelFilter::INFO.into())
+        .from_env()?;
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::fmt::layer())
+        .with(filter)
+        .init();
     let cli = cli::Cli::parse();
 
     match cli.command {

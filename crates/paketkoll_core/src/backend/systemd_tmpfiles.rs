@@ -166,7 +166,7 @@ fn process_entry<'entry>(
 ) -> anyhow::Result<()> {
     // Figure out path
     if entry.path_is_glob() {
-        log::warn!(
+        tracing::warn!(
             "Path {} is a glob, skipping as we can't handle that",
             entry.path()
         );
@@ -232,7 +232,7 @@ fn process_entry<'entry>(
             append: true,
             contents: _,
         } => {
-            log::error!("w+ (append to file) is not currently supported, skipping entry");
+            tracing::error!("w+ (append to file) is not currently supported, skipping entry");
             return Ok(());
         }
         systemd_tmpfiles::Directive::CreateDirectory {
@@ -355,7 +355,7 @@ fn process_entry<'entry>(
             group,
         } => {
             if *recursive {
-                log::warn!("Recursive Z not properly supported for {path}");
+                tracing::warn!("Recursive Z not properly supported for {path}");
             }
             Properties::Permissions(Permissions {
                 mode: mode
@@ -435,7 +435,7 @@ fn do_insert(
                         do_insert_inner(&mut entry, path, props, flags);
                     }
                     Properties::Special | Properties::Removed => {
-                        log::warn!("Tried to update permissions on non-permissions entry");
+                        tracing::warn!("Tried to update permissions on non-permissions entry");
                     }
                 }
             } else {
@@ -485,7 +485,7 @@ fn recursive_copy(
     let source_metadata = match source_path.metadata() {
         Ok(metadata) => metadata,
         Err(e) => {
-            log::warn!("Failed to read metadata for {source_path:?}: {e}",);
+            tracing::warn!("Failed to read metadata for {source_path:?}: {e}",);
             return Ok(());
         }
     };
@@ -496,7 +496,7 @@ fn recursive_copy(
             let dir_iter = match std::fs::read_dir(source_path) {
                 Ok(iter) => iter,
                 Err(e) => {
-                    log::warn!("Failed to read directory {source_path:?}: {e}",);
+                    tracing::warn!("Failed to read directory {source_path:?}: {e}",);
                     return Ok(());
                 }
             };
@@ -521,7 +521,7 @@ fn recursive_copy(
         false => {
             let checksum = generate_checksum_from_file(source_path);
             let Ok(checksum) = checksum else {
-                log::warn!(
+                tracing::warn!(
                     "Failed to generate checksum for {source_path:?}: {}",
                     checksum.expect_err("Must be an error in this control flow")
                 );

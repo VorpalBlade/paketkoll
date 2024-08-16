@@ -352,7 +352,7 @@ fn check_contents(
             }
         }
         _ => {
-            log::error!("Checksum {expected_checksum} is of an unsupported type");
+            tracing::error!("Checksum {expected_checksum} is of an unsupported type");
             issues.push(IssueKind::FsCheckError(Box::new(anyhow::anyhow!(
                 "Unsupported checksum type"
             ))));

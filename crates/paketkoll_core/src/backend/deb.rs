@@ -118,30 +118,30 @@ impl Name for Debian {
 
 impl Files for Debian {
     fn files(&self, interner: &Interner) -> anyhow::Result<Vec<FileEntry>> {
-        log::debug!("Loading packages");
+        tracing::debug!("Loading packages");
         let packages_files: Vec<_> = get_package_files(interner)?.collect();
 
         // Handle diversions: (parse output of dpkg-divert --list)
-        log::debug!("Loading diversions");
+        tracing::debug!("Loading diversions");
         let diversions =
             divert::get_diversions(interner).context("Failed to get dpkg diversions")?;
 
         // Load config files.
-        log::debug!("Loading status to get config files");
+        tracing::debug!("Loading status to get config files");
         let (config_files, _) = {
             let mut status = BufReader::new(File::open(STATUS_PATH)?);
             parsers::parse_status(interner, &mut status, self.primary_architecture)
         }
         .context(format!("Failed to parse {}", STATUS_PATH))?;
 
-        log::debug!("Merging packages files into one map");
+        tracing::debug!("Merging packages files into one map");
         let merged = DashMap::with_hasher(ahash::RandomState::new());
         packages_files.into_par_iter().for_each(|files| {
             merge_deb_fileentries(&merged, files, &diversions);
         });
 
         // The config files must be merged into the results
-        log::debug!("Merging config files");
+        tracing::debug!("Merging config files");
         merge_deb_fileentries(&merged, config_files, &diversions);
 
         // For Debian we apply the filter here at the end, since multiple steps
@@ -194,7 +194,7 @@ impl Files for Debian {
                         if let Err(e) =
                             is_file_match(&entry.path(), interner, &re, paths, &file_to_package)
                         {
-                            log::error!("Failed to parse package data: {e}");
+                            tracing::error!("Failed to parse package data: {e}");
                         }
                     }
                 }
@@ -264,18 +264,18 @@ impl Files for Debian {
         interner: &Interner,
     ) -> Result<Vec<ArchiveResult>, PackageManagerError> {
         // Handle diversions: (parse output of dpkg-divert --list)
-        log::debug!("Loading diversions");
+        tracing::debug!("Loading diversions");
         let diversions =
             divert::get_diversions(interner).context("Failed to get dpkg diversions")?;
 
-        log::debug!("List of diversions: {diversions:?}");
+        tracing::debug!("List of diversions: {diversions:?}");
 
-        log::info!(
+        tracing::info!(
             "Loading file data from dpkg cache archives for {} packages",
             filter.len()
         );
         let archives = self.iterate_deb_archives(filter, package_map, interner)?;
-        log::info!(
+        tracing::info!(
             "Got list of {} archives, starting extracting information (this may take a while, \
              especially on the first run before the disk cache can help)",
             filter.len()
@@ -291,7 +291,7 @@ impl Files for Debian {
                 })
             })
             .collect();
-        log::info!("Extracted information from archives");
+        tracing::info!("Extracted information from archives");
         Ok(results)
     }
 
@@ -340,7 +340,7 @@ impl Debian {
 
         if !missing.is_empty() {
             let _guard = self.pkgmgr_mutex.lock();
-            log::info!("Downloading missing packages (installed but not in local cache)");
+            tracing::info!("Downloading missing packages (installed but not in local cache)");
             download_debs(&missing)?;
         }
 
@@ -373,7 +373,7 @@ fn archive_to_entries(
     packages: &PackageMap,
     interner: &Interner,
 ) -> anyhow::Result<Vec<FileEntry>> {
-    log::debug!("Processing {}", deb_file.display());
+    tracing::debug!("Processing {}", deb_file.display());
     // The package is a .deb, which is actually an ar archive
     let package_file = File::open(deb_file)?;
     let mut archive = ar::Archive::new(package_file);
@@ -401,7 +401,7 @@ fn archive_to_entries(
                 if let Some(diversion) = diversions.get(&entry.path) {
                     if !self_pkg.ids.contains(&diversion.by_package) {
                         // This file is diverted
-                        log::debug!(
+                        tracing::debug!(
                             "Diverted file: {opath} -> {npath} by {diverting_pkg} while \
                              processing {pkg}",
                             opath = entry.path.display(),
@@ -583,7 +583,7 @@ fn process_file(interner: &Interner, entry: &DirEntry) -> anyhow::Result<Option<
 impl Packages for Debian {
     fn packages(&self, interner: &Interner) -> anyhow::Result<Vec<PackageInterned>> {
         // Parse status
-        log::debug!("Loading status to installed packages");
+        tracing::debug!("Loading status to installed packages");
         let (_, mut packages) = {
             let mut status = BufReader::new(File::open(STATUS_PATH)?);
             parsers::parse_status(interner, &mut status, self.primary_architecture)
@@ -591,7 +591,7 @@ impl Packages for Debian {
         .context(format!("Failed to parse {}", STATUS_PATH))?;
 
         // Parse extended status
-        log::debug!("Loading extended status to get auto installed packages");
+        tracing::debug!("Loading extended status to get auto installed packages");
         let extended_packages = {
             let mut status = BufReader::new(File::open(EXTENDED_STATUS_PATH)?);
             parsers::parse_extended_status(interner, &mut status)?
@@ -686,7 +686,7 @@ fn download_debs(pkgs: &[&str]) -> Result<(), anyhow::Error> {
         .args(pkgs)
         .status()?;
     if !status.success() {
-        log::warn!("Failed to download package for {pkgs:?}");
+        tracing::warn!("Failed to download package for {pkgs:?}");
     };
     Ok(())
 }
@@ -703,7 +703,7 @@ fn download_deb(pkg: &str) -> Result<(), anyhow::Error> {
         ])
         .status()?;
     if !status.success() {
-        log::warn!("Failed to download package for {pkg}");
+        tracing::warn!("Failed to download package for {pkg}");
     };
     Ok(())
 }
