@@ -26,8 +26,6 @@ use konfigkoll_script::ScriptEngine;
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::PkgIdent;
 use konfigkoll_types::PkgInstruction;
-#[cfg(target_env = "musl")]
-use mimalloc::MiMalloc;
 use paketkoll_cache::FromArchiveCache;
 use paketkoll_cache::OriginalFilesCache;
 use paketkoll_core::backend::ConcreteBackend;
@@ -44,8 +42,11 @@ mod pkgs;
 mod save;
 
 #[cfg(target_env = "musl")]
-#[cfg_attr(target_env = "musl", global_allocator)]
-static GLOBAL: MiMalloc = MiMalloc;
+mod _musl {
+    use mimalloc::MiMalloc;
+    #[global_allocator]
+    static GLOBAL: MiMalloc = MiMalloc;
+}
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
