@@ -48,8 +48,8 @@ pub fn convert_issues_to_fs_instructions(
         .into_par_iter()
         .map(|issue| {
             let mut results = vec![];
-            let (_pkg, issue) = issue;
-            match convert_issue(&issue, &mut results, &id_resolver) {
+            let (pkg, issue) = issue;
+            match convert_issue(&issue, pkg, &mut results, &id_resolver) {
                 Ok(()) => (),
                 Err(err) => {
                     tracing::error!(
@@ -76,6 +76,7 @@ pub fn convert_issues_to_fs_instructions(
 #[tracing::instrument(level = "debug", skip(results, id_resolver))]
 fn convert_issue(
     issue: &Issue,
+    pkg: Option<PackageRef>,
     results: &mut Vec<FsInstruction>,
     id_resolver: &Mutex<NumericToNameResolveCache>,
 ) -> Result<(), anyhow::Error> {
@@ -87,10 +88,11 @@ fn convert_issue(
                 path: path.into(),
                 op: FsOp::Remove,
                 comment: None,
+                pkg,
             }),
             paketkoll_types::issue::IssueKind::Exists
             | paketkoll_types::issue::IssueKind::Unexpected => {
-                results.extend(from_fs(path, id_resolver)?);
+                results.extend(from_fs(path, pkg, id_resolver)?);
             }
             paketkoll_types::issue::IssueKind::PermissionDenied => {
                 anyhow::bail!("Permission denied on {:?}", issue.path());
@@ -103,8 +105,9 @@ fn convert_issue(
                     path: path.into(),
                     op: FsOp::Remove,
                     comment: Some(format_compact!("Removed due to type conflict")),
+                    pkg,
                 });
-                results.extend(from_fs(path, id_resolver)?);
+                results.extend(from_fs(path, pkg, id_resolver)?);
             }
             paketkoll_types::issue::IssueKind::SizeIncorrect { .. } => {
                 results.push(FsInstruction {
@@ -114,6 +117,7 @@ fn convert_issue(
                             .with_context(|| format!("Failed to read {path:?}"))?,
                     ),
                     comment: None,
+                    pkg,
                 });
             }
             paketkoll_types::issue::IssueKind::ChecksumIncorrect {
@@ -127,6 +131,7 @@ fn convert_issue(
                             .with_context(|| format!("Failed to read {path:?}"))?,
                     ),
                     comment: None,
+                    pkg,
                 });
             }
             paketkoll_types::issue::IssueKind::SymlinkTarget {
@@ -140,6 +145,7 @@ fn convert_issue(
                         target: actual.into(),
                     },
                     comment: None,
+                    pkg,
                 });
             }
             paketkoll_types::issue::IssueKind::WrongOwner {
@@ -151,6 +157,7 @@ fn convert_issue(
                     owner: id_resolver.lock().lookup(&IdKey::User(*actual))?,
                 },
                 comment: None,
+                pkg,
             }),
             paketkoll_types::issue::IssueKind::WrongGroup {
                 actual,
@@ -161,6 +168,7 @@ fn convert_issue(
                     group: id_resolver.lock().lookup(&IdKey::Group(*actual))?,
                 },
                 comment: None,
+                pkg,
             }),
             paketkoll_types::issue::IssueKind::WrongMode {
                 actual,
@@ -169,6 +177,7 @@ fn convert_issue(
                 path: path.into(),
                 op: FsOp::SetMode { mode: *actual },
                 comment: None,
+                pkg,
             }),
             paketkoll_types::issue::IssueKind::WrongDeviceNodeId {
                 actual: (dev_type, major, minor),
@@ -186,6 +195,7 @@ fn convert_issue(
                     },
                 },
                 comment: None,
+                pkg,
             }),
             paketkoll_types::issue::IssueKind::MetadataError(_) => todo!(),
             paketkoll_types::issue::IssueKind::FsCheckError(_) => todo!(),
@@ -198,6 +208,7 @@ fn convert_issue(
 /// Create all required instructions for a file on the file system
 fn from_fs(
     path: &Utf8Path,
+    pkg: Option<PackageRef>,
     id_resolver: &Mutex<NumericToNameResolveCache>,
 ) -> anyhow::Result<impl Iterator<Item = FsInstruction>> {
     let metadata = path
@@ -213,12 +224,14 @@ fn from_fs(
                 fs_load_contents(path, None).with_context(|| format!("Failed to load {path}"))?,
             ),
             comment: None,
+            pkg,
         });
     } else if metadata.is_dir() {
         results.push(FsInstruction {
             path: path.into(),
             op: FsOp::CreateDirectory,
             comment: None,
+            pkg,
         });
     } else if metadata.file_type().is_symlink() {
         results.push(FsInstruction {
@@ -229,12 +242,14 @@ fn from_fs(
                     .try_into()?,
             },
             comment: None,
+            pkg,
         });
     } else if metadata.file_type().is_fifo() {
         results.push(FsInstruction {
             path: path.into(),
             op: FsOp::CreateFifo,
             comment: None,
+            pkg,
         });
     } else if metadata.file_type().is_block_device() {
         let rdev = metadata.rdev();
@@ -247,6 +262,7 @@ fn from_fs(
                 minor: unsafe { libc::minor(rdev) } as u64,
             },
             comment: None,
+            pkg,
         });
     } else if metadata.file_type().is_char_device() {
         let rdev = metadata.rdev();
@@ -259,6 +275,7 @@ fn from_fs(
                 minor: unsafe { libc::minor(rdev) } as u64,
             },
             comment: None,
+            pkg,
         });
     } else if metadata.file_type().is_socket() {
         // Socket files can only be created by a running program and gets
@@ -277,6 +294,7 @@ fn from_fs(
                 mode: Mode::new(metadata.mode() & MODE_MASK),
             },
             comment: None,
+            pkg,
         });
     }
     results.push(FsInstruction {
@@ -287,6 +305,7 @@ fn from_fs(
                 .lookup(&IdKey::User(Uid::new(metadata.uid())))?,
         },
         comment: None,
+        pkg,
     });
     results.push(FsInstruction {
         path: path.into(),
@@ -296,6 +315,7 @@ fn from_fs(
                 .lookup(&IdKey::Group(Gid::new(metadata.gid())))?,
         },
         comment: None,
+        pkg,
     });
 
     Ok(results.into_iter())

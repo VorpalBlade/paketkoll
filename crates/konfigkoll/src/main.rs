@@ -267,6 +267,7 @@ async fn main() -> anyhow::Result<()> {
                 &fs_changes,
                 pkg_additions,
                 pkg_removals,
+                &interner,
             )?;
         }
         Commands::Apply {} => {
@@ -327,6 +328,7 @@ async fn main() -> anyhow::Result<()> {
 }
 
 /// Implements the actual saving for the `save` command
+#[allow(clippy::too_many_arguments)]
 fn cmd_save_changes(
     confirmation: Paranoia,
     config_path: &Utf8Path,
@@ -335,6 +337,7 @@ fn cmd_save_changes(
     fs_changes: &[FsInstruction],
     pkg_additions: Vec<(&PkgIdent, PkgInstruction)>,
     pkg_removals: Vec<(&PkgIdent, PkgInstruction)>,
+    interner: &Interner,
 ) -> anyhow::Result<()> {
     if !fs_changes.is_empty() || !pkg_additions.is_empty() || !pkg_removals.is_empty() {
         tracing::warn!("There are differences (saving to unsorted.rn)");
@@ -385,6 +388,7 @@ fn cmd_save_changes(
             }
         },
         fs_changes.iter(),
+        interner,
     )?;
     output.write_all("}\n".as_bytes())?;
 

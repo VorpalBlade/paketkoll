@@ -15,6 +15,7 @@ use paketkoll_types::backend::Files;
 use paketkoll_types::files::Mode;
 use paketkoll_types::files::PathMap;
 use paketkoll_types::files::Properties;
+use paketkoll_types::intern::PackageRef;
 
 use crate::utils::IdKey;
 use crate::utils::NumericToNameResolveCache;
@@ -34,6 +35,8 @@ struct FsNode {
     removed_before_added: bool,
     /// Optional comment for saving purposes
     comment: Option<CompactString>,
+    /// Optional package associated with this instruction (for saving purposes)
+    pkg: Option<PackageRef>,
 }
 
 // This is a macro due to partial moving of self
@@ -44,37 +47,44 @@ macro_rules! fsnode_into_base_instruction {
                 path: $path.into(),
                 op: FsOp::Remove,
                 comment: $this.comment,
+                pkg: $this.pkg,
             }),
             FsEntry::Unchanged => None,
             FsEntry::Directory => Some(FsInstruction {
                 path: $path.into(),
                 op: FsOp::CreateDirectory,
                 comment: $this.comment,
+                pkg: $this.pkg,
             }),
             FsEntry::File(contents) => Some(FsInstruction {
                 path: $path.into(),
                 op: FsOp::CreateFile(contents),
                 comment: $this.comment,
+                pkg: $this.pkg,
             }),
             FsEntry::Symlink { target } => Some(FsInstruction {
                 path: $path.into(),
                 op: FsOp::CreateSymlink { target },
                 comment: $this.comment,
+                pkg: $this.pkg,
             }),
             FsEntry::Fifo => Some(FsInstruction {
                 path: $path.into(),
                 op: FsOp::CreateFifo,
                 comment: $this.comment,
+                pkg: $this.pkg,
             }),
             FsEntry::BlockDevice { major, minor } => Some(FsInstruction {
                 path: $path.into(),
                 op: FsOp::CreateBlockDevice { major, minor },
                 comment: $this.comment,
+                pkg: $this.pkg,
             }),
             FsEntry::CharDevice { major, minor } => Some(FsInstruction {
                 path: $path.into(),
                 op: FsOp::CreateCharDevice { major, minor },
                 comment: $this.comment,
+                pkg: $this.pkg,
             }),
         }
     };
@@ -101,6 +111,7 @@ impl FsNode {
                 path: path.into(),
                 op: FsOp::Remove,
                 comment: Some("Removed (and later recreated) due to file type conflict".into()),
+                pkg: self.pkg,
             });
         }
         match &self.entry {
@@ -123,6 +134,7 @@ impl FsNode {
                         path: path.into(),
                         op: FsOp::SetMode { mode },
                         comment: None,
+                        pkg: self.pkg,
                     });
                 }
             }
@@ -132,6 +144,7 @@ impl FsNode {
                         path: path.into(),
                         op: FsOp::SetOwner { owner },
                         comment: None,
+                        pkg: self.pkg,
                     });
                 }
             }
@@ -141,6 +154,7 @@ impl FsNode {
                         path: path.into(),
                         op: FsOp::SetGroup { group },
                         comment: None,
+                        pkg: self.pkg,
                     });
                 }
             }
@@ -197,6 +211,7 @@ impl FsEntries {
                             group: Some(ROOT),
                             removed_before_added: true,
                             comment: instr.comment,
+                            pkg: instr.pkg,
                         },
                     );
                 }
@@ -210,6 +225,7 @@ impl FsEntries {
                             group: Some(ROOT),
                             removed_before_added: false,
                             comment: instr.comment,
+                            pkg: instr.pkg,
                         },
                     );
                 }
@@ -223,6 +239,7 @@ impl FsEntries {
                             group: Some(ROOT),
                             removed_before_added: false,
                             comment: instr.comment,
+                            pkg: instr.pkg,
                         },
                     );
                 }
@@ -236,6 +253,7 @@ impl FsEntries {
                             group: Some(ROOT),
                             removed_before_added: false,
                             comment: instr.comment,
+                            pkg: instr.pkg,
                         },
                     );
                 }
@@ -249,6 +267,7 @@ impl FsEntries {
                             group: Some(ROOT),
                             removed_before_added: false,
                             comment: instr.comment,
+                            pkg: instr.pkg,
                         },
                     );
                 }
@@ -262,6 +281,7 @@ impl FsEntries {
                             group: Some(ROOT),
                             removed_before_added: false,
                             comment: instr.comment,
+                            pkg: instr.pkg,
                         },
                     );
                 }
@@ -275,6 +295,7 @@ impl FsEntries {
                             group: Some(ROOT),
                             removed_before_added: false,
                             comment: instr.comment,
+                            pkg: instr.pkg,
                         },
                     );
                 }
@@ -294,6 +315,7 @@ impl FsEntries {
                             group: None,
                             removed_before_added: false,
                             comment: instr.comment,
+                            pkg: instr.pkg,
                         });
                 }
                 FsOp::SetOwner { ref owner } => {
@@ -312,6 +334,7 @@ impl FsEntries {
                             group: None,
                             removed_before_added: false,
                             comment: instr.comment,
+                            pkg: instr.pkg,
                         });
                 }
                 FsOp::SetGroup { ref group } => {
@@ -330,6 +353,7 @@ impl FsEntries {
                             group: Some(group.clone()),
                             removed_before_added: false,
                             comment: instr.comment,
+                            pkg: instr.pkg,
                         });
                 }
                 FsOp::Comment => (),
@@ -353,12 +377,14 @@ impl FsEntries {
             group: Some(ROOT),
             removed_before_added: false,
             comment: None,
+            pkg: None,
         });
         entry.entry = new_node.entry;
         entry.mode = new_node.mode;
         entry.owner = new_node.owner;
         entry.group = new_node.group;
         entry.comment = new_node.comment;
+        entry.pkg = new_node.pkg;
     }
 
     /// Add missing directory parents for a given node
@@ -371,6 +397,7 @@ impl FsEntries {
                 group: Some(ROOT),
                 removed_before_added: false,
                 comment: None,
+                pkg: None,
             });
         }
     }
@@ -419,6 +446,8 @@ pub fn diff(
                 let before = before.1;
                 let after = after.1;
 
+                let pkg = before.pkg.or(after.pkg);
+
                 if before.entry != after.entry {
                     let before_discr = FsEntryDiscriminants::from(&before.entry);
                     let after_discr = FsEntryDiscriminants::from(&after.entry);
@@ -431,6 +460,7 @@ pub fn diff(
                             comment: Some(
                                 "Removed (and later recreated) due to file type conflict".into(),
                             ),
+                            pkg,
                         });
                     }
                     // Just the properties of it has changed
@@ -447,6 +477,7 @@ pub fn diff(
                             path: path.clone(),
                             op: FsOp::Comment,
                             comment: Some("Mode change unneeded".into()),
+                            pkg,
                         });
                     }
                     (Some(v1), Some(v2)) if v1 == v2 => (),
@@ -455,6 +486,7 @@ pub fn diff(
                             path: path.clone(),
                             op: FsOp::SetMode { mode: v },
                             comment: None,
+                            pkg,
                         });
                     }
                 }
@@ -465,6 +497,7 @@ pub fn diff(
                             path: path.clone(),
                             op: FsOp::Comment,
                             comment: Some("Owner change unneeded".into()),
+                            pkg,
                         });
                     }
                     (Some(v1), Some(v2)) if v1 == v2 => (),
@@ -473,6 +506,7 @@ pub fn diff(
                             path: path.clone(),
                             op: FsOp::SetOwner { owner: v },
                             comment: None,
+                            pkg,
                         });
                     }
                 }
@@ -483,6 +517,7 @@ pub fn diff(
                             path: path.clone(),
                             op: FsOp::Comment,
                             comment: Some("Group change unneeded".into()),
+                            pkg,
                         });
                     }
                     (Some(v1), Some(v2)) if v1 == v2 => (),
@@ -491,12 +526,14 @@ pub fn diff(
                             path: path.clone(),
                             op: FsOp::SetGroup { group: v },
                             comment: None,
+                            pkg,
                         });
                     }
                 }
             }
             itertools::EitherOrBoth::Left(before) => {
                 tracing::debug!("{:?} -> ()", before);
+                let pkg = before.1.pkg;
                 match goal {
                     DiffGoal::Apply(ref _backend_impl, path_map) => {
                         // Figure out what the previous state of this file was:
@@ -511,6 +548,7 @@ pub fn diff(
                                                 path: before.0.clone(),
                                                 op: FsOp::Restore,
                                                 comment: before.1.comment,
+                                                pkg,
                                             });
                                         }
                                         Properties::Symlink(ref v) => {
@@ -522,6 +560,7 @@ pub fn diff(
                                                         .into(),
                                                 },
                                                 comment: before.1.comment,
+                                                pkg,
                                             });
                                         }
                                         Properties::Directory(_) => {
@@ -529,6 +568,7 @@ pub fn diff(
                                                 path: before.0.clone(),
                                                 op: FsOp::CreateDirectory,
                                                 comment: before.1.comment,
+                                                pkg,
                                             });
                                         }
                                         Properties::Fifo(_)
@@ -560,6 +600,7 @@ pub fn diff(
                                             path: before.0.clone(),
                                             op: FsOp::SetMode { mode: v1 },
                                             comment: None,
+                                            pkg,
                                         });
                                     }
                                 }
@@ -576,6 +617,7 @@ pub fn diff(
                                             path: before.0.clone(),
                                             op: FsOp::SetOwner { owner: v1 },
                                             comment: None,
+                                            pkg,
                                         });
                                     }
                                 }
@@ -592,6 +634,7 @@ pub fn diff(
                                             path: before.0.clone(),
                                             op: FsOp::SetGroup { group: v1 },
                                             comment: None,
+                                            pkg,
                                         });
                                     }
                                 }
@@ -601,6 +644,7 @@ pub fn diff(
                                     path: before.0,
                                     op: FsOp::Remove,
                                     comment: before.1.comment,
+                                    pkg,
                                 });
                             }
                         }
@@ -629,6 +673,7 @@ pub fn diff(
                             path: before.0,
                             op: FsOp::Comment,
                             comment: Some(reason.into()),
+                            pkg,
                         });
                         // TODO: Do something special when the before
                         // instruction is a removal one?I
@@ -661,6 +706,7 @@ mod tests {
                     target: "/hello/target".into(),
                 },
                 comment: None,
+                pkg: None,
             },
             FsInstruction {
                 path: "/hello/file".into(),
@@ -668,6 +714,7 @@ mod tests {
                     b"hello".to_vec().into_boxed_slice(),
                 )),
                 comment: Some("A comment".into()),
+                pkg: None,
             },
             FsInstruction {
                 path: "/hello/file".into(),
@@ -675,6 +722,7 @@ mod tests {
                     mode: Mode::new(0o600),
                 },
                 comment: None,
+                pkg: None,
             },
         ];
         entries.apply_instructions(instrs.into_iter(), false);
@@ -690,6 +738,7 @@ mod tests {
                 group: Some(ROOT),
                 removed_before_added: false,
                 comment: None,
+                pkg: None,
             })
         );
         assert_eq!(
@@ -703,6 +752,7 @@ mod tests {
                 group: Some(ROOT),
                 removed_before_added: false,
                 comment: Some("A comment".into()),
+                pkg: None,
             })
         );
         assert_eq!(
@@ -714,6 +764,7 @@ mod tests {
                 group: Some(ROOT),
                 removed_before_added: false,
                 comment: None,
+                pkg: None,
             })
         );
         assert_eq!(
@@ -725,6 +776,7 @@ mod tests {
                 group: Some(ROOT),
                 removed_before_added: false,
                 comment: None,
+                pkg: None,
             })
         );
     }

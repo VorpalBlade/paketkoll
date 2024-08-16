@@ -3,6 +3,7 @@ use std::collections::BTreeMap;
 use compact_str::CompactString;
 
 use paketkoll_types::files::Mode;
+use paketkoll_types::intern::PackageRef;
 
 use crate::FileContents;
 
@@ -70,8 +71,10 @@ pub struct FsInstruction {
     pub path: camino::Utf8PathBuf,
     /// Operation to perform
     pub op: FsOp,
-    /// Optional comment for saving purposes
+    /// Optional comment (for saving purposes)
     pub comment: Option<CompactString>,
+    /// Optional package associated with this instruction (for saving purposes)
+    pub pkg: Option<PackageRef>,
 }
 
 impl PartialOrd for FsInstruction {

@@ -10,6 +10,7 @@ use konfigkoll_types::FileContents;
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::PkgIdent;
 use konfigkoll_types::PkgInstruction;
+use paketkoll_types::intern::Interner;
 
 /// Save file system changes
 ///
@@ -23,11 +24,20 @@ pub fn save_fs_changes<'instruction>(
     output: &mut dyn std::io::Write,
     mut file_data_saver: impl FnMut(&Utf8Path, &FileContents) -> anyhow::Result<()>,
     instructions: impl Iterator<Item = &'instruction FsInstruction>,
+    interner: &Interner,
 ) -> anyhow::Result<()> {
     for instruction in instructions {
-        let comment = match instruction.comment {
-            Some(ref comment) => format_compact!(" // {}", comment),
-            None => CompactString::default(),
+        let comment = match (instruction.pkg, &instruction.comment) {
+            (None, None) => CompactString::default(),
+            (None, Some(ref comment)) => {
+                format_compact!(" // {comment}")
+            }
+            (Some(pkg), None) => {
+                format_compact!(" // [{}]", pkg.to_str(interner))
+            }
+            (Some(pkg), Some(ref comment)) => {
+                format_compact!(" // [{}] {comment}", pkg.to_str(interner))
+            }
         };
         let prefix = format!("    {}cmds", prefix);
         match instruction.op {
@@ -163,6 +173,7 @@ mod tests {
     use ahash::AHashMap;
     use camino::Utf8Path;
     use camino::Utf8PathBuf;
+    use paketkoll_types::intern::PackageRef;
     use pretty_assertions::assert_eq;
 
     use konfigkoll_types::FileContents;
@@ -185,23 +196,34 @@ mod tests {
             Ok(())
         };
 
+        let interner = Interner::default();
+
         let instructions = vec![
             FsInstruction {
                 op: FsOp::CreateFile(FileContents::from_literal("hello".as_bytes().into())),
                 path: Utf8PathBuf::from("/hello/world"),
                 comment: None,
+                pkg: None,
             },
             FsInstruction {
                 op: FsOp::Remove,
                 path: Utf8PathBuf::from("/remove_me"),
                 comment: Some("For reasons!".into()),
+                pkg: Some(PackageRef::get_or_intern(&interner, "package_name")),
             },
         ];
 
-        save_fs_changes("A", &mut output, file_data_saver, instructions.iter()).unwrap();
+        save_fs_changes(
+            "A",
+            &mut output,
+            file_data_saver,
+            instructions.iter(),
+            &interner,
+        )
+        .unwrap();
 
-        let expected =
-            "    Acmds.copy(\"/hello/world\")?;\n    Acmds.rm(\"/remove_me\")?; // For reasons!\n";
+        let expected = "    Acmds.copy(\"/hello/world\")?;\n    Acmds.rm(\"/remove_me\")?; // \
+                        [package_name] For reasons!\n";
         assert_eq!(String::from_utf8(output).unwrap(), expected);
         assert_eq!(
             file_data.get(Utf8Path::new("/hello/world")).unwrap(),

@@ -183,6 +183,7 @@ impl Commands {
             op: FsOp::Remove,
             path: path.into(),
             comment: None,
+            pkg: None,
         });
         Ok(())
     }
@@ -229,6 +230,7 @@ impl Commands {
             op: FsOp::CreateFile(contents),
             path: path.into(),
             comment: None,
+            pkg: None,
         });
         Ok(())
     }
@@ -248,6 +250,7 @@ impl Commands {
             },
             path: path.into(),
             comment: None,
+            pkg: None,
         });
         Ok(())
     }
@@ -265,6 +268,7 @@ impl Commands {
             op: FsOp::CreateFile(FileContents::from_literal(contents.into())),
             path: path.into(),
             comment: None,
+            pkg: None,
         });
         Ok(())
     }
@@ -282,6 +286,7 @@ impl Commands {
             op: FsOp::CreateDirectory,
             path: path.into(),
             comment: None,
+            pkg: None,
         });
         Ok(())
     }
@@ -301,6 +306,7 @@ impl Commands {
             },
             path: path.into(),
             comment: None,
+            pkg: None,
         });
         Ok(())
     }
@@ -320,6 +326,7 @@ impl Commands {
             },
             path: path.into(),
             comment: None,
+            pkg: None,
         });
         Ok(())
     }
@@ -347,6 +354,7 @@ impl Commands {
             op: FsOp::SetMode { mode: numeric_mode },
             path: path.into(),
             comment: None,
+            pkg: None,
         });
         Ok(())
     }
