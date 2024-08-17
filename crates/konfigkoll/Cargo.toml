@@ -37,13 +37,14 @@ vendored = ["paketkoll_core/vendored"]
 
 [dependencies]
 ahash.workspace = true
-anyhow.workspace = true
 camino.workspace = true
 clap.workspace = true
+color-eyre.workspace = true
 compact_str.workspace = true
 dashmap.workspace = true
 directories.workspace = true
 either.workspace = true
+eyre.workspace = true
 itertools.workspace = true
 konfigkoll_core = { version = "0.4.0", path = "../konfigkoll_core" }
 konfigkoll_script = { version = "0.1.4", path = "../konfigkoll_script" }
@@ -56,6 +57,7 @@ paketkoll_types = { version = "0.1.4", path = "../paketkoll_types" }
 rayon.workspace = true
 rune = { workspace = true, features = ["cli"] }
 tokio.workspace = true
+tracing-error.workspace = true
 tracing-subscriber.workspace = true
 tracing.workspace = true
 

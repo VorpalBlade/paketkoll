@@ -11,11 +11,11 @@ version = "0.1.4"
 
 [dependencies]
 ahash.workspace = true
-anyhow.workspace = true
 bitflags.workspace = true
 compact_str.workspace = true
 dashmap.workspace = true
 derive_builder.workspace = true
+eyre.workspace = true
 faster-hex.workspace = true
 lasso.workspace = true
 nix = { workspace = true, features = ["fs", "user"] }

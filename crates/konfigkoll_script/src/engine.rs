@@ -5,20 +5,19 @@ use std::panic::AssertUnwindSafe;
 use std::sync::Arc;
 use std::sync::OnceLock;
 
-use anyhow::Context;
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
-use rune::termcolor::ColorChoice;
-use rune::termcolor::StandardStream;
-use rune::Diagnostics;
-use rune::Source;
-use rune::Vm;
-
+use eyre::Context;
 use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::PackageBackendMap;
 use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::intern::Interner;
+use rune::termcolor::ColorChoice;
+use rune::termcolor::StandardStream;
+use rune::Diagnostics;
+use rune::Source;
+use rune::Vm;
 
 use crate::plugins::command::Commands;
 use crate::plugins::error::KError;
@@ -147,11 +146,9 @@ impl ScriptEngine {
         Ok(context)
     }
 
-    pub fn new_with_files(config_path: &Utf8Path) -> anyhow::Result<Self> {
+    pub fn new_with_files(config_path: &Utf8Path) -> eyre::Result<Self> {
         CFG_PATH.set(config_path.to_owned()).map_err(|v| {
-            anyhow::anyhow!(
-                "Failed to set CFG_PATH to {v}, this should not be called more than once"
-            )
+            eyre::eyre!("Failed to set CFG_PATH to {v}, this should not be called more than once")
         })?;
         let context = Self::create_context()?;
 
@@ -189,7 +186,7 @@ impl ScriptEngine {
 
     /// Call a function in the script
     #[tracing::instrument(level = "info", name = "script", skip(self))]
-    pub async fn run_phase(&mut self, phase: Phase) -> anyhow::Result<()> {
+    pub async fn run_phase(&mut self, phase: Phase) -> eyre::Result<()> {
         // Update phase in relevant state
         self.state.commands.phase = phase;
         // Create VM and do call
@@ -246,7 +243,7 @@ impl ScriptEngine {
                 Ok(_) => (),
                 Err(e) => vm.with(|| try_format_error(phase, e))?,
             },
-            _ => anyhow::bail!("Got non-result from {phase}: {output:?}"),
+            _ => eyre::bail!("Got non-result from {phase}: {output:?}"),
         }
         Ok(())
     }
@@ -265,23 +262,20 @@ impl ScriptEngine {
 /// Attempt to format the error in the best way possible.
 ///
 /// Unfortunately this is awkward with dynamic Rune values.
-fn try_format_error(phase: Phase, value: &rune::Value) -> anyhow::Result<()> {
+fn try_format_error(phase: Phase, value: &rune::Value) -> eyre::Result<()> {
     match value.clone().into_any() {
         rune::runtime::VmResult::Ok(any) => {
             if let Ok(mut err) = any.downcast_borrow_mut::<KError>() {
                 tracing::error!("Got error result from {phase}: {}", *err.inner());
-                let err: anyhow::Error = err.take_inner();
+                let err: eyre::Error = err.take_inner();
                 return Err(err);
             }
-            if let Ok(err) = any.downcast_borrow_ref::<anyhow::Error>() {
-                anyhow::bail!("Got error result from {phase}: {:?}", *err);
-            }
             if let Ok(err) = any.downcast_borrow_ref::<std::io::Error>() {
-                anyhow::bail!("Got IO error result from {phase}: {:?}", *err);
+                eyre::bail!("Got IO error result from {phase}: {:?}", *err);
             }
             let ty = try_get_type_info(value, "error");
             let formatted = catch_unwind(AssertUnwindSafe(|| format!("{value:?}")));
-            anyhow::bail!(
+            eyre::bail!(
                 "Got error result from {phase}, but it is a unknown error type: {ty}: {any:?}, \
                  formats as: {formatted:?}",
             );
@@ -298,10 +292,10 @@ fn try_format_error(phase: Phase, value: &rune::Value) -> anyhow::Result<()> {
         format!("Got error result from {phase}: {value:?}")
     }));
     match formatted {
-        Ok(str) => anyhow::bail!(str),
+        Ok(str) => eyre::bail!(str),
         Err(_) => {
             let ty = try_get_type_info(value, "error");
-            anyhow::bail!(
+            eyre::bail!(
                 "Got error result from {phase}, but got a panic while attempting to format said \
                  error for printing, {ty}",
             );

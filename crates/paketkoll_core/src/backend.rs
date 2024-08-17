@@ -44,7 +44,7 @@ pub enum ConcreteBackend {
 }
 
 impl TryFrom<paketkoll_types::backend::Backend> for ConcreteBackend {
-    type Error = anyhow::Error;
+    type Error = eyre::Error;
 
     fn try_from(value: paketkoll_types::backend::Backend) -> Result<Self, Self::Error> {
         match value {
@@ -56,7 +56,7 @@ impl TryFrom<paketkoll_types::backend::Backend> for ConcreteBackend {
             #[cfg(feature = "systemd_tmpfiles")]
             paketkoll_types::backend::Backend::SystemdTmpfiles => Ok(Self::SystemdTmpfiles),
             #[allow(unreachable_patterns)]
-            _ => anyhow::bail!("Unsupported backend in current build: {:?}", value),
+            _ => eyre::bail!("Unsupported backend in current build: {:?}", value),
         }
     }
 }
@@ -97,7 +97,7 @@ impl ConcreteBackend {
         self,
         configuration: &BackendConfiguration,
         interner: &Interner,
-    ) -> anyhow::Result<Box<dyn Files>> {
+    ) -> eyre::Result<Box<dyn Files>> {
         match self {
             #[cfg(feature = "arch_linux")]
             ConcreteBackend::Pacman => Ok(Box::new({
@@ -111,9 +111,9 @@ impl ConcreteBackend {
                 builder.package_filter(configuration.package_filter);
                 builder.build(interner)
             })),
-            ConcreteBackend::Flatpak => Err(anyhow::anyhow!(
-                "Flatpak backend does not support file checks"
-            )),
+            ConcreteBackend::Flatpak => {
+                Err(eyre::eyre!("Flatpak backend does not support file checks"))
+            }
             #[cfg(feature = "systemd_tmpfiles")]
             ConcreteBackend::SystemdTmpfiles => Ok(Box::new({
                 let builder = systemd_tmpfiles::SystemdTmpfilesBuilder::default();
@@ -127,7 +127,7 @@ impl ConcreteBackend {
         self,
         configuration: &BackendConfiguration,
         interner: &Interner,
-    ) -> anyhow::Result<Box<dyn Packages>> {
+    ) -> eyre::Result<Box<dyn Packages>> {
         match self {
             #[cfg(feature = "arch_linux")]
             ConcreteBackend::Pacman => Ok(Box::new({
@@ -146,7 +146,7 @@ impl ConcreteBackend {
                 builder.build()
             })),
             #[cfg(feature = "systemd_tmpfiles")]
-            ConcreteBackend::SystemdTmpfiles => Err(anyhow::anyhow!(
+            ConcreteBackend::SystemdTmpfiles => Err(eyre::eyre!(
                 "SystemdTmpfiles backend does not support package checks"
             )),
         }
@@ -157,7 +157,7 @@ impl ConcreteBackend {
         self,
         configuration: &BackendConfiguration,
         interner: &Interner,
-    ) -> anyhow::Result<Box<dyn FullBackend>> {
+    ) -> eyre::Result<Box<dyn FullBackend>> {
         match self {
             #[cfg(feature = "arch_linux")]
             ConcreteBackend::Pacman => Ok(Box::new({
@@ -171,11 +171,11 @@ impl ConcreteBackend {
                 builder.package_filter(configuration.package_filter);
                 builder.build(interner)
             })),
-            ConcreteBackend::Flatpak => Err(anyhow::anyhow!(
-                "Flatpak backend does not support file checks"
-            )),
+            ConcreteBackend::Flatpak => {
+                Err(eyre::eyre!("Flatpak backend does not support file checks"))
+            }
             #[cfg(feature = "systemd_tmpfiles")]
-            ConcreteBackend::SystemdTmpfiles => Err(anyhow::anyhow!(
+            ConcreteBackend::SystemdTmpfiles => Err(eyre::eyre!(
                 "SystemdTmpfiles backend does not support package checks"
             )),
         }

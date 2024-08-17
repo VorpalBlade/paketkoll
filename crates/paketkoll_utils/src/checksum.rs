@@ -2,11 +2,10 @@
 
 use std::io::ErrorKind;
 
-use anyhow::Context;
-
+use eyre::Context;
 use paketkoll_types::files::Checksum;
 
-pub fn sha256_readable(reader: &mut impl std::io::Read) -> anyhow::Result<Checksum> {
+pub fn sha256_readable(reader: &mut impl std::io::Read) -> eyre::Result<Checksum> {
     let mut buffer = [0; 16 * 1024];
     let mut hasher = ring::digest::Context::new(&ring::digest::SHA256);
     loop {

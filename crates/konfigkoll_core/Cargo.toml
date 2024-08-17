@@ -9,13 +9,13 @@ version = "0.4.0"
 
 [dependencies]
 ahash.workspace = true
-anyhow.workspace = true
 camino.workspace = true
 clru.workspace = true
 compact_str.workspace = true
 console.workspace = true
 duct.workspace = true
 either.workspace = true
+eyre.workspace = true
 itertools.workspace = true
 konfigkoll_types = { version = "0.2.0", path = "../konfigkoll_types" }
 libc.workspace = true

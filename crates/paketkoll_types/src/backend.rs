@@ -7,10 +7,10 @@ use std::sync::Arc;
 
 use ahash::AHashMap;
 use ahash::AHashSet;
-use anyhow::anyhow;
-use anyhow::Context;
 use compact_str::CompactString;
 use dashmap::DashMap;
+use eyre::eyre;
+use eyre::Context;
 use smallvec::SmallVec;
 
 use crate::files::FileEntry;
@@ -69,7 +69,7 @@ pub trait Name: Send + Sync + std::fmt::Debug {
 pub trait Files: Name {
     /// Collect a list of files managed by the package manager including
     /// any available metadata such as checksums or timestamps about those files
-    fn files(&self, interner: &Interner) -> anyhow::Result<Vec<FileEntry>>;
+    fn files(&self, interner: &Interner) -> eyre::Result<Vec<FileEntry>>;
 
     /// Attempt to get file information from archives in the package cache (if
     /// supported)
@@ -99,7 +99,7 @@ pub trait Files: Name {
         &self,
         paths: &AHashSet<&Path>,
         interner: &Interner,
-    ) -> anyhow::Result<OwningPackagesResult>;
+    ) -> eyre::Result<OwningPackagesResult>;
 
     /// Get the original contents of files
     fn original_files(
@@ -132,7 +132,7 @@ pub enum OriginalFileError {
     #[error("Failed to find file(s) in package: {0}")]
     FileNotFound(CompactString),
     #[error("Failed to get original file: {0}")]
-    Other(#[from] anyhow::Error),
+    Other(#[from] eyre::Error),
 }
 
 /// Errors that backends can produce
@@ -149,19 +149,19 @@ pub enum ArchiveQueryError {
     OriginalFileError(#[from] OriginalFileError),
     /// All other errors
     #[error("{0:?}")]
-    Other(#[from] anyhow::Error),
+    Other(#[from] eyre::Error),
 }
 
 /// A package manager backend (reading list of packages)
 pub trait Packages: Name {
     /// Collect a list of all installed packages
-    fn packages(&self, interner: &Interner) -> anyhow::Result<Vec<PackageInterned>>;
+    fn packages(&self, interner: &Interner) -> eyre::Result<Vec<PackageInterned>>;
 
     /// Collect a map of packages with all alternative names as keys
-    fn package_map_complete(&self, interner: &Interner) -> anyhow::Result<PackageMap> {
+    fn package_map_complete(&self, interner: &Interner) -> eyre::Result<PackageMap> {
         let packages = self
             .packages(interner)
-            .with_context(|| anyhow!("Failed to load package list"))?;
+            .with_context(|| eyre!("Failed to load package list"))?;
         Ok(packages_to_package_map(packages.iter()))
     }
 
@@ -193,7 +193,7 @@ pub enum PackageManagerError {
     UnsupportedOperation(&'static str),
     /// All other errors
     #[error("{0:?}")]
-    Other(#[from] anyhow::Error),
+    Other(#[from] eyre::Error),
 }
 
 /// Convert a package vector to a package map

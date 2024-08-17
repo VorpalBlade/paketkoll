@@ -6,10 +6,10 @@ use std::os::unix::fs::PermissionsExt;
 use std::sync::Arc;
 
 use ahash::AHashMap;
-use anyhow::Context;
 use console::style;
 use either::Either;
-
+use eyre::Context;
+use eyre::ContextCompat;
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::FsOp;
 use konfigkoll_types::FsOpDiscriminants;
@@ -45,10 +45,10 @@ pub trait Applicator {
         install: &[&'instructions str],
         mark_explicit: &[&'instructions str],
         uninstall: &[&'instructions str],
-    ) -> anyhow::Result<()>;
+    ) -> eyre::Result<()>;
 
     /// Apply file changes
-    fn apply_files(&mut self, instructions: &[FsInstruction]) -> anyhow::Result<()>;
+    fn apply_files(&mut self, instructions: &[FsInstruction]) -> eyre::Result<()>;
 }
 
 impl<L, R> Applicator for Either<L, R>
@@ -62,14 +62,14 @@ where
         install: &[&'instructions str],
         mark_explicit: &[&'instructions str],
         uninstall: &[&'instructions str],
-    ) -> anyhow::Result<()> {
+    ) -> eyre::Result<()> {
         match self {
             Either::Left(inner) => inner.apply_pkgs(backend, install, mark_explicit, uninstall),
             Either::Right(inner) => inner.apply_pkgs(backend, install, mark_explicit, uninstall),
         }
     }
 
-    fn apply_files(&mut self, instructions: &[FsInstruction]) -> anyhow::Result<()> {
+    fn apply_files(&mut self, instructions: &[FsInstruction]) -> eyre::Result<()> {
         match self {
             Either::Left(inner) => inner.apply_files(instructions),
             Either::Right(inner) => inner.apply_files(instructions),
@@ -107,7 +107,7 @@ impl InProcessApplicator {
         &mut self,
         instr: &FsInstruction,
         pkg_map: &PackageMap,
-    ) -> anyhow::Result<()> {
+    ) -> eyre::Result<()> {
         tracing::info!("Applying: {}: {}", instr.path, instr.op);
         if instr.op != FsOp::Comment && instr.op != FsOp::Remove {
             if let Some(parent) = instr.path.parent() {
@@ -231,7 +231,7 @@ impl InProcessApplicator {
                 let package = owners
                     .get(instr.path.as_std_path())
                     .with_context(|| format!("Failed to find owner for {}", instr.path))?
-                    .ok_or_else(|| anyhow::anyhow!("No owner for {}", instr.path))?;
+                    .ok_or_else(|| eyre::eyre!("No owner for {}", instr.path))?;
                 let package = package.to_str(&self.interner);
                 // Get original contents:
                 let queries = [OriginalFileQuery {
@@ -245,7 +245,7 @@ impl InProcessApplicator {
                 for query in queries {
                     let contents = original_contents
                         .get(&query)
-                        .ok_or_else(|| anyhow::anyhow!("No original contents for {:?}", query))?;
+                        .ok_or_else(|| eyre::eyre!("No original contents for {:?}", query))?;
                     std::fs::write(&instr.path, contents)?;
                 }
             }
@@ -262,7 +262,7 @@ impl Applicator for InProcessApplicator {
         install: &[&'instructions str],
         mark_explicit: &[&'instructions str],
         uninstall: &[&'instructions str],
-    ) -> anyhow::Result<()> {
+    ) -> eyre::Result<()> {
         tracing::info!(
             "Proceeding with installing {:?} and uninstalling {:?} with backend {:?}",
             install,
@@ -272,7 +272,7 @@ impl Applicator for InProcessApplicator {
         let backend = self
             .package_backends
             .get(&backend)
-            .ok_or_else(|| anyhow::anyhow!("Unknown backend: {:?}", backend))?;
+            .ok_or_else(|| eyre::eyre!("Unknown backend: {:?}", backend))?;
 
         tracing::info!("Installing packages...");
         backend.transact(install, &[], true)?;
@@ -298,12 +298,12 @@ impl Applicator for InProcessApplicator {
         Ok(())
     }
 
-    fn apply_files(&mut self, instructions: &[FsInstruction]) -> anyhow::Result<()> {
+    fn apply_files(&mut self, instructions: &[FsInstruction]) -> eyre::Result<()> {
         let pkg_map = self
             .package_maps
             .get(&self.file_backend.as_backend_enum())
             .ok_or_else(|| {
-                anyhow::anyhow!(
+                eyre::eyre!(
                     "No package map for file backend {:?}",
                     self.file_backend.as_backend_enum()
                 )
@@ -419,7 +419,7 @@ impl<Inner: Applicator + std::fmt::Debug> Applicator for InteractiveApplicator<I
         install: &[&'instructions str],
         mark_explicit: &[&'instructions str],
         uninstall: &[&'instructions str],
-    ) -> anyhow::Result<()> {
+    ) -> eyre::Result<()> {
         tracing::info!(
             "Will install {:?}, mark {:?} as explicit and uninstall {:?} with backend {backend}",
             install.len(),
@@ -436,7 +436,7 @@ impl<Inner: Applicator + std::fmt::Debug> Applicator for InteractiveApplicator<I
             }
             PkgPromptChoices::Abort => {
                 tracing::error!("Aborting");
-                Err(anyhow::anyhow!("User aborted"))
+                Err(eyre::eyre!("User aborted"))
             }
             PkgPromptChoices::Skip => {
                 tracing::warn!("Skipping");
@@ -445,7 +445,7 @@ impl<Inner: Applicator + std::fmt::Debug> Applicator for InteractiveApplicator<I
         }
     }
 
-    fn apply_files(&mut self, instructions: &[FsInstruction]) -> anyhow::Result<()> {
+    fn apply_files(&mut self, instructions: &[FsInstruction]) -> eyre::Result<()> {
         tracing::info!("Will apply {} file instructions", instructions.len());
         show_fs_diff(instructions);
         match self.fs_confirmer.prompt()? {
@@ -455,7 +455,7 @@ impl<Inner: Applicator + std::fmt::Debug> Applicator for InteractiveApplicator<I
             }
             FsPromptChoices::Abort => {
                 tracing::error!("Aborting");
-                Err(anyhow::anyhow!("User aborted"))
+                Err(eyre::eyre!("User aborted"))
             }
             FsPromptChoices::Skip => {
                 tracing::warn!("Skipping");
@@ -492,7 +492,7 @@ fn show_pkg_diff(backend: Backend, install: &[&str], mark_explicit: &[&str], uni
 }
 
 impl<Inner: Applicator + std::fmt::Debug> InteractiveApplicator<Inner> {
-    fn interactive_apply_single_file(&mut self, instr: &FsInstruction) -> anyhow::Result<()> {
+    fn interactive_apply_single_file(&mut self, instr: &FsInstruction) -> eyre::Result<()> {
         println!(
             "Under consideration: {} with change {}",
             style(instr.path.as_str()).blue(),
@@ -506,7 +506,7 @@ impl<Inner: Applicator + std::fmt::Debug> InteractiveApplicator<Inner> {
                 }
                 InteractivePromptChoices::Abort => {
                     tracing::info!("Aborting");
-                    return Err(anyhow::anyhow!("User aborted"));
+                    return Err(eyre::eyre!("User aborted"));
                 }
                 InteractivePromptChoices::Skip => {
                     tracing::info!("Skipping {}", instr.path);
@@ -535,7 +535,7 @@ impl Applicator for NoopApplicator {
         install: &[&'instructions str],
         mark_explicit: &[&'instructions str],
         uninstall: &[&'instructions str],
-    ) -> anyhow::Result<()> {
+    ) -> eyre::Result<()> {
         tracing::info!(
             "Would install {:?}, mark {:?} explicit and uninstall {:?} with backend {:?}",
             install.len(),
@@ -556,7 +556,7 @@ impl Applicator for NoopApplicator {
         Ok(())
     }
 
-    fn apply_files(&mut self, instructions: &[FsInstruction]) -> anyhow::Result<()> {
+    fn apply_files(&mut self, instructions: &[FsInstruction]) -> eyre::Result<()> {
         tracing::info!("Would apply {} file instructions", instructions.len());
         for instr in instructions {
             tracing::info!(" {}: {}", instr.path, instr.op);
@@ -568,7 +568,7 @@ impl Applicator for NoopApplicator {
 pub fn apply_files(
     applicator: &mut dyn Applicator,
     instructions: &mut [FsInstruction],
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     // Sort and group by type of operation, to make changes easier to review
     instructions.sort_by(|a, b| {
         FsOpDiscriminants::from(&a.op)
@@ -604,7 +604,7 @@ pub fn apply_packages<'instructions>(
     instructions: impl Iterator<Item = (&'instructions PkgIdent, PkgInstruction)>,
     package_maps: &PackageMapMap,
     interner: &Interner,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     // Sort into backends
     let mut sorted = AHashMap::new();
     for (pkg, instr) in instructions {
@@ -614,7 +614,7 @@ pub fn apply_packages<'instructions>(
             .or_insert_with(PackageOperations::default);
         let sub_map = package_maps
             .get(&backend)
-            .ok_or_else(|| anyhow::anyhow!("No package map for backend {:?}", backend))?;
+            .ok_or_else(|| eyre::eyre!("No package map for backend {:?}", backend))?;
         // Deal with the case where a package is installed as a dependency and we want
         // it explicit
         let pkg_ref = PackageRef::get_or_intern(interner, pkg.identifier.as_str());

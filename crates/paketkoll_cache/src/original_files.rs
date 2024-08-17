@@ -5,12 +5,11 @@ use std::fmt::Display;
 use std::path::Path;
 
 use ahash::AHashMap;
-use anyhow::Context;
 use cached::stores::DiskCacheBuilder;
 use cached::DiskCache;
 use cached::IOCached;
 use compact_str::CompactString;
-
+use eyre::Context;
 use paketkoll_types::backend::ArchiveResult;
 use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
@@ -66,7 +65,7 @@ pub struct OriginalFilesCache {
 }
 
 impl OriginalFilesCache {
-    pub fn from_path(inner: Box<dyn Files>, path: &Path) -> anyhow::Result<Self> {
+    pub fn from_path(inner: Box<dyn Files>, path: &Path) -> eyre::Result<Self> {
         let cache = DiskCacheBuilder::new("original_files")
             .set_refresh(true)
             .set_lifespan(60 * 60 * 24 * 30) // A month
@@ -96,7 +95,7 @@ impl Name for OriginalFilesCache {
 }
 
 impl Files for OriginalFilesCache {
-    fn files(&self, interner: &Interner) -> anyhow::Result<Vec<FileEntry>> {
+    fn files(&self, interner: &Interner) -> eyre::Result<Vec<FileEntry>> {
         self.inner.files(interner)
     }
 
@@ -108,7 +107,7 @@ impl Files for OriginalFilesCache {
         &self,
         paths: &ahash::AHashSet<&Path>,
         interner: &Interner,
-    ) -> anyhow::Result<dashmap::DashMap<std::path::PathBuf, Option<PackageRef>, ahash::RandomState>>
+    ) -> eyre::Result<dashmap::DashMap<std::path::PathBuf, Option<PackageRef>, ahash::RandomState>>
     {
         self.inner.owning_packages(paths, interner)
     }

@@ -18,11 +18,11 @@ pub type KResult<T, E = KError> = core::result::Result<T, E>;
 #[derive(Debug, rune::Any)]
 #[rune(item = ::error)]
 pub struct KError {
-    inner: Option<anyhow::Error>,
+    inner: Option<eyre::Error>,
 }
 
 impl KError {
-    pub(crate) fn inner(&self) -> &anyhow::Error {
+    pub(crate) fn inner(&self) -> &eyre::Error {
         self.inner.as_ref().expect("Must be initialised")
     }
 
@@ -30,7 +30,7 @@ impl KError {
     ///
     /// Will panic if the inner error has already been taken (as will other
     /// methods on the error)
-    pub(crate) fn take_inner(&mut self) -> anyhow::Error {
+    pub(crate) fn take_inner(&mut self) -> eyre::Error {
         std::mem::take(&mut self.inner).expect("Must be initialised")
     }
 }
@@ -41,14 +41,14 @@ impl Display for KError {
             &self
                 .inner
                 .as_ref()
-                .unwrap_or(&anyhow::anyhow!("<ALREADY TAKEN>")),
+                .unwrap_or(&eyre::eyre!("<ALREADY TAKEN>")),
             f,
         )
     }
 }
 
-impl From<anyhow::Error> for KError {
-    fn from(inner: anyhow::Error) -> Self {
+impl From<eyre::Error> for KError {
+    fn from(inner: eyre::Error) -> Self {
         Self { inner: Some(inner) }
     }
 }
@@ -56,7 +56,7 @@ impl From<anyhow::Error> for KError {
 impl From<std::io::Error> for KError {
     fn from(inner: std::io::Error) -> Self {
         Self {
-            inner: Some(anyhow::Error::from(inner)),
+            inner: Some(eyre::Error::from(inner)),
         }
     }
 }
@@ -64,13 +64,13 @@ impl From<std::io::Error> for KError {
 impl From<std::fmt::Error> for KError {
     fn from(inner: std::fmt::Error) -> Self {
         Self {
-            inner: Some(anyhow::Error::from(inner)),
+            inner: Some(eyre::Error::from(inner)),
         }
     }
 }
 
-impl From<KError> for anyhow::Error {
-    fn from(error: KError) -> anyhow::Error {
+impl From<KError> for eyre::Error {
+    fn from(error: KError) -> eyre::Error {
         error.inner.expect("Must be initialised")
     }
 }

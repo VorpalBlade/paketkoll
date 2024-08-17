@@ -3,8 +3,9 @@
 use std::io::ErrorKind;
 use std::io::Read;
 
-use anyhow::Context;
 use camino::Utf8PathBuf;
+use eyre::Context;
+use konfigkoll_utils::safe_path_join;
 use rune::alloc::fmt::TryWrite;
 use rune::runtime::Bytes;
 use rune::runtime::Formatter;
@@ -12,8 +13,6 @@ use rune::vm_write;
 use rune::Any;
 use rune::ContextError;
 use rune::Module;
-
-use konfigkoll_utils::safe_path_join;
 
 use super::error::KResult;
 use crate::engine::CFG_PATH;
@@ -71,7 +70,7 @@ impl TempDir {
             Ok(path) => Ok(Self { path }),
             Err(path) => {
                 std::fs::remove_dir_all(&path).expect("Failed to remove temporary directory");
-                Err(anyhow::anyhow!("Failed to convert path to utf8: {path:?}").into())
+                Err(eyre::eyre!("Failed to convert path to utf8: {path:?}").into())
             }
         }
     }

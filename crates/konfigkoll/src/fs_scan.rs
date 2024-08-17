@@ -3,27 +3,26 @@
 use std::sync::Arc;
 
 use ahash::AHashSet;
-use anyhow::Context;
 use compact_str::CompactString;
 use dashmap::DashMap;
+use eyre::Context;
 use itertools::Itertools;
-use ouroboros::self_referencing;
-use paketkoll_types::backend::ArchiveQueryError;
-use paketkoll_types::intern::PackageRef;
-use rayon::prelude::*;
-
 use konfigkoll_types::FsInstruction;
+use ouroboros::self_referencing;
 use paketkoll_core::config::CheckAllFilesConfiguration;
 use paketkoll_core::config::CommonFileCheckConfiguration;
 use paketkoll_core::config::ConfigFiles;
 use paketkoll_core::file_ops::canonicalize_file_entries;
 use paketkoll_core::file_ops::create_path_map;
 use paketkoll_core::file_ops::mismatching_and_unexpected_files;
+use paketkoll_types::backend::ArchiveQueryError;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::PackageMap;
 use paketkoll_types::files::FileEntry;
 use paketkoll_types::files::PathMap;
 use paketkoll_types::intern::Interner;
+use paketkoll_types::intern::PackageRef;
+use rayon::prelude::*;
 
 #[self_referencing]
 pub(crate) struct ScanResult {
@@ -40,7 +39,7 @@ pub(crate) fn scan_fs(
     package_map: &PackageMap,
     ignores: &[CompactString],
     trust_mtime: bool,
-) -> anyhow::Result<(ScanResult, Vec<FsInstruction>)> {
+) -> eyre::Result<(ScanResult, Vec<FsInstruction>)> {
     tracing::debug!("Scanning filesystem");
     let mut fs_instructions_sys = vec![];
     let files = if backend.prefer_files_from_archive() {

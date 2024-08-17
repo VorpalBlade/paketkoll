@@ -6,7 +6,7 @@ use crate::cli::Commands;
 use crate::cli::ConfigFiles;
 
 impl TryFrom<Backend> for paketkoll_core::backend::ConcreteBackend {
-    type Error = anyhow::Error;
+    type Error = eyre::Error;
 
     fn try_from(value: Backend) -> Result<Self, Self::Error> {
         match value {
@@ -23,7 +23,7 @@ impl TryFrom<Backend> for paketkoll_core::backend::ConcreteBackend {
                     | os_info::Type::Pop
                     | os_info::Type::Raspbian
                     | os_info::Type::Ubuntu => Ok(Self::Apt),
-                    _ => Err(anyhow::anyhow!(
+                    _ => Err(eyre::eyre!(
                         "Unknown or unsupported distro: {} (try passing a specific backend if you \
                          think it should work)",
                         info.os_type()
@@ -52,7 +52,7 @@ impl From<ConfigFiles> for paketkoll_core::config::ConfigFiles {
 }
 
 impl TryFrom<&Cli> for paketkoll_core::backend::BackendConfiguration {
-    type Error = anyhow::Error;
+    type Error = eyre::Error;
 
     fn try_from(value: &Cli) -> Result<Self, Self::Error> {
         let mut builder = Self::builder();
@@ -75,7 +75,7 @@ impl TryFrom<&Cli> for paketkoll_core::backend::BackendConfiguration {
 }
 
 impl TryFrom<&Cli> for paketkoll_core::config::CommonFileCheckConfiguration {
-    type Error = anyhow::Error;
+    type Error = eyre::Error;
 
     fn try_from(value: &Cli) -> Result<Self, Self::Error> {
         let mut builder = Self::builder();

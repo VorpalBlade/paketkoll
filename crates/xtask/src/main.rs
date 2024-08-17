@@ -2,14 +2,14 @@ use clap::CommandFactory;
 use clap::Parser;
 use clap::ValueEnum;
 use clap_complete::Shell;
+use cli::Commands;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
-use cli::Commands;
-
 mod cli;
 
-fn main() -> anyhow::Result<()> {
+fn main() -> color_eyre::eyre::Result<()> {
+    color_eyre::install()?;
     let filter = tracing_subscriber::EnvFilter::builder()
         .with_default_directive(tracing::level_filters::LevelFilter::INFO.into())
         .from_env()?;

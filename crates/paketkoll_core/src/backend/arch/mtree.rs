@@ -8,10 +8,10 @@ use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::Context;
 use dashmap::DashSet;
+use eyre::Context;
+use eyre::ContextCompat;
 use flate2::bufread::GzDecoder;
-
 use mtree2::MTree;
 use paketkoll_types::files::Checksum;
 use paketkoll_types::files::Directory;
@@ -42,11 +42,11 @@ pub(super) fn extract_mtree<'seen>(
     path: &Path,
     backup_files: BTreeSet<Vec<u8>>,
     seen_directories: &'seen DashSet<(PathBuf, Directory)>,
-) -> anyhow::Result<impl Iterator<Item = anyhow::Result<FileEntry>> + 'seen> {
+) -> eyre::Result<impl Iterator<Item = eyre::Result<FileEntry>> + 'seen> {
     let file = BufReader::new(File::open(path)?);
     let decoder = GzDecoder::new(file);
     if decoder.header().is_none() {
-        anyhow::bail!(
+        eyre::bail!(
             "Failed to open {:?} as gzip compressed (did Arch Linux change formats?)",
             path
         );
@@ -60,7 +60,7 @@ fn parse_mtree<'input_data>(
     reader: impl Read + 'input_data,
     backup_files: BTreeSet<Vec<u8>>,
     seen_directories: &'input_data DashSet<(PathBuf, Directory)>,
-) -> anyhow::Result<impl Iterator<Item = anyhow::Result<FileEntry>> + 'input_data> {
+) -> eyre::Result<impl Iterator<Item = eyre::Result<FileEntry>> + 'input_data> {
     let mtree = MTree::from_reader(reader);
     let results = mtree.into_iter().filter_map(move |item| match item {
         Ok(inner) => {
@@ -83,7 +83,7 @@ fn convert_mtree(
     item: &mtree2::Entry,
     seen_directories: &DashSet<(PathBuf, Directory)>,
     backup_files: &BTreeSet<Vec<u8>>,
-) -> Result<Option<FileEntry>, anyhow::Error> {
+) -> Result<Option<FileEntry>, eyre::Error> {
     Ok(match item.file_type() {
         Some(mtree2::FileType::Directory) => {
             let dir = Directory {

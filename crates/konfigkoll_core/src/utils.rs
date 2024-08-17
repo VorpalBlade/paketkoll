@@ -2,10 +2,9 @@
 
 use std::num::NonZeroUsize;
 
-use anyhow::anyhow;
 use clru::CLruCache;
 use compact_str::CompactString;
-
+use eyre::eyre;
 use paketkoll_types::files::Gid;
 use paketkoll_types::files::Uid;
 
@@ -47,7 +46,7 @@ pub(crate) type NameToNumericResolveCache = IdResolveCache<IdKeyName, u32>;
 
 impl IdResolveCache<IdKey<Uid, Gid>, CompactString> {
     /// Lookup a UID/GID (resolving and caching if necessary)
-    pub(crate) fn lookup(&mut self, key: &IdKey<Uid, Gid>) -> anyhow::Result<CompactString> {
+    pub(crate) fn lookup(&mut self, key: &IdKey<Uid, Gid>) -> eyre::Result<CompactString> {
         match self.cache.get(key) {
             Some(v) => Ok(v.clone()),
             None => {
@@ -55,12 +54,12 @@ impl IdResolveCache<IdKey<Uid, Gid>, CompactString> {
                 let name: CompactString = match key {
                     IdKey::User(uid) => {
                         nix::unistd::User::from_uid(uid.into())?
-                            .ok_or_else(|| anyhow!("Failed to find user with ID {}", uid))?
+                            .ok_or_else(|| eyre!("Failed to find user with ID {}", uid))?
                             .name
                     }
                     IdKey::Group(gid) => {
                         nix::unistd::Group::from_gid(gid.into())?
-                            .ok_or_else(|| anyhow!("Failed to find group with ID {}", gid))?
+                            .ok_or_else(|| eyre!("Failed to find group with ID {}", gid))?
                             .name
                     }
                 }
@@ -77,18 +76,18 @@ impl IdResolveCache<IdKey<CompactString, CompactString>, u32> {
     pub(crate) fn lookup(
         &mut self,
         key: &IdKey<CompactString, CompactString>,
-    ) -> anyhow::Result<u32> {
+    ) -> eyre::Result<u32> {
         match self.cache.get(key) {
             Some(v) => Ok(*v),
             None => {
                 // Resolve
                 let id = match key {
                     IdKey::User(user) => nix::unistd::User::from_name(user.as_str())?
-                        .ok_or_else(|| anyhow!("Failed to find user with ID {}", user))?
+                        .ok_or_else(|| eyre!("Failed to find user with ID {}", user))?
                         .uid
                         .as_raw(),
                     IdKey::Group(group) => nix::unistd::Group::from_name(group.as_str())?
-                        .ok_or_else(|| anyhow!("Failed to find group with ID {}", group))?
+                        .ok_or_else(|| eyre!("Failed to find group with ID {}", group))?
                         .gid
                         .as_raw(),
                 };

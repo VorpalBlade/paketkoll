@@ -2,17 +2,14 @@ use std::io::BufWriter;
 use std::io::Write;
 use std::sync::Arc;
 
-use anyhow::Context;
+use apply::create_applicator;
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use clap::Parser;
 use compact_str::CompactString;
+use eyre::Context;
+use eyre::ContextCompat;
 use itertools::Itertools;
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::util::SubscriberInitExt;
-
-use crate::fs_scan::ScanResult;
-use apply::create_applicator;
 use konfigkoll::cli::Cli;
 use konfigkoll::cli::Commands;
 use konfigkoll::cli::Paranoia;
@@ -34,6 +31,10 @@ use paketkoll_types::backend::Files;
 use paketkoll_types::backend::PackageBackendMap;
 use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::backend::Packages;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
+
+use crate::fs_scan::ScanResult;
 
 mod apply;
 mod fs_scan;
@@ -49,7 +50,8 @@ mod _musl {
 }
 
 #[tokio::main(flavor = "current_thread")]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> color_eyre::eyre::Result<()> {
+    color_eyre::install()?;
     // Set up logging with tracing
     let filter = tracing_subscriber::EnvFilter::builder()
         .with_default_directive(tracing::level_filters::LevelFilter::INFO.into())
@@ -57,6 +59,7 @@ async fn main() -> anyhow::Result<()> {
     tracing_subscriber::registry()
         .with(tracing_subscriber::fmt::layer())
         .with(filter)
+        .with(tracing_error::ErrorLayer::default())
         .init();
 
     let cli = Cli::parse();
@@ -95,7 +98,7 @@ async fn main() -> anyhow::Result<()> {
         .state()
         .settings()
         .file_backend()
-        .ok_or_else(|| anyhow::anyhow!("A file backend must be set"))?;
+        .ok_or_else(|| eyre::eyre!("A file backend must be set"))?;
     let pkg_backend_ids = script_engine
         .state()
         .settings()
@@ -118,7 +121,7 @@ async fn main() -> anyhow::Result<()> {
                 Ok(b)
             })
             .map(|b| b.map(|b| (b.as_backend_enum(), b)))
-            .collect::<anyhow::Result<_>>()?,
+            .collect::<eyre::Result<_>>()?,
     );
 
     let backend_files: Arc<dyn Files> = {
@@ -338,7 +341,7 @@ fn cmd_save_changes(
     pkg_additions: Vec<(&PkgIdent, PkgInstruction)>,
     pkg_removals: Vec<(&PkgIdent, PkgInstruction)>,
     interner: &Interner,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     if !fs_changes.is_empty() || !pkg_additions.is_empty() || !pkg_removals.is_empty() {
         tracing::warn!("There are differences (saving to unsorted.rn)");
     } else {
@@ -418,7 +421,7 @@ fn cmd_apply_changes(
     package_maps: &PackageMapMap,
     fs_changes: Vec<FsInstruction>,
     pkgs_changes: Vec<(&PkgIdent, PkgInstruction)>,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     if fs_changes.is_empty() && pkgs_changes.is_empty() {
         tracing::info!("No system changes to apply, you are up-to-date");
     } else {
@@ -468,10 +471,7 @@ fn cmd_apply_changes(
 }
 
 /// Compute the FS changes for the save direction
-fn fs_state_diff_save(
-    script_fs: FsEntries,
-    sys_fs: FsEntries,
-) -> anyhow::Result<Vec<FsInstruction>> {
+fn fs_state_diff_save(script_fs: FsEntries, sys_fs: FsEntries) -> eyre::Result<Vec<FsInstruction>> {
     let mut fs_additions =
         konfigkoll_core::state::diff(&DiffGoal::Save, script_fs, sys_fs)?.collect_vec();
     fs_additions.sort();
@@ -484,7 +484,7 @@ fn fs_state_diff_apply(
     fs_scan_result: &ScanResult,
     script_fs: FsEntries,
     sys_fs: FsEntries,
-) -> anyhow::Result<Vec<FsInstruction>> {
+) -> eyre::Result<Vec<FsInstruction>> {
     let mut fs_changes = konfigkoll_core::state::diff(
         &DiffGoal::Apply(backend_files.clone(), fs_scan_result.borrow_path_map()),
         sys_fs,

@@ -3,9 +3,7 @@
 use std::process::Command;
 use std::process::Stdio;
 
-use anyhow::Context;
-use smallvec::SmallVec;
-
+use eyre::Context;
 use paketkoll_types::backend::Name;
 use paketkoll_types::backend::PackageManagerError;
 use paketkoll_types::backend::Packages;
@@ -15,6 +13,7 @@ use paketkoll_types::package::InstallReason;
 use paketkoll_types::package::Package;
 use paketkoll_types::package::PackageInstallStatus;
 use paketkoll_types::package::PackageInterned;
+use smallvec::SmallVec;
 
 use crate::utils::package_manager_transaction;
 
@@ -45,7 +44,7 @@ impl Packages for Flatpak {
     fn packages(
         &self,
         interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<Vec<PackageInterned>> {
+    ) -> eyre::Result<Vec<PackageInterned>> {
         let cmd = Command::new("flatpak")
             .arg("list")
             .arg("--system")
@@ -58,7 +57,7 @@ impl Packages for Flatpak {
             .wait_with_output()
             .context("Failed to wait for flatpak list")?;
         if !output.status.success() {
-            anyhow::bail!(
+            eyre::bail!(
                 "Failed to run flatpak list: {}",
                 String::from_utf8(output.stderr).context("Failed to parse stderr")?
             );
@@ -119,19 +118,19 @@ impl Packages for Flatpak {
 fn parse_flatpak_output(
     output: &str,
     interner: &paketkoll_types::intern::Interner,
-) -> Result<Vec<PackageInterned>, anyhow::Error> {
+) -> Result<Vec<PackageInterned>, eyre::Error> {
     let mut packages = Vec::new();
 
     for line in output.lines() {
         let parts: SmallVec<[&str; 6]> = line.split('\t').collect();
         if parts.len() != 6 {
-            anyhow::bail!("Unexpected number of columns in flatpak list: {}", line);
+            eyre::bail!("Unexpected number of columns in flatpak list: {}", line);
         }
         // Parse ref
         let (app_id, arch) = {
             let ref_parts: Vec<&str> = parts[0].split('/').collect();
             if ref_parts.len() != 3 {
-                anyhow::bail!("Unexpected number of parts in flatpak ref: {}", parts[0]);
+                eyre::bail!("Unexpected number of parts in flatpak ref: {}", parts[0]);
             }
             (ref_parts[0], ref_parts[1])
         };
@@ -176,7 +175,6 @@ fn parse_flatpak_output(
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
-
     use Package;
 
     use super::*;

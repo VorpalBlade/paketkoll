@@ -3,11 +3,10 @@
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
-use anyhow::anyhow;
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use compact_str::CompactString;
-
+use eyre::eyre;
 use konfigkoll_types::FileContents;
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::FsOp;
@@ -429,7 +428,7 @@ pub fn diff(
     goal: &DiffGoal<'_, '_>,
     before: FsEntries,
     after: FsEntries,
-) -> anyhow::Result<impl Iterator<Item = FsInstruction>> {
+) -> eyre::Result<impl Iterator<Item = FsInstruction>> {
     let diff_iter = itertools::merge_join_by(before.fs, after.fs, |(k1, _), (k2, _)| k1.cmp(k2));
 
     let mut results = vec![];
@@ -556,7 +555,7 @@ pub fn diff(
                                                 path: before.0.clone(),
                                                 op: FsOp::CreateSymlink {
                                                     target: Utf8Path::from_path(&v.target)
-                                                        .ok_or_else(|| anyhow!("Invalid UTF-8"))?
+                                                        .ok_or_else(|| eyre!("Invalid UTF-8"))?
                                                         .into(),
                                                 },
                                                 comment: before.1.comment,
@@ -576,7 +575,7 @@ pub fn diff(
                                         | Properties::Permissions(_)
                                         | Properties::Special
                                         | Properties::Removed => {
-                                            anyhow::bail!(
+                                            eyre::bail!(
                                                 "{:?} needs to be restored to package manager \
                                                  state, but how do to do that is not yet \
                                                  implemented",

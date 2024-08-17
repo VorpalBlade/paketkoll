@@ -1,11 +1,10 @@
 //! Generate a stream of commands that would create the current system state
 
-use anyhow::Context;
 use camino::Utf8Path;
 use compact_str::format_compact;
 use compact_str::CompactString;
+use eyre::Context;
 use itertools::Itertools;
-
 use konfigkoll_types::FileContents;
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::PkgIdent;
@@ -22,10 +21,10 @@ use paketkoll_types::intern::Interner;
 pub fn save_fs_changes<'instruction>(
     prefix: &str,
     output: &mut dyn std::io::Write,
-    mut file_data_saver: impl FnMut(&Utf8Path, &FileContents) -> anyhow::Result<()>,
+    mut file_data_saver: impl FnMut(&Utf8Path, &FileContents) -> eyre::Result<()>,
     instructions: impl Iterator<Item = &'instruction FsInstruction>,
     interner: &Interner,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     for instruction in instructions {
         let comment = match (instruction.pkg, &instruction.comment) {
             (None, None) => CompactString::default(),
@@ -132,7 +131,7 @@ pub fn save_packages<'instructions>(
     prefix: &str,
     output: &mut dyn std::io::Write,
     instructions: impl Iterator<Item = (&'instructions PkgIdent, PkgInstruction)>,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     let prefix = format!("    {}cmds", prefix);
     let instructions = instructions
         .into_iter()
@@ -173,9 +172,6 @@ mod tests {
     use ahash::AHashMap;
     use camino::Utf8Path;
     use camino::Utf8PathBuf;
-    use paketkoll_types::intern::PackageRef;
-    use pretty_assertions::assert_eq;
-
     use konfigkoll_types::FileContents;
     use konfigkoll_types::FsInstruction;
     use konfigkoll_types::FsOp;
@@ -184,6 +180,8 @@ mod tests {
     use konfigkoll_types::PkgInstructions;
     use konfigkoll_types::PkgOp;
     use paketkoll_types::backend::Backend;
+    use paketkoll_types::intern::PackageRef;
+    use pretty_assertions::assert_eq;
 
     use super::*;
 

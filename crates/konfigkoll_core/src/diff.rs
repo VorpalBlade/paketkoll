@@ -11,7 +11,6 @@ use camino::Utf8PathBuf;
 use console::style;
 use itertools::EitherOrBoth;
 use itertools::Itertools;
-
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::FsOp;
 use paketkoll_utils::MODE_MASK;
@@ -31,7 +30,7 @@ pub fn show_fs_instr_diff(
     instr: &FsInstruction,
     diff_command: &[String],
     pager_command: &[String],
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     match &instr.op {
         FsOp::CreateFile(contents) => {
             show_file_diff(&instr.path, contents, diff_command, pager_command)?;
@@ -57,7 +56,7 @@ pub fn show_fs_instr_diff(
             // Get old target
             let old_target = match std::fs::read_link(&instr.path) {
                 Ok(target) => Utf8PathBuf::from_path_buf(target)
-                    .map_err(|p| anyhow::anyhow!("Failed to convert path to UTF-8: {:?}", p))?
+                    .map_err(|p| eyre::eyre!("Failed to convert path to UTF-8: {:?}", p))?
                     .to_string(),
                 Err(error) => match error.kind() {
                     std::io::ErrorKind::NotFound => "<no prior symlink exists>".to_string(),
@@ -149,7 +148,7 @@ fn show_file_diff(
     contents: &konfigkoll_types::FileContents,
     diff_command: &[String],
     pager_command: &[String],
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     let diff = match contents {
         konfigkoll_types::FileContents::Literal { checksum: _, data } => duct::cmd(
             &diff_command[0],

@@ -8,7 +8,7 @@ rust-version = "1.80.0"
 version = "0.1.4"
 
 [dependencies]
-anyhow.workspace = true
+eyre.workspace = true
 paketkoll_types = { version = "0.1.4", path = "../paketkoll_types" }
 ring.workspace = true
 

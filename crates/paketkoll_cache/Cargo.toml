@@ -11,10 +11,10 @@ version = "0.2.3"
 
 [dependencies]
 ahash.workspace = true
-anyhow.workspace = true
 cached.workspace = true
 compact_str.workspace = true
 dashmap.workspace = true
+eyre.workspace = true
 paketkoll_types = { version = "0.1.4", path = "../paketkoll_types" }
 serde.workspace = true
 smallvec.workspace = true

@@ -6,23 +6,20 @@ use std::io::BufReader;
 use std::path::Path;
 use std::path::PathBuf;
 
-use anyhow::Context;
 use bstr::ByteSlice;
 use bstr::ByteVec;
 use compact_str::format_compact;
 use compact_str::CompactString;
 use dashmap::DashMap;
+use eyre::Context;
 use paketkoll_types::backend::ArchiveQueryError;
 use paketkoll_types::backend::ArchiveResult;
-use paketkoll_types::backend::OriginalFileError;
-use paketkoll_types::backend::OriginalFilesResult;
-use paketkoll_types::backend::OwningPackagesResult;
-use rayon::prelude::*;
-use regex::RegexSet;
-
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::Name;
+use paketkoll_types::backend::OriginalFileError;
 use paketkoll_types::backend::OriginalFileQuery;
+use paketkoll_types::backend::OriginalFilesResult;
+use paketkoll_types::backend::OwningPackagesResult;
 use paketkoll_types::backend::PackageManagerError;
 use paketkoll_types::backend::PackageMap;
 use paketkoll_types::backend::Packages;
@@ -32,7 +29,10 @@ use paketkoll_types::intern::ArchitectureRef;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::intern::PackageRef;
 use paketkoll_types::package::PackageInterned;
+use rayon::prelude::*;
+use regex::RegexSet;
 
+use super::FullBackend;
 use crate::backend::PackageFilter;
 use crate::utils::convert_archive_entries;
 use crate::utils::extract_files;
@@ -42,8 +42,6 @@ use crate::utils::missing_packages;
 use crate::utils::package_manager_transaction;
 use crate::utils::CompressionFormat;
 use crate::utils::PackageQuery;
-
-use super::FullBackend;
 
 mod divert;
 mod parsers;
@@ -117,7 +115,7 @@ impl Name for Debian {
 }
 
 impl Files for Debian {
-    fn files(&self, interner: &Interner) -> anyhow::Result<Vec<FileEntry>> {
+    fn files(&self, interner: &Interner) -> eyre::Result<Vec<FileEntry>> {
         tracing::debug!("Loading packages");
         let packages_files: Vec<_> = get_package_files(interner)?.collect();
 
@@ -168,7 +166,7 @@ impl Files for Debian {
         &self,
         paths: &ahash::AHashSet<&Path>,
         interner: &Interner,
-    ) -> anyhow::Result<OwningPackagesResult> {
+    ) -> eyre::Result<OwningPackagesResult> {
         // Optimise for speed, go directly into package cache and look for files that
         // contain the given string
         let file_to_package = DashMap::with_hasher(ahash::RandomState::new());
@@ -240,7 +238,7 @@ impl Files for Debian {
                         .context("Failed to parse file entry (ar level) as UTF-8")?
                         .split('.')
                         .last()
-                        .ok_or_else(|| anyhow::anyhow!("No file extension found"))?
+                        .ok_or_else(|| eyre::eyre!("No file extension found"))?
                         .into();
                     let mut decompressed =
                         CompressionFormat::from_extension(&extension, &mut entry)?;
@@ -310,7 +308,7 @@ impl Debian {
         filter: &'inputs [PackageRef],
         packages: &'inputs PackageMap,
         interner: &'inputs Interner,
-    ) -> anyhow::Result<
+    ) -> eyre::Result<
         impl Iterator<Item = Result<(PackageRef, PathBuf), ArchiveQueryError>> + 'inputs,
     > {
         let intermediate: Vec<_> = filter
@@ -372,7 +370,7 @@ fn archive_to_entries(
     diversions: &divert::Diversions,
     packages: &PackageMap,
     interner: &Interner,
-) -> anyhow::Result<Vec<FileEntry>> {
+) -> eyre::Result<Vec<FileEntry>> {
     tracing::debug!("Processing {}", deb_file.display());
     // The package is a .deb, which is actually an ar archive
     let package_file = File::open(deb_file)?;
@@ -385,7 +383,7 @@ fn archive_to_entries(
             let extension: CompactString = std::str::from_utf8(entry.header().identifier())?
                 .split('.')
                 .last()
-                .ok_or_else(|| anyhow::anyhow!("No file extension found"))?
+                .ok_or_else(|| eyre::eyre!("No file extension found"))?
                 .into();
             let mut decompressed = CompressionFormat::from_extension(&extension, &mut entry)?;
             let archive = tar::Archive::new(&mut decompressed);
@@ -416,7 +414,7 @@ fn archive_to_entries(
             return Ok(entries);
         }
     }
-    Err(anyhow::anyhow!("Failed to find data.tar in {deb_file:?}"))
+    Err(eyre::eyre!("Failed to find data.tar in {deb_file:?}"))
 }
 
 /// Convert Debian archive paths to normal paths
@@ -475,18 +473,18 @@ fn is_file_match(
     re: &RegexSet,
     paths: &[String],
     output: &OwningPackagesResult,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     let contents = std::fs::read_to_string(list_path)
         .with_context(|| format!("Failed to read {list_path:?}"))?;
     let matches = re.matches(&contents);
     if matches.matched_any() {
         let file_name = list_path
             .file_name()
-            .ok_or_else(|| anyhow::anyhow!("Failed to extract filename"))?;
+            .ok_or_else(|| eyre::eyre!("Failed to extract filename"))?;
         let file_name = file_name.to_string_lossy();
         let file_name = file_name
             .strip_suffix(".list")
-            .ok_or_else(|| anyhow::anyhow!("Not a list file?"))?;
+            .ok_or_else(|| eyre::eyre!("Not a list file?"))?;
         let pkg_name = match file_name.split_once(':') {
             Some((name, _arch)) => name,
             None => file_name,
@@ -534,9 +532,9 @@ fn merge_deb_fileentries(
     }
 }
 
-fn get_package_files(interner: &Interner) -> anyhow::Result<impl Iterator<Item = Vec<FileEntry>>> {
+fn get_package_files(interner: &Interner) -> eyre::Result<impl Iterator<Item = Vec<FileEntry>>> {
     let files: Vec<_> = std::fs::read_dir(DB_PATH)?.collect();
-    let results: anyhow::Result<Vec<_>> = files
+    let results: eyre::Result<Vec<_>> = files
         .into_par_iter()
         .filter_map(|entry| match entry {
             Ok(entry) => {
@@ -549,7 +547,7 @@ fn get_package_files(interner: &Interner) -> anyhow::Result<impl Iterator<Item =
     Ok(results?.into_iter())
 }
 
-fn process_file(interner: &Interner, entry: &DirEntry) -> anyhow::Result<Option<Vec<FileEntry>>> {
+fn process_file(interner: &Interner, entry: &DirEntry) -> eyre::Result<Option<Vec<FileEntry>>> {
     let file_name = <Vec<u8> as ByteVec>::from_os_string(entry.file_name())
         .expect("Package names really should be valid Unicode on your platform");
 
@@ -581,7 +579,7 @@ fn process_file(interner: &Interner, entry: &DirEntry) -> anyhow::Result<Option<
 }
 
 impl Packages for Debian {
-    fn packages(&self, interner: &Interner) -> anyhow::Result<Vec<PackageInterned>> {
+    fn packages(&self, interner: &Interner) -> eyre::Result<Vec<PackageInterned>> {
         // Parse status
         tracing::debug!("Loading status to installed packages");
         let (_, mut packages) = {
@@ -603,7 +601,7 @@ impl Packages for Debian {
                 package.name,
                 package
                     .architecture
-                    .ok_or_else(|| anyhow::anyhow!("No architecture"))?,
+                    .ok_or_else(|| eyre::eyre!("No architecture"))?,
             );
             if let Some(Some(auto_installed)) = extended_packages.get(&pkg_id) {
                 package.reason = Some(*auto_installed);
@@ -674,7 +672,7 @@ impl Packages for Debian {
 
 impl FullBackend for Debian {}
 
-fn download_debs(pkgs: &[&str]) -> anyhow::Result<()> {
+fn download_debs(pkgs: &[&str]) -> eyre::Result<()> {
     let status = std::process::Command::new("apt-get")
         .args([
             "install",
@@ -691,7 +689,7 @@ fn download_debs(pkgs: &[&str]) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn download_deb(pkg: &str) -> anyhow::Result<()> {
+fn download_deb(pkg: &str) -> eyre::Result<()> {
     let status = std::process::Command::new("apt-get")
         .args([
             "install",

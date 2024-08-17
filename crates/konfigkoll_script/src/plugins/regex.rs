@@ -1,6 +1,6 @@
 //! Exposing regex to rune
 
-use anyhow::Context;
+use eyre::Context;
 use regex::Regex as InnerRegex;
 use rune::Any;
 use rune::ContextError;

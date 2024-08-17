@@ -2,7 +2,6 @@
 
 use compact_str::format_compact;
 use compact_str::CompactString;
-
 use paketkoll_types::intern::Interner;
 use paketkoll_types::package::PackageInterned;
 

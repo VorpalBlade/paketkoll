@@ -7,9 +7,8 @@ use std::os::unix::fs::FileTypeExt;
 use std::os::unix::fs::MetadataExt;
 use std::path::PathBuf;
 
-use anyhow::Context;
-use anyhow::Result;
-
+use eyre::Context;
+use eyre::Result;
 use paketkoll_types::files::Checksum;
 use paketkoll_types::files::DeviceNode;
 use paketkoll_types::files::DeviceType;
@@ -353,7 +352,7 @@ fn check_contents(
         }
         _ => {
             tracing::error!("Checksum {expected_checksum} is of an unsupported type");
-            issues.push(IssueKind::FsCheckError(Box::new(anyhow::anyhow!(
+            issues.push(IssueKind::FsCheckError(Box::new(eyre::eyre!(
                 "Unsupported checksum type"
             ))));
         }

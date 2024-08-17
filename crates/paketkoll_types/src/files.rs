@@ -29,7 +29,7 @@ impl Mode {
     /// Parse from u=rwx,g=rw,o=r format
     ///
     /// Since that is a diff
-    pub fn parse(value: &str) -> anyhow::Result<Self> {
+    pub fn parse(value: &str) -> eyre::Result<Self> {
         let components = value.split(',');
 
         let mut mode: u32 = 0;
@@ -37,9 +37,9 @@ impl Mode {
             let component = component.as_bytes();
             let who = component
                 .first()
-                .ok_or_else(|| anyhow::anyhow!("Invalid mode: {value}"))?;
+                .ok_or_else(|| eyre::eyre!("Invalid mode: {value}"))?;
             if component[1] != b'=' {
-                return Err(anyhow::anyhow!("Invalid mode: {value}"));
+                return Err(eyre::eyre!("Invalid mode: {value}"));
             }
             let perms = &component[2..];
 
@@ -50,7 +50,7 @@ impl Mode {
                     b'r' => bits |= 0b100,
                     b'w' => bits |= 0b010,
                     b'x' => bits |= 0b001,
-                    _ => return Err(anyhow::anyhow!("Invalid mode: {value}")),
+                    _ => return Err(eyre::eyre!("Invalid mode: {value}")),
                 }
             }
 
@@ -59,7 +59,7 @@ impl Mode {
                 b'u' => mode |= bits << 6,
                 b'g' => mode |= bits << 3,
                 b'o' => mode |= bits,
-                _ => return Err(anyhow::anyhow!("Invalid mode: {value}")),
+                _ => return Err(eyre::eyre!("Invalid mode: {value}")),
             }
         }
         Ok(Self(mode))

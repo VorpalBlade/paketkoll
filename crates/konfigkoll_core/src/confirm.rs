@@ -54,7 +54,7 @@ fn inner_prompt(
     term: &mut Term,
     prompt: &CompactString,
     default: Option<char>,
-) -> anyhow::Result<char> {
+) -> eyre::Result<char> {
     loop {
         term.write_all(prompt.as_bytes())?;
         let key = term.read_key()?;
@@ -74,11 +74,11 @@ fn inner_prompt(
             Key::Char(c) => return Ok(c),
             Key::Escape => {
                 term.write_line("Aborted")?;
-                anyhow::bail!("User aborted with Escape");
+                eyre::bail!("User aborted with Escape");
             }
             Key::CtrlC => {
                 term.write_line("Aborted")?;
-                anyhow::bail!("User aborted with Ctrl-C");
+                eyre::bail!("User aborted with Ctrl-C");
             }
             _ => {
                 term.write_line("Unknown input, try again")?;
@@ -89,7 +89,7 @@ fn inner_prompt(
 
 impl<T: Choices> MultiOptionConfirm<T> {
     /// Run the prompt and return the user choice
-    pub fn prompt(&self) -> anyhow::Result<T> {
+    pub fn prompt(&self) -> eyre::Result<T> {
         loop {
             let mut term = Term::stdout();
             let ch = inner_prompt(&mut term, &self.prompt, self.default)?;

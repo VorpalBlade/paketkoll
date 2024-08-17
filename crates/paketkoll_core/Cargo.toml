@@ -20,13 +20,7 @@ version = "0.5.4"
 default = []
 
 # Include the Arch Linux backend
-arch_linux = [
-    "__gzip",
-    "__sha256",
-    "__zstd",
-    "dep:mtree2",
-    "dep:rust-ini",
-]
+arch_linux = ["__gzip", "__sha256", "__zstd", "dep:mtree2", "dep:rust-ini"]
 
 # Include support for the Debian backend
 debian = [
@@ -60,7 +54,6 @@ __zstd = ["dep:zstd"]
 
 [dependencies]
 ahash.workspace = true
-anyhow.workspace = true
 ar = { workspace = true, optional = true }
 bstr.workspace = true
 bzip2 = { workspace = true, optional = true }
@@ -69,6 +62,7 @@ compact_str.workspace = true
 dashmap.workspace = true
 derive_builder.workspace = true
 either.workspace = true
+eyre.workspace = true
 faster-hex.workspace = true
 flate2 = { workspace = true, optional = true }
 flume.workspace = true

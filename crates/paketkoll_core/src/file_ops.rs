@@ -3,15 +3,13 @@
 use std::os::unix::ffi::OsStrExt;
 use std::path::PathBuf;
 
-use anyhow::Context;
+use eyre::Context;
 use ignore::overrides::OverrideBuilder;
 use ignore::Match;
 use ignore::WalkBuilder;
 use ignore::WalkState;
-use paketkoll_types::backend::OriginalFilesResult;
-use rayon::prelude::*;
-
 use paketkoll_types::backend::OriginalFileQuery;
+use paketkoll_types::backend::OriginalFilesResult;
 use paketkoll_types::files::FileEntry;
 use paketkoll_types::files::PathMap;
 use paketkoll_types::intern::Interner;
@@ -19,6 +17,7 @@ use paketkoll_types::intern::PackageRef;
 use paketkoll_types::issue::Issue;
 use paketkoll_types::issue::IssueKind;
 use paketkoll_types::issue::PackageIssue;
+use rayon::prelude::*;
 
 /// Perform a query of original files
 #[doc(hidden)]
@@ -26,7 +25,7 @@ pub fn original_files(
     backend: &crate::backend::ConcreteBackend,
     backend_config: &crate::backend::BackendConfiguration,
     queries: &[OriginalFileQuery],
-) -> anyhow::Result<OriginalFilesResult> {
+) -> eyre::Result<OriginalFilesResult> {
     let interner = Interner::new();
     let backend_impl = backend
         .create_full(backend_config, &interner)
@@ -48,7 +47,7 @@ pub fn check_installed_files(
     backend: &crate::backend::ConcreteBackend,
     backend_config: &crate::backend::BackendConfiguration,
     filecheck_config: &crate::config::CommonFileCheckConfiguration,
-) -> anyhow::Result<(Interner, Vec<PackageIssue>)> {
+) -> eyre::Result<(Interner, Vec<PackageIssue>)> {
     let interner = Interner::new();
     let backend_impl = backend
         .create_files(backend_config, &interner)
@@ -91,7 +90,7 @@ pub fn check_all_files(
     backend_config: &crate::backend::BackendConfiguration,
     filecheck_config: &crate::config::CommonFileCheckConfiguration,
     unexpected_cfg: &crate::config::CheckAllFilesConfiguration,
-) -> anyhow::Result<(Interner, Vec<PackageIssue>)> {
+) -> eyre::Result<(Interner, Vec<PackageIssue>)> {
     let interner = Interner::new();
     // Collect distro files
     let backend_impl = backend
@@ -138,7 +137,7 @@ pub fn mismatching_and_unexpected_files<'a>(
     path_map: &PathMap<'a>,
     filecheck_config: &crate::config::CommonFileCheckConfiguration,
     unexpected_cfg: &crate::config::CheckAllFilesConfiguration,
-) -> anyhow::Result<Vec<(Option<PackageRef>, Issue)>> {
+) -> eyre::Result<Vec<(Option<PackageRef>, Issue)>> {
     tracing::debug!("Building ignores");
     // Build glob set of ignores
     let overrides = {

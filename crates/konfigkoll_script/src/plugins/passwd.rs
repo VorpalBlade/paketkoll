@@ -8,22 +8,20 @@ use std::fmt::Write;
 
 use ahash::AHashMap;
 use ahash::AHashSet;
-use anyhow::Context;
+use eyre::Context;
 use itertools::Itertools;
 use rune::runtime::Function;
 use rune::Any;
 use rune::ContextError;
 use rune::Module;
 use rune::Value;
-use winnow::Parser;
-
 use sysusers::GroupId;
 use sysusers::UserId;
-
-use crate::Commands;
+use winnow::Parser;
 
 use super::error::KResult;
 use super::package_managers::PackageManager;
+use crate::Commands;
 
 mod sysusers;
 
@@ -94,13 +92,13 @@ struct Passwd {
 
 /// Internal helper functions
 impl Passwd {
-    fn sanity_check(&self) -> anyhow::Result<()> {
+    fn sanity_check(&self) -> eyre::Result<()> {
         // Check for duplicate IDs
         {
             let mut ids = BTreeSet::new();
             for user in self.users.values() {
                 if !ids.insert(user.uid) {
-                    return Err(anyhow::anyhow!(
+                    return Err(eyre::eyre!(
                         "More than one user maps to UID: {} ({})",
                         user.uid,
                         self.users
@@ -120,7 +118,7 @@ impl Passwd {
             let mut ids = BTreeSet::new();
             for group in self.groups.values() {
                 if !ids.insert(group.gid) {
-                    return Err(anyhow::anyhow!(
+                    return Err(eyre::eyre!(
                         "More than one group maps to GID: {} ({})",
                         group.gid,
                         self.groups
@@ -143,7 +141,7 @@ impl Passwd {
 macro_rules! log_and_error {
     ($($arg:tt)*) => {
         tracing::error!($($arg)*);
-        return Err(anyhow::anyhow!($($arg)*).into());
+        return Err(eyre::eyre!($($arg)*).into());
     };
 }
 
@@ -363,21 +361,16 @@ impl Passwd {
                             // Resolve gid to group name
                             let group = self.groups.values().find(|v| v.gid == gid);
                             let group_name = group.map(|g| g.name.as_str()).ok_or_else(|| {
-                                anyhow::anyhow!("No group with GID {} for user {}", gid, user.name)
+                                eyre::eyre!("No group with GID {} for user {}", gid, user.name)
                             })?;
                             (uid, Some(gid), group_name.into())
                         }
                         Some(UserId::FromPath(_)) => {
-                            return Err(
-                                anyhow::anyhow!("Cannot yet handle user IDs from path").into()
-                            )
+                            return Err(eyre::eyre!("Cannot yet handle user IDs from path").into())
                         }
                         None => {
                             let uid = self.user_ids.get(user.name.as_str()).ok_or_else(|| {
-                                anyhow::anyhow!(
-                                    "No ID for user {} (needed by sysusers.d)",
-                                    user.name
-                                )
+                                eyre::eyre!("No ID for user {} (needed by sysusers.d)", user.name)
                             })?;
                             (*uid, None, user.name.clone())
                         }
@@ -415,19 +408,14 @@ impl Passwd {
                     let gid = match group.id {
                         Some(GroupId::Gid(gid)) => gid,
                         Some(GroupId::FromPath(_)) => {
-                            return Err(
-                                anyhow::anyhow!("Cannot yet handle group IDs from path").into()
-                            )
+                            return Err(eyre::eyre!("Cannot yet handle group IDs from path").into())
                         }
                         None => self
                             .group_ids
                             .get(group.name.as_str())
                             .copied()
                             .ok_or_else(|| {
-                                anyhow::anyhow!(
-                                    "No ID for group {} (needed by sysusers.d)",
-                                    group.name
-                                )
+                                eyre::eyre!("No ID for group {} (needed by sysusers.d)", group.name)
                             })?,
                     };
                     self.groups

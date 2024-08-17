@@ -4,7 +4,7 @@ use std::borrow::Cow;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use anyhow::Context;
+use eyre::Context;
 use regex::Regex;
 use rune::runtime::Shared;
 use rune::runtime::VmResult;
@@ -95,7 +95,7 @@ enum Selector {
 }
 
 impl TryFrom<&Selector> for konfigkoll_utils::line_edit::Selector {
-    type Error = anyhow::Error;
+    type Error = eyre::Error;
 
     fn try_from(value: &Selector) -> Result<Self, Self::Error> {
         match value {
@@ -186,7 +186,7 @@ impl Action {
 }
 
 impl TryFrom<&Action> for konfigkoll_utils::line_edit::Action {
-    type Error = anyhow::Error;
+    type Error = eyre::Error;
 
     fn try_from(value: &Action) -> Result<Self, Self::Error> {
         match value {

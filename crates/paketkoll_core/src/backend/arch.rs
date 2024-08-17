@@ -8,24 +8,22 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use ahash::AHashSet;
-use anyhow::Context;
 use bstr::ByteSlice;
 use bstr::ByteVec;
 use compact_str::format_compact;
 use dashmap::DashMap;
 use dashmap::DashSet;
 use either::Either;
+use eyre::Context;
+use eyre::ContextCompat;
 use paketkoll_types::backend::ArchiveQueryError;
 use paketkoll_types::backend::ArchiveResult;
-use paketkoll_types::backend::OriginalFileError;
-use paketkoll_types::backend::OriginalFilesResult;
-use paketkoll_types::backend::OwningPackagesResult;
-use rayon::prelude::*;
-use regex::RegexSet;
-
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::Name;
+use paketkoll_types::backend::OriginalFileError;
 use paketkoll_types::backend::OriginalFileQuery;
+use paketkoll_types::backend::OriginalFilesResult;
+use paketkoll_types::backend::OwningPackagesResult;
 use paketkoll_types::backend::PackageManagerError;
 use paketkoll_types::backend::PackageMap;
 use paketkoll_types::backend::Packages;
@@ -33,15 +31,16 @@ use paketkoll_types::files::FileEntry;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::intern::PackageRef;
 use paketkoll_types::package::PackageInterned;
+use rayon::prelude::*;
+use regex::RegexSet;
 
+use super::FullBackend;
+use super::PackageFilter;
 use crate::utils::convert_archive_entries;
 use crate::utils::extract_files;
 use crate::utils::group_queries_by_pkg;
 use crate::utils::locate_package_file;
 use crate::utils::package_manager_transaction;
-
-use super::FullBackend;
-use super::PackageFilter;
 
 mod desc;
 mod mtree;
@@ -68,14 +67,14 @@ pub(crate) struct ArchLinuxBuilder {
 
 impl ArchLinuxBuilder {
     /// Load pacman config
-    fn load_config(&mut self) -> anyhow::Result<pacman_conf::PacmanConfig> {
+    fn load_config(&mut self) -> eyre::Result<pacman_conf::PacmanConfig> {
         tracing::debug!("Loading pacman config");
         let mut readable = BufReader::new(std::fs::File::open("/etc/pacman.conf")?);
         let pacman_config: pacman_conf::PacmanConfig =
             pacman_conf::PacmanConfig::new(&mut readable)?;
 
         if pacman_config.root != "/" {
-            anyhow::bail!("Pacman root other than \"/\" not supported");
+            eyre::bail!("Pacman root other than \"/\" not supported");
         }
         Ok(pacman_config)
     }
@@ -85,7 +84,7 @@ impl ArchLinuxBuilder {
         self
     }
 
-    pub fn build(mut self) -> anyhow::Result<ArchLinux> {
+    pub fn build(mut self) -> eyre::Result<ArchLinux> {
         let pacman_config = self.load_config().context("Failed to load pacman.conf")?;
         Ok(ArchLinux {
             // Impossible unwrap: We just loaded it
@@ -109,7 +108,7 @@ impl Name for ArchLinux {
 }
 
 impl Files for ArchLinux {
-    fn files(&self, interner: &Interner) -> anyhow::Result<Vec<FileEntry>> {
+    fn files(&self, interner: &Interner) -> eyre::Result<Vec<FileEntry>> {
         let db_path: &Path = Path::new(&self.pacman_config.db_path);
 
         // Load packages
@@ -124,7 +123,7 @@ impl Files for ArchLinux {
         // start over later on with a new parallel iteration. No idea why. (241
         // ms vs 264 ms according to hyperfine on my machine, stdev < 4 ms in
         // both cases).
-        let results: anyhow::Result<Vec<FileEntry>> = pkgs_and_paths
+        let results: eyre::Result<Vec<FileEntry>> = pkgs_and_paths
             .into_par_iter()
             .flat_map_iter(|entry| match entry {
                 Ok(PackageData {
@@ -153,7 +152,7 @@ impl Files for ArchLinux {
         &self,
         paths: &AHashSet<&Path>,
         interner: &Interner,
-    ) -> anyhow::Result<OwningPackagesResult> {
+    ) -> eyre::Result<OwningPackagesResult> {
         // Optimise for speed, go directly into package cache and look for files that
         // contain the given string
         let file_to_package = DashMap::with_hasher(ahash::RandomState::new());
@@ -286,7 +285,7 @@ impl ArchLinux {
 }
 
 /// Convert deb archives to file entries
-fn archive_to_entries(pkg_ref: PackageRef, pkg_file: &Path) -> anyhow::Result<Vec<FileEntry>> {
+fn archive_to_entries(pkg_ref: PackageRef, pkg_file: &Path) -> eyre::Result<Vec<FileEntry>> {
     // The package is a .tar.zst
     let package_file = std::fs::File::open(pkg_file)?;
     let decompressed = zstd::Decoder::new(package_file)?;
@@ -346,7 +345,7 @@ fn find_files(
     re: &RegexSet,
     paths: &[String],
     output: &OwningPackagesResult,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     if !entry.file_type()?.is_dir() {
         return Ok(());
     };
@@ -375,9 +374,9 @@ fn find_files(
 }
 
 impl Packages for ArchLinux {
-    fn packages(&self, interner: &Interner) -> anyhow::Result<Vec<PackageInterned>> {
+    fn packages(&self, interner: &Interner) -> eyre::Result<Vec<PackageInterned>> {
         let db_root = Path::new(&self.pacman_config.db_path).join("local");
-        let results: anyhow::Result<Vec<PackageInterned>> = std::fs::read_dir(db_root)
+        let results: eyre::Result<Vec<PackageInterned>> = std::fs::read_dir(db_root)
             .context("Failed to read pacman database directory")?
             .par_bridge()
             .filter_map(|entry| {
@@ -438,7 +437,7 @@ impl Packages for ArchLinux {
         let mut query_cmd = std::process::Command::new("pacman");
         query_cmd.args(["-Qttdq"]);
 
-        let mut run_query = || -> anyhow::Result<Option<String>> {
+        let mut run_query = || -> eyre::Result<Option<String>> {
             let query_output = query_cmd
                 .output()
                 .with_context(|| "Failed to execute pacman -Qdtq")?;
@@ -472,7 +471,7 @@ impl Packages for ArchLinux {
 // arch: any, x86_64
 // Epoch separator is :
 
-fn download_arch_pkg(pkg: &str) -> anyhow::Result<()> {
+fn download_arch_pkg(pkg: &str) -> eyre::Result<()> {
     let status = std::process::Command::new("pacman")
         .args(["-Sw", "--noconfirm", pkg])
         .status()?;
@@ -495,7 +494,7 @@ fn get_mtree_paths<'borrows>(
     db_path: &Path,
     interner: &'borrows Interner,
     package_filter: &'borrows PackageFilter,
-) -> anyhow::Result<impl ParallelIterator<Item = anyhow::Result<PackageData>> + 'borrows> {
+) -> eyre::Result<impl ParallelIterator<Item = eyre::Result<PackageData>> + 'borrows> {
     let db_root = db_path.join("local");
     Ok(std::fs::read_dir(db_root)
         .context("Failed to read pacman database directory")?
@@ -514,7 +513,7 @@ fn load_pkg_for_file_listing(
     entry: &std::fs::DirEntry,
     interner: &Interner,
     package_filter: &PackageFilter,
-) -> anyhow::Result<Option<PackageData>> {
+) -> eyre::Result<Option<PackageData>> {
     if !entry.file_type()?.is_dir() {
         return Ok(None);
     }
@@ -556,7 +555,7 @@ fn load_pkg_for_file_listing(
 fn load_pkg(
     entry: &std::fs::DirEntry,
     interner: &Interner,
-) -> anyhow::Result<Option<PackageInterned>> {
+) -> eyre::Result<Option<PackageInterned>> {
     if !entry.file_type()?.is_dir() {
         return Ok(None);
     }

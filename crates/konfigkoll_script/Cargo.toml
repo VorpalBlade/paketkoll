@@ -9,9 +9,9 @@ version = "0.1.4"
 
 [dependencies]
 ahash.workspace = true
-anyhow.workspace = true
 camino.workspace = true
 compact_str.workspace = true
+eyre.workspace = true
 glob.workspace = true
 globset.workspace = true
 itertools.workspace = true

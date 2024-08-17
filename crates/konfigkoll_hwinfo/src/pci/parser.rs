@@ -109,7 +109,7 @@ impl std::fmt::Display for ParsePciError {
 
 impl std::error::Error for ParsePciError {}
 
-pub(super) fn parse_pcidatabase(input: &str) -> anyhow::Result<super::PciIdDb> {
+pub(super) fn parse_pcidatabase(input: &str) -> eyre::Result<super::PciIdDb> {
     let lines = parse_file
         .parse(input)
         .map_err(|error| ParsePciError::from_parse(&error, input))?;
@@ -122,7 +122,7 @@ pub(super) fn parse_pcidatabase(input: &str) -> anyhow::Result<super::PciIdDb> {
 /// We either need to keep a cursor into the structure we are building (ouch in
 /// Rust), or we need a lookahead of 1 line to determine when to go up a level.
 /// We do the latter, using [`itertools::put_back`].
-fn build_hierarchy(lines: &[Line<'_>]) -> anyhow::Result<super::PciIdDb> {
+fn build_hierarchy(lines: &[Line<'_>]) -> eyre::Result<super::PciIdDb> {
     let mut db = super::PciIdDb {
         classes: Default::default(),
         vendors: Default::default(),
@@ -223,7 +223,7 @@ fn build_hierarchy(lines: &[Line<'_>]) -> anyhow::Result<super::PciIdDb> {
             Line::Subclass(_)
             | Line::ProgrammingInterface(_)
             | Line::Device(_)
-            | Line::Subsystem(_) => anyhow::bail!("Unexpected line at top level: {line:?}"),
+            | Line::Subsystem(_) => eyre::bail!("Unexpected line at top level: {line:?}"),
         }
     }
 
@@ -340,12 +340,11 @@ mod tests {
     use pretty_assertions::assert_eq;
     use winnow::combinator::terminated;
 
+    use super::*;
     use crate::pci::Device;
     use crate::pci::PciIdDb;
     use crate::pci::Subsystem;
     use crate::pci::Vendor;
-
-    use super::*;
 
     #[test]
     fn test_build_hierarchy() {

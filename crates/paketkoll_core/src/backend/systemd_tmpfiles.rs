@@ -8,9 +8,9 @@ use std::path::PathBuf;
 use std::process::Stdio;
 
 use ahash::AHashMap;
-use anyhow::Context;
 use compact_str::CompactString;
-
+use eyre::Context;
+use eyre::ContextCompat;
 use paketkoll_types::backend::ArchiveResult;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::Name;
@@ -68,10 +68,7 @@ impl Name for SystemdTmpfiles {
 }
 
 impl Files for SystemdTmpfiles {
-    fn files(
-        &self,
-        _interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<Vec<FileEntry>> {
+    fn files(&self, _interner: &paketkoll_types::intern::Interner) -> eyre::Result<Vec<FileEntry>> {
         // Get the entire config from sytemd-tmpfiles
         let cmd = std::process::Command::new("systemd-tmpfiles")
             .arg("--cat-config")
@@ -86,7 +83,7 @@ impl Files for SystemdTmpfiles {
             .wait_with_output()
             .context("Failed to wait for systemd-tmpfiles --cat-config")?;
         if !output.status.success() {
-            anyhow::bail!(
+            eyre::bail!(
                 "Failed to run systemd-tmpfiles --cat-config: {}",
                 String::from_utf8(output.stderr).context("Failed to parse stderr")?
             );
@@ -102,11 +99,11 @@ impl Files for SystemdTmpfiles {
         &self,
         _paths: &ahash::AHashSet<&Path>,
         _interner: &paketkoll_types::intern::Interner,
-    ) -> anyhow::Result<
+    ) -> eyre::Result<
         dashmap::DashMap<PathBuf, Option<paketkoll_types::intern::PackageRef>, ahash::RandomState>,
     > {
         // This doesn't make sense for this provider
-        anyhow::bail!("Owning packages are not supported for systemd-tmpfiles")
+        eyre::bail!("Owning packages are not supported for systemd-tmpfiles")
     }
 
     fn original_files(
@@ -115,7 +112,7 @@ impl Files for SystemdTmpfiles {
         _packages: &PackageMap,
         _interner: &paketkoll_types::intern::Interner,
     ) -> Result<OriginalFilesResult, OriginalFileError> {
-        Err(anyhow::anyhow!(
+        Err(eyre::eyre!(
             "Original file queries are not supported for systemd-tmpfiles"
         ))?
     }
@@ -134,7 +131,7 @@ impl Files for SystemdTmpfiles {
 
 /// Parse the systemd-tmpfiles output into [`FileEntry`]s that are usable by the
 /// shared later stages.
-fn parse_systemd_tmpfiles_output(output: &str) -> Result<Vec<FileEntry>, anyhow::Error> {
+fn parse_systemd_tmpfiles_output(output: &str) -> Result<Vec<FileEntry>, eyre::Error> {
     let parsed = systemd_tmpfiles::parser::parse_str(output)
         .context("Failed to parse systemd-tmpfiles output")?;
 
@@ -163,7 +160,7 @@ fn process_entry<'entry>(
     files: &mut AHashMap<PathBuf, FileEntry>,
     id_cache: &mut IdCache<'entry>,
     resolver: &systemd_tmpfiles::specifier::SystemResolver,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     // Figure out path
     if entry.path_is_glob() {
         tracing::warn!(
@@ -381,7 +378,7 @@ fn do_insert(
     path: &str,
     props: Properties,
     flags: FileFlags,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     let normalised_path = std::path::absolute(PathBuf::from(path))?;
     match files.entry(normalised_path) {
         Entry::Occupied(mut entry) => {
@@ -480,7 +477,7 @@ fn recursive_copy(
     source_path: &Path,
     target_path: &str,
     flags: FileFlags,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     // Get source metadata
     let source_metadata = match source_path.metadata() {
         Ok(metadata) => metadata,
@@ -542,7 +539,7 @@ fn recursive_copy(
 }
 
 /// Generate a checksum from a path on the system (needed for copy directives)
-fn generate_checksum_from_file(path: &Path) -> anyhow::Result<Checksum> {
+fn generate_checksum_from_file(path: &Path) -> eyre::Result<Checksum> {
     let mut reader =
         std::fs::File::open(path).with_context(|| format!("IO error while reading {:?}", path))?;
     sha256_readable(&mut reader)
@@ -574,8 +571,8 @@ impl<'a> IdCache<'a> {
     fn lookup(
         &mut self,
         key: IdCacheKey<'a>,
-        resolver: impl FnOnce(&'_ str) -> anyhow::Result<u32>,
-    ) -> anyhow::Result<u32> {
+        resolver: impl FnOnce(&'_ str) -> eyre::Result<u32>,
+    ) -> eyre::Result<u32> {
         let cache_entry = self.0.entry(key);
         match cache_entry {
             Entry::Occupied(e) => Ok(*e.get()),
@@ -592,14 +589,14 @@ impl<'a> IdCache<'a> {
 fn resolve_gid<'entry>(
     group: &'entry systemd_tmpfiles::Id,
     id_cache: &mut IdCache<'entry>,
-) -> anyhow::Result<Gid> {
+) -> eyre::Result<Gid> {
     match group {
         systemd_tmpfiles::Id::Caller { new_only: _ } => Ok(Gid::new(0)),
         systemd_tmpfiles::Id::Id { id, new_only: _ } => Ok(Gid::new(*id)),
         systemd_tmpfiles::Id::Name { name, new_only: _ } => id_cache
             .lookup(
                 IdCacheKey::Group(name.as_str()),
-                |name: &str| -> anyhow::Result<u32> {
+                |name: &str| -> eyre::Result<u32> {
                     let entry = nix::unistd::Group::from_name(name)
                         .with_context(|| format!("Failed to resolve GID for {name}"))?
                         .with_context(|| format!("Failed to resolve GID for {name}"))?;
@@ -615,14 +612,14 @@ fn resolve_gid<'entry>(
 fn resolve_uid<'entry>(
     user: &'entry systemd_tmpfiles::Id,
     id_cache: &mut IdCache<'entry>,
-) -> anyhow::Result<Uid> {
+) -> eyre::Result<Uid> {
     match user {
         systemd_tmpfiles::Id::Caller { new_only: _ } => Ok(Uid::new(0)),
         systemd_tmpfiles::Id::Id { id, new_only: _ } => Ok(Uid::new(*id)),
         systemd_tmpfiles::Id::Name { name, new_only: _ } => id_cache
             .lookup(
                 IdCacheKey::User(name.as_str()),
-                |name: &str| -> anyhow::Result<u32> {
+                |name: &str| -> eyre::Result<u32> {
                     let entry = nix::unistd::User::from_name(name)
                         .with_context(|| format!("Failed to resolve UID for {name}"))?
                         .with_context(|| format!("Failed to resolve UID for {name}"))?;

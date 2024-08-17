@@ -7,13 +7,9 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use ahash::AHashSet;
-use anyhow::Context;
 use camino::Utf8PathBuf;
 use compact_str::CompactString;
-use rune::ContextError;
-use rune::Module;
-use rune::Value;
-
+use eyre::Context;
 use konfigkoll_types::FileContents;
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::FsOp;
@@ -25,11 +21,13 @@ use konfigkoll_types::PkgOp;
 use konfigkoll_utils::safe_path_join;
 use paketkoll_types::backend::Backend;
 use paketkoll_types::files::Mode;
-
-use crate::Phase;
+use rune::ContextError;
+use rune::Module;
+use rune::Value;
 
 use super::error::KResult;
 use super::settings::Settings;
+use crate::Phase;
 
 #[derive(Debug, Clone, rune::Any)]
 #[rune(item = ::command)]
@@ -77,12 +75,12 @@ impl Commands {
             })
     }
 
-    fn verify_path(&self, path: &str) -> anyhow::Result<()> {
+    fn verify_path(&self, path: &str) -> eyre::Result<()> {
         if path.contains("..") {
-            return Err(anyhow::anyhow!("Path {} contains '..'", path));
+            return Err(eyre::eyre!("Path {} contains '..'", path));
         }
         if !path.starts_with('/') {
-            return Err(anyhow::anyhow!("Path {} is not absolute", path));
+            return Err(eyre::eyre!("Path {} is not absolute", path));
         }
         Ok(())
     }
@@ -94,7 +92,7 @@ impl Commands {
     #[rune::function(keep)]
     pub fn ignore_path(&mut self, ignore: &str) -> KResult<()> {
         if self.phase != Phase::Ignores {
-            return Err(anyhow::anyhow!("Can only ignore paths during the 'ignores' phase").into());
+            return Err(eyre::eyre!("Can only ignore paths during the 'ignores' phase").into());
         }
         if !self.fs_ignores.insert(ignore.into()) {
             tracing::warn!("Ignoring path '{}' multiple times", ignore);
@@ -108,7 +106,7 @@ impl Commands {
     #[rune::function(keep)]
     pub fn add_pkg(&mut self, package_manager: &str, identifier: &str) -> KResult<()> {
         if self.phase < Phase::ScriptDependencies {
-            return Err(anyhow::anyhow!(
+            return Err(eyre::eyre!(
                 "Can only add packages during the 'script_dependencies' or 'main' phases"
             )
             .into());
@@ -143,7 +141,7 @@ impl Commands {
     #[rune::function(keep)]
     pub fn remove_pkg(&mut self, package_manager: &str, identifier: &str) -> KResult<()> {
         if self.phase < Phase::ScriptDependencies {
-            return Err(anyhow::anyhow!(
+            return Err(eyre::eyre!(
                 "Can only add packages during the 'script_dependencies' or 'main' phases"
             )
             .into());
@@ -176,10 +174,9 @@ impl Commands {
     #[rune::function(keep)]
     pub fn rm(&mut self, path: &str) -> KResult<()> {
         if self.phase != Phase::Main {
-            return Err(anyhow::anyhow!(
-                "File system actions are only possible in the 'main' phase"
-            )
-            .into());
+            return Err(
+                eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
+            );
         }
         self.fs_actions.push(FsInstruction {
             op: FsOp::Remove,
@@ -210,10 +207,9 @@ impl Commands {
     #[rune::function(keep)]
     pub fn copy_from(&mut self, path: &str, src: &str) -> KResult<()> {
         if self.phase != Phase::Main {
-            return Err(anyhow::anyhow!(
-                "File system actions are only possible in the 'main' phase"
-            )
-            .into());
+            return Err(
+                eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
+            );
         }
         self.verify_path(path)?;
         self.verify_path(src)?;
@@ -223,7 +219,7 @@ impl Commands {
             Err(e) => {
                 tracing::error!("Failed to read file contents for '{}': {}", path, e);
                 return Err(
-                    anyhow::anyhow!("Failed to read file contents for '{}': {}", path, e).into(),
+                    eyre::eyre!("Failed to read file contents for '{}': {}", path, e).into(),
                 );
             }
         };
@@ -240,10 +236,9 @@ impl Commands {
     #[rune::function(keep)]
     pub fn ln(&mut self, path: &str, target: &str) -> KResult<()> {
         if self.phase != Phase::Main {
-            return Err(anyhow::anyhow!(
-                "File system actions are only possible in the 'main' phase"
-            )
-            .into());
+            return Err(
+                eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
+            );
         }
         self.verify_path(path)?;
         self.fs_actions.push(FsInstruction {
@@ -261,10 +256,9 @@ impl Commands {
     #[rune::function(keep)]
     pub fn write(&mut self, path: &str, contents: &[u8]) -> KResult<()> {
         if self.phase != Phase::Main {
-            return Err(anyhow::anyhow!(
-                "File system actions are only possible in the 'main' phase"
-            )
-            .into());
+            return Err(
+                eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
+            );
         }
         self.verify_path(path)?;
         self.fs_actions.push(FsInstruction {
@@ -280,10 +274,9 @@ impl Commands {
     #[rune::function(keep)]
     pub fn mkdir(&mut self, path: &str) -> KResult<()> {
         if self.phase != Phase::Main {
-            return Err(anyhow::anyhow!(
-                "File system actions are only possible in the 'main' phase"
-            )
-            .into());
+            return Err(
+                eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
+            );
         }
         self.verify_path(path)?;
         self.fs_actions.push(FsInstruction {
@@ -299,10 +292,9 @@ impl Commands {
     #[rune::function(keep)]
     pub fn chown(&mut self, path: &str, owner: &str) -> KResult<()> {
         if self.phase != Phase::Main {
-            return Err(anyhow::anyhow!(
-                "File system actions are only possible in the 'main' phase"
-            )
-            .into());
+            return Err(
+                eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
+            );
         }
         self.verify_path(path)?;
         self.fs_actions.push(FsInstruction {
@@ -320,10 +312,9 @@ impl Commands {
     #[rune::function(keep)]
     pub fn chgrp(&mut self, path: &str, group: &str) -> KResult<()> {
         if self.phase != Phase::Main {
-            return Err(anyhow::anyhow!(
-                "File system actions are only possible in the 'main' phase"
-            )
-            .into());
+            return Err(
+                eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
+            );
         }
         self.verify_path(path)?;
         self.fs_actions.push(FsInstruction {
@@ -341,10 +332,9 @@ impl Commands {
     #[rune::function(keep)]
     pub fn chmod(&mut self, path: &str, mode: Value) -> KResult<()> {
         if self.phase != Phase::Main {
-            return Err(anyhow::anyhow!(
-                "File system actions are only possible in the 'main' phase"
-            )
-            .into());
+            return Err(
+                eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
+            );
         }
         self.verify_path(path)?;
         let numeric_mode = match mode {
@@ -354,7 +344,7 @@ impl Commands {
                 // Convert text mode (u+rx,g+rw,o+r, etc) to numeric mode
                 Mode::parse(&guard)?
             }
-            _ => return Err(anyhow::anyhow!("Invalid mode value").into()),
+            _ => return Err(eyre::eyre!("Invalid mode value").into()),
         };
 
         self.fs_actions.push(FsInstruction {

@@ -1,12 +1,11 @@
 //! System information gathering
+use konfigkoll_hwinfo::pci::PciDevice;
+use konfigkoll_hwinfo::pci::PciIdDb;
 use rune::Any;
 use rune::ContextError;
 use rune::Module;
 use sysinfo::CpuRefreshKind;
 use sysinfo::MemoryRefreshKind;
-
-use konfigkoll_hwinfo::pci::PciDevice;
-use konfigkoll_hwinfo::pci::PciIdDb;
 
 use super::error::KResult;
 
@@ -116,7 +115,7 @@ impl SysInfo {
 
         self.pci_devices
             .clone()
-            .ok_or_else(|| anyhow::anyhow!("Failed to load PCI devices").into())
+            .ok_or_else(|| eyre::eyre!("Failed to load PCI devices").into())
     }
 }
 

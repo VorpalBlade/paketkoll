@@ -7,8 +7,8 @@ use std::path::PathBuf;
 
 use ahash::AHashMap;
 use ahash::AHashSet;
-use anyhow::Context;
 use compact_str::CompactString;
+use eyre::Context;
 use smallvec::SmallVec;
 
 /// Helper to do a generic package manager transaction
@@ -17,7 +17,7 @@ pub(crate) fn package_manager_transaction(
     flags: &[&str],
     pkg_list: &[&str],
     ask_confirmation: Option<&str>,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     let mut cmd = std::process::Command::new(program_name);
     for arg in flags {
         cmd.arg(arg);
@@ -33,8 +33,8 @@ pub(crate) fn package_manager_transaction(
         .with_context(|| format!("Failed to execute {program_name}"))?;
     if !status.success() {
         match status.code() {
-            Some(code) => anyhow::bail!("{program_name} failed with exit code {code}"),
-            _ => anyhow::bail!("{program_name} failed with signal {:?}", status.signal()),
+            Some(code) => eyre::bail!("{program_name} failed with exit code {code}"),
+            _ => eyre::bail!("{program_name} failed with signal {:?}", status.signal()),
         }
     }
     Ok(())
@@ -52,7 +52,7 @@ pub(crate) enum CompressionFormat<'archive, R: Read + 'archive> {
 }
 
 impl<'archive, R: Read + 'archive> CompressionFormat<'archive, R> {
-    pub(crate) fn from_extension(ext: &str, stream: R) -> anyhow::Result<Self> {
+    pub(crate) fn from_extension(ext: &str, stream: R) -> eyre::Result<Self> {
         match ext {
             #[cfg(feature = "__gzip")]
             "gz" => Ok(Self::Gzip(flate2::read::GzDecoder::new(stream))),
@@ -62,7 +62,7 @@ impl<'archive, R: Read + 'archive> CompressionFormat<'archive, R> {
             "bz2" => Ok(Self::Bzip2(bzip2::read::BzDecoder::new(stream))),
             #[cfg(feature = "__zstd")]
             "zst" | "zstd" => Ok(Self::Zstd(zstd::stream::Decoder::new(stream)?)),
-            _ => Err(anyhow::anyhow!("Unknown compression format: {ext}")),
+            _ => Err(eyre::eyre!("Unknown compression format: {ext}")),
         }
     }
 }
@@ -108,7 +108,7 @@ pub(crate) fn locate_package_file(
     dir_candidates: &[&str],
     package_match: &str,
     pkg: &str,
-    download_pkg: impl Fn(&str) -> anyhow::Result<()>,
+    download_pkg: impl Fn(&str) -> eyre::Result<()>,
 ) -> Result<Option<PathBuf>, paketkoll_types::backend::OriginalFileError> {
     for downloaded in [false, true] {
         // Try to locate package
@@ -165,7 +165,7 @@ pub(crate) struct PackageQuery<'a> {
 pub(crate) fn missing_packages<'strings>(
     dir_candidates: &[&str],
     package_matches: impl Iterator<Item = PackageQuery<'strings>>,
-) -> Result<Vec<&'strings str>, anyhow::Error> {
+) -> Result<Vec<&'strings str>, eyre::Error> {
     let mut missing = vec![];
     // Try to locate package
     for PackageQuery {
@@ -227,7 +227,7 @@ pub(crate) fn extract_files(
         let path = entry.path().context("TAR parsing error (path)")?;
         let path = path
             .to_str()
-            .ok_or_else(|| anyhow::anyhow!("Failed to convert path to string"))?;
+            .ok_or_else(|| eyre::eyre!("Failed to convert path to string"))?;
         let path = match name_map_filter(path) {
             Some(v) => v,
             None => continue,
@@ -269,7 +269,7 @@ pub(crate) fn convert_archive_entries(
     pkg_ref: paketkoll_types::intern::PackageRef,
     source: &'static str,
     name_map_filter: impl Fn(&std::path::Path) -> Option<std::borrow::Cow<'_, std::path::Path>>,
-) -> Result<Vec<paketkoll_types::files::FileEntry>, anyhow::Error> {
+) -> Result<Vec<paketkoll_types::files::FileEntry>, eyre::Error> {
     use std::time::SystemTime;
 
     use paketkoll_types::files::Directory;
@@ -344,9 +344,7 @@ pub(crate) fn convert_archive_entries(
                         properties: Properties::Symlink(Symlink {
                             owner,
                             group,
-                            target: link
-                                .ok_or(anyhow::anyhow!("Failed to get link target"))?
-                                .into(),
+                            target: link.ok_or(eyre::eyre!("Failed to get link target"))?.into(),
                         }),
                         flags: FileFlags::empty(),
                         source,

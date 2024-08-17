@@ -7,14 +7,8 @@ use std::os::unix::ffi::OsStrExt;
 use std::path::Path;
 
 use ahash::AHashSet;
-use anyhow::Context;
 use clap::Parser;
-use proc_exit::Code;
-use proc_exit::Exit;
-use rayon::prelude::*;
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::util::SubscriberInitExt;
-
+use eyre::Context;
 use paketkoll::cli::Cli;
 use paketkoll::cli::Commands;
 use paketkoll::cli::Format;
@@ -27,6 +21,11 @@ use paketkoll_core::paketkoll_types::issue::Issue;
 use paketkoll_core::paketkoll_types::package::InstallReason;
 use paketkoll_types::backend::OriginalFileQuery;
 use paketkoll_types::package::PackageInterned;
+use proc_exit::Code;
+use proc_exit::Exit;
+use rayon::prelude::*;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
 
 #[cfg(target_env = "musl")]
 mod _musl {
@@ -35,13 +34,15 @@ mod _musl {
     static GLOBAL: MiMalloc = MiMalloc;
 }
 
-fn main() -> anyhow::Result<Exit> {
+fn main() -> color_eyre::eyre::Result<Exit> {
+    color_eyre::install()?;
     let filter = tracing_subscriber::EnvFilter::builder()
         .with_default_directive(tracing::level_filters::LevelFilter::INFO.into())
         .from_env()?;
     tracing_subscriber::registry()
         .with(tracing_subscriber::fmt::layer())
         .with(filter)
+        .with(tracing_error::ErrorLayer::default())
         .init();
     let cli = Cli::parse();
 
@@ -77,7 +78,7 @@ fn main() -> anyhow::Result<Exit> {
                     inputs.insert(Path::new(path));
                     let file_map = backend_impl.owning_packages(&inputs, &interner)?;
                     if file_map.len() != 1 {
-                        return Err(anyhow::anyhow!(
+                        return Err(eyre::eyre!(
                             "Expected exactly one package to own the file, found {}",
                             file_map.len()
                         ));
@@ -89,7 +90,7 @@ fn main() -> anyhow::Result<Exit> {
                     if let Some(package) = owner {
                         package.to_str(&interner)
                     } else {
-                        return Err(anyhow::anyhow!("No package owns the given file"));
+                        return Err(eyre::eyre!("No package owns the given file"));
                     }
                 }
             };
@@ -161,13 +162,13 @@ fn print_packages(
     packages: Vec<PackageInterned>,
     interner: &Interner,
     stdout: &mut BufWriter<std::io::StdoutLock<'_>>,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     match cli.format {
         Format::Human => {
             for pkg in packages {
                 let pkg_name = interner
                     .try_resolve(&pkg.name.as_interner_ref())
-                    .ok_or_else(|| anyhow::anyhow!("No package name for package"))?;
+                    .ok_or_else(|| eyre::eyre!("No package name for package"))?;
                 match pkg.reason {
                     Some(InstallReason::Explicit) => {
                         writeln!(stdout, "{} {}", pkg_name, pkg.version)?;
@@ -195,7 +196,7 @@ fn print_packages(
     Ok(())
 }
 
-fn run_file_checks(cli: &Cli) -> anyhow::Result<Exit> {
+fn run_file_checks(cli: &Cli) -> eyre::Result<Exit> {
     let (interner, mut found_issues) = match cli.command {
         Commands::Check { .. } => file_ops::check_installed_files(
             &(cli.backend.try_into()?),

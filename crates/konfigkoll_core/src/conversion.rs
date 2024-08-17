@@ -8,12 +8,9 @@ use std::os::unix::fs::FileTypeExt;
 use std::os::unix::fs::MetadataExt;
 use std::sync::atomic::AtomicU32;
 
-use anyhow::Context;
 use camino::Utf8Path;
 use compact_str::format_compact;
-use parking_lot::Mutex;
-use rayon::prelude::*;
-
+use eyre::Context;
 use konfigkoll_types::FileContents;
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::FsOp;
@@ -33,13 +30,15 @@ use paketkoll_types::package::InstallReason;
 use paketkoll_types::package::PackageInterned;
 use paketkoll_utils::checksum::sha256_readable;
 use paketkoll_utils::MODE_MASK;
+use parking_lot::Mutex;
+use rayon::prelude::*;
 
 use crate::utils::IdKey;
 use crate::utils::NumericToNameResolveCache;
 
 pub fn convert_issues_to_fs_instructions(
     issues: Vec<(Option<PackageRef>, Issue)>,
-) -> anyhow::Result<Vec<FsInstruction>> {
+) -> eyre::Result<Vec<FsInstruction>> {
     tracing::debug!("Starting conversion of {} issues", issues.len());
     let error_count = AtomicU32::new(0);
     let id_resolver = Mutex::new(NumericToNameResolveCache::new());
@@ -67,7 +66,7 @@ pub fn convert_issues_to_fs_instructions(
     tracing::debug!("Conversion done, length: {}", converted.len());
     let error_count = error_count.load(std::sync::atomic::Ordering::Relaxed);
     if error_count > 0 {
-        anyhow::bail!("{error_count} errors were encountered while converting, see log");
+        eyre::bail!("{error_count} errors were encountered while converting, see log");
     }
 
     Ok(converted)
@@ -79,7 +78,7 @@ fn convert_issue(
     pkg: Option<PackageRef>,
     results: &mut Vec<FsInstruction>,
     id_resolver: &Mutex<NumericToNameResolveCache>,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     tracing::debug!("Converting issue");
     let path: &Utf8Path = issue.path().try_into()?;
     for kind in issue.kinds() {
@@ -95,7 +94,7 @@ fn convert_issue(
                 results.extend(from_fs(path, pkg, id_resolver)?);
             }
             paketkoll_types::issue::IssueKind::PermissionDenied => {
-                anyhow::bail!("Permission denied on {:?}", issue.path());
+                eyre::bail!("Permission denied on {:?}", issue.path());
             }
             paketkoll_types::issue::IssueKind::TypeIncorrect {
                 actual: _,
@@ -210,10 +209,10 @@ fn from_fs(
     path: &Utf8Path,
     pkg: Option<PackageRef>,
     id_resolver: &Mutex<NumericToNameResolveCache>,
-) -> anyhow::Result<impl Iterator<Item = FsInstruction>> {
+) -> eyre::Result<impl Iterator<Item = FsInstruction>> {
     let metadata = path
         .symlink_metadata()
-        .with_context(|| anyhow::anyhow!("Failed to get metadata"))?;
+        .with_context(|| eyre::eyre!("Failed to get metadata"))?;
 
     let mut results = vec![];
 
@@ -238,7 +237,7 @@ fn from_fs(
             path: path.into(),
             op: FsOp::CreateSymlink {
                 target: std::fs::read_link(path)
-                    .with_context(|| anyhow::anyhow!("Failed to read symlink target"))?
+                    .with_context(|| eyre::eyre!("Failed to read symlink target"))?
                     .try_into()?,
             },
             comment: None,
@@ -283,7 +282,7 @@ fn from_fs(
         tracing::warn!("Ignoring socket file: {:?}", path);
         return Ok(results.into_iter());
     } else {
-        anyhow::bail!("Unsupported file type: {:?}", path);
+        eyre::bail!("Unsupported file type: {:?}", path);
     }
 
     // Set metadata
@@ -322,7 +321,7 @@ fn from_fs(
 }
 
 /// Load real contents from file system
-fn fs_load_contents(path: &Utf8Path, checksum: Option<&Checksum>) -> anyhow::Result<FileContents> {
+fn fs_load_contents(path: &Utf8Path, checksum: Option<&Checksum>) -> eyre::Result<FileContents> {
     let f = File::open(path)?;
     let size = f.metadata()?.size();
     if size > 1024 * 1024 * 200 {
@@ -392,7 +391,6 @@ pub fn convert_packages_to_pkg_instructions(
 #[cfg(test)]
 mod tests {
     use itertools::Itertools;
-
     use paketkoll_types::package::PackageInstallStatus;
 
     use super::*;

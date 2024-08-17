@@ -156,10 +156,10 @@ pub enum IssueKind {
     /// Some sort of parsing error for this entry (from the package manager
     /// backend)
     #[serde(serialize_with = "serialize_error")]
-    MetadataError(Box<anyhow::Error>),
+    MetadataError(Box<eyre::Error>),
     /// Some sort of unexpected error when processing the file system
     #[serde(serialize_with = "serialize_error")]
-    FsCheckError(Box<anyhow::Error>),
+    FsCheckError(Box<eyre::Error>),
 }
 
 impl Display for IssueKind {
@@ -214,17 +214,17 @@ impl Display for IssueKind {
 /// Trying to get useful formatting for errors is a mess on stable Rust
 /// (it's better on nightly, but we don't want to require that).
 /// Especially backtraces are missing.
-fn format_error(f: &mut std::fmt::Formatter<'_>, err: &anyhow::Error) -> std::fmt::Result {
+fn format_error(f: &mut std::fmt::Formatter<'_>, err: &eyre::Error) -> std::fmt::Result {
     for cause in err.chain() {
         write!(f, "\n   Caused by: {}", cause)?;
     }
-    if Ok("1".into()) == std::env::var("RUST_BACKTRACE") {
-        write!(f, "\n   Backtrace: {}", err.backtrace())?;
-    }
+    //if Ok("1".into()) == std::env::var("RUST_BACKTRACE") {
+    //    write!(f, "\n   Backtrace: {}", err.backtrace())?;
+    //}
     Ok(())
 }
 
-fn serialize_error<S>(err: &anyhow::Error, serializer: S) -> Result<S::Ok, S::Error>
+fn serialize_error<S>(err: &eyre::Error, serializer: S) -> Result<S::Ok, S::Error>
 where
     S: serde::Serializer,
 {

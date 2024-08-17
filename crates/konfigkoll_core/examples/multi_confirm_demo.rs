@@ -1,5 +1,4 @@
 use console::Style;
-
 use konfigkoll_core::confirm::Choices;
 use konfigkoll_core::confirm::MultiOptionConfirm;
 
@@ -24,7 +23,7 @@ impl Choices for PromptChoices {
     }
 }
 
-fn main() -> anyhow::Result<()> {
+fn main() -> eyre::Result<()> {
     let mut builder = MultiOptionConfirm::builder();
     builder
         .prompt("Are you sure?")

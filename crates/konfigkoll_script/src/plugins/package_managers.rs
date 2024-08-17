@@ -4,15 +4,7 @@ use std::collections::BTreeMap;
 use std::str::FromStr;
 use std::sync::Arc;
 
-use anyhow::Context;
-use rune::alloc::fmt::TryWrite;
-use rune::runtime::Bytes;
-use rune::runtime::Shared;
-use rune::vm_write;
-use rune::Any;
-use rune::ContextError;
-use rune::Module;
-
+use eyre::Context;
 use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::OriginalFileQuery;
@@ -21,6 +13,13 @@ use paketkoll_types::backend::PackageMap;
 use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::backend::Packages;
 use paketkoll_types::intern::Interner;
+use rune::alloc::fmt::TryWrite;
+use rune::runtime::Bytes;
+use rune::runtime::Shared;
+use rune::vm_write;
+use rune::Any;
+use rune::ContextError;
+use rune::Module;
 
 use super::error::KResult;
 
@@ -155,16 +154,16 @@ impl PackageManager {
         let files = guard
             .files
             .as_ref()
-            .ok_or_else(|| anyhow::anyhow!("No files backend for {}", guard.backend))?;
+            .ok_or_else(|| eyre::eyre!("No files backend for {}", guard.backend))?;
         let package_map = guard
             .package_map
             .as_ref()
-            .ok_or_else(|| anyhow::anyhow!("No package map for {}", guard.backend))?;
+            .ok_or_else(|| eyre::eyre!("No package map for {}", guard.backend))?;
         let results = files
             .original_files(&queries, package_map, &guard.interner)
             .map_err(|e| OriginalFilesError::from_inner(e, path))?;
         if results.len() != 1 {
-            Err(anyhow::anyhow!(
+            Err(eyre::eyre!(
                 "Failed original_file_contents({package}, {path}): Got wrong number of results: {}",
                 results.len()
             ))?;
@@ -173,7 +172,7 @@ impl PackageManager {
             .into_iter()
             .next()
             .ok_or_else(|| {
-                anyhow::anyhow!(
+                eyre::eyre!(
                     "Failed original_file_contents({package}, {path}): Failed to extract result"
                 )
             })?
@@ -206,7 +205,7 @@ pub enum OriginalFilesError {
     #[error("File {1} not found in package: {0}")]
     FileNotFound(#[rune(get)] String, #[rune(get)] String),
     #[error("Failed to get original file: {0}")]
-    Other(#[from] anyhow::Error),
+    Other(#[from] eyre::Error),
 }
 
 impl OriginalFilesError {

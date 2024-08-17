@@ -2,21 +2,20 @@
 
 use std::sync::Arc;
 
-use anyhow::Context;
+use eyre::Context;
 use itertools::Itertools;
-use rayon::prelude::*;
-
 use konfigkoll_types::PkgInstructions;
 use paketkoll_types::backend::PackageBackendMap;
 use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::package::PackageInstallStatus;
+use rayon::prelude::*;
 
 #[tracing::instrument(skip_all)]
 pub(crate) fn load_packages(
     interner: &Arc<Interner>,
     backends_pkg: &PackageBackendMap,
-) -> anyhow::Result<(PkgInstructions, PackageMapMap)> {
+) -> eyre::Result<(PkgInstructions, PackageMapMap)> {
     let mut pkgs_sys = PkgInstructions::new();
     let mut package_maps: PackageMapMap = PackageMapMap::new();
     let backend_maps: Vec<_> = backends_pkg

@@ -14,7 +14,6 @@
 use std::io::BufRead;
 
 use compact_str::CompactString;
-
 use paketkoll_types::intern::ArchitectureRef;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::intern::PackageRef;
@@ -26,7 +25,7 @@ use paketkoll_types::package::PackageInterned;
 pub(super) fn from_arch_linux_desc(
     mut readable: impl BufRead,
     interner: &Interner,
-) -> anyhow::Result<PackageInterned> {
+) -> eyre::Result<PackageInterned> {
     let mut name: Option<PackageRef> = None;
     let mut arch: Option<ArchitectureRef> = None;
     let mut version: Option<CompactString> = None;
@@ -70,10 +69,10 @@ pub(super) fn from_arch_linux_desc(
     }
 
     Ok(PackageInterned {
-        name: name.ok_or_else(|| anyhow::anyhow!("No name"))?,
+        name: name.ok_or_else(|| eyre::eyre!("No name"))?,
         architecture: arch,
-        version: version.ok_or_else(|| anyhow::anyhow!("No version"))?,
-        desc: Some(desc.ok_or_else(|| anyhow::anyhow!("No desc"))?),
+        version: version.ok_or_else(|| eyre::eyre!("No version"))?,
+        desc: Some(desc.ok_or_else(|| eyre::eyre!("No desc"))?),
         depends: depends.into_iter().map(Dependency::Single).collect(),
         provides,
         reason: Some(reason.unwrap_or(InstallReason::Explicit)),
@@ -83,7 +82,7 @@ pub(super) fn from_arch_linux_desc(
 }
 
 /// Get the backup files list
-pub(super) fn backup_files(mut readable: impl BufRead) -> Result<Vec<String>, anyhow::Error> {
+pub(super) fn backup_files(mut readable: impl BufRead) -> Result<Vec<String>, eyre::Error> {
     let mut backup_files = Vec::new();
 
     let mut line = String::new();
@@ -101,7 +100,7 @@ fn parse_package_list(
     readable: &mut impl BufRead,
     to_fill: &mut Vec<PackageRef>,
     interner: &Interner,
-) -> anyhow::Result<()> {
+) -> eyre::Result<()> {
     let mut line = String::new();
     while readable.read_line(&mut line)? > 0 {
         let trimmed_line = line.trim_end();
@@ -119,7 +118,7 @@ fn parse_package_list(
 }
 
 /// Parse a list backup list
-fn parse_backup(readable: &mut impl BufRead, to_fill: &mut Vec<String>) -> anyhow::Result<()> {
+fn parse_backup(readable: &mut impl BufRead, to_fill: &mut Vec<String>) -> eyre::Result<()> {
     let mut line = String::new();
     while readable.read_line(&mut line)? > 0 {
         let trimmed_line = line.trim_end();
@@ -138,10 +137,9 @@ fn parse_backup(readable: &mut impl BufRead, to_fill: &mut Vec<String>) -> anyho
 
 #[cfg(test)]
 mod tests {
-    use pretty_assertions::assert_eq;
-
     use paketkoll_types::intern::Interner;
     use paketkoll_types::package::Package;
+    use pretty_assertions::assert_eq;
 
     use super::*;
 

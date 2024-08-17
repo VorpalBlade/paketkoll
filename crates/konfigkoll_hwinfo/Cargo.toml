@@ -12,7 +12,7 @@ rune = ["dep:rune"]
 
 [dependencies]
 ahash.workspace = true
-anyhow.workspace = true
+eyre.workspace = true
 itertools.workspace = true
 rune = { workspace = true, optional = true }
 winnow.workspace = true

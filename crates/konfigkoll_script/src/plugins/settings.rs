@@ -3,8 +3,8 @@
 use std::str::FromStr;
 
 use ahash::AHashSet;
-use anyhow::Context;
 use camino::Utf8PathBuf;
+use eyre::Context;
 use globset::Glob;
 use globset::GlobSet;
 use parking_lot::Mutex;
@@ -81,7 +81,7 @@ impl Settings {
         v.into_iter()
     }
 
-    pub fn early_configs(&self) -> anyhow::Result<GlobSet> {
+    pub fn early_configs(&self) -> eyre::Result<GlobSet> {
         let guard = self.early_configs.lock();
         let mut builder = GlobSet::builder();
         for p in guard.iter() {
@@ -94,7 +94,7 @@ impl Settings {
             .context("Failed to build globset for early configs")
     }
 
-    pub fn sensitive_configs(&self) -> anyhow::Result<GlobSet> {
+    pub fn sensitive_configs(&self) -> eyre::Result<GlobSet> {
         let guard = self.sensitive_configs.lock();
         let mut builder = GlobSet::builder();
         for p in guard.iter() {

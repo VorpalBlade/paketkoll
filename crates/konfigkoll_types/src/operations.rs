@@ -1,7 +1,6 @@
 use std::collections::BTreeMap;
 
 use compact_str::CompactString;
-
 use paketkoll_types::files::Mode;
 use paketkoll_types::intern::PackageRef;
 

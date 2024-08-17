@@ -2,14 +2,12 @@
 
 use std::io::BufRead;
 
-use anyhow::bail;
-use anyhow::Context;
 use bstr::io::BufReadExt;
 use bstr::ByteSlice;
 use bstr::ByteVec;
 use compact_str::format_compact;
-use smallvec::SmallVec;
-
+use eyre::bail;
+use eyre::Context;
 use paketkoll_types::files::Checksum;
 use paketkoll_types::files::FileEntry;
 use paketkoll_types::files::FileFlags;
@@ -24,13 +22,14 @@ use paketkoll_types::package::Package;
 use paketkoll_types::package::PackageBuilder;
 use paketkoll_types::package::PackageInstallStatus;
 use paketkoll_types::package::PackageInterned;
+use smallvec::SmallVec;
 
 /// Load lines from a readable as `PathBufs`
 pub(super) fn parse_paths(
     package: PackageRef,
     input: &mut impl BufRead,
-) -> anyhow::Result<Vec<FileEntry>> {
-    let lines: anyhow::Result<Vec<_>> = input
+) -> eyre::Result<Vec<FileEntry>> {
+    let lines: eyre::Result<Vec<_>> = input
         .byte_lines()
         .map(|e| match e {
             Ok(inner) if inner.as_slice() == b"/." => {
@@ -62,8 +61,8 @@ pub(super) fn parse_paths(
 pub(super) fn parse_md5sums(
     package: PackageRef,
     input: &mut impl BufRead,
-) -> anyhow::Result<Vec<FileEntry>> {
-    let lines: anyhow::Result<Vec<_>> = input
+) -> eyre::Result<Vec<FileEntry>> {
+    let lines: eyre::Result<Vec<_>> = input
         .byte_lines()
         .map(|e| match e {
             Ok(mut inner) => {
@@ -149,7 +148,7 @@ pub(super) fn parse_status(
     interner: &Interner,
     input: &mut impl BufRead,
     primary_architecture: ArchitectureRef,
-) -> anyhow::Result<(Vec<FileEntry>, Vec<PackageInterned>)> {
+) -> eyre::Result<(Vec<FileEntry>, Vec<PackageInterned>)> {
     let mut state = StatusParsingState::Start;
 
     let all_architecture = ArchitectureRef::get_or_intern(interner, "all");
@@ -205,7 +204,7 @@ pub(super) fn parse_status(
             if line.starts_with(' ') {
                 let line_fragments: SmallVec<[&str; 4]> = line.split(' ').collect();
                 if line_fragments.len() < 2 {
-                    return Err(anyhow::anyhow!("Too short line")).with_context(ctx);
+                    return Err(eyre::eyre!("Too short line")).with_context(ctx);
                 }
                 if Some(&"remove-on-upgrade") == line_fragments.last() {
                     // Skip this entry for now
@@ -345,7 +344,7 @@ enum StatusParsingState {
 pub(super) fn parse_extended_status(
     interner: &Interner,
     input: &mut impl BufRead,
-) -> anyhow::Result<ahash::AHashMap<(PackageRef, ArchitectureRef), Option<InstallReason>>> {
+) -> eyre::Result<ahash::AHashMap<(PackageRef, ArchitectureRef), Option<InstallReason>>> {
     let mut state = ExtendedStatusParsingState::Start;
 
     let all_arch = ArchitectureRef::get_or_intern(interner, "all");
@@ -399,8 +398,6 @@ enum ExtendedStatusParsingState {
 
 #[cfg(test)]
 mod tests {
-    use pretty_assertions::assert_eq;
-
     use paketkoll_types::files::Checksum;
     use paketkoll_types::files::FileEntry;
     use paketkoll_types::files::FileFlags;
@@ -413,6 +410,7 @@ mod tests {
     use paketkoll_types::package::InstallReason;
     use paketkoll_types::package::Package;
     use paketkoll_types::package::PackageInstallStatus;
+    use pretty_assertions::assert_eq;
 
     use super::parse_md5sums;
     use super::parse_paths;

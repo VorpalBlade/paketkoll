@@ -3,19 +3,18 @@
 use std::str::FromStr;
 use std::sync::LazyLock;
 
-use anyhow::Context;
 use camino::Utf8PathBuf;
 use compact_str::CompactString;
+use eyre::Context;
 use rune::Any;
 use rune::ContextError;
 use rune::Module;
 
-use crate::Commands;
-use crate::Phase;
-
 use super::error::KResult;
 use super::package_managers::OriginalFilesError;
 use super::package_managers::PackageManager;
+use crate::Commands;
+use crate::Phase;
 
 /// A systemd Unit file
 ///
@@ -102,7 +101,7 @@ impl Unit {
     }
 
     /// Get contents of file
-    fn contents(&self) -> anyhow::Result<Vec<u8>> {
+    fn contents(&self) -> eyre::Result<Vec<u8>> {
         match &self.source {
             Source::File { contents, .. } => Ok(contents.clone()),
             Source::Package {
@@ -132,7 +131,7 @@ impl Unit {
 
     /// Parse the contents of the unit file, it is a simple INI file, use
     /// rust-ini
-    fn parse_unit_file(&self) -> anyhow::Result<ini::Ini> {
+    fn parse_unit_file(&self) -> eyre::Result<ini::Ini> {
         let contents = self.contents()?;
         let contents = std::str::from_utf8(&contents)
             .context("UTF-8 conversion failed for systemd unit file")?;
@@ -149,14 +148,14 @@ impl Unit {
             unit: file
                 .rsplit_once('/')
                 .map(|(_, f)| f)
-                .ok_or_else(|| anyhow::anyhow!("No file name found"))?
+                .ok_or_else(|| eyre::eyre!("No file name found"))?
                 .into(),
             source: Source::File {
                 path: file.into(),
                 contents: cmds
                     .file_contents(file)
                     .ok_or_else(|| {
-                        anyhow::anyhow!(
+                        eyre::eyre!(
                             "Failed to find file contents of {} (did you add a command that \
                              created the file before?)",
                             file
@@ -221,10 +220,9 @@ impl Unit {
     #[rune::function(keep)]
     pub fn enable(self, commands: &mut Commands) -> KResult<()> {
         if commands.phase != Phase::Main {
-            return Err(anyhow::anyhow!(
-                "File system actions are only possible in the 'main' phase"
-            )
-            .into());
+            return Err(
+                eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
+            );
         }
 
         let parsed = self.parse_unit_file()?;
@@ -260,10 +258,9 @@ impl Unit {
     #[rune::function(keep)]
     pub fn mask(self, commands: &mut Commands) -> KResult<()> {
         if commands.phase != Phase::Main {
-            return Err(anyhow::anyhow!(
-                "File system actions are only possible in the 'main' phase"
-            )
-            .into());
+            return Err(
+                eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
+            );
         }
 
         commands.ln(&self.symlink_path(), "/dev/null")?;

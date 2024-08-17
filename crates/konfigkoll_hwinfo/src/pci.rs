@@ -15,12 +15,12 @@ pub struct PciIdDb {
 
 impl PciIdDb {
     /// Create from a string containing `pci.ids`
-    pub fn parse(s: &str) -> anyhow::Result<Self> {
+    pub fn parse(s: &str) -> eyre::Result<Self> {
         parser::parse_pcidatabase(s)
     }
 
     /// Create from a file containing `pci.ids`
-    pub fn parse_file(path: &std::path::Path) -> anyhow::Result<Self> {
+    pub fn parse_file(path: &std::path::Path) -> eyre::Result<Self> {
         let s = std::fs::read_to_string(path)?;
         Self::parse(&s)
     }
@@ -81,7 +81,7 @@ pub struct PciDevice {
 
 impl PciDevice {
     /// Load data from /sys
-    fn from_directory(path: &std::path::Path) -> anyhow::Result<Self> {
+    fn from_directory(path: &std::path::Path) -> eyre::Result<Self> {
         let class = std::fs::read_to_string(path.join("class"))?;
         let vendor = std::fs::read_to_string(path.join("vendor"))?;
         let device = std::fs::read_to_string(path.join("device"))?;
@@ -186,7 +186,7 @@ where
 }
 
 /// Read PCI device info from `/sys`
-pub fn load_pci_devices() -> anyhow::Result<impl Iterator<Item = PciDevice>> {
+pub fn load_pci_devices() -> eyre::Result<impl Iterator<Item = PciDevice>> {
     let path = std::path::Path::new("/sys/bus/pci/devices");
     let mut devices = vec![];
     for entry in std::fs::read_dir(path)? {

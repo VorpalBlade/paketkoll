@@ -4,8 +4,8 @@ use std::collections::BTreeMap;
 use std::io::BufRead;
 use std::path::PathBuf;
 
-use anyhow::Context;
-
+use eyre::Context;
+use eyre::ContextCompat;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::intern::PackageRef;
 
@@ -22,7 +22,7 @@ pub(super) struct Diversion {
 pub(super) type Diversions = BTreeMap<PathBuf, Diversion>;
 
 /// Get all diversions from dpkg-divert --list
-pub(super) fn get_diversions(interner: &Interner) -> anyhow::Result<Diversions> {
+pub(super) fn get_diversions(interner: &Interner) -> eyre::Result<Diversions> {
     let mut cmd = std::process::Command::new("dpkg-divert");
     cmd.arg("--list");
     let output = cmd.output().context("Failed to run dpkg-divert")?;
@@ -31,7 +31,7 @@ pub(super) fn get_diversions(interner: &Interner) -> anyhow::Result<Diversions> 
 }
 
 /// Parse output from dpkg-divert --list
-fn parse_diversions(mut input: impl BufRead, interner: &Interner) -> anyhow::Result<Diversions> {
+fn parse_diversions(mut input: impl BufRead, interner: &Interner) -> eyre::Result<Diversions> {
     let mut results = Diversions::new();
 
     let re = regex::Regex::new(r"^diversion of (?<orig>.+) to (?<new>.+) by (?<pkg>.+)$")?;
@@ -69,7 +69,7 @@ fn parse_diversions(mut input: impl BufRead, interner: &Interner) -> anyhow::Res
                 )
                 .is_some();
             if had_entry {
-                return Err(anyhow::anyhow!(
+                return Err(eyre::eyre!(
                     "Duplicate diversion for path {:?}. Don't know how to handle",
                     orig_path
                 ));
@@ -84,10 +84,9 @@ fn parse_diversions(mut input: impl BufRead, interner: &Interner) -> anyhow::Res
 
 #[cfg(test)]
 mod tests {
-    use pretty_assertions::assert_eq;
-
     use paketkoll_types::intern::Interner;
     use paketkoll_types::intern::PackageRef;
+    use pretty_assertions::assert_eq;
 
     use super::parse_diversions;
     use super::Diversion;

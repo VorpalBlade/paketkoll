@@ -2,8 +2,9 @@
 
 use std::io::Read;
 
-use anyhow::Context;
 use compact_str::CompactString;
+use eyre::Context;
+use eyre::ContextCompat;
 
 /// Pacman configuration (or at least the parts we care about)
 #[derive(Debug)]
@@ -14,7 +15,7 @@ pub(crate) struct PacmanConfig {
 }
 
 impl PacmanConfig {
-    pub(crate) fn new(file: &mut impl Read) -> anyhow::Result<Self> {
+    pub(crate) fn new(file: &mut impl Read) -> eyre::Result<Self> {
         let parser = ini::Ini::read_from(file).context("Failed to open pacman.conf")?;
         let options: &ini::Properties = parser
             .section(Some("options"))

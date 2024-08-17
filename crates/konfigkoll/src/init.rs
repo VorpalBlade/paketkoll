@@ -1,10 +1,10 @@
 //! Set up a new configuration directory from the template
 
-use anyhow::Context;
 use camino::Utf8Path;
+use eyre::Context;
 
 /// Set up a new configuration directory from the template
-pub(crate) fn init_directory(config_path: &Utf8Path) -> anyhow::Result<()> {
+pub(crate) fn init_directory(config_path: &Utf8Path) -> eyre::Result<()> {
     std::fs::create_dir_all(config_path).context("Failed to create config directory")?;
     std::fs::create_dir_all(config_path.join("files"))?;
 
