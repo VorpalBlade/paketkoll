@@ -14,7 +14,7 @@ use compact_str::format_compact;
 use dashmap::DashMap;
 use dashmap::DashSet;
 use either::Either;
-use eyre::ContextCompat;
+use eyre::OptionExt;
 use eyre::WrapErr;
 use paketkoll_types::backend::ArchiveQueryError;
 use paketkoll_types::backend::ArchiveResult;
@@ -260,7 +260,7 @@ impl ArchLinux {
         let package_paths = filter.iter().map(|pkg_ref| {
             let pkg = packages
                 .get(pkg_ref)
-                .wrap_err("Failed to find package in package map")?;
+                .ok_or_eyre("Failed to find package in package map")?;
             let name = pkg.name.to_str(interner);
             // Get the full file name
             let filename = format_pkg_filename(interner, pkg);

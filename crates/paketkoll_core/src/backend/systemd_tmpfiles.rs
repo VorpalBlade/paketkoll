@@ -2,7 +2,6 @@
 
 use ahash::AHashMap;
 use compact_str::CompactString;
-use eyre::ContextCompat;
 use eyre::WrapErr;
 use paketkoll_types::backend::ArchiveResult;
 use paketkoll_types::backend::Files;
@@ -598,7 +597,7 @@ fn resolve_gid<'entry>(
                 |name: &str| -> eyre::Result<u32> {
                     let entry = nix::unistd::Group::from_name(name)
                         .wrap_err_with(|| format!("Failed to resolve GID for {name}"))?
-                        .wrap_err_with(|| format!("Failed to resolve GID for {name}"))?;
+                        .ok_or_else(|| eyre::eyre!("Failed to resolve GID for {name}"))?;
                     Ok(entry.gid.as_raw())
                 },
             )
@@ -621,7 +620,7 @@ fn resolve_uid<'entry>(
                 |name: &str| -> eyre::Result<u32> {
                     let entry = nix::unistd::User::from_name(name)
                         .wrap_err_with(|| format!("Failed to resolve UID for {name}"))?
-                        .wrap_err_with(|| format!("Failed to resolve UID for {name}"))?;
+                        .ok_or_else(|| eyre::eyre!("Failed to resolve UID for {name}"))?;
                     Ok(entry.uid.as_raw())
                 },
             )

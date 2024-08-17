@@ -1,6 +1,6 @@
 //! Parser for dpkg-divert
 
-use eyre::ContextCompat;
+use eyre::OptionExt;
 use eyre::WrapErr;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::intern::PackageRef;
@@ -42,19 +42,19 @@ fn parse_diversions(mut input: impl BufRead, interner: &Interner) -> eyre::Resul
         if let Some(captures) = captures {
             let orig_path: PathBuf = captures
                 .name("orig")
-                .wrap_err("Failed to extract orig path")?
+                .ok_or_eyre("Failed to extract orig path")?
                 .as_str()
                 .into();
             let new_path = captures
                 .name("new")
-                .wrap_err("Failed to extract new path")?
+                .ok_or_eyre("Failed to extract new path")?
                 .as_str()
                 .into();
             let by_package = PackageRef::get_or_intern(
                 interner,
                 captures
                     .name("pkg")
-                    .wrap_err("Failed to extract package")?
+                    .ok_or_eyre("Failed to extract package")?
                     .as_str(),
             );
 

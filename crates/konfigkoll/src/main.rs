@@ -4,7 +4,7 @@ use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use clap::Parser;
 use compact_str::CompactString;
-use eyre::ContextCompat;
+use eyre::OptionExt;
 use eyre::WrapErr;
 use itertools::Itertools;
 use konfigkoll::cli::Cli;
@@ -87,7 +87,7 @@ async fn main() -> color_eyre::eyre::Result<()> {
     script_engine.run_phase(Phase::SystemDiscovery).await?;
 
     let proj_dirs = directories::ProjectDirs::from("", "", "konfigkoll")
-        .wrap_err("Failed to get directories for disk cache")?;
+        .ok_or_eyre("Failed to get directories for disk cache")?;
 
     // Create backends
     tracing::info!("Creating backends");

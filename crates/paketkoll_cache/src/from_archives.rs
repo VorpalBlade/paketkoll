@@ -6,7 +6,7 @@ use cached::stores::DiskCacheBuilder;
 use cached::DiskCache;
 use cached::IOCached;
 use compact_str::CompactString;
-use eyre::ContextCompat;
+use eyre::OptionExt;
 use eyre::WrapErr;
 use paketkoll_types::backend::ArchiveQueryError;
 use paketkoll_types::backend::ArchiveResult;
@@ -170,7 +170,7 @@ impl Files for FromArchiveCache {
         let mut cache_keys = AHashMap::new();
 
         for pkg_ref in filter {
-            let pkg = package_map.get(pkg_ref).wrap_err("Package not found")?;
+            let pkg = package_map.get(pkg_ref).ok_or_eyre("Package not found")?;
             let cache_key = format_package(pkg, interner);
             let cache_key = CacheKey::new(inner_name, cache_version, cache_key);
             match self
@@ -213,8 +213,8 @@ impl Files for FromArchiveCache {
             for inner_result in uncached_results.into_iter() {
                 match inner_result {
                     Ok((query, result)) => {
-                        let cache_key = cache_keys.remove(&query).wrap_err_with(|| {
-                            format!("Cache key not found (archive): {query:?}")
+                        let cache_key = cache_keys.remove(&query).ok_or_else(|| {
+                            eyre::eyre!("Cache key not found (archive): {query:?}")
                         })?;
                         self.cache
                             .cache_set(
@@ -237,9 +237,9 @@ impl Files for FromArchiveCache {
                             .iter()
                             .map(|e| e.to_str(interner).into())
                             .collect();
-                        let cache_key = cache_keys
-                            .remove(&query)
-                            .wrap_err_with(|| format!("Cache key not found (archive): {pkgs:?}"))?;
+                        let cache_key = cache_keys.remove(&query).ok_or_else(|| {
+                            eyre::eyre!("Cache key not found (archive): {pkgs:?}")
+                        })?;
                         self.cache
                             .cache_set(
                                 cache_key.clone(),

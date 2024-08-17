@@ -1,7 +1,6 @@
 //! Code to save config
 
 use camino::Utf8Path;
-use eyre::ContextCompat;
 use konfigkoll_types::FileContents;
 use konfigkoll_utils::safe_path_join;
 use std::io::Write;
@@ -14,8 +13,8 @@ pub(crate) fn file_data_saver(
 ) -> eyre::Result<()> {
     tracing::info!("Saving file data for {}", path);
     let full_path = safe_path_join(files_path, path);
-    std::fs::create_dir_all(full_path.parent().wrap_err_with(|| {
-        format!("Impossible error: joined path should always below config dir: {full_path}")
+    std::fs::create_dir_all(full_path.parent().ok_or_else(|| {
+        eyre::eyre!("Impossible error: joined path should always below config dir: {full_path}")
     })?)?;
     match contents {
         FileContents::Literal { checksum: _, data } => {

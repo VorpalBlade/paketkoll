@@ -1,7 +1,7 @@
 //! Logic to take mtree data to `FileEntry`
 
 use dashmap::DashSet;
-use eyre::ContextCompat;
+use eyre::OptionExt;
 use eyre::WrapErr;
 use flate2::bufread::GzDecoder;
 use mtree2::MTree;
@@ -86,9 +86,9 @@ fn convert_mtree(
     Ok(match item.file_type() {
         Some(mtree2::FileType::Directory) => {
             let dir = Directory {
-                owner: Uid::new(item.uid().wrap_err("No uid for dir")?),
-                group: Gid::new(item.gid().wrap_err("No gid for dir")?),
-                mode: Mode::new(item.mode().wrap_err("Missing mode")?.into()),
+                owner: Uid::new(item.uid().ok_or_eyre("No uid for dir")?),
+                group: Gid::new(item.gid().ok_or_eyre("No gid for dir")?),
+                mode: Mode::new(item.mode().ok_or_eyre("Missing mode")?.into()),
             };
             let path = extract_path(item);
             if seen_directories.insert((path.clone(), dir.clone())) {
@@ -108,12 +108,12 @@ fn convert_mtree(
             package: Some(pkg),
             path: extract_path(item),
             properties: Properties::RegularFile(RegularFile {
-                owner: Uid::new(item.uid().wrap_err("No uid for file")?),
-                group: Gid::new(item.gid().wrap_err("No gid for file")?),
-                mode: Mode::new(item.mode().wrap_err("Missing mode")?.into()),
-                mtime: item.time().wrap_err("Missing mtime")?,
-                checksum: Checksum::Sha256(*item.sha256().wrap_err("Missing sha256")?),
-                size: item.size().wrap_err("Missing size")?,
+                owner: Uid::new(item.uid().ok_or_eyre("No uid for file")?),
+                group: Gid::new(item.gid().ok_or_eyre("No gid for file")?),
+                mode: Mode::new(item.mode().ok_or_eyre("Missing mode")?.into()),
+                mtime: item.time().ok_or_eyre("Missing mtime")?,
+                checksum: Checksum::Sha256(*item.sha256().ok_or_eyre("Missing sha256")?),
+                size: item.size().ok_or_eyre("Missing size")?,
             }),
             flags: if backup_files.contains(item.path().as_os_str().as_encoded_bytes()) {
                 FileFlags::CONFIG
@@ -127,9 +127,9 @@ fn convert_mtree(
             package: Some(pkg),
             path: extract_path(item),
             properties: Properties::Symlink(Symlink {
-                owner: Uid::new(item.uid().wrap_err("No uid for link")?),
-                group: Gid::new(item.gid().wrap_err("No gid for link")?),
-                target: item.link().wrap_err("No target for link")?.into(),
+                owner: Uid::new(item.uid().ok_or_eyre("No uid for link")?),
+                group: Gid::new(item.gid().ok_or_eyre("No gid for link")?),
+                target: item.link().ok_or_eyre("No target for link")?.into(),
             }),
             flags: FileFlags::empty(),
             source: super::NAME,

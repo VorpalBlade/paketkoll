@@ -8,7 +8,6 @@ use crate::utils::NameToNumericResolveCache;
 use ahash::AHashMap;
 use console::style;
 use either::Either;
-use eyre::ContextCompat;
 use eyre::WrapErr;
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::FsOp;
@@ -228,7 +227,7 @@ impl InProcessApplicator {
                     .wrap_err_with(|| format!("Failed to find owner for {}", instr.path))?;
                 let package = owners
                     .get(instr.path.as_std_path())
-                    .wrap_err_with(|| format!("Failed to find owner for {}", instr.path))?
+                    .ok_or_else(|| eyre::eyre!("Failed to find owner for {}", instr.path))?
                     .ok_or_else(|| eyre::eyre!("No owner for {}", instr.path))?;
                 let package = package.to_str(&self.interner);
                 // Get original contents:
