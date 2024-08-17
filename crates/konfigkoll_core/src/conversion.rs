@@ -341,7 +341,7 @@ fn fs_load_contents(path: &Utf8Path, checksum: Option<&Checksum>) -> anyhow::Res
     let size = path.metadata()?.size();
     // I don't like this, but I don't see much of a better option to avoid running
     // out of memory
-    if size > 1024 * 1024 {
+    if size > 512 {
         Ok(FileContents::FromFile {
             checksum,
             path: path.into(),
