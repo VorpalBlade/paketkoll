@@ -20,6 +20,7 @@ use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::OriginalFileQuery;
 use paketkoll_types::backend::PackageBackendMap;
+use paketkoll_types::backend::PackageMap;
 use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::intern::PackageRef;
@@ -101,6 +102,157 @@ impl InProcessApplicator {
             id_resolver: NameToNumericResolveCache::new(),
         }
     }
+
+    fn apply_single_file(
+        &mut self,
+        instr: &FsInstruction,
+        pkg_map: &PackageMap,
+    ) -> Result<(), anyhow::Error> {
+        tracing::info!("Applying: {}: {}", instr.path, instr.op);
+        if instr.op != FsOp::Comment && instr.op != FsOp::Remove {
+            if let Some(parent) = instr.path.parent() {
+                std::fs::create_dir_all(parent).context("Failed to create parent directory")?;
+            }
+        }
+        match &instr.op {
+            FsOp::Remove => {
+                let existing = std::fs::symlink_metadata(&instr.path);
+                if let Ok(metadata) = existing {
+                    if metadata.is_dir() {
+                        match std::fs::remove_dir(&instr.path) {
+                            Ok(_) => (),
+                            Err(err) => match err.raw_os_error() {
+                                Some(libc::ENOTEMPTY) => {
+                                    Err(err).context(
+                                        "Failed to remove directory: it is not empty (possibly it \
+                                         contains some ignored files). You will have to \
+                                         investigate and resolve this yourself, since we don't \
+                                         want to delete things we shouldn't.",
+                                    )?;
+                                }
+                                Some(_) | None => {
+                                    Err(err).context("Failed to remove directory")?;
+                                }
+                            },
+                        }
+                    } else {
+                        std::fs::remove_file(&instr.path)?;
+                    }
+                }
+            }
+            FsOp::CreateDirectory => {
+                std::fs::create_dir_all(&instr.path)?;
+            }
+            FsOp::CreateFile(contents) => {
+                match contents {
+                    konfigkoll_types::FileContents::Literal { checksum: _, data } => {
+                        std::fs::write(&instr.path, data).context("Failed to write file data")?;
+                    }
+                    konfigkoll_types::FileContents::FromFile { checksum: _, path } => {
+                        // std::fs::copy copies permissions, which we don't want (we want the
+                        // file to be owned by root with default permissions until an
+                        // instruction says otherwise), so we can't use it.
+                        let mut target_file = std::fs::OpenOptions::new()
+                            .write(true)
+                            .truncate(true)
+                            .create(true)
+                            .mode(0o644)
+                            .open(&instr.path)
+                            .context("Failed to open target file for writing")?;
+                        let mut source_file = std::fs::File::open(path)
+                            .context("Failed to open source file for reading")?;
+                        std::io::copy(&mut source_file, &mut target_file)
+                            .context("Failed to copy file contents")?;
+                    }
+                }
+            }
+            FsOp::CreateSymlink { target } => {
+                match std::os::unix::fs::symlink(target, &instr.path) {
+                    Ok(_) => Ok(()),
+                    Err(err) => {
+                        if err.kind() == std::io::ErrorKind::AlreadyExists {
+                            // If the symlink already exists, we can just remove it and try
+                            // again
+                            std::fs::remove_file(&instr.path)
+                                .context("Failed to remove old file before creating symlink")?;
+                            std::os::unix::fs::symlink(target, &instr.path)
+                        } else {
+                            Err(err)
+                        }
+                    }
+                }
+                .context("Failed to create symlink")?;
+            }
+            FsOp::CreateFifo => {
+                // Since we split out mode in general, we don't know what to put here.
+                // Use empty, and let later instructions set it correctly.
+                nix::unistd::mkfifo(instr.path.as_std_path(), nix::sys::stat::Mode::empty())?;
+            }
+            FsOp::CreateBlockDevice { major, minor } => {
+                // Like with fifo, we don't know mode yet.
+                nix::sys::stat::mknod(
+                    instr.path.as_std_path(),
+                    nix::sys::stat::SFlag::S_IFBLK,
+                    nix::sys::stat::Mode::empty(),
+                    nix::sys::stat::makedev(*major, *minor),
+                )?;
+            }
+            FsOp::CreateCharDevice { major, minor } => {
+                // Like with fifo, we don't know mode yet.
+                nix::sys::stat::mknod(
+                    instr.path.as_std_path(),
+                    nix::sys::stat::SFlag::S_IFCHR,
+                    nix::sys::stat::Mode::empty(),
+                    nix::sys::stat::makedev(*major, *minor),
+                )?;
+            }
+            FsOp::SetMode { mode } => {
+                let perms = Permissions::from_mode(mode.as_raw());
+                std::fs::set_permissions(&instr.path, perms)?;
+            }
+            FsOp::SetOwner { owner } => {
+                let uid = nix::unistd::Uid::from_raw(
+                    self.id_resolver.lookup(&IdKey::User(owner.clone()))?,
+                );
+                nix::unistd::chown(instr.path.as_std_path(), Some(uid), None)?;
+            }
+            FsOp::SetGroup { group } => {
+                let gid = nix::unistd::Gid::from_raw(
+                    self.id_resolver.lookup(&IdKey::Group(group.clone()))?,
+                );
+                nix::unistd::chown(instr.path.as_std_path(), None, Some(gid))?;
+            }
+            FsOp::Restore => {
+                // Get package:
+                let owners = self
+                    .file_backend
+                    .owning_packages(&[instr.path.as_std_path()].into(), &self.interner)
+                    .with_context(|| format!("Failed to find owner for {}", instr.path))?;
+                let package = owners
+                    .get(instr.path.as_std_path())
+                    .with_context(|| format!("Failed to find owner for {}", instr.path))?
+                    .ok_or_else(|| anyhow::anyhow!("No owner for {}", instr.path))?;
+                let package = package.to_str(&self.interner);
+                // Get original contents:
+                let queries = [OriginalFileQuery {
+                    package: package.into(),
+                    path: instr.path.as_str().into(),
+                }];
+                let original_contents =
+                    self.file_backend
+                        .original_files(&queries, pkg_map, &self.interner)?;
+                // Apply
+                for query in queries {
+                    let contents = original_contents
+                        .get(&query)
+                        .ok_or_else(|| anyhow::anyhow!("No original contents for {:?}", query))?;
+                    std::fs::write(&instr.path, contents)?;
+                }
+            }
+            FsOp::Comment => (),
+        };
+        Ok(())
+    }
 }
 
 impl Applicator for InProcessApplicator {
@@ -155,152 +307,12 @@ impl Applicator for InProcessApplicator {
                     "No package map for file backend {:?}",
                     self.file_backend.as_backend_enum()
                 )
-            })?;
+            })?
+            .clone();
         for instr in instructions {
-            tracing::info!("Applying: {}: {}", instr.path, instr.op);
-            if instr.op != FsOp::Comment && instr.op != FsOp::Remove {
-                if let Some(parent) = instr.path.parent() {
-                    std::fs::create_dir_all(parent).context("Failed to create parent directory")?;
-                }
-            }
-            match &instr.op {
-                FsOp::Remove => {
-                    let existing = std::fs::symlink_metadata(&instr.path);
-                    if let Ok(metadata) = existing {
-                        if metadata.is_dir() {
-                            match std::fs::remove_dir(&instr.path) {
-                                Ok(_) => (),
-                                Err(err) => match err.raw_os_error() {
-                                    Some(libc::ENOTEMPTY) => {
-                                        Err(err).context(
-                                            "Failed to remove directory: it is not empty \
-                                             (possibly it contains some ignored files). You will \
-                                             have to investigate and resolve this yourself, since \
-                                             we don't want to delete things we shouldn't.",
-                                        )?;
-                                    }
-                                    Some(_) | None => {
-                                        Err(err).context("Failed to remove directory")?;
-                                    }
-                                },
-                            }
-                        } else {
-                            std::fs::remove_file(&instr.path)?;
-                        }
-                    }
-                }
-                FsOp::CreateDirectory => {
-                    std::fs::create_dir_all(&instr.path)?;
-                }
-                FsOp::CreateFile(contents) => {
-                    match contents {
-                        konfigkoll_types::FileContents::Literal { checksum: _, data } => {
-                            std::fs::write(&instr.path, data)
-                                .context("Failed to write file data")?;
-                        }
-                        konfigkoll_types::FileContents::FromFile { checksum: _, path } => {
-                            // std::fs::copy copies permissions, which we don't want (we want the
-                            // file to be owned by root with default permissions until an
-                            // instruction says otherwise), so we can't use it.
-                            let mut target_file = std::fs::OpenOptions::new()
-                                .write(true)
-                                .truncate(true)
-                                .create(true)
-                                .mode(0o644)
-                                .open(&instr.path)
-                                .context("Failed to open target file for writing")?;
-                            let mut source_file = std::fs::File::open(path)
-                                .context("Failed to open source file for reading")?;
-                            std::io::copy(&mut source_file, &mut target_file)
-                                .context("Failed to copy file contents")?;
-                        }
-                    }
-                }
-                FsOp::CreateSymlink { target } => {
-                    match std::os::unix::fs::symlink(target, &instr.path) {
-                        Ok(_) => Ok(()),
-                        Err(err) => {
-                            if err.kind() == std::io::ErrorKind::AlreadyExists {
-                                // If the symlink already exists, we can just remove it and try
-                                // again
-                                std::fs::remove_file(&instr.path)
-                                    .context("Failed to remove old file before creating symlink")?;
-                                std::os::unix::fs::symlink(target, &instr.path)
-                            } else {
-                                Err(err)
-                            }
-                        }
-                    }
-                    .context("Failed to create symlink")?
-                }
-                FsOp::CreateFifo => {
-                    // Since we split out mode in general, we don't know what to put here.
-                    // Use empty, and let later instructions set it correctly.
-                    nix::unistd::mkfifo(instr.path.as_std_path(), nix::sys::stat::Mode::empty())?;
-                }
-                FsOp::CreateBlockDevice { major, minor } => {
-                    // Like with fifo, we don't know mode yet.
-                    nix::sys::stat::mknod(
-                        instr.path.as_std_path(),
-                        nix::sys::stat::SFlag::S_IFBLK,
-                        nix::sys::stat::Mode::empty(),
-                        nix::sys::stat::makedev(*major, *minor),
-                    )?;
-                }
-                FsOp::CreateCharDevice { major, minor } => {
-                    // Like with fifo, we don't know mode yet.
-                    nix::sys::stat::mknod(
-                        instr.path.as_std_path(),
-                        nix::sys::stat::SFlag::S_IFCHR,
-                        nix::sys::stat::Mode::empty(),
-                        nix::sys::stat::makedev(*major, *minor),
-                    )?;
-                }
-                FsOp::SetMode { mode } => {
-                    let perms = Permissions::from_mode(mode.as_raw());
-                    std::fs::set_permissions(&instr.path, perms)?;
-                }
-                FsOp::SetOwner { owner } => {
-                    let uid = nix::unistd::Uid::from_raw(
-                        self.id_resolver.lookup(&IdKey::User(owner.clone()))?,
-                    );
-                    nix::unistd::chown(instr.path.as_std_path(), Some(uid), None)?;
-                }
-                FsOp::SetGroup { group } => {
-                    let gid = nix::unistd::Gid::from_raw(
-                        self.id_resolver.lookup(&IdKey::Group(group.clone()))?,
-                    );
-                    nix::unistd::chown(instr.path.as_std_path(), None, Some(gid))?;
-                }
-                FsOp::Restore => {
-                    // Get package:
-                    let owners = self
-                        .file_backend
-                        .owning_packages(&[instr.path.as_std_path()].into(), &self.interner)
-                        .with_context(|| format!("Failed to find owner for {}", instr.path))?;
-                    let package = owners
-                        .get(instr.path.as_std_path())
-                        .with_context(|| format!("Failed to find owner for {}", instr.path))?
-                        .ok_or_else(|| anyhow::anyhow!("No owner for {}", instr.path))?;
-                    let package = package.to_str(&self.interner);
-                    // Get original contents:
-                    let queries = [OriginalFileQuery {
-                        package: package.into(),
-                        path: instr.path.as_str().into(),
-                    }];
-                    let original_contents =
-                        self.file_backend
-                            .original_files(&queries, pkg_map, &self.interner)?;
-                    // Apply
-                    for query in queries {
-                        let contents = original_contents.get(&query).ok_or_else(|| {
-                            anyhow::anyhow!("No original contents for {:?}", query)
-                        })?;
-                        std::fs::write(&instr.path, contents)?;
-                    }
-                }
-                FsOp::Comment => (),
-            }
+            self.apply_single_file(instr, &pkg_map).with_context(|| {
+                format!("Failed to apply change for {}: {:?}", instr.path, instr.op)
+            })?;
         }
         Ok(())
     }
