@@ -8,6 +8,39 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.6] - 2024-08-17
+
+### 🚀 Features
+
+- Include package name for the modified file (where possible) in a comment when saving
+
+### 🐛 Bug fixes
+
+- Redo archive support to handle cases where an archive is not downloadable
+- Replacing existing symlinks now works (fixes [#67](https://github.com/VorpalBlade/paketkoll/pull/67))
+
+### ⚡ Performance improvements
+
+- Remove unused dependencies (speeds up build time slightly)
+
+### 🩺 Diagnostics & output formatting
+
+- Improve diagnostics for failed file application (now includes failed file name)
+- Interactive apply now shows the summary diff unconditionally. Packages can now be skipped.
+
+### 🚜 Refactoring
+
+- Clean up musl code
+- Rewrite the way tracing_subscriber is being used
+- Make serde non-optional to simplify number of possible configurations
+- Make multi-confirmer strongly typed
+
+### ⚙️ Other stuff
+
+- Move features to workspace manifest where possible
+- Remove empty feature table
+- Apply nightly clippy fixes
+
 ## [0.1.5] - 2024-08-03
 
 ### 🚀 Features

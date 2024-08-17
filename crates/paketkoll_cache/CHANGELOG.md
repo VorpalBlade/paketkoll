@@ -8,6 +8,25 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.3] - 2024-08-17
+
+### 🐛 Bug fixes
+
+- Redo archive support to handle cases where an archive is not downloadable
+- Fix incorrect application of diversions on Debian
+
+### ⚡ Performance improvements
+
+- Remove unused dependencies (speeds up build time slightly)
+
+### 🚜 Refactoring
+
+- Make serde non-optional to simplify number of possible configurations
+
+### ⚙️ Other stuff
+
+- Move features to workspace manifest where possible
+
 ## [0.2.2] - 2024-08-03
 
 ### 🩺 Diagnostics & output formatting
