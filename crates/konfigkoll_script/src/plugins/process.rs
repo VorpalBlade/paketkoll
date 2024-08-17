@@ -60,6 +60,7 @@ use rune::Any;
 use rune::ContextError;
 use rune::Module;
 use tokio::process;
+use tracing::instrument;
 
 /// A module for working with processes.
 ///
@@ -283,6 +284,7 @@ impl Child {
 
     /// Sends a signal to the child process.
     #[rune::function(vm_result, instance, path = Self::kill)]
+    #[instrument(level = "info", skip_all)]
     async fn kill(mut this: Mut<Self>) -> io::Result<()> {
         let inner = match &mut this.inner {
             Some(inner) => inner,
@@ -298,6 +300,7 @@ impl Child {
     ///
     /// This will not capture output, use [`wait_with_output`] for that.
     #[rune::function(vm_result, instance)]
+    #[instrument(level = "info", skip_all)]
     async fn wait(self) -> io::Result<ExitStatus> {
         let mut inner = match self.inner {
             Some(inner) => inner,
@@ -314,6 +317,7 @@ impl Child {
     // Returns a future that will resolve to an Output, containing the exit
     // status, stdout, and stderr of the child process.
     #[rune::function(vm_result, instance)]
+    #[instrument(level = "info", skip_all)]
     async fn wait_with_output(self) -> io::Result<Output> {
         let inner = match self.inner {
             Some(inner) => inner,
