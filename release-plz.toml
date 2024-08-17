@@ -6,12 +6,8 @@ name = "xtask"
 release = false
 
 [[package]]
-name = "konfigkoll_script"
-publish_features = ["arch_linux", "debian"]
-
-[[package]]
 name = "paketkoll_core"
-publish_features = ["arch_linux", "debian", "serde"]
+publish_features = ["arch_linux", "debian"]
 
 # We only want GH releases for the binaries
 [[package]]
