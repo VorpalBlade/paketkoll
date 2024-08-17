@@ -1,6 +1,5 @@
 [workspace]
 git_release_enable = false
-git_release_draft = true
 
 [[package]]
 name = "xtask"
