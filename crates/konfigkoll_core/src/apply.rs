@@ -217,8 +217,21 @@ impl Applicator for InProcessApplicator {
                     }
                 }
                 FsOp::CreateSymlink { target } => {
-                    std::os::unix::fs::symlink(target, &instr.path)
-                        .context("Failed to create symlink")?;
+                    match std::os::unix::fs::symlink(target, &instr.path) {
+                        Ok(_) => Ok(()),
+                        Err(err) => {
+                            if err.kind() == std::io::ErrorKind::AlreadyExists {
+                                // If the symlink already exists, we can just remove it and try
+                                // again
+                                std::fs::remove_file(&instr.path)
+                                    .context("Failed to remove old file before creating symlink")?;
+                                std::os::unix::fs::symlink(target, &instr.path)
+                            } else {
+                                Err(err)
+                            }
+                        }
+                    }
+                    .context("Failed to create symlink")?
                 }
                 FsOp::CreateFifo => {
                     // Since we split out mode in general, we don't know what to put here.
