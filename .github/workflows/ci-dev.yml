@@ -37,6 +37,8 @@ jobs:
         with:
           # Shallow checkouts don't work for merging, so pull in enough history to likely work
           fetch-depth: 75
+          # Needed to push to main
+          persist-credentials: false
       - name: Update main
         run: |
           set -xe
