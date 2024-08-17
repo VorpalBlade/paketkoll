@@ -1,7 +1,5 @@
 //! Allows asking for confirmation in the CLI
 
-use std::io::Write;
-
 use ahash::AHashMap;
 use ahash::AHashSet;
 use compact_str::CompactString;
@@ -10,6 +8,7 @@ use console::Key;
 use console::Style;
 use console::Term;
 use itertools::Itertools;
+use std::io::Write;
 
 /// Trait to be implemented for enums that represent user prompt choices.
 pub trait Choices: Copy + PartialEq + Eq {

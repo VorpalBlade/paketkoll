@@ -1,13 +1,5 @@
 //! Logic to take mtree data to `FileEntry`
 
-use std::collections::BTreeSet;
-use std::ffi::OsStr;
-use std::fs::File;
-use std::io::BufReader;
-use std::io::Read;
-use std::path::Path;
-use std::path::PathBuf;
-
 use dashmap::DashSet;
 use eyre::Context;
 use eyre::ContextCompat;
@@ -24,6 +16,13 @@ use paketkoll_types::files::RegularFile;
 use paketkoll_types::files::Symlink;
 use paketkoll_types::files::Uid;
 use paketkoll_types::intern::PackageRef;
+use std::collections::BTreeSet;
+use std::ffi::OsStr;
+use std::fs::File;
+use std::io::BufReader;
+use std::io::Read;
+use std::path::Path;
+use std::path::PathBuf;
 
 /// Set of special files to ignore from mtree data
 ///

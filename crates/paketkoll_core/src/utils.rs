@@ -1,15 +1,14 @@
 //! Various utility functions
 
-use std::io::BufReader;
-use std::io::Read;
-use std::os::unix::process::ExitStatusExt;
-use std::path::PathBuf;
-
 use ahash::AHashMap;
 use ahash::AHashSet;
 use compact_str::CompactString;
 use eyre::Context;
 use smallvec::SmallVec;
+use std::io::BufReader;
+use std::io::Read;
+use std::os::unix::process::ExitStatusExt;
+use std::path::PathBuf;
 
 /// Helper to do a generic package manager transaction
 pub(crate) fn package_manager_transaction(
@@ -270,8 +269,6 @@ pub(crate) fn convert_archive_entries(
     source: &'static str,
     name_map_filter: impl Fn(&std::path::Path) -> Option<std::borrow::Cow<'_, std::path::Path>>,
 ) -> Result<Vec<paketkoll_types::files::FileEntry>, eyre::Error> {
-    use std::time::SystemTime;
-
     use paketkoll_types::files::Directory;
     use paketkoll_types::files::FileEntry;
     use paketkoll_types::files::FileFlags;
@@ -282,6 +279,7 @@ pub(crate) fn convert_archive_entries(
     use paketkoll_types::files::Symlink;
     use paketkoll_types::files::Uid;
     use paketkoll_utils::checksum::sha256_readable;
+    use std::time::SystemTime;
 
     let mut results = AHashMap::new();
     for entry in archive

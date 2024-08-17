@@ -1,20 +1,18 @@
 //! Helpers for working with systemd units
 
-use std::str::FromStr;
-use std::sync::LazyLock;
-
+use super::error::KResult;
+use super::package_managers::OriginalFilesError;
+use super::package_managers::PackageManager;
+use crate::Commands;
+use crate::Phase;
 use camino::Utf8PathBuf;
 use compact_str::CompactString;
 use eyre::Context;
 use rune::Any;
 use rune::ContextError;
 use rune::Module;
-
-use super::error::KResult;
-use super::package_managers::OriginalFilesError;
-use super::package_managers::PackageManager;
-use crate::Commands;
-use crate::Phase;
+use std::str::FromStr;
+use std::sync::LazyLock;
 
 /// A systemd Unit file
 ///

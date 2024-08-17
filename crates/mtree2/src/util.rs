@@ -1,10 +1,9 @@
 //! Utility misc stuff
+use crate::parser::ParserError;
+use crate::parser::ParserResult;
 use std::ffi::OsStr;
 use std::os::unix::ffi::OsStrExt;
 use std::time::Duration;
-
-use crate::parser::ParserError;
-use crate::parser::ParserResult;
 
 /// Helper to parse a number from a slice of u8 in hexadecimal.
 pub trait FromHex: Sized {
@@ -236,11 +235,10 @@ impl<'haystack> Iterator for MemchrSplitter<'haystack> {
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-
     use super::decode_escapes;
     use super::decode_escapes_path;
     use super::FromHex;
+    use std::path::PathBuf;
 
     #[test]
     fn test_parse_time() {

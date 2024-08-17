@@ -1,10 +1,9 @@
 //! Parse pacman.conf
 
-use std::io::Read;
-
 use compact_str::CompactString;
 use eyre::Context;
 use eyre::ContextCompat;
+use std::io::Read;
 
 /// Pacman configuration (or at least the parts we care about)
 #[derive(Debug)]
@@ -34,9 +33,8 @@ impl PacmanConfig {
 
 #[cfg(test)]
 mod tests {
-    use pretty_assertions::assert_eq;
-
     use super::*;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_pacman_config() {

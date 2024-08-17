@@ -1,4 +1,5 @@
 //! System information gathering
+use super::error::KResult;
 use konfigkoll_hwinfo::pci::PciDevice;
 use konfigkoll_hwinfo::pci::PciIdDb;
 use rune::Any;
@@ -6,8 +7,6 @@ use rune::ContextError;
 use rune::Module;
 use sysinfo::CpuRefreshKind;
 use sysinfo::MemoryRefreshKind;
-
-use super::error::KResult;
 
 /// System info access
 #[derive(Debug, Any)]

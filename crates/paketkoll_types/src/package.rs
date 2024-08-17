@@ -1,11 +1,10 @@
 //! Types and traits for representing data about packages
 
-use compact_str::CompactString;
-use smallvec::SmallVec;
-
 use crate::intern::ArchitectureRef;
 use crate::intern::Interner;
 use crate::intern::PackageRef;
+use compact_str::CompactString;
+use smallvec::SmallVec;
 
 /// The reason a package is installed
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]

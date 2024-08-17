@@ -169,6 +169,7 @@ pub fn save_packages<'instructions>(
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use ahash::AHashMap;
     use camino::Utf8Path;
     use camino::Utf8PathBuf;
@@ -182,8 +183,6 @@ mod tests {
     use paketkoll_types::backend::Backend;
     use paketkoll_types::intern::PackageRef;
     use pretty_assertions::assert_eq;
-
-    use super::*;
 
     #[test]
     fn test_save_fs_changes() {

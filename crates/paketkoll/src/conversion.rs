@@ -1,9 +1,8 @@
-use ahash::AHashSet;
-
 use crate::cli::Backend;
 use crate::cli::Cli;
 use crate::cli::Commands;
 use crate::cli::ConfigFiles;
+use ahash::AHashSet;
 
 impl TryFrom<Backend> for paketkoll_core::backend::ConcreteBackend {
     type Error = eyre::Error;

@@ -41,6 +41,13 @@
 //!
 //! [mtree(5)]: https://www.freebsd.org/cgi/man.cgi?mtree(5)
 
+pub use parser::FileMode;
+pub use parser::FileType;
+pub use parser::Format;
+use parser::Keyword;
+use parser::MTreeLine;
+pub use parser::ParserError;
+use parser::SpecialKind;
 use std::env;
 use std::ffi::OsStr;
 use std::fmt;
@@ -54,14 +61,6 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
-
-pub use parser::FileMode;
-pub use parser::FileType;
-pub use parser::Format;
-use parser::Keyword;
-use parser::MTreeLine;
-pub use parser::ParserError;
-use parser::SpecialKind;
 use util::decode_escapes_path;
 
 mod parser;

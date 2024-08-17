@@ -1,12 +1,5 @@
 //! (File only) backend for systemd-tmpfiles
 
-use std::borrow::Cow;
-use std::collections::hash_map::Entry;
-use std::os::unix::fs::MetadataExt;
-use std::path::Path;
-use std::path::PathBuf;
-use std::process::Stdio;
-
 use ahash::AHashMap;
 use compact_str::CompactString;
 use eyre::Context;
@@ -40,6 +33,12 @@ use paketkoll_types::intern::PackageRef;
 use paketkoll_utils::checksum::sha256_buffer;
 use paketkoll_utils::checksum::sha256_readable;
 use paketkoll_utils::MODE_MASK;
+use std::borrow::Cow;
+use std::collections::hash_map::Entry;
+use std::os::unix::fs::MetadataExt;
+use std::path::Path;
+use std::path::PathBuf;
+use std::process::Stdio;
 use systemd_tmpfiles::specifier::Resolve;
 
 const NAME: &str = "systemd_tmpfiles";

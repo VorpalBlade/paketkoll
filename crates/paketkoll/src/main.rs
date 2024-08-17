@@ -1,11 +1,5 @@
 //! Implements the CLI for paketkoll
 
-use std::io::stdout;
-use std::io::BufWriter;
-use std::io::Write;
-use std::os::unix::ffi::OsStrExt;
-use std::path::Path;
-
 use ahash::AHashSet;
 use clap::Parser;
 use eyre::Context;
@@ -24,6 +18,11 @@ use paketkoll_types::package::PackageInterned;
 use proc_exit::Code;
 use proc_exit::Exit;
 use rayon::prelude::*;
+use std::io::stdout;
+use std::io::BufWriter;
+use std::io::Write;
+use std::os::unix::ffi::OsStrExt;
+use std::path::Path;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 

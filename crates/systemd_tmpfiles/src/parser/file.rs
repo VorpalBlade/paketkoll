@@ -1,5 +1,7 @@
 //! Low level parser of the file format
 
+use crate::Id;
+use crate::Mode;
 use compact_str::CompactString;
 use winnow::ascii::digit1;
 use winnow::ascii::escaped_transform;
@@ -16,9 +18,6 @@ use winnow::token::take_till;
 use winnow::token::take_while;
 use winnow::PResult;
 use winnow::Parser;
-
-use crate::Id;
-use crate::Mode;
 
 /// Low level parser that doesn't make a difference between entry types
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -218,9 +217,8 @@ impl<'i> Accumulate<&'i str> for CompactStringWrapper {
 
 #[cfg(test)]
 mod tests {
-    use pretty_assertions::assert_eq;
-
     use super::*;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_comment() {

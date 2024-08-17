@@ -1,8 +1,6 @@
 //! Package backend for flatpak
 
-use std::process::Command;
-use std::process::Stdio;
-
+use crate::utils::package_manager_transaction;
 use eyre::Context;
 use paketkoll_types::backend::Name;
 use paketkoll_types::backend::PackageManagerError;
@@ -14,8 +12,8 @@ use paketkoll_types::package::Package;
 use paketkoll_types::package::PackageInstallStatus;
 use paketkoll_types::package::PackageInterned;
 use smallvec::SmallVec;
-
-use crate::utils::package_manager_transaction;
+use std::process::Command;
+use std::process::Stdio;
 
 /// Flatpak backend
 #[derive(Debug)]
@@ -174,10 +172,9 @@ fn parse_flatpak_output(
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use pretty_assertions::assert_eq;
     use Package;
-
-    use super::*;
 
     #[test]
     fn test_parse_flatpak_output() {

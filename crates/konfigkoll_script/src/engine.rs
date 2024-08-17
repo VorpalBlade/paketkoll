@@ -1,10 +1,8 @@
-use std::fmt::Display;
-use std::io::Write;
-use std::panic::catch_unwind;
-use std::panic::AssertUnwindSafe;
-use std::sync::Arc;
-use std::sync::OnceLock;
-
+use crate::plugins::command::Commands;
+use crate::plugins::error::KError;
+use crate::plugins::package_managers::PackageManagers;
+use crate::plugins::properties::Properties;
+use crate::plugins::settings::Settings;
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use eyre::Context;
@@ -18,12 +16,12 @@ use rune::termcolor::StandardStream;
 use rune::Diagnostics;
 use rune::Source;
 use rune::Vm;
-
-use crate::plugins::command::Commands;
-use crate::plugins::error::KError;
-use crate::plugins::package_managers::PackageManagers;
-use crate::plugins::properties::Properties;
-use crate::plugins::settings::Settings;
+use std::fmt::Display;
+use std::io::Write;
+use std::panic::catch_unwind;
+use std::panic::AssertUnwindSafe;
+use std::sync::Arc;
+use std::sync::OnceLock;
 
 /// Describe the phases of script evaluation.
 ///

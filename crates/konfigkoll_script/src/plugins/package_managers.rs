@@ -1,9 +1,6 @@
 //! Access to system package manager
 
-use std::collections::BTreeMap;
-use std::str::FromStr;
-use std::sync::Arc;
-
+use super::error::KResult;
 use eyre::Context;
 use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
@@ -20,8 +17,9 @@ use rune::vm_write;
 use rune::Any;
 use rune::ContextError;
 use rune::Module;
-
-use super::error::KResult;
+use std::collections::BTreeMap;
+use std::str::FromStr;
+use std::sync::Arc;
 
 /// Type of map for package managers
 pub type PackageManagerMap = BTreeMap<Backend, PackageManager>;

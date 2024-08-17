@@ -1,10 +1,6 @@
 //! Wrapping backend that performs disk cache of original files queries
 
-use std::fmt::Debug;
-use std::fmt::Display;
-use std::path::Path;
-use std::path::PathBuf;
-
+use crate::utils::format_package;
 use ahash::AHashMap;
 use cached::stores::DiskCacheBuilder;
 use cached::DiskCache;
@@ -28,8 +24,10 @@ use paketkoll_types::files::Properties;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::intern::PackageRef;
 use smallvec::SmallVec;
-
-use crate::utils::format_package;
+use std::fmt::Debug;
+use std::fmt::Display;
+use std::path::Path;
+use std::path::PathBuf;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct CacheKey {

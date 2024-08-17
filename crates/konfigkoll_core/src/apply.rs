@@ -1,10 +1,10 @@
 //! Apply a stream of instructions to the current system
 
-use std::fs::Permissions;
-use std::os::unix::fs::OpenOptionsExt;
-use std::os::unix::fs::PermissionsExt;
-use std::sync::Arc;
-
+use crate::confirm::Choices;
+use crate::confirm::MultiOptionConfirm;
+use crate::diff::show_fs_instr_diff;
+use crate::utils::IdKey;
+use crate::utils::NameToNumericResolveCache;
 use ahash::AHashMap;
 use console::style;
 use either::Either;
@@ -24,12 +24,10 @@ use paketkoll_types::backend::PackageMap;
 use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::intern::PackageRef;
-
-use crate::confirm::Choices;
-use crate::confirm::MultiOptionConfirm;
-use crate::diff::show_fs_instr_diff;
-use crate::utils::IdKey;
-use crate::utils::NameToNumericResolveCache;
+use std::fs::Permissions;
+use std::os::unix::fs::OpenOptionsExt;
+use std::os::unix::fs::PermissionsExt;
+use std::sync::Arc;
 
 /// Applier of system changes
 ///

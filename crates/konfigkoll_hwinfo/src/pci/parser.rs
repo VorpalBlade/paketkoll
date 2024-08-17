@@ -1,5 +1,8 @@
 //! Parser for pci.ids
 
+use super::Class;
+use super::ProgrammingInterface;
+use super::Subclass;
 use ahash::AHashMap;
 use winnow::ascii::hex_uint;
 use winnow::ascii::newline;
@@ -15,10 +18,6 @@ use winnow::token::take;
 use winnow::token::take_until;
 use winnow::PResult;
 use winnow::Parser;
-
-use super::Class;
-use super::ProgrammingInterface;
-use super::Subclass;
 
 #[derive(Debug, PartialEq, Eq)]
 enum Line<'input> {
@@ -336,15 +335,14 @@ fn is_hex(s: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use indoc::indoc;
-    use pretty_assertions::assert_eq;
-    use winnow::combinator::terminated;
-
     use super::*;
     use crate::pci::Device;
     use crate::pci::PciIdDb;
     use crate::pci::Subsystem;
     use crate::pci::Vendor;
+    use indoc::indoc;
+    use pretty_assertions::assert_eq;
+    use winnow::combinator::terminated;
 
     #[test]
     fn test_build_hierarchy() {

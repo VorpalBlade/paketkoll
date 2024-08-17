@@ -1,12 +1,7 @@
 //! Generic code for checking files wrt file system
 
-use std::fs::File;
-use std::io::ErrorKind;
-use std::io::Read;
-use std::os::unix::fs::FileTypeExt;
-use std::os::unix::fs::MetadataExt;
-use std::path::PathBuf;
-
+use crate::config::CommonFileCheckConfiguration;
+use crate::config::ConfigFiles;
 use eyre::Context;
 use eyre::Result;
 use paketkoll_types::files::Checksum;
@@ -30,9 +25,12 @@ use paketkoll_types::issue::Issue;
 use paketkoll_types::issue::IssueKind;
 use paketkoll_types::issue::IssueVec;
 use paketkoll_utils::MODE_MASK;
-
-use crate::config::CommonFileCheckConfiguration;
-use crate::config::ConfigFiles;
+use std::fs::File;
+use std::io::ErrorKind;
+use std::io::Read;
+use std::os::unix::fs::FileTypeExt;
+use std::os::unix::fs::MetadataExt;
+use std::path::PathBuf;
 
 /// Determine if a given file should be processed
 fn should_process(file: &FileEntry, config: &CommonFileCheckConfiguration) -> bool {

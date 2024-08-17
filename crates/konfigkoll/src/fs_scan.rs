@@ -1,7 +1,5 @@
 //! Scan the file system
 
-use std::sync::Arc;
-
 use ahash::AHashSet;
 use compact_str::CompactString;
 use dashmap::DashMap;
@@ -23,6 +21,7 @@ use paketkoll_types::files::PathMap;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::intern::PackageRef;
 use rayon::prelude::*;
+use std::sync::Arc;
 
 #[self_referencing]
 pub(crate) struct ScanResult {

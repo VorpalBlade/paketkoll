@@ -1,7 +1,5 @@
 //! Code for applying the configuration to the system.
 
-use std::sync::Arc;
-
 use either::Either;
 use konfigkoll::cli::Paranoia;
 use konfigkoll_core::apply::Applicator;
@@ -9,6 +7,7 @@ use paketkoll_types::backend::Files;
 use paketkoll_types::backend::PackageBackendMap;
 use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::intern::Interner;
+use std::sync::Arc;
 
 #[allow(clippy::too_many_arguments)]
 pub(crate) fn create_applicator(

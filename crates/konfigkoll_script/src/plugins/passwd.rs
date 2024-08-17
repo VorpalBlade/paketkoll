@@ -1,11 +1,9 @@
 //! Helpers for working with /etc/passwd and /etc/groups (as well as shadow
 //! files)
 
-use std::borrow::Cow;
-use std::collections::BTreeMap;
-use std::collections::BTreeSet;
-use std::fmt::Write;
-
+use super::error::KResult;
+use super::package_managers::PackageManager;
+use crate::Commands;
 use ahash::AHashMap;
 use ahash::AHashSet;
 use eyre::Context;
@@ -15,13 +13,13 @@ use rune::Any;
 use rune::ContextError;
 use rune::Module;
 use rune::Value;
+use std::borrow::Cow;
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
+use std::fmt::Write;
 use sysusers::GroupId;
 use sysusers::UserId;
 use winnow::Parser;
-
-use super::error::KResult;
-use super::package_managers::PackageManager;
-use crate::Commands;
 
 mod sysusers;
 

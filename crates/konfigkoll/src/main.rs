@@ -1,7 +1,4 @@
-use std::io::BufWriter;
-use std::io::Write;
-use std::sync::Arc;
-
+use crate::fs_scan::ScanResult;
 use apply::create_applicator;
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
@@ -31,10 +28,11 @@ use paketkoll_types::backend::Files;
 use paketkoll_types::backend::PackageBackendMap;
 use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::backend::Packages;
+use std::io::BufWriter;
+use std::io::Write;
+use std::sync::Arc;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
-
-use crate::fs_scan::ScanResult;
 
 mod apply;
 mod fs_scan;

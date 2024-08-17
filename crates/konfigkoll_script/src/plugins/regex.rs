@@ -1,12 +1,11 @@
 //! Exposing regex to rune
 
+use super::error::KResult;
 use eyre::Context;
 use regex::Regex as InnerRegex;
 use rune::Any;
 use rune::ContextError;
 use rune::Module;
-
-use super::error::KResult;
 
 #[derive(Debug, Clone, Any)]
 #[rune(item = ::regex)]

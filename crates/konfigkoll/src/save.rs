@@ -1,11 +1,10 @@
 //! Code to save config
 
-use std::io::Write;
-
 use camino::Utf8Path;
 use eyre::ContextCompat;
 use konfigkoll_types::FileContents;
 use konfigkoll_utils::safe_path_join;
+use std::io::Write;
 
 /// Copy files to the config directory, under the "files/".
 pub(crate) fn file_data_saver(

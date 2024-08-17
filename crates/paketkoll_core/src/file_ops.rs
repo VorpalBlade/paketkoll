@@ -1,8 +1,5 @@
 //! Contain file checking functionality
 
-use std::os::unix::ffi::OsStrExt;
-use std::path::PathBuf;
-
 use eyre::Context;
 use ignore::overrides::OverrideBuilder;
 use ignore::Match;
@@ -18,6 +15,8 @@ use paketkoll_types::issue::Issue;
 use paketkoll_types::issue::IssueKind;
 use paketkoll_types::issue::PackageIssue;
 use rayon::prelude::*;
+use std::os::unix::ffi::OsStrExt;
+use std::path::PathBuf;
 
 /// Perform a query of original files
 #[doc(hidden)]

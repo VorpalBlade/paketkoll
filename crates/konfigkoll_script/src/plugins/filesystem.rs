@@ -1,8 +1,7 @@
 //! Host file system access
 
-use std::io::ErrorKind;
-use std::io::Read;
-
+use super::error::KResult;
+use crate::engine::CFG_PATH;
 use camino::Utf8PathBuf;
 use eyre::Context;
 use konfigkoll_utils::safe_path_join;
@@ -13,9 +12,8 @@ use rune::vm_write;
 use rune::Any;
 use rune::ContextError;
 use rune::Module;
-
-use super::error::KResult;
-use crate::engine::CFG_PATH;
+use std::io::ErrorKind;
+use std::io::Read;
 
 /// A file error
 #[derive(Debug, Any, thiserror::Error)]

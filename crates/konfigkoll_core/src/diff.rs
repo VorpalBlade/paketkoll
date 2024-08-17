@@ -2,10 +2,6 @@
 //!
 //! This module implements a generic algorithm similar to comm(1)
 
-use std::iter::FusedIterator;
-use std::os::unix::fs::MetadataExt;
-use std::os::unix::fs::PermissionsExt;
-
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use console::style;
@@ -14,6 +10,9 @@ use itertools::Itertools;
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::FsOp;
 use paketkoll_utils::MODE_MASK;
+use std::iter::FusedIterator;
+use std::os::unix::fs::MetadataExt;
+use std::os::unix::fs::PermissionsExt;
 
 /// Compare two sorted slices of items
 pub fn comm<L, R>(left: L, right: R) -> impl FusedIterator<Item = EitherOrBoth<L::Item, R::Item>>

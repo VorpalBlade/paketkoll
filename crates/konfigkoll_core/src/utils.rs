@@ -1,12 +1,11 @@
 //! Utilities
 
-use std::num::NonZeroUsize;
-
 use clru::CLruCache;
 use compact_str::CompactString;
 use eyre::eyre;
 use paketkoll_types::files::Gid;
 use paketkoll_types::files::Uid;
+use std::num::NonZeroUsize;
 
 /// UID/GID to name resolver / cache
 #[derive(Debug)]

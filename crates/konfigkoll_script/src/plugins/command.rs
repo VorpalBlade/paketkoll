@@ -3,9 +3,9 @@
 //! These are the important ones, the ones that describe how the system should
 //! be changed.
 
-use std::str::FromStr;
-use std::sync::Arc;
-
+use super::error::KResult;
+use super::settings::Settings;
+use crate::Phase;
 use ahash::AHashSet;
 use camino::Utf8PathBuf;
 use compact_str::CompactString;
@@ -24,10 +24,8 @@ use paketkoll_types::files::Mode;
 use rune::ContextError;
 use rune::Module;
 use rune::Value;
-
-use super::error::KResult;
-use super::settings::Settings;
-use crate::Phase;
+use std::str::FromStr;
+use std::sync::Arc;
 
 #[derive(Debug, Clone, rune::Any)]
 #[rune(item = ::command)]

@@ -1,7 +1,5 @@
 //! Parsers for Debian package files.
 
-use std::io::BufRead;
-
 use bstr::io::BufReadExt;
 use bstr::ByteSlice;
 use bstr::ByteVec;
@@ -23,6 +21,7 @@ use paketkoll_types::package::PackageBuilder;
 use paketkoll_types::package::PackageInstallStatus;
 use paketkoll_types::package::PackageInterned;
 use smallvec::SmallVec;
+use std::io::BufRead;
 
 /// Load lines from a readable as `PathBufs`
 pub(super) fn parse_paths(
@@ -398,6 +397,9 @@ enum ExtendedStatusParsingState {
 
 #[cfg(test)]
 mod tests {
+    use super::parse_md5sums;
+    use super::parse_paths;
+    use super::parse_status;
     use paketkoll_types::files::Checksum;
     use paketkoll_types::files::FileEntry;
     use paketkoll_types::files::FileFlags;
@@ -411,10 +413,6 @@ mod tests {
     use paketkoll_types::package::Package;
     use paketkoll_types::package::PackageInstallStatus;
     use pretty_assertions::assert_eq;
-
-    use super::parse_md5sums;
-    use super::parse_paths;
-    use super::parse_status;
 
     #[test]
     fn test_parse_paths() {

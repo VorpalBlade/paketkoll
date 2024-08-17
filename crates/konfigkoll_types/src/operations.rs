@@ -1,10 +1,8 @@
-use std::collections::BTreeMap;
-
+use crate::FileContents;
 use compact_str::CompactString;
 use paketkoll_types::files::Mode;
 use paketkoll_types::intern::PackageRef;
-
-use crate::FileContents;
+use std::collections::BTreeMap;
 
 /// An operation to be performed on a file system entry
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, strum::EnumDiscriminants)]

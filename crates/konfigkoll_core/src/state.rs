@@ -1,8 +1,7 @@
 //! State representation of file system
 
-use std::collections::BTreeMap;
-use std::sync::Arc;
-
+use crate::utils::IdKey;
+use crate::utils::NumericToNameResolveCache;
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use compact_str::CompactString;
@@ -15,9 +14,8 @@ use paketkoll_types::files::Mode;
 use paketkoll_types::files::PathMap;
 use paketkoll_types::files::Properties;
 use paketkoll_types::intern::PackageRef;
-
-use crate::utils::IdKey;
-use crate::utils::NumericToNameResolveCache;
+use std::collections::BTreeMap;
+use std::sync::Arc;
 
 const DEFAULT_FILE_MODE: Mode = Mode::new(0o644);
 const DEFAULT_DIR_MODE: Mode = Mode::new(0o755);
@@ -691,9 +689,8 @@ pub fn diff(
 
 #[cfg(test)]
 mod tests {
-    use FsOp;
-
     use super::*;
+    use FsOp;
 
     #[test]
     fn test_apply_instructions() {

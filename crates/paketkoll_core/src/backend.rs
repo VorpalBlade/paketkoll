@@ -1,11 +1,10 @@
 //! The various backends implementing distro specific support
 
-use std::fmt::Debug;
-
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::Packages;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::intern::PackageRef;
+use std::fmt::Debug;
 
 #[cfg(feature = "arch_linux")]
 pub(crate) mod arch;

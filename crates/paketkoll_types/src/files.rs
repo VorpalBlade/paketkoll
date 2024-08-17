@@ -1,12 +1,11 @@
 //! Types representing things about the file system
 
+use crate::intern::PackageRef;
 use std::fmt::Octal;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::atomic::AtomicBool;
 use std::time::SystemTime;
-
-use crate::intern::PackageRef;
 
 /// Unix file mode (permissions)
 #[derive(

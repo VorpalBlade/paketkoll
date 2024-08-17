@@ -1,12 +1,12 @@
 //! The Arch Linux (and derivatives) backend
 
-use std::borrow::Cow;
-use std::collections::BTreeSet;
-use std::io::BufReader;
-use std::iter::once;
-use std::path::Path;
-use std::path::PathBuf;
-
+use super::FullBackend;
+use super::PackageFilter;
+use crate::utils::convert_archive_entries;
+use crate::utils::extract_files;
+use crate::utils::group_queries_by_pkg;
+use crate::utils::locate_package_file;
+use crate::utils::package_manager_transaction;
 use ahash::AHashSet;
 use bstr::ByteSlice;
 use bstr::ByteVec;
@@ -33,14 +33,12 @@ use paketkoll_types::intern::PackageRef;
 use paketkoll_types::package::PackageInterned;
 use rayon::prelude::*;
 use regex::RegexSet;
-
-use super::FullBackend;
-use super::PackageFilter;
-use crate::utils::convert_archive_entries;
-use crate::utils::extract_files;
-use crate::utils::group_queries_by_pkg;
-use crate::utils::locate_package_file;
-use crate::utils::package_manager_transaction;
+use std::borrow::Cow;
+use std::collections::BTreeSet;
+use std::io::BufReader;
+use std::iter::once;
+use std::path::Path;
+use std::path::PathBuf;
 
 mod desc;
 mod mtree;

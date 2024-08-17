@@ -1,13 +1,12 @@
 //! A simple streaming line editor (inspired by sed, but simplified)
 
+use compact_str::CompactString;
+use regex::Regex;
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::fmt::Debug;
 use std::rc::Rc;
 use std::str::Lines;
-
-use compact_str::CompactString;
-use regex::Regex;
 
 /// A program consists of a bunch of commands and can be applied to a string
 /// line by line.

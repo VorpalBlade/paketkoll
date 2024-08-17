@@ -1,7 +1,6 @@
 //! Konfigkoll settings
 
-use std::str::FromStr;
-
+use super::error::KResult;
 use ahash::AHashSet;
 use camino::Utf8PathBuf;
 use eyre::Context;
@@ -10,8 +9,7 @@ use globset::GlobSet;
 use parking_lot::Mutex;
 use rune::ContextError;
 use rune::Module;
-
-use super::error::KResult;
+use std::str::FromStr;
 
 const DEFAULT_EARLY: &[&str] = &["/etc/passwd", "/etc/group", "/etc/shadow", "/etc/gshadow"];
 const DEFAUT_SENSITIVE: &[&str] = &[

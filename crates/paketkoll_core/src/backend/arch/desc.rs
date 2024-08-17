@@ -11,8 +11,6 @@
 // base-package
 // ...
 
-use std::io::BufRead;
-
 use compact_str::CompactString;
 use paketkoll_types::intern::ArchitectureRef;
 use paketkoll_types::intern::Interner;
@@ -21,6 +19,7 @@ use paketkoll_types::package::Dependency;
 use paketkoll_types::package::InstallReason;
 use paketkoll_types::package::PackageInstallStatus;
 use paketkoll_types::package::PackageInterned;
+use std::io::BufRead;
 
 pub(super) fn from_arch_linux_desc(
     mut readable: impl BufRead,
@@ -137,11 +136,10 @@ fn parse_backup(readable: &mut impl BufRead, to_fill: &mut Vec<String>) -> eyre:
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use paketkoll_types::intern::Interner;
     use paketkoll_types::package::Package;
     use pretty_assertions::assert_eq;
-
-    use super::*;
 
     #[test]
     fn test_parse() {

@@ -1,7 +1,5 @@
 //! Package scanning functions
 
-use std::sync::Arc;
-
 use eyre::Context;
 use itertools::Itertools;
 use konfigkoll_types::PkgInstructions;
@@ -10,6 +8,7 @@ use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::package::PackageInstallStatus;
 use rayon::prelude::*;
+use std::sync::Arc;
 
 #[tracing::instrument(skip_all)]
 pub(crate) fn load_packages(

@@ -1,14 +1,13 @@
+use camino::Utf8Path;
+use either::Either;
+use eyre::Context;
+use paketkoll_types::files::Checksum;
 use std::borrow::Cow;
 use std::fs::File;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::io::BufReader;
 use std::io::Read;
-
-use camino::Utf8Path;
-use either::Either;
-use eyre::Context;
-use paketkoll_types::files::Checksum;
 
 /// Describes the contents of a file for the purpose of a [`FsOp`](crate::FsOp).
 #[derive(Debug, Clone)]

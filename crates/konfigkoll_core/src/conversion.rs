@@ -1,13 +1,7 @@
 //! Conversion from paketkoll issues into konfigkoll instruction stream
 
-use std::fs::File;
-use std::io::BufReader;
-use std::io::Read;
-use std::io::Seek;
-use std::os::unix::fs::FileTypeExt;
-use std::os::unix::fs::MetadataExt;
-use std::sync::atomic::AtomicU32;
-
+use crate::utils::IdKey;
+use crate::utils::NumericToNameResolveCache;
 use camino::Utf8Path;
 use compact_str::format_compact;
 use eyre::Context;
@@ -32,9 +26,13 @@ use paketkoll_utils::checksum::sha256_readable;
 use paketkoll_utils::MODE_MASK;
 use parking_lot::Mutex;
 use rayon::prelude::*;
-
-use crate::utils::IdKey;
-use crate::utils::NumericToNameResolveCache;
+use std::fs::File;
+use std::io::BufReader;
+use std::io::Read;
+use std::io::Seek;
+use std::os::unix::fs::FileTypeExt;
+use std::os::unix::fs::MetadataExt;
+use std::sync::atomic::AtomicU32;
 
 pub fn convert_issues_to_fs_instructions(
     issues: Vec<(Option<PackageRef>, Issue)>,
@@ -390,10 +388,9 @@ pub fn convert_packages_to_pkg_instructions(
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use itertools::Itertools;
     use paketkoll_types::package::PackageInstallStatus;
-
-    use super::*;
 
     #[test]
     fn test_convert_packages_to_pkg_instructions() {

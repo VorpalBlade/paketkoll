@@ -1,8 +1,7 @@
+use mtree2::MTree;
 use std::env;
 use std::error::Error;
 use std::fs::File;
-
-use mtree2::MTree;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<_> = env::args().collect();

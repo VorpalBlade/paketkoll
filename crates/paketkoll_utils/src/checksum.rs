@@ -1,9 +1,8 @@
 //! Checksum utilities
 
-use std::io::ErrorKind;
-
 use eyre::Context;
 use paketkoll_types::files::Checksum;
+use std::io::ErrorKind;
 
 pub fn sha256_readable(reader: &mut impl std::io::Read) -> eyre::Result<Checksum> {
     let mut buffer = [0; 16 * 1024];

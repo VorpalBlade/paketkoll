@@ -1,16 +1,14 @@
 //! Actual parser for file format
 
-use compact_str::CompactString;
-use compact_str::ToCompactString;
-use smallvec::SmallVec;
-use winnow::error::ContextError;
-use winnow::Parser;
-
-use file::Line;
-
 use crate::DeviceNode;
 use crate::Directive;
 use crate::Entry;
+use compact_str::CompactString;
+use compact_str::ToCompactString;
+use file::Line;
+use smallvec::SmallVec;
+use winnow::error::ContextError;
+use winnow::Parser;
 
 mod file;
 
@@ -298,11 +296,10 @@ fn parse_entry_type(entry: &str) -> Option<(char, bool, super::EntryFlags)> {
 
 #[cfg(test)]
 mod tests {
-    use pretty_assertions::assert_eq;
-
     use crate::Age;
     use crate::Entry;
     use crate::Id;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_parse_entry_type() {
