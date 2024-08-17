@@ -108,7 +108,7 @@ pub(crate) fn locate_package_file(
     dir_candidates: &[&str],
     package_match: &str,
     pkg: &str,
-    download_pkg: impl Fn(&str) -> Result<(), anyhow::Error>,
+    download_pkg: impl Fn(&str) -> anyhow::Result<()>,
 ) -> Result<Option<PathBuf>, paketkoll_types::backend::OriginalFileError> {
     for downloaded in [false, true] {
         // Try to locate package

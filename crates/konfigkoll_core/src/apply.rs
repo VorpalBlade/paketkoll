@@ -107,7 +107,7 @@ impl InProcessApplicator {
         &mut self,
         instr: &FsInstruction,
         pkg_map: &PackageMap,
-    ) -> Result<(), anyhow::Error> {
+    ) -> anyhow::Result<()> {
         tracing::info!("Applying: {}: {}", instr.path, instr.op);
         if instr.op != FsOp::Comment && instr.op != FsOp::Remove {
             if let Some(parent) = instr.path.parent() {
@@ -492,10 +492,7 @@ fn show_pkg_diff(backend: Backend, install: &[&str], mark_explicit: &[&str], uni
 }
 
 impl<Inner: Applicator + std::fmt::Debug> InteractiveApplicator<Inner> {
-    fn interactive_apply_single_file(
-        &mut self,
-        instr: &FsInstruction,
-    ) -> Result<(), anyhow::Error> {
+    fn interactive_apply_single_file(&mut self, instr: &FsInstruction) -> anyhow::Result<()> {
         println!(
             "Under consideration: {} with change {}",
             style(instr.path.as_str()).blue(),

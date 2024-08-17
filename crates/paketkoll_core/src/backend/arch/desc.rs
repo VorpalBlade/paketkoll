@@ -101,7 +101,7 @@ fn parse_package_list(
     readable: &mut impl BufRead,
     to_fill: &mut Vec<PackageRef>,
     interner: &Interner,
-) -> Result<(), anyhow::Error> {
+) -> anyhow::Result<()> {
     let mut line = String::new();
     while readable.read_line(&mut line)? > 0 {
         let trimmed_line = line.trim_end();
@@ -119,10 +119,7 @@ fn parse_package_list(
 }
 
 /// Parse a list backup list
-fn parse_backup(
-    readable: &mut impl BufRead,
-    to_fill: &mut Vec<String>,
-) -> Result<(), anyhow::Error> {
+fn parse_backup(readable: &mut impl BufRead, to_fill: &mut Vec<String>) -> anyhow::Result<()> {
     let mut line = String::new();
     while readable.read_line(&mut line)? > 0 {
         let trimmed_line = line.trim_end();

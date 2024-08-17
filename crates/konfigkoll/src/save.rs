@@ -13,7 +13,7 @@ pub(crate) fn file_data_saver(
     files_path: &Utf8Path,
     path: &Utf8Path,
     contents: &FileContents,
-) -> Result<(), anyhow::Error> {
+) -> anyhow::Result<()> {
     tracing::info!("Saving file data for {}", path);
     let full_path = safe_path_join(files_path, path);
     std::fs::create_dir_all(full_path.parent().with_context(|| {
@@ -31,12 +31,12 @@ pub(crate) fn file_data_saver(
     Ok(())
 }
 
-pub(crate) fn noop_file_data_saver(path: &Utf8Path) -> Result<(), anyhow::Error> {
+pub(crate) fn noop_file_data_saver(path: &Utf8Path) -> anyhow::Result<()> {
     tracing::info!("Would save file data for {}", path);
     Ok(())
 }
 
-pub(crate) fn filtered_file_data_saver(path: &Utf8Path) -> Result<(), anyhow::Error> {
+pub(crate) fn filtered_file_data_saver(path: &Utf8Path) -> anyhow::Result<()> {
     tracing::info!(
         "Would have saved file data for {} (but it is filtered)",
         path

@@ -79,7 +79,7 @@ fn convert_issue(
     pkg: Option<PackageRef>,
     results: &mut Vec<FsInstruction>,
     id_resolver: &Mutex<NumericToNameResolveCache>,
-) -> Result<(), anyhow::Error> {
+) -> anyhow::Result<()> {
     tracing::debug!("Converting issue");
     let path: &Utf8Path = issue.path().try_into()?;
     for kind in issue.kinds() {

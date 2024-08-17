@@ -31,7 +31,7 @@ pub fn show_fs_instr_diff(
     instr: &FsInstruction,
     diff_command: &[String],
     pager_command: &[String],
-) -> Result<(), anyhow::Error> {
+) -> anyhow::Result<()> {
     match &instr.op {
         FsOp::CreateFile(contents) => {
             show_file_diff(&instr.path, contents, diff_command, pager_command)?;

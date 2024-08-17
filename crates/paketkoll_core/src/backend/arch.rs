@@ -472,7 +472,7 @@ impl Packages for ArchLinux {
 // arch: any, x86_64
 // Epoch separator is :
 
-fn download_arch_pkg(pkg: &str) -> Result<(), anyhow::Error> {
+fn download_arch_pkg(pkg: &str) -> anyhow::Result<()> {
     let status = std::process::Command::new("pacman")
         .args(["-Sw", "--noconfirm", pkg])
         .status()?;

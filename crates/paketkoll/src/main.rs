@@ -161,7 +161,7 @@ fn print_packages(
     packages: Vec<PackageInterned>,
     interner: &Interner,
     stdout: &mut BufWriter<std::io::StdoutLock<'_>>,
-) -> Result<(), anyhow::Error> {
+) -> anyhow::Result<()> {
     match cli.format {
         Format::Human => {
             for pkg in packages {
@@ -195,7 +195,7 @@ fn print_packages(
     Ok(())
 }
 
-fn run_file_checks(cli: &Cli) -> Result<Exit, anyhow::Error> {
+fn run_file_checks(cli: &Cli) -> anyhow::Result<Exit> {
     let (interner, mut found_issues) = match cli.command {
         Commands::Check { .. } => file_ops::check_installed_files(
             &(cli.backend.try_into()?),

@@ -674,7 +674,7 @@ impl Packages for Debian {
 
 impl FullBackend for Debian {}
 
-fn download_debs(pkgs: &[&str]) -> Result<(), anyhow::Error> {
+fn download_debs(pkgs: &[&str]) -> anyhow::Result<()> {
     let status = std::process::Command::new("apt-get")
         .args([
             "install",
@@ -691,7 +691,7 @@ fn download_debs(pkgs: &[&str]) -> Result<(), anyhow::Error> {
     Ok(())
 }
 
-fn download_deb(pkg: &str) -> Result<(), anyhow::Error> {
+fn download_deb(pkg: &str) -> anyhow::Result<()> {
     let status = std::process::Command::new("apt-get")
         .args([
             "install",
