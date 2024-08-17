@@ -3,6 +3,7 @@
 use std::str::FromStr;
 use std::sync::LazyLock;
 
+use anyhow::Context;
 use camino::Utf8PathBuf;
 use compact_str::CompactString;
 use rune::Any;
@@ -12,6 +13,7 @@ use rune::Module;
 use crate::Commands;
 use crate::Phase;
 
+use super::error::KResult;
 use super::package_managers::OriginalFilesError;
 use super::package_managers::PackageManager;
 
@@ -118,9 +120,11 @@ impl Unit {
                         } else {
                             format!("/usr{}", self.unit_file_path())
                         };
-                        Ok(package_manager.file_contents(package, &alt_path)?)
+                        Ok(package_manager
+                            .file_contents(package, &alt_path)
+                            .context("File contents query failed")?)
                     }
-                    Err(e) => Err(e)?,
+                    Err(e) => Err(e).context("File contents query failed")?,
                 }
             }
         }
@@ -130,8 +134,9 @@ impl Unit {
     /// rust-ini
     fn parse_unit_file(&self) -> anyhow::Result<ini::Ini> {
         let contents = self.contents()?;
-        let contents = std::str::from_utf8(&contents)?;
-        Ok(ini::Ini::load_from_str(contents)?)
+        let contents = std::str::from_utf8(&contents)
+            .context("UTF-8 conversion failed for systemd unit file")?;
+        ini::Ini::load_from_str(contents).context("Parsing unit file as INI failed")
     }
 }
 
@@ -139,7 +144,7 @@ impl Unit {
 impl Unit {
     /// Create a new instance from a file path
     #[rune::function(path = Self::from_file, keep)]
-    pub fn from_file(file: &str, cmds: &Commands) -> anyhow::Result<Self> {
+    pub fn from_file(file: &str, cmds: &Commands) -> KResult<Self> {
         Ok(Self {
             unit: file
                 .rsplit_once('/')
@@ -214,11 +219,12 @@ impl Unit {
 
     /// Enable the unit
     #[rune::function(keep)]
-    pub fn enable(self, commands: &mut Commands) -> anyhow::Result<()> {
+    pub fn enable(self, commands: &mut Commands) -> KResult<()> {
         if commands.phase != Phase::Main {
             return Err(anyhow::anyhow!(
                 "File system actions are only possible in the 'main' phase"
-            ));
+            )
+            .into());
         }
 
         let parsed = self.parse_unit_file()?;
@@ -252,11 +258,12 @@ impl Unit {
 
     /// Mask the unit
     #[rune::function(keep)]
-    pub fn mask(self, commands: &mut Commands) -> anyhow::Result<()> {
+    pub fn mask(self, commands: &mut Commands) -> KResult<()> {
         if commands.phase != Phase::Main {
             return Err(anyhow::anyhow!(
                 "File system actions are only possible in the 'main' phase"
-            ));
+            )
+            .into());
         }
 
         commands.ln(&self.symlink_path(), "/dev/null")?;

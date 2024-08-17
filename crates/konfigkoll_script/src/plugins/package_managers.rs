@@ -22,6 +22,8 @@ use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::backend::Packages;
 use paketkoll_types::intern::Interner;
 
+use super::error::KResult;
+
 /// Type of map for package managers
 pub type PackageManagerMap = BTreeMap<Backend, PackageManager>;
 
@@ -184,9 +186,15 @@ impl PackageManager {
 impl PackageManager {
     /// Get the original file contents of a package as a `Result<Bytes>`
     #[rune::function(keep)]
-    fn original_file_contents(&self, package: &str, path: &str) -> anyhow::Result<Bytes> {
-        let result = self.file_contents(package, path)?;
-        Ok(Bytes::from_vec(result.try_into()?))
+    fn original_file_contents(&self, package: &str, path: &str) -> KResult<Bytes> {
+        let result = self
+            .file_contents(package, path)
+            .context("Failed to get original file contents")?;
+        Ok(Bytes::from_vec(
+            result
+                .try_into()
+                .context("Failed to get original file contents")?,
+        ))
     }
 }
 

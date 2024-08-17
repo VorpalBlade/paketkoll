@@ -11,6 +11,8 @@ use parking_lot::Mutex;
 use rune::ContextError;
 use rune::Module;
 
+use super::error::KResult;
+
 const DEFAULT_EARLY: &[&str] = &["/etc/passwd", "/etc/group", "/etc/shadow", "/etc/gshadow"];
 const DEFAUT_SENSITIVE: &[&str] = &[
     "/etc/shadow",
@@ -87,7 +89,9 @@ impl Settings {
                 "Failed to parse one or more early configuration path as a regular expressions",
             )?);
         }
-        Ok(builder.build()?)
+        builder
+            .build()
+            .context("Failed to build globset for early configs")
     }
 
     pub fn sensitive_configs(&self) -> anyhow::Result<GlobSet> {
@@ -98,7 +102,9 @@ impl Settings {
                 "Failed to parse one or more sensitive configuration path as a regular expressions",
             )?);
         }
-        Ok(builder.build()?)
+        builder
+            .build()
+            .context("Failed to build globset for sensitive configs")
     }
 
     /// Get diff tool to use
@@ -139,7 +145,7 @@ impl Settings {
     ///
     /// This will return an error on other values.
     #[rune::function]
-    pub fn set_file_backend(&self, name: &str) -> anyhow::Result<()> {
+    pub fn set_file_backend(&self, name: &str) -> KResult<()> {
         let backend = paketkoll_types::backend::Backend::from_str(name)
             .with_context(|| format!("Unknown backend {name}"))?;
         let mut guard = self.file_backend.lock();
@@ -164,7 +170,7 @@ impl Settings {
     ///
     /// This will return an error on other values.
     #[rune::function]
-    pub fn enable_pkg_backend(&self, name: &str) -> anyhow::Result<()> {
+    pub fn enable_pkg_backend(&self, name: &str) -> KResult<()> {
         let backend = paketkoll_types::backend::Backend::from_str(name)
             .with_context(|| format!("Unknown backend {name}"))?;
 

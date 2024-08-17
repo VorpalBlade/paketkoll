@@ -28,6 +28,7 @@ use paketkoll_types::files::Mode;
 
 use crate::Phase;
 
+use super::error::KResult;
 use super::settings::Settings;
 
 #[derive(Debug, Clone, rune::Any)]
@@ -91,11 +92,9 @@ impl Commands {
 impl Commands {
     /// Ignore a path, preventing it from being scanned for differences
     #[rune::function(keep)]
-    pub fn ignore_path(&mut self, ignore: &str) -> anyhow::Result<()> {
+    pub fn ignore_path(&mut self, ignore: &str) -> KResult<()> {
         if self.phase != Phase::Ignores {
-            return Err(anyhow::anyhow!(
-                "Can only ignore paths during the 'ignores' phase"
-            ));
+            return Err(anyhow::anyhow!("Can only ignore paths during the 'ignores' phase").into());
         }
         if !self.fs_ignores.insert(ignore.into()) {
             tracing::warn!("Ignoring path '{}' multiple times", ignore);
@@ -107,11 +106,12 @@ impl Commands {
     ///
     /// If the package manager isn't enabled, this will be a no-op.
     #[rune::function(keep)]
-    pub fn add_pkg(&mut self, package_manager: &str, identifier: &str) -> anyhow::Result<()> {
+    pub fn add_pkg(&mut self, package_manager: &str, identifier: &str) -> KResult<()> {
         if self.phase < Phase::ScriptDependencies {
             return Err(anyhow::anyhow!(
                 "Can only add packages during the 'script_dependencies' or 'main' phases"
-            ));
+            )
+            .into());
         }
         let backend = Backend::from_str(package_manager).context("Invalid backend")?;
         if !self.settings.is_pkg_backend_enabled(backend) {
@@ -141,11 +141,12 @@ impl Commands {
     ///
     /// If the package manager isn't enabled, this will be a no-op.
     #[rune::function(keep)]
-    pub fn remove_pkg(&mut self, package_manager: &str, identifier: &str) -> anyhow::Result<()> {
+    pub fn remove_pkg(&mut self, package_manager: &str, identifier: &str) -> KResult<()> {
         if self.phase < Phase::ScriptDependencies {
             return Err(anyhow::anyhow!(
                 "Can only add packages during the 'script_dependencies' or 'main' phases"
-            ));
+            )
+            .into());
         }
         let backend = Backend::from_str(package_manager).context("Invalid backend")?;
         if !self.settings.is_file_backend_enabled(backend) {
@@ -173,11 +174,12 @@ impl Commands {
 
     /// Remove a path
     #[rune::function(keep)]
-    pub fn rm(&mut self, path: &str) -> anyhow::Result<()> {
+    pub fn rm(&mut self, path: &str) -> KResult<()> {
         if self.phase != Phase::Main {
             return Err(anyhow::anyhow!(
                 "File system actions are only possible in the 'main' phase"
-            ));
+            )
+            .into());
         }
         self.fs_actions.push(FsInstruction {
             op: FsOp::Remove,
@@ -197,7 +199,7 @@ impl Commands {
 
     /// Create a file with the given contents
     #[rune::function(keep)]
-    pub fn copy(&mut self, path: &str) -> anyhow::Result<()> {
+    pub fn copy(&mut self, path: &str) -> KResult<()> {
         self.copy_from(path, path)
     }
 
@@ -206,11 +208,12 @@ impl Commands {
     /// The rename is useful to copy a file to a different location (e.g.
     /// `etc/fstab.hostname` to `etc/fstab`)
     #[rune::function(keep)]
-    pub fn copy_from(&mut self, path: &str, src: &str) -> anyhow::Result<()> {
+    pub fn copy_from(&mut self, path: &str, src: &str) -> KResult<()> {
         if self.phase != Phase::Main {
             return Err(anyhow::anyhow!(
                 "File system actions are only possible in the 'main' phase"
-            ));
+            )
+            .into());
         }
         self.verify_path(path)?;
         self.verify_path(src)?;
@@ -219,11 +222,9 @@ impl Commands {
             Ok(v) => v,
             Err(e) => {
                 tracing::error!("Failed to read file contents for '{}': {}", path, e);
-                return Err(anyhow::anyhow!(
-                    "Failed to read file contents for '{}': {}",
-                    path,
-                    e
-                ));
+                return Err(
+                    anyhow::anyhow!("Failed to read file contents for '{}': {}", path, e).into(),
+                );
             }
         };
         self.fs_actions.push(FsInstruction {
@@ -237,11 +238,12 @@ impl Commands {
 
     /// Create a symlink
     #[rune::function(keep)]
-    pub fn ln(&mut self, path: &str, target: &str) -> anyhow::Result<()> {
+    pub fn ln(&mut self, path: &str, target: &str) -> KResult<()> {
         if self.phase != Phase::Main {
             return Err(anyhow::anyhow!(
                 "File system actions are only possible in the 'main' phase"
-            ));
+            )
+            .into());
         }
         self.verify_path(path)?;
         self.fs_actions.push(FsInstruction {
@@ -257,11 +259,12 @@ impl Commands {
 
     /// Create a file with the given contents
     #[rune::function(keep)]
-    pub fn write(&mut self, path: &str, contents: &[u8]) -> anyhow::Result<()> {
+    pub fn write(&mut self, path: &str, contents: &[u8]) -> KResult<()> {
         if self.phase != Phase::Main {
             return Err(anyhow::anyhow!(
                 "File system actions are only possible in the 'main' phase"
-            ));
+            )
+            .into());
         }
         self.verify_path(path)?;
         self.fs_actions.push(FsInstruction {
@@ -275,11 +278,12 @@ impl Commands {
 
     /// Create a directory
     #[rune::function(keep)]
-    pub fn mkdir(&mut self, path: &str) -> anyhow::Result<()> {
+    pub fn mkdir(&mut self, path: &str) -> KResult<()> {
         if self.phase != Phase::Main {
             return Err(anyhow::anyhow!(
                 "File system actions are only possible in the 'main' phase"
-            ));
+            )
+            .into());
         }
         self.verify_path(path)?;
         self.fs_actions.push(FsInstruction {
@@ -293,11 +297,12 @@ impl Commands {
 
     /// Change file owner
     #[rune::function(keep)]
-    pub fn chown(&mut self, path: &str, owner: &str) -> anyhow::Result<()> {
+    pub fn chown(&mut self, path: &str, owner: &str) -> KResult<()> {
         if self.phase != Phase::Main {
             return Err(anyhow::anyhow!(
                 "File system actions are only possible in the 'main' phase"
-            ));
+            )
+            .into());
         }
         self.verify_path(path)?;
         self.fs_actions.push(FsInstruction {
@@ -313,11 +318,12 @@ impl Commands {
 
     /// Change file group
     #[rune::function(keep)]
-    pub fn chgrp(&mut self, path: &str, group: &str) -> anyhow::Result<()> {
+    pub fn chgrp(&mut self, path: &str, group: &str) -> KResult<()> {
         if self.phase != Phase::Main {
             return Err(anyhow::anyhow!(
                 "File system actions are only possible in the 'main' phase"
-            ));
+            )
+            .into());
         }
         self.verify_path(path)?;
         self.fs_actions.push(FsInstruction {
@@ -333,21 +339,22 @@ impl Commands {
 
     /// Change file mode
     #[rune::function(keep)]
-    pub fn chmod(&mut self, path: &str, mode: Value) -> anyhow::Result<()> {
+    pub fn chmod(&mut self, path: &str, mode: Value) -> KResult<()> {
         if self.phase != Phase::Main {
             return Err(anyhow::anyhow!(
                 "File system actions are only possible in the 'main' phase"
-            ));
+            )
+            .into());
         }
         self.verify_path(path)?;
         let numeric_mode = match mode {
             Value::Integer(m) => Mode::new(m as u32),
             Value::String(str) => {
-                let guard = str.borrow_ref()?;
+                let guard = str.borrow_ref().context("Borrow guard failed")?;
                 // Convert text mode (u+rx,g+rw,o+r, etc) to numeric mode
                 Mode::parse(&guard)?
             }
-            _ => return Err(anyhow::anyhow!("Invalid mode value")),
+            _ => return Err(anyhow::anyhow!("Invalid mode value").into()),
         };
 
         self.fs_actions.push(FsInstruction {
@@ -361,13 +368,7 @@ impl Commands {
 
     /// Set all permissions at once
     #[rune::function(keep)]
-    pub fn perms(
-        &mut self,
-        path: &str,
-        owner: &str,
-        group: &str,
-        mode: Value,
-    ) -> anyhow::Result<()> {
+    pub fn perms(&mut self, path: &str, owner: &str, group: &str, mode: Value) -> KResult<()> {
         self.chown(path, owner)?;
         self.chgrp(path, group)?;
         self.chmod(path, mode)?;

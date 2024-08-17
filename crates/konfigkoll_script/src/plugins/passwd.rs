@@ -8,6 +8,7 @@ use std::fmt::Write;
 
 use ahash::AHashMap;
 use ahash::AHashSet;
+use anyhow::Context;
 use itertools::Itertools;
 use rune::runtime::Function;
 use rune::Any;
@@ -21,6 +22,7 @@ use sysusers::UserId;
 
 use crate::Commands;
 
+use super::error::KResult;
 use super::package_managers::PackageManager;
 
 mod sysusers;
@@ -141,7 +143,7 @@ impl Passwd {
 macro_rules! log_and_error {
     ($($arg:tt)*) => {
         tracing::error!($($arg)*);
-        return Err(anyhow::anyhow!($($arg)*));
+        return Err(anyhow::anyhow!($($arg)*).into());
     };
 }
 
@@ -155,7 +157,7 @@ impl Passwd {
     /// * `group_ids` - A list of tuples of (groupname, gid) to use if sysusers
     ///   files does not specify a GID
     #[rune::function(path = Self::new)]
-    fn new(user_ids: Vec<(String, u32)>, group_ids: Vec<(String, u32)>) -> anyhow::Result<Self> {
+    fn new(user_ids: Vec<(String, u32)>, group_ids: Vec<(String, u32)>) -> KResult<Self> {
         let num_uids = user_ids.len();
         let num_gids = group_ids.len();
         let uids: AHashMap<String, u32> = user_ids.into_iter().collect();
@@ -253,11 +255,12 @@ impl Passwd {
     /// Read the passwd and group files from the system and update IDs to match
     /// the system (based on name)
     #[rune::function]
-    fn align_ids_with_system(&mut self) -> anyhow::Result<()> {
+    fn align_ids_with_system(&mut self) -> KResult<()> {
         self.sanity_check().inspect_err(|e| {
             tracing::error!("Sanity check *before* aligning passwd IDs failed: {e}");
         })?;
-        let passwd = std::fs::read_to_string("/etc/passwd")?;
+        let passwd = std::fs::read_to_string("/etc/passwd")
+            .context("Failed to read /etc/passwd from host")?;
         for line in passwd.lines() {
             let parts: Vec<_> = line.split(':').collect();
             if parts.len() != 7 {
@@ -265,7 +268,9 @@ impl Passwd {
                 continue;
             }
             let name = parts[0];
-            let uid: u32 = parts[2].parse()?;
+            let uid: u32 = parts[2]
+                .parse()
+                .context("Failed to parse /etc/passwd from host")?;
             if let Some(user) = self.users.get_mut(name) {
                 if user.uid != uid {
                     tracing::info!("Updating UID for {} from {} to {}", name, user.uid, uid);
@@ -274,7 +279,8 @@ impl Passwd {
             }
         }
 
-        let group = std::fs::read_to_string("/etc/group")?;
+        let group =
+            std::fs::read_to_string("/etc/group").context("Failed to read /etc/group from host")?;
         for line in group.lines() {
             let parts: Vec<_> = line.split(':').collect();
             if parts.len() != 4 {
@@ -282,7 +288,9 @@ impl Passwd {
                 continue;
             }
             let name = parts[0];
-            let gid: u32 = parts[2].parse()?;
+            let gid: u32 = parts[2]
+                .parse()
+                .context("Failed to parse /etc/group from host")?;
             if let Some(group) = self.groups.get_mut(name) {
                 if group.gid != gid {
                     tracing::info!("Updating GID for {} from {} to {}", name, group.gid, gid);
@@ -298,8 +306,9 @@ impl Passwd {
     #[rune::function]
     // Allow because rune doesn't work without the owned vec
     #[allow(clippy::needless_pass_by_value)]
-    fn passwd_from_system(&mut self, users: Vec<String>) -> anyhow::Result<()> {
-        let shadow = std::fs::read_to_string("/etc/shadow")?;
+    fn passwd_from_system(&mut self, users: Vec<String>) -> KResult<()> {
+        let shadow = std::fs::read_to_string("/etc/shadow")
+            .context("Failed to read /etc/shadow from host")?;
         for line in shadow.lines() {
             let parts: Vec<_> = line.split(':').collect();
             if parts.len() != 9 {
@@ -332,12 +341,17 @@ impl Passwd {
         package_manager: &PackageManager,
         package: &str,
         config_file: &str,
-    ) -> anyhow::Result<()> {
-        let file_contents =
-            String::from_utf8(package_manager.file_contents(package, config_file)?)?;
+    ) -> KResult<()> {
+        let file_contents = String::from_utf8(
+            package_manager
+                .file_contents(package, config_file)
+                .context("Failed to get sysusers file")?,
+        )
+        .with_context(|| format!("UTF-8 decoding error for {config_file} ({package})"))?;
         let parsed = sysusers::parse_file
             .parse(&file_contents)
-            .map_err(|error| sysusers::SysusersParseError::from_parse(&error, &file_contents))?;
+            .map_err(|error| sysusers::SysusersParseError::from_parse(&error, &file_contents))
+            .with_context(|| format!("Failed to parse {config_file} ({package})"))?;
         for directive in parsed {
             match directive {
                 sysusers::Directive::Comment => (),
@@ -354,7 +368,9 @@ impl Passwd {
                             (uid, Some(gid), group_name.into())
                         }
                         Some(UserId::FromPath(_)) => {
-                            return Err(anyhow::anyhow!("Cannot yet handle user IDs from path"))
+                            return Err(
+                                anyhow::anyhow!("Cannot yet handle user IDs from path").into()
+                            )
                         }
                         None => {
                             let uid = self.user_ids.get(user.name.as_str()).ok_or_else(|| {
@@ -399,7 +415,9 @@ impl Passwd {
                     let gid = match group.id {
                         Some(GroupId::Gid(gid)) => gid,
                         Some(GroupId::FromPath(_)) => {
-                            return Err(anyhow::anyhow!("Cannot yet handle group IDs from path"))
+                            return Err(
+                                anyhow::anyhow!("Cannot yet handle group IDs from path").into()
+                            )
                         }
                         None => self
                             .group_ids
@@ -437,7 +455,7 @@ impl Passwd {
 
     /// Apply to commands
     #[rune::function]
-    fn apply(self, cmds: &mut Commands) -> anyhow::Result<()> {
+    fn apply(self, cmds: &mut Commands) -> KResult<()> {
         self.sanity_check()
             .inspect_err(|e| tracing::error!("Sanity check when applying passwd failed: {e}"))?;
         let mut passwd = String::new();

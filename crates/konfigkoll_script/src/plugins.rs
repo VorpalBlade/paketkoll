@@ -1,6 +1,7 @@
 //! Rune plugins for Konfigkoll
 
 pub(crate) mod command;
+pub mod error;
 mod filesystem;
 pub mod package_managers;
 mod passwd;
@@ -14,6 +15,7 @@ mod systemd;
 
 pub(crate) fn register_modules(context: &mut rune::Context) -> Result<(), rune::ContextError> {
     context.install(command::module()?)?;
+    context.install(error::module()?)?;
     context.install(filesystem::module()?)?;
     context.install(package_managers::module()?)?;
     context.install(passwd::module()?)?;

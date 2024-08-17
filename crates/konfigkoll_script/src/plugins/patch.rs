@@ -12,6 +12,8 @@ use rune::Any;
 use rune::ContextError;
 use rune::Module;
 
+use super::error::KResult;
+
 /// A simple line editor, like sed
 #[derive(Debug, Default, Any)]
 #[rune(item = ::patch)]
@@ -31,7 +33,7 @@ impl LineEditor {
     /// Returns a Result<()>, where the error variant can happen on invalid
     /// regexes.
     #[rune::function]
-    pub fn add(&mut self, selector: &Selector, action: &Action) -> anyhow::Result<()> {
+    pub fn add(&mut self, selector: &Selector, action: &Action) -> KResult<()> {
         self.inner
             .borrow_mut()
             .add(selector.try_into()?, false, action.try_into()?);
@@ -44,7 +46,7 @@ impl LineEditor {
     /// Returns a Result<()>, where the error variant can happen on invalid
     /// regexes.
     #[rune::function]
-    pub fn add_inverted(&mut self, selector: &Selector, action: &Action) -> anyhow::Result<()> {
+    pub fn add_inverted(&mut self, selector: &Selector, action: &Action) -> KResult<()> {
         self.inner
             .borrow_mut()
             .add(selector.try_into()?, true, action.try_into()?);

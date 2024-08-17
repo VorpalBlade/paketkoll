@@ -21,6 +21,7 @@ use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::intern::Interner;
 
 use crate::plugins::command::Commands;
+use crate::plugins::error::KError;
 use crate::plugins::package_managers::PackageManagers;
 use crate::plugins::properties::Properties;
 use crate::plugins::settings::Settings;
@@ -267,6 +268,11 @@ impl ScriptEngine {
 fn try_format_error(phase: Phase, value: &rune::Value) -> anyhow::Result<()> {
     match value.clone().into_any() {
         rune::runtime::VmResult::Ok(any) => {
+            if let Ok(mut err) = any.downcast_borrow_mut::<KError>() {
+                tracing::error!("Got error result from {phase}: {}", *err.inner());
+                let err: anyhow::Error = err.take_inner();
+                return Err(err);
+            }
             if let Ok(err) = any.downcast_borrow_ref::<anyhow::Error>() {
                 anyhow::bail!("Got error result from {phase}: {:?}", *err);
             }

@@ -8,6 +8,8 @@ use sysinfo::MemoryRefreshKind;
 use konfigkoll_hwinfo::pci::PciDevice;
 use konfigkoll_hwinfo::pci::PciIdDb;
 
+use super::error::KResult;
+
 /// System info access
 #[derive(Debug, Any)]
 #[rune(item = ::sysinfo)]
@@ -106,7 +108,7 @@ impl SysInfo {
 
     #[rune::function]
     /// Get the PCI devices
-    fn pci_devices(&mut self) -> anyhow::Result<Vec<PciDevice>> {
+    fn pci_devices(&mut self) -> KResult<Vec<PciDevice>> {
         if self.pci_devices.is_none() {
             let devices = konfigkoll_hwinfo::pci::load_pci_devices()?;
             self.pci_devices = Some(devices.collect());
@@ -114,7 +116,7 @@ impl SysInfo {
 
         self.pci_devices
             .clone()
-            .ok_or_else(|| anyhow::anyhow!("Failed to load PCI devices"))
+            .ok_or_else(|| anyhow::anyhow!("Failed to load PCI devices").into())
     }
 }
 

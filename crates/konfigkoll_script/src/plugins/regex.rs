@@ -1,9 +1,12 @@
 //! Exposing regex to rune
 
+use anyhow::Context;
 use regex::Regex as InnerRegex;
 use rune::Any;
 use rune::ContextError;
 use rune::Module;
+
+use super::error::KResult;
 
 #[derive(Debug, Clone, Any)]
 #[rune(item = ::regex)]
@@ -23,9 +26,9 @@ impl Regex {
 impl Regex {
     /// Create a new regex from a string
     #[rune::function(path = Self::new)]
-    fn new(pattern: &str) -> anyhow::Result<Self> {
+    fn new(pattern: &str) -> KResult<Self> {
         Ok(Self {
-            inner: InnerRegex::new(pattern)?,
+            inner: InnerRegex::new(pattern).context("Failed to compile regular expression")?,
         })
     }
 
