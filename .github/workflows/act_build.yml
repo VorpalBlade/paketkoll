@@ -1,17 +1,10 @@
-name: Build
+name: Build (helper)
 
 permissions:
   contents: read
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+  workflow_call:
 
 env:
   CARGO_INCREMENTAL: 0

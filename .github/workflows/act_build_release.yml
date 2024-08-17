@@ -46,7 +46,6 @@ defaults:
     shell: bash
 
 jobs:
-
   cargo-about:
     runs-on: ubuntu-22.04
     steps:

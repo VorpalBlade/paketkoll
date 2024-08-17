@@ -1,0 +1,91 @@
+name: Lint (helper)
+
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+
+jobs:
+  rust-clippy-analyze:
+    name: Rust Clippy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        run: rustup update stable && rustup default stable && rustup component add clippy
+
+      - name: Get cargo-binstall
+        run: |
+          curl -L https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-musl.tgz | tar -zxf - && mv cargo-binstall $HOME/.cargo/bin/
+
+      - name: Install required cargo addons
+        run: cargo binstall --no-confirm --no-symlinks clippy-sarif sarif-fmt
+
+      - name: Cache builds
+        uses: Swatinem/rust-cache@v2.7.3
+
+      - name: Run rust-clippy
+        run:
+          cargo clippy
+          --all-features
+          --all-targets
+          --message-format=json -- -D warnings | clippy-sarif | tee rust-clippy-results.sarif | sarif-fmt
+        continue-on-error: true
+
+      - name: Upload analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: rust-clippy-results.sarif
+          wait-for-processing: true
+
+      - name: Report status
+        run: cargo clippy --all-features --all-targets -- -D warnings
+
+  rustfmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust
+      run: rustup install --profile minimal nightly && rustup default nightly && rustup component add rustfmt
+    - run: cargo +nightly fmt -- --check
+
+  cargo-deny:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Rust
+      run: rustup update stable && rustup default stable && rustup component add clippy
+
+    - name: Get cargo-binstall
+      run: |
+        curl -L https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-musl.tgz | tar -zxf - && mv cargo-binstall $HOME/.cargo/bin/
+
+    - name: Install required cargo addons
+      run: cargo binstall --no-confirm --no-symlinks cargo-deny
+
+    - run: cargo deny check
+
+  cargo-about:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Rust
+      run: rustup update stable && rustup default stable && rustup component add clippy
+
+    - name: Get cargo-binstall
+      run: |
+        curl -L https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-musl.tgz | tar -zxf - && mv cargo-binstall $HOME/.cargo/bin/
+
+    - name: Install required cargo addons
+      run: cargo binstall --no-confirm --no-symlinks cargo-about
+
+    - run: mkdir target && cargo about generate  about.hbs > target/license.html

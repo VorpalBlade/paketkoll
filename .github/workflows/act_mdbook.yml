@@ -1,18 +1,14 @@
-name: Mdbook
+name: Mdbook (helper)
+
+permissions:
+  contents: read
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+  workflow_call:
 
 jobs:
   test:
-    name: Test
+    name: Mdbook test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master

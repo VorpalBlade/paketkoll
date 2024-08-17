@@ -22,7 +22,7 @@ jobs:
   paketkoll:
     name: "Release paketkoll"
     if: github.repository_owner == 'VorpalBlade' && startsWith(github.event.release.name, 'paketkoll-v')
-    uses: ./.github/workflows/action_build_release.yml
+    uses: ./.github/workflows/act_build_release.yml
     with:
       release_name: ${{ github.event.release.name }}
       project: paketkoll
@@ -36,7 +36,7 @@ jobs:
   konfigkoll:
     name: "Release konfigkoll"
     if: github.repository_owner == 'VorpalBlade' && startsWith(github.event.release.name, 'konfigkoll-v')
-    uses: ./.github/workflows/action_build_release.yml
+    uses: ./.github/workflows/act_build_release.yml
     with:
       release_name: ${{ github.event.release.name }}
       project: konfigkoll
