@@ -5,11 +5,11 @@ license = "MPL-2.0"
 name = "paketkoll_utils"
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.80.0"
-version = "0.1.3"
+version = "0.1.4"
 
 [dependencies]
 anyhow.workspace = true
-paketkoll_types = { version = "0.1.3", path = "../paketkoll_types" }
+paketkoll_types = { version = "0.1.4", path = "../paketkoll_types" }
 ring.workspace = true
 
 [lints]

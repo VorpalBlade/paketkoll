@@ -8,6 +8,32 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.5.4] - 2024-08-17
+
+### 🚀 Features
+
+- Switch from log to tracing
+
+### 🐛 Bug fixes
+
+- Redo archive support to handle cases where an archive is not downloadable
+- Fix incorrect application of diversions on Debian
+- For consistency on APT, do not consider suggests when removing unused packages.
+
+### ⚡ Performance improvements
+
+- Remove unused dependencies (speeds up build time slightly)
+
+### 🚜 Refactoring
+
+- Simplify features by making some code always included
+- Make serde non-optional to simplify number of possible configurations
+
+### ⚙️ Other stuff
+
+- Move features to workspace manifest where possible
+- Apply nightly clippy fixes
+
 ## [0.5.3] - 2024-08-03
 
 ### 🐛 Bug fixes

@@ -8,6 +8,25 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.4] - 2024-08-17
+
+### 🚀 Features
+
+- Include package name for the modified file (where possible) in a comment when saving
+
+### ⚡ Performance improvements
+
+- Remove unused dependencies (speeds up build time slightly)
+
+### 🚜 Refactoring
+
+- Make serde non-optional to simplify number of possible configurations
+
+### ⚙️ Other stuff
+
+- Remove empty feature table
+- Move features to workspace manifest where possible
+
 ## [0.1.3] - 2024-08-03
 
 ### 🚀 Features

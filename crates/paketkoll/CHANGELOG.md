@@ -8,6 +8,24 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.3.4] - 2024-08-17
+
+### 🚀 Features
+
+- Switch from log to tracing
+
+### ⚡ Performance improvements
+
+- Remove unused dependencies (speeds up build time slightly)
+
+### 🚜 Refactoring
+
+- Make serde non-optional to simplify number of possible configurations
+
+### ⚙️ Other stuff
+
+- Move features to workspace manifest where possible
+
 ## [0.3.3] - 2024-08-03
 
 ### 🐛 Bug fixes

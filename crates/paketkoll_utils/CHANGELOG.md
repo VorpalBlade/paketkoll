@@ -8,6 +8,12 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.4] - 2024-08-17
+
+### ⚙️ Other stuff
+
+- Update Cargo.toml dependencies
+
 ## [0.1.3] - 2024-08-03
 
 ### ⚙️ Other stuff
