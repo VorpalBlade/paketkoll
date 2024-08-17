@@ -1,0 +1,51 @@
+name: CI (dev)
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [ "dev" ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  lints:
+    name: "Lint"
+    uses: ./.github/workflows/act_lint.yml
+    permissions:
+      contents: read
+      security-events: write
+
+  build:
+    name: "Build"
+    uses: ./.github/workflows/act_build.yml
+
+  mdbook:
+    name: "Mdbook"
+    uses: ./.github/workflows/act_mdbook.yml
+
+  push-to-main:
+    needs: [lints, build, mdbook]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Shallow checkouts don't work for merging, so pull in enough history to likely work
+          fetch-depth: 75
+      - name: Update main
+        run: |
+          set -xe
+          git fetch origin main
+          git checkout main
+          git pull origin main
+          git merge --ff-only dev
+      - uses: ad-m/github-push-action@v0.8.0
+        name: Push to main
+        with:
+          github_token: ${{ secrets.GH_PAT }}
+          branch: main

@@ -5,12 +5,8 @@ permissions:
   contents: write
 
 on:
-  workflow_run:
-    workflows: ["Build"]
-    branches:
-      - main
-    types:
-      - completed
+  push:
+    branches: [ "main" ]
 
 concurrency:
   group: ${{ github.workflow }}
@@ -20,8 +16,6 @@ jobs:
   release-plz:
     name: Release-plz
     runs-on: ubuntu-latest
-    # Only run if the build was successful
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
