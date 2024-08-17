@@ -195,7 +195,7 @@ impl Entry {
 
     /// `device` The device number for *block* or *char* file types.
     pub fn device(&self) -> Option<&Device> {
-        self.params.device.as_ref()
+        self.params.device.as_deref()
     }
 
     /// `contents` The full pathname of a file that holds the contents of this
@@ -272,7 +272,7 @@ impl Entry {
     /// device that contains the file. Its format is the same as the one for
     /// `device`.
     pub fn resident_device(&self) -> Option<&Device> {
-        self.params.resident_device.as_ref()
+        self.params.resident_device.as_deref()
     }
 
     /// `rmd160|rmd160digest|ripemd160digest` The RIPEMD160 message digest of
@@ -343,7 +343,7 @@ struct Params {
     /// by the cksum(1) utility.
     pub checksum: Option<u64>,
     /// `device` The device number for *block* or *char* file types.
-    pub device: Option<Device>,
+    pub device: Option<Box<Device>>,
     /// `contents` The full pathname of a file that holds the contents of this
     /// file.
     pub contents: Option<PathBuf>,
@@ -378,7 +378,7 @@ struct Params {
     /// `resdevice` The "resident" device number of the file, e.g. the ID of the
     /// device that contains the file. Its format is the same as the one for
     /// `device`.
-    pub resident_device: Option<Device>,
+    pub resident_device: Option<Box<Device>>,
     /// `rmd160|rmd160digest|ripemd160digest` The RIPEMD160 message digest of
     /// the file.
     pub rmd160: Option<Box<[u8; 20]>>,
@@ -420,7 +420,7 @@ impl Params {
     fn set(&mut self, keyword: Keyword<'_>) {
         match keyword {
             Keyword::Checksum(cksum) => self.checksum = Some(cksum),
-            Keyword::DeviceRef(device) => self.device = Some(device.to_device()),
+            Keyword::DeviceRef(device) => self.device = Some(Box::new(device.to_device())),
             Keyword::Contents(contents) => {
                 self.contents = Some(Path::new(OsStr::from_bytes(contents)).to_owned());
             }
@@ -437,7 +437,9 @@ impl Params {
             Keyword::NLink(nlink) => self.nlink = Some(nlink),
             Keyword::NoChange => self.no_change = false,
             Keyword::Optional => self.optional = false,
-            Keyword::ResidentDeviceRef(device) => self.resident_device = Some(device.to_device()),
+            Keyword::ResidentDeviceRef(device) => {
+                self.resident_device = Some(Box::new(device.to_device()));
+            }
             Keyword::Rmd160(rmd160) => self.rmd160 = Some(Box::new(rmd160)),
             Keyword::Sha1(sha1) => self.sha1 = Some(Box::new(sha1)),
             Keyword::Sha256(sha256) => self.sha256 = Some(sha256),
