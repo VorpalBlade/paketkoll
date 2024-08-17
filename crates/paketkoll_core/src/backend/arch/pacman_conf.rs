@@ -1,8 +1,8 @@
 //! Parse pacman.conf
 
 use compact_str::CompactString;
-use eyre::Context;
 use eyre::ContextCompat;
+use eyre::WrapErr;
 use std::io::Read;
 
 /// Pacman configuration (or at least the parts we care about)
@@ -15,10 +15,10 @@ pub(crate) struct PacmanConfig {
 
 impl PacmanConfig {
     pub(crate) fn new(file: &mut impl Read) -> eyre::Result<Self> {
-        let parser = ini::Ini::read_from(file).context("Failed to open pacman.conf")?;
+        let parser = ini::Ini::read_from(file).wrap_err("Failed to open pacman.conf")?;
         let options: &ini::Properties = parser
             .section(Some("options"))
-            .context("Could not find options section in pacman.conf")?;
+            .wrap_err("Could not find options section in pacman.conf")?;
 
         Ok(Self {
             root: options.get("RootDir").unwrap_or("/").into(),

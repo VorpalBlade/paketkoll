@@ -1,7 +1,7 @@
 //! Package backend for flatpak
 
 use crate::utils::package_manager_transaction;
-use eyre::Context;
+use eyre::WrapErr;
 use paketkoll_types::backend::Name;
 use paketkoll_types::backend::PackageManagerError;
 use paketkoll_types::backend::Packages;
@@ -50,18 +50,18 @@ impl Packages for Flatpak {
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
             .spawn()
-            .context("Failed to spawn \"flatpak list\" (is flatpak installed and in PATH?)")?;
+            .wrap_err("Failed to spawn \"flatpak list\" (is flatpak installed and in PATH?)")?;
         let output = cmd
             .wait_with_output()
-            .context("Failed to wait for flatpak list")?;
+            .wrap_err("Failed to wait for flatpak list")?;
         if !output.status.success() {
             eyre::bail!(
                 "Failed to run flatpak list: {}",
-                String::from_utf8(output.stderr).context("Failed to parse stderr")?
+                String::from_utf8(output.stderr).wrap_err("Failed to parse stderr")?
             );
         }
         let output =
-            String::from_utf8(output.stdout).context("Failed to parse flatpak list as UTF-8")?;
+            String::from_utf8(output.stdout).wrap_err("Failed to parse flatpak list as UTF-8")?;
 
         parse_flatpak_output(&output, interner)
     }
@@ -81,7 +81,7 @@ impl Packages for Flatpak {
                 install,
                 (!ask_confirmation).then_some("--noninteractive"),
             )
-            .context("Failed to install with flatpak")?;
+            .wrap_err("Failed to install with flatpak")?;
         }
         if !uninstall.is_empty() {
             package_manager_transaction(
@@ -90,7 +90,7 @@ impl Packages for Flatpak {
                 uninstall,
                 (!ask_confirmation).then_some("--noninteractive"),
             )
-            .context("Failed to uninstall with flatpak")?;
+            .wrap_err("Failed to uninstall with flatpak")?;
         }
         Ok(())
     }
@@ -108,7 +108,7 @@ impl Packages for Flatpak {
             &[],
             (!ask_confirmation).then_some("--noninteractive"),
         )
-        .context("Failed to remove unused packages with flatpak")?;
+        .wrap_err("Failed to remove unused packages with flatpak")?;
         Ok(())
     }
 }

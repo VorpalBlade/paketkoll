@@ -1,7 +1,7 @@
 //! Parser for dpkg-divert
 
-use eyre::Context;
 use eyre::ContextCompat;
+use eyre::WrapErr;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::intern::PackageRef;
 use std::collections::BTreeMap;
@@ -24,7 +24,7 @@ pub(super) type Diversions = BTreeMap<PathBuf, Diversion>;
 pub(super) fn get_diversions(interner: &Interner) -> eyre::Result<Diversions> {
     let mut cmd = std::process::Command::new("dpkg-divert");
     cmd.arg("--list");
-    let output = cmd.output().context("Failed to run dpkg-divert")?;
+    let output = cmd.output().wrap_err("Failed to run dpkg-divert")?;
 
     parse_diversions(std::io::Cursor::new(output.stdout), interner)
 }
@@ -42,19 +42,19 @@ fn parse_diversions(mut input: impl BufRead, interner: &Interner) -> eyre::Resul
         if let Some(captures) = captures {
             let orig_path: PathBuf = captures
                 .name("orig")
-                .context("Failed to extract orig path")?
+                .wrap_err("Failed to extract orig path")?
                 .as_str()
                 .into();
             let new_path = captures
                 .name("new")
-                .context("Failed to extract new path")?
+                .wrap_err("Failed to extract new path")?
                 .as_str()
                 .into();
             let by_package = PackageRef::get_or_intern(
                 interner,
                 captures
                     .name("pkg")
-                    .context("Failed to extract package")?
+                    .wrap_err("Failed to extract package")?
                     .as_str(),
             );
 

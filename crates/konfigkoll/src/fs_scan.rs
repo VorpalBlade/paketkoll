@@ -3,7 +3,7 @@
 use ahash::AHashSet;
 use compact_str::CompactString;
 use dashmap::DashMap;
-use eyre::Context;
+use eyre::WrapErr;
 use itertools::Itertools;
 use konfigkoll_types::FsInstruction;
 use ouroboros::self_referencing;
@@ -109,7 +109,7 @@ pub(crate) fn scan_fs(
         });
         file_map.into_iter().map(|(_, v)| v).collect_vec()
     } else {
-        let mut files = backend.files(interner).with_context(|| {
+        let mut files = backend.files(interner).wrap_err_with(|| {
             format!(
                 "Failed to collect information from backend {}",
                 backend.name()

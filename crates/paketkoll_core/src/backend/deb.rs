@@ -14,7 +14,7 @@ use bstr::ByteVec;
 use compact_str::format_compact;
 use compact_str::CompactString;
 use dashmap::DashMap;
-use eyre::Context;
+use eyre::WrapErr;
 use paketkoll_types::backend::ArchiveQueryError;
 use paketkoll_types::backend::ArchiveResult;
 use paketkoll_types::backend::Files;
@@ -120,7 +120,7 @@ impl Files for Debian {
         // Handle diversions: (parse output of dpkg-divert --list)
         tracing::debug!("Loading diversions");
         let diversions =
-            divert::get_diversions(interner).context("Failed to get dpkg diversions")?;
+            divert::get_diversions(interner).wrap_err("Failed to get dpkg diversions")?;
 
         // Load config files.
         tracing::debug!("Loading status to get config files");
@@ -182,7 +182,7 @@ impl Files for Debian {
         let re = RegexSet::new(paths)?;
 
         std::fs::read_dir(db_root)
-            .context("Failed to read dpkg database directory")?
+            .wrap_err("Failed to read dpkg database directory")?
             .par_bridge()
             .for_each(|entry| {
                 if let Ok(entry) = entry {
@@ -225,15 +225,15 @@ impl Files for Debian {
                 .ok_or_else(|| OriginalFileError::PackageNotFound(format_compact!("{pkg}")))?;
 
             // The package is a .deb, which is actually an ar archive
-            let package_file = File::open(&package_path).context("Failed to open archive")?;
+            let package_file = File::open(&package_path).wrap_err("Failed to open archive")?;
             let mut archive = ar::Archive::new(package_file);
 
             // We want the data.tar.xz file (or other compression scheme)
             while let Some(entry) = archive.next_entry() {
-                let mut entry = entry.context("Failed to process entry in .deb (ar level)")?;
+                let mut entry = entry.wrap_err("Failed to process entry in .deb (ar level)")?;
                 if entry.header().identifier().starts_with(b"data.tar") {
                     let extension: CompactString = std::str::from_utf8(entry.header().identifier())
-                        .context("Failed to parse file entry (ar level) as UTF-8")?
+                        .wrap_err("Failed to parse file entry (ar level) as UTF-8")?
                         .split('.')
                         .last()
                         .ok_or_else(|| eyre::eyre!("No file extension found"))?
@@ -262,7 +262,7 @@ impl Files for Debian {
         // Handle diversions: (parse output of dpkg-divert --list)
         tracing::debug!("Loading diversions");
         let diversions =
-            divert::get_diversions(interner).context("Failed to get dpkg diversions")?;
+            divert::get_diversions(interner).wrap_err("Failed to get dpkg diversions")?;
 
         tracing::debug!("List of diversions: {diversions:?}");
 
@@ -473,7 +473,7 @@ fn is_file_match(
     output: &OwningPackagesResult,
 ) -> eyre::Result<()> {
     let contents = std::fs::read_to_string(list_path)
-        .with_context(|| format!("Failed to read {list_path:?}"))?;
+        .wrap_err_with(|| format!("Failed to read {list_path:?}"))?;
     let matches = re.matches(&contents);
     if matches.matched_any() {
         let file_name = list_path
@@ -539,7 +539,7 @@ fn get_package_files(interner: &Interner) -> eyre::Result<impl Iterator<Item = V
                 let results = process_file(interner, &entry);
                 results.transpose()
             }
-            Err(err) => Some(Err(err).context("Failed to get packages")),
+            Err(err) => Some(Err(err).wrap_err("Failed to get packages")),
         })
         .collect();
     Ok(results?.into_iter())
@@ -623,7 +623,7 @@ impl Packages for Debian {
                 install,
                 (!ask_confirmation).then_some("-y"),
             )
-            .context("Failed to install with apt-get")?;
+            .wrap_err("Failed to install with apt-get")?;
         }
         if !uninstall.is_empty() {
             package_manager_transaction(
@@ -632,7 +632,7 @@ impl Packages for Debian {
                 uninstall,
                 (!ask_confirmation).then_some("-y"),
             )
-            .context("Failed to uninstall with apt-get")?;
+            .wrap_err("Failed to uninstall with apt-get")?;
         }
         Ok(())
     }
@@ -641,11 +641,11 @@ impl Packages for Debian {
         let _guard = self.pkgmgr_mutex.lock();
         if !dependencies.is_empty() {
             package_manager_transaction("apt-mark", &["auto"], dependencies, None)
-                .context("Failed to mark auto-installed with apt-mark")?;
+                .wrap_err("Failed to mark auto-installed with apt-mark")?;
         }
         if !manual.is_empty() {
             package_manager_transaction("apt-mark", &["manual"], manual, None)
-                .context("Failed to mark manual with apt-mark")?;
+                .wrap_err("Failed to mark manual with apt-mark")?;
         }
         Ok(())
     }
@@ -658,7 +658,7 @@ impl Packages for Debian {
             &[],
             (!ask_confirmation).then_some("-y"),
         )
-        .context("Failed to autoremove with apt-get")?;
+        .wrap_err("Failed to autoremove with apt-get")?;
         Ok(())
     }
 }

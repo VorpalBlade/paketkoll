@@ -5,7 +5,7 @@ use crate::plugins::properties::Properties;
 use crate::plugins::settings::Settings;
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
-use eyre::Context;
+use eyre::WrapErr;
 use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::PackageBackendMap;
@@ -159,9 +159,10 @@ impl ScriptEngine {
         let mut sources = rune::Sources::new();
         sources
             .insert(
-                Source::from_path(config_path.join("main.rn")).context("Failed to load main.rn")?,
+                Source::from_path(config_path.join("main.rn"))
+                    .wrap_err("Failed to load main.rn")?,
             )
-            .context("Failed to insert source file")?;
+            .wrap_err("Failed to insert source file")?;
 
         let result = rune::prepare(&mut sources)
             .with_context(&context)

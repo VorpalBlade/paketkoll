@@ -14,7 +14,7 @@ pub(crate) fn file_data_saver(
 ) -> eyre::Result<()> {
     tracing::info!("Saving file data for {}", path);
     let full_path = safe_path_join(files_path, path);
-    std::fs::create_dir_all(full_path.parent().with_context(|| {
+    std::fs::create_dir_all(full_path.parent().wrap_err_with(|| {
         format!("Impossible error: joined path should always below config dir: {full_path}")
     })?)?;
     match contents {

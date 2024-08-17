@@ -6,8 +6,8 @@ use cached::stores::DiskCacheBuilder;
 use cached::DiskCache;
 use cached::IOCached;
 use compact_str::CompactString;
-use eyre::Context;
 use eyre::ContextCompat;
+use eyre::WrapErr;
 use paketkoll_types::backend::ArchiveQueryError;
 use paketkoll_types::backend::ArchiveResult;
 use paketkoll_types::backend::Backend;
@@ -170,13 +170,13 @@ impl Files for FromArchiveCache {
         let mut cache_keys = AHashMap::new();
 
         for pkg_ref in filter {
-            let pkg = package_map.get(pkg_ref).context("Package not found")?;
+            let pkg = package_map.get(pkg_ref).wrap_err("Package not found")?;
             let cache_key = format_package(pkg, interner);
             let cache_key = CacheKey::new(inner_name, cache_version, cache_key);
             match self
                 .cache
                 .cache_get(&cache_key)
-                .context("Cache query failed")?
+                .wrap_err("Cache query failed")?
             {
                 Some(v) => match v {
                     FileEntryCacheWrapper::Cached(v) => {
@@ -213,9 +213,9 @@ impl Files for FromArchiveCache {
             for inner_result in uncached_results.into_iter() {
                 match inner_result {
                     Ok((query, result)) => {
-                        let cache_key = cache_keys
-                            .remove(&query)
-                            .with_context(|| format!("Cache key not found (archive): {query:?}"))?;
+                        let cache_key = cache_keys.remove(&query).wrap_err_with(|| {
+                            format!("Cache key not found (archive): {query:?}")
+                        })?;
                         self.cache
                             .cache_set(
                                 cache_key.clone(),
@@ -223,7 +223,7 @@ impl Files for FromArchiveCache {
                                     result.iter().map(Into::into).collect(),
                                 ),
                             )
-                            .with_context(|| {
+                            .wrap_err_with(|| {
                                 format!(
                                     "Cache set failed: pkg={} cache_key={}",
                                     query.to_str(interner),
@@ -239,7 +239,7 @@ impl Files for FromArchiveCache {
                             .collect();
                         let cache_key = cache_keys
                             .remove(&query)
-                            .with_context(|| format!("Cache key not found (archive): {pkgs:?}"))?;
+                            .wrap_err_with(|| format!("Cache key not found (archive): {pkgs:?}"))?;
                         self.cache
                             .cache_set(
                                 cache_key.clone(),
@@ -248,7 +248,7 @@ impl Files for FromArchiveCache {
                                     pkgs.clone(),
                                 ),
                             )
-                            .with_context(|| {
+                            .wrap_err_with(|| {
                                 format!(
                                     "Negative cache set failed: pkgs={:?} cache_key={}",
                                     pkgs, cache_key

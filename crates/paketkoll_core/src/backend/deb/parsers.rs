@@ -5,7 +5,7 @@ use bstr::ByteSlice;
 use bstr::ByteVec;
 use compact_str::format_compact;
 use eyre::bail;
-use eyre::Context;
+use eyre::WrapErr;
 use paketkoll_types::files::Checksum;
 use paketkoll_types::files::FileEntry;
 use paketkoll_types::files::FileFlags;
@@ -44,13 +44,13 @@ pub(super) fn parse_paths(
             }
             Ok(inner) => Ok(FileEntry {
                 package: Some(package),
-                path: inner.into_path_buf().context("Failed to convert")?,
+                path: inner.into_path_buf().wrap_err("Failed to convert")?,
                 properties: Properties::Unknown,
                 flags: FileFlags::empty(),
                 source: super::NAME,
                 seen: Default::default(),
             }),
-            Err(err) => Err(err).context("Failed to parse"),
+            Err(err) => Err(err).wrap_err("Failed to parse"),
         })
         .collect();
     lines
@@ -86,7 +86,7 @@ pub(super) fn parse_md5sums(
                     seen: Default::default(),
                 })
             }
-            Err(err) => Err(err).context("Failed to parse"),
+            Err(err) => Err(err).wrap_err("Failed to parse"),
         })
         .collect();
     lines
@@ -203,7 +203,7 @@ pub(super) fn parse_status(
             if line.starts_with(' ') {
                 let line_fragments: SmallVec<[&str; 4]> = line.split(' ').collect();
                 if line_fragments.len() < 2 {
-                    return Err(eyre::eyre!("Too short line")).with_context(ctx);
+                    return Err(eyre::eyre!("Too short line")).wrap_err_with(ctx);
                 }
                 if Some(&"remove-on-upgrade") == line_fragments.last() {
                     // Skip this entry for now
@@ -216,7 +216,7 @@ pub(super) fn parse_status(
                 let file = &line_fragments[1];
                 let checksum = line_fragments[2];
                 let mut decoded: [u8; 16] = [0; 16];
-                faster_hex::hex_decode(checksum.as_bytes(), &mut decoded).with_context(ctx)?;
+                faster_hex::hex_decode(checksum.as_bytes(), &mut decoded).wrap_err_with(ctx)?;
                 config_files.push(FileEntry {
                     package: Some(pkg),
                     path: file.into(),

@@ -9,7 +9,7 @@ use ahash::AHashSet;
 use compact_str::CompactString;
 use dashmap::DashMap;
 use eyre::eyre;
-use eyre::Context;
+use eyre::WrapErr;
 use smallvec::SmallVec;
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -159,7 +159,7 @@ pub trait Packages: Name {
     fn package_map_complete(&self, interner: &Interner) -> eyre::Result<PackageMap> {
         let packages = self
             .packages(interner)
-            .with_context(|| eyre!("Failed to load package list"))?;
+            .wrap_err_with(|| eyre!("Failed to load package list"))?;
         Ok(packages_to_package_map(packages.iter()))
     }
 

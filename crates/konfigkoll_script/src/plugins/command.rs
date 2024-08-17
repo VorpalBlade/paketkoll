@@ -9,7 +9,7 @@ use crate::Phase;
 use ahash::AHashSet;
 use camino::Utf8PathBuf;
 use compact_str::CompactString;
-use eyre::Context;
+use eyre::WrapErr;
 use konfigkoll_types::FileContents;
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::FsOp;
@@ -109,7 +109,7 @@ impl Commands {
             )
             .into());
         }
-        let backend = Backend::from_str(package_manager).context("Invalid backend")?;
+        let backend = Backend::from_str(package_manager).wrap_err("Invalid backend")?;
         if !self.settings.is_pkg_backend_enabled(backend) {
             tracing::debug!("Skipping disabled package manager {}", package_manager);
             return Ok(());
@@ -144,7 +144,7 @@ impl Commands {
             )
             .into());
         }
-        let backend = Backend::from_str(package_manager).context("Invalid backend")?;
+        let backend = Backend::from_str(package_manager).wrap_err("Invalid backend")?;
         if !self.settings.is_file_backend_enabled(backend) {
             tracing::debug!("Skipping disabled package manager {}", package_manager);
             return Ok(());
@@ -338,7 +338,7 @@ impl Commands {
         let numeric_mode = match mode {
             Value::Integer(m) => Mode::new(m as u32),
             Value::String(str) => {
-                let guard = str.borrow_ref().context("Borrow guard failed")?;
+                let guard = str.borrow_ref().wrap_err("Borrow guard failed")?;
                 // Convert text mode (u+rx,g+rw,o+r, etc) to numeric mode
                 Mode::parse(&guard)?
             }

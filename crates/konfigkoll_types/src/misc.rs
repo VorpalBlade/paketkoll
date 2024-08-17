@@ -1,6 +1,6 @@
 use camino::Utf8Path;
 use either::Either;
-use eyre::Context;
+use eyre::WrapErr;
 use paketkoll_types::files::Checksum;
 use std::borrow::Cow;
 use std::fs::File;
@@ -30,9 +30,9 @@ impl FileContents {
 
     pub fn from_file(path: &Utf8Path) -> eyre::Result<Self> {
         let mut reader =
-            BufReader::new(File::open(path).with_context(|| format!("Failed to open {path}"))?);
+            BufReader::new(File::open(path).wrap_err_with(|| format!("Failed to open {path}"))?);
         let checksum =
-            paketkoll_utils::checksum::sha256_readable(&mut reader).context("Checksum failed")?;
+            paketkoll_utils::checksum::sha256_readable(&mut reader).wrap_err("Checksum failed")?;
         Ok(Self::FromFile {
             checksum,
             path: path.to_owned(),
@@ -51,7 +51,7 @@ impl FileContents {
         match self {
             FileContents::Literal { checksum: _, data } => Ok(Either::Left(data.as_ref())),
             FileContents::FromFile { checksum: _, path } => Ok(Either::Right(
-                File::open(path).with_context(|| format!("Failed to open {path}"))?,
+                File::open(path).wrap_err_with(|| format!("Failed to open {path}"))?,
             )),
         }
     }
@@ -61,7 +61,7 @@ impl FileContents {
             FileContents::Literal { data, .. } => Ok(Cow::Borrowed(data.as_ref())),
             FileContents::FromFile { path, .. } => {
                 let mut reader = BufReader::new(
-                    File::open(path).with_context(|| format!("Failed to open {path}"))?,
+                    File::open(path).wrap_err_with(|| format!("Failed to open {path}"))?,
                 );
                 let mut data = Vec::new();
                 reader.read_to_end(&mut data)?;

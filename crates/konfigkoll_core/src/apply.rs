@@ -8,8 +8,8 @@ use crate::utils::NameToNumericResolveCache;
 use ahash::AHashMap;
 use console::style;
 use either::Either;
-use eyre::Context;
 use eyre::ContextCompat;
+use eyre::WrapErr;
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::FsOp;
 use konfigkoll_types::FsOpDiscriminants;
@@ -109,7 +109,7 @@ impl InProcessApplicator {
         tracing::info!("Applying: {}: {}", instr.path, instr.op);
         if instr.op != FsOp::Comment && instr.op != FsOp::Remove {
             if let Some(parent) = instr.path.parent() {
-                std::fs::create_dir_all(parent).context("Failed to create parent directory")?;
+                std::fs::create_dir_all(parent).wrap_err("Failed to create parent directory")?;
             }
         }
         match &instr.op {
@@ -129,7 +129,7 @@ impl InProcessApplicator {
                                     )?;
                                 }
                                 Some(_) | None => {
-                                    Err(err).context("Failed to remove directory")?;
+                                    Err(err).wrap_err("Failed to remove directory")?;
                                 }
                             },
                         }
@@ -144,7 +144,7 @@ impl InProcessApplicator {
             FsOp::CreateFile(contents) => {
                 match contents {
                     konfigkoll_types::FileContents::Literal { checksum: _, data } => {
-                        std::fs::write(&instr.path, data).context("Failed to write file data")?;
+                        std::fs::write(&instr.path, data).wrap_err("Failed to write file data")?;
                     }
                     konfigkoll_types::FileContents::FromFile { checksum: _, path } => {
                         // std::fs::copy copies permissions, which we don't want (we want the
@@ -156,11 +156,11 @@ impl InProcessApplicator {
                             .create(true)
                             .mode(0o644)
                             .open(&instr.path)
-                            .context("Failed to open target file for writing")?;
+                            .wrap_err("Failed to open target file for writing")?;
                         let mut source_file = std::fs::File::open(path)
-                            .context("Failed to open source file for reading")?;
+                            .wrap_err("Failed to open source file for reading")?;
                         std::io::copy(&mut source_file, &mut target_file)
-                            .context("Failed to copy file contents")?;
+                            .wrap_err("Failed to copy file contents")?;
                     }
                 }
             }
@@ -172,14 +172,14 @@ impl InProcessApplicator {
                             // If the symlink already exists, we can just remove it and try
                             // again
                             std::fs::remove_file(&instr.path)
-                                .context("Failed to remove old file before creating symlink")?;
+                                .wrap_err("Failed to remove old file before creating symlink")?;
                             std::os::unix::fs::symlink(target, &instr.path)
                         } else {
                             Err(err)
                         }
                     }
                 }
-                .context("Failed to create symlink")?;
+                .wrap_err("Failed to create symlink")?;
             }
             FsOp::CreateFifo => {
                 // Since we split out mode in general, we don't know what to put here.
@@ -225,10 +225,10 @@ impl InProcessApplicator {
                 let owners = self
                     .file_backend
                     .owning_packages(&[instr.path.as_std_path()].into(), &self.interner)
-                    .with_context(|| format!("Failed to find owner for {}", instr.path))?;
+                    .wrap_err_with(|| format!("Failed to find owner for {}", instr.path))?;
                 let package = owners
                     .get(instr.path.as_std_path())
-                    .with_context(|| format!("Failed to find owner for {}", instr.path))?
+                    .wrap_err_with(|| format!("Failed to find owner for {}", instr.path))?
                     .ok_or_else(|| eyre::eyre!("No owner for {}", instr.path))?;
                 let package = package.to_str(&self.interner);
                 // Get original contents:
@@ -308,7 +308,7 @@ impl Applicator for InProcessApplicator {
             })?
             .clone();
         for instr in instructions {
-            self.apply_single_file(instr, &pkg_map).with_context(|| {
+            self.apply_single_file(instr, &pkg_map).wrap_err_with(|| {
                 format!("Failed to apply change for {}: {:?}", instr.path, instr.op)
             })?;
         }
@@ -584,7 +584,7 @@ pub fn apply_files(
         };
         applicator
             .apply_files(&*chunk)
-            .context("Error while applying files")?;
+            .wrap_err("Error while applying files")?;
     }
     Ok(())
 }
@@ -633,7 +633,7 @@ pub fn apply_packages<'instructions>(
                 &operations.mark_as_manual,
                 &operations.uninstall,
             )
-            .with_context(|| format!("Error while applying packages with {backend}"))?;
+            .wrap_err_with(|| format!("Error while applying packages with {backend}"))?;
     }
     Ok(())
 }

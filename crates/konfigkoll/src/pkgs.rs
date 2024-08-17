@@ -1,6 +1,6 @@
 //! Package scanning functions
 
-use eyre::Context;
+use eyre::WrapErr;
 use itertools::Itertools;
 use konfigkoll_types::PkgInstructions;
 use paketkoll_types::backend::PackageBackendMap;
@@ -23,7 +23,7 @@ pub(crate) fn load_packages(
         .map(|backend| {
             let backend_pkgs = backend
                 .packages(interner)
-                .with_context(|| {
+                .wrap_err_with(|| {
                     format!(
                         "Failed to collect information from backend {}",
                         backend.name()

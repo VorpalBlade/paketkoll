@@ -1,11 +1,11 @@
 //! Set up a new configuration directory from the template
 
 use camino::Utf8Path;
-use eyre::Context;
+use eyre::WrapErr;
 
 /// Set up a new configuration directory from the template
 pub(crate) fn init_directory(config_path: &Utf8Path) -> eyre::Result<()> {
-    std::fs::create_dir_all(config_path).context("Failed to create config directory")?;
+    std::fs::create_dir_all(config_path).wrap_err("Failed to create config directory")?;
     std::fs::create_dir_all(config_path.join("files"))?;
 
     // Create skeleton main script

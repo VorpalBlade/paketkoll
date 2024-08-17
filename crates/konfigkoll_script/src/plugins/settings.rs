@@ -3,7 +3,7 @@
 use super::error::KResult;
 use ahash::AHashSet;
 use camino::Utf8PathBuf;
-use eyre::Context;
+use eyre::WrapErr;
 use globset::Glob;
 use globset::GlobSet;
 use parking_lot::Mutex;
@@ -89,7 +89,7 @@ impl Settings {
         }
         builder
             .build()
-            .context("Failed to build globset for early configs")
+            .wrap_err("Failed to build globset for early configs")
     }
 
     pub fn sensitive_configs(&self) -> eyre::Result<GlobSet> {
@@ -102,7 +102,7 @@ impl Settings {
         }
         builder
             .build()
-            .context("Failed to build globset for sensitive configs")
+            .wrap_err("Failed to build globset for sensitive configs")
     }
 
     /// Get diff tool to use
@@ -145,7 +145,7 @@ impl Settings {
     #[rune::function]
     pub fn set_file_backend(&self, name: &str) -> KResult<()> {
         let backend = paketkoll_types::backend::Backend::from_str(name)
-            .with_context(|| format!("Unknown backend {name}"))?;
+            .wrap_err_with(|| format!("Unknown backend {name}"))?;
         let mut guard = self.file_backend.lock();
         if guard.is_some() {
             tracing::warn!("File backend was set more than once");
@@ -170,7 +170,7 @@ impl Settings {
     #[rune::function]
     pub fn enable_pkg_backend(&self, name: &str) -> KResult<()> {
         let backend = paketkoll_types::backend::Backend::from_str(name)
-            .with_context(|| format!("Unknown backend {name}"))?;
+            .wrap_err_with(|| format!("Unknown backend {name}"))?;
 
         let before = self.enabled_pkg_backends.lock().insert(backend);
 

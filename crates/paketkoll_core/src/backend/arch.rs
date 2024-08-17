@@ -14,8 +14,8 @@ use compact_str::format_compact;
 use dashmap::DashMap;
 use dashmap::DashSet;
 use either::Either;
-use eyre::Context;
 use eyre::ContextCompat;
+use eyre::WrapErr;
 use paketkoll_types::backend::ArchiveQueryError;
 use paketkoll_types::backend::ArchiveResult;
 use paketkoll_types::backend::Files;
@@ -83,7 +83,7 @@ impl ArchLinuxBuilder {
     }
 
     pub fn build(mut self) -> eyre::Result<ArchLinux> {
-        let pacman_config = self.load_config().context("Failed to load pacman.conf")?;
+        let pacman_config = self.load_config().wrap_err("Failed to load pacman.conf")?;
         Ok(ArchLinux {
             // Impossible unwrap: We just loaded it
             pacman_config,
@@ -168,7 +168,7 @@ impl Files for ArchLinux {
         let re = RegexSet::new(paths)?;
 
         std::fs::read_dir(db_root)
-            .context("Failed to read pacman database directory")?
+            .wrap_err("Failed to read pacman database directory")?
             .par_bridge()
             .for_each(|entry| {
                 if let Ok(entry) = entry {
@@ -209,9 +209,9 @@ impl Files for ArchLinux {
 
             // The package is a .tar.zst
             let package_file =
-                std::fs::File::open(&package_path).context("Failed to open archive")?;
+                std::fs::File::open(&package_path).wrap_err("Failed to open archive")?;
             let decompressed =
-                zstd::Decoder::new(package_file).context("Failed to create zstd decompressor")?;
+                zstd::Decoder::new(package_file).wrap_err("Failed to create zstd decompressor")?;
             let archive = tar::Archive::new(decompressed);
 
             // Now, lets extract the requested files from the package
@@ -260,7 +260,7 @@ impl ArchLinux {
         let package_paths = filter.iter().map(|pkg_ref| {
             let pkg = packages
                 .get(pkg_ref)
-                .context("Failed to find package in package map")?;
+                .wrap_err("Failed to find package in package map")?;
             let name = pkg.name.to_str(interner);
             // Get the full file name
             let filename = format_pkg_filename(interner, pkg);
@@ -349,14 +349,14 @@ fn find_files(
     };
     let files_path = entry.path().join("files");
     let contents = std::fs::read_to_string(&files_path)
-        .with_context(|| format!("Failed to read {files_path:?}"))?;
+        .wrap_err_with(|| format!("Failed to read {files_path:?}"))?;
     let matches = re.matches(&contents);
     if matches.matched_any() {
         let desc_path = entry.path().join("desc");
         let pkg_data = {
             let readable = BufReader::new(
                 std::fs::File::open(&desc_path)
-                    .with_context(|| format!("Failed to open {desc_path:?}"))?,
+                    .wrap_err_with(|| format!("Failed to open {desc_path:?}"))?,
             );
             desc::from_arch_linux_desc(readable, interner)?
         };
@@ -375,12 +375,12 @@ impl Packages for ArchLinux {
     fn packages(&self, interner: &Interner) -> eyre::Result<Vec<PackageInterned>> {
         let db_root = Path::new(&self.pacman_config.db_path).join("local");
         let results: eyre::Result<Vec<PackageInterned>> = std::fs::read_dir(db_root)
-            .context("Failed to read pacman database directory")?
+            .wrap_err("Failed to read pacman database directory")?
             .par_bridge()
             .filter_map(|entry| {
                 let entry = entry.ok()?;
                 load_pkg(&entry, interner)
-                    .with_context(|| {
+                    .wrap_err_with(|| {
                         format!("Failed to load package data for {:?}", entry.file_name())
                     })
                     .transpose()
@@ -403,7 +403,7 @@ impl Packages for ArchLinux {
                 install,
                 (!ask_confirmation).then_some("--noconfirm"),
             )
-            .context("Failed to install with pacman")?;
+            .wrap_err("Failed to install with pacman")?;
         }
         if !uninstall.is_empty() {
             package_manager_transaction(
@@ -412,7 +412,7 @@ impl Packages for ArchLinux {
                 uninstall,
                 (!ask_confirmation).then_some("--noconfirm"),
             )
-            .context("Failed to uninstall with pacman")?;
+            .wrap_err("Failed to uninstall with pacman")?;
         }
         Ok(())
     }
@@ -421,11 +421,11 @@ impl Packages for ArchLinux {
         let _guard = self.pkgmgr_mutex.lock();
         if !dependencies.is_empty() {
             package_manager_transaction("pacman", &["-D", "--asdeps"], dependencies, None)
-                .context("Failed to mark dependencies with pacman")?;
+                .wrap_err("Failed to mark dependencies with pacman")?;
         }
         if !manual.is_empty() {
             package_manager_transaction("pacman", &["-D", "--asexplicit"], manual, None)
-                .context("Failed to mark manual with pacman")?;
+                .wrap_err("Failed to mark manual with pacman")?;
         }
         Ok(())
     }
@@ -438,9 +438,9 @@ impl Packages for ArchLinux {
         let mut run_query = || -> eyre::Result<Option<String>> {
             let query_output = query_cmd
                 .output()
-                .with_context(|| "Failed to execute pacman -Qdtq")?;
+                .wrap_err_with(|| "Failed to execute pacman -Qdtq")?;
             let out = String::from_utf8(query_output.stdout)
-                .with_context(|| "Failed to parse pacman -Qdtq output as UTF-8")?;
+                .wrap_err_with(|| "Failed to parse pacman -Qdtq output as UTF-8")?;
             if out.is_empty() {
                 Ok(None)
             } else {
@@ -456,7 +456,7 @@ impl Packages for ArchLinux {
                 &packages,
                 (!ask_confirmation).then_some("--noconfirm"),
             )
-            .context("Failed to remove unused packages with pacman")?;
+            .wrap_err("Failed to remove unused packages with pacman")?;
         }
 
         Ok(())
@@ -495,12 +495,14 @@ fn get_mtree_paths<'borrows>(
 ) -> eyre::Result<impl ParallelIterator<Item = eyre::Result<PackageData>> + 'borrows> {
     let db_root = db_path.join("local");
     Ok(std::fs::read_dir(db_root)
-        .context("Failed to read pacman database directory")?
+        .wrap_err("Failed to read pacman database directory")?
         .par_bridge()
         .filter_map(|entry| {
             let entry = entry.ok()?;
             load_pkg_for_file_listing(&entry, interner, package_filter)
-                .with_context(|| format!("Failed to load package data for {:?}", entry.file_name()))
+                .wrap_err_with(|| {
+                    format!("Failed to load package data for {:?}", entry.file_name())
+                })
                 .transpose()
         }))
 }
@@ -519,7 +521,7 @@ fn load_pkg_for_file_listing(
     let pkg_data = {
         let readable = BufReader::new(
             std::fs::File::open(&desc_path)
-                .with_context(|| format!("Failed to open {desc_path:?}"))?,
+                .wrap_err_with(|| format!("Failed to open {desc_path:?}"))?,
         );
         desc::from_arch_linux_desc(readable, interner)?
     };
@@ -534,7 +536,7 @@ fn load_pkg_for_file_listing(
     let backup_files = {
         let readable = BufReader::new(
             std::fs::File::open(&files_path)
-                .with_context(|| format!("Failed to open {files_path:?}"))?,
+                .wrap_err_with(|| format!("Failed to open {files_path:?}"))?,
         );
         desc::backup_files(readable)?
             .into_iter()
@@ -561,7 +563,7 @@ fn load_pkg(
     let pkg_data = {
         let readable = BufReader::new(
             std::fs::File::open(&desc_path)
-                .with_context(|| format!("Failed to open {desc_path:?}"))?,
+                .wrap_err_with(|| format!("Failed to open {desc_path:?}"))?,
         );
         desc::from_arch_linux_desc(readable, interner)?
     };

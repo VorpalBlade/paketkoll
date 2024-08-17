@@ -1,7 +1,7 @@
 //! Access to system package manager
 
 use super::error::KResult;
-use eyre::Context;
+use eyre::WrapErr;
 use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::OriginalFileQuery;
@@ -148,7 +148,7 @@ impl PackageManager {
         let guard = self
             .inner
             .borrow_ref()
-            .context("Failed to get inner object")?;
+            .wrap_err("Failed to get inner object")?;
         let files = guard
             .files
             .as_ref()
@@ -186,11 +186,11 @@ impl PackageManager {
     fn original_file_contents(&self, package: &str, path: &str) -> KResult<Bytes> {
         let result = self
             .file_contents(package, path)
-            .context("Failed to get original file contents")?;
+            .wrap_err("Failed to get original file contents")?;
         Ok(Bytes::from_vec(
             result
                 .try_into()
-                .context("Failed to get original file contents")?,
+                .wrap_err("Failed to get original file contents")?,
         ))
     }
 }

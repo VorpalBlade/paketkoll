@@ -3,7 +3,7 @@
 use camino::Utf8Path;
 use compact_str::format_compact;
 use compact_str::CompactString;
-use eyre::Context;
+use eyre::WrapErr;
 use itertools::Itertools;
 use konfigkoll_types::FileContents;
 use konfigkoll_types::FsInstruction;
@@ -44,7 +44,7 @@ pub fn save_fs_changes<'instruction>(
                 writeln!(output, "{prefix}.rm(\"{}\")?;{}", instruction.path, comment)?;
             }
             konfigkoll_types::FsOp::CreateFile(ref contents) => {
-                file_data_saver(&instruction.path, contents).with_context(|| {
+                file_data_saver(&instruction.path, contents).wrap_err_with(|| {
                     format!("Failed to save {} to config directory", instruction.path)
                 })?;
                 writeln!(

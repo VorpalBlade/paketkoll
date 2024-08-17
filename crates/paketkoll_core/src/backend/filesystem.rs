@@ -2,8 +2,8 @@
 
 use crate::config::CommonFileCheckConfiguration;
 use crate::config::ConfigFiles;
-use eyre::Context;
 use eyre::Result;
+use eyre::WrapErr;
 use paketkoll_types::files::Checksum;
 use paketkoll_types::files::DeviceNode;
 use paketkoll_types::files::DeviceType;
@@ -144,7 +144,7 @@ pub(crate) fn check_file(
                                 });
                             }
                         }
-                        Err(err) => Err(err).with_context(|| {
+                        Err(err) => Err(err).wrap_err_with(|| {
                             format!("Failed to read link target for {:?}", file.path)
                         })?,
                     }
@@ -242,7 +242,7 @@ pub(crate) fn check_file(
             ErrorKind::PermissionDenied => {
                 issues.push(IssueKind::PermissionDenied);
             }
-            _ => Err(err).with_context(|| format!("IO error while processing {:?}", file.path))?,
+            _ => Err(err).wrap_err_with(|| format!("IO error while processing {:?}", file.path))?,
         },
     }
     // Finally check if we have anything to report
@@ -294,7 +294,7 @@ fn check_contents(
                 issues.push(IssueKind::PermissionDenied);
                 return Ok(());
             }
-            _ => Err(err).with_context(|| format!("IO error while reading {:?}", path))?,
+            _ => Err(err).wrap_err_with(|| format!("IO error while reading {:?}", path))?,
         },
     };
 

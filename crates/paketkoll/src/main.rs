@@ -2,7 +2,7 @@
 
 use ahash::AHashSet;
 use clap::Parser;
-use eyre::Context;
+use eyre::WrapErr;
 use paketkoll::cli::Cli;
 use paketkoll::cli::Commands;
 use paketkoll::cli::Format;
@@ -64,11 +64,13 @@ fn main() -> color_eyre::eyre::Result<Exit> {
             let backend: paketkoll_core::backend::ConcreteBackend = cli.backend.try_into()?;
             let backend_impl = backend
                 .create_full(&(&cli).try_into()?, &interner)
-                .context("Failed to create backend")?;
+                .wrap_err("Failed to create backend")?;
 
             let package_map = backend_impl
                 .package_map_complete(&interner)
-                .with_context(|| format!("Failed to collect information from backend {backend}"))?;
+                .wrap_err_with(|| {
+                    format!("Failed to collect information from backend {backend}")
+                })?;
 
             let package: &str = match package {
                 Some(p) => p,
@@ -99,7 +101,7 @@ fn main() -> color_eyre::eyre::Result<Exit> {
             }];
             let results = backend_impl
                 .original_files(queries.as_slice(), &package_map, &interner)
-                .with_context(|| {
+                .wrap_err_with(|| {
                     format!("Failed to collect original files from backend {backend}")
                 })?;
 
@@ -113,7 +115,7 @@ fn main() -> color_eyre::eyre::Result<Exit> {
             let backend: paketkoll_core::backend::ConcreteBackend = cli.backend.try_into()?;
             let backend_impl = backend
                 .create_files(&(&cli).try_into()?, &interner)
-                .context("Failed to create backend")?;
+                .wrap_err("Failed to create backend")?;
 
             let inputs = AHashSet::from_iter(paths.iter().map(Path::new));
             let file_map = backend_impl.owning_packages(&inputs, &interner)?;
@@ -132,17 +134,19 @@ fn main() -> color_eyre::eyre::Result<Exit> {
             let backend: paketkoll_core::backend::ConcreteBackend = cli.backend.try_into()?;
             let backend_impl = backend
                 .create_full(&(&cli).try_into()?, &interner)
-                .context("Failed to create backend")?;
+                .wrap_err("Failed to create backend")?;
 
             let package_map = backend_impl
                 .package_map_complete(&interner)
-                .with_context(|| format!("Failed to collect information from backend {backend}"))?;
+                .wrap_err_with(|| {
+                    format!("Failed to collect information from backend {backend}")
+                })?;
 
             let pkg_ref = PackageRef::get_or_intern(&interner, package);
 
             let files = backend_impl
                 .files_from_archives(&[pkg_ref], &package_map, &interner)
-                .with_context(|| {
+                .wrap_err_with(|| {
                     format!(
                         "Failed to collect file information for package {package} from backend \
                          {backend}"

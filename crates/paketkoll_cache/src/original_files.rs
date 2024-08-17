@@ -6,7 +6,7 @@ use cached::stores::DiskCacheBuilder;
 use cached::DiskCache;
 use cached::IOCached;
 use compact_str::CompactString;
-use eyre::Context;
+use eyre::WrapErr;
 use paketkoll_types::backend::ArchiveResult;
 use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
@@ -140,7 +140,7 @@ impl Files for OriginalFilesCache {
             match self
                 .cache
                 .cache_get(&cache_key)
-                .context("Failed cache query")?
+                .wrap_err("Failed cache query")?
             {
                 Some(v) => {
                     tracing::trace!("Cache hit: {}", cache_key);
@@ -157,7 +157,7 @@ impl Files for OriginalFilesCache {
         let uncached_results = self
             .inner
             .original_files(&uncached_queries, packages, interner)
-            .with_context(|| format!("Inner query of {uncached_queries:?} failed"))?;
+            .wrap_err_with(|| format!("Inner query of {uncached_queries:?} failed"))?;
 
         // Insert the uncached results into the cache and update the results
         for (query, result) in uncached_results.into_iter() {
@@ -165,7 +165,7 @@ impl Files for OriginalFilesCache {
                 Some(cache_key) => {
                     self.cache
                         .cache_set(cache_key, result.clone())
-                        .context("Failed cache insertion")?;
+                        .wrap_err("Failed cache insertion")?;
                 }
                 None => {
                     tracing::warn!(

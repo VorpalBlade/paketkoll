@@ -6,7 +6,7 @@ use super::package_managers::PackageManager;
 use crate::Commands;
 use ahash::AHashMap;
 use ahash::AHashSet;
-use eyre::Context;
+use eyre::WrapErr;
 use itertools::Itertools;
 use rune::runtime::Function;
 use rune::Any;
@@ -256,7 +256,7 @@ impl Passwd {
             tracing::error!("Sanity check *before* aligning passwd IDs failed: {e}");
         })?;
         let passwd = std::fs::read_to_string("/etc/passwd")
-            .context("Failed to read /etc/passwd from host")?;
+            .wrap_err("Failed to read /etc/passwd from host")?;
         for line in passwd.lines() {
             let parts: Vec<_> = line.split(':').collect();
             if parts.len() != 7 {
@@ -266,7 +266,7 @@ impl Passwd {
             let name = parts[0];
             let uid: u32 = parts[2]
                 .parse()
-                .context("Failed to parse /etc/passwd from host")?;
+                .wrap_err("Failed to parse /etc/passwd from host")?;
             if let Some(user) = self.users.get_mut(name) {
                 if user.uid != uid {
                     tracing::info!("Updating UID for {} from {} to {}", name, user.uid, uid);
@@ -275,8 +275,8 @@ impl Passwd {
             }
         }
 
-        let group =
-            std::fs::read_to_string("/etc/group").context("Failed to read /etc/group from host")?;
+        let group = std::fs::read_to_string("/etc/group")
+            .wrap_err("Failed to read /etc/group from host")?;
         for line in group.lines() {
             let parts: Vec<_> = line.split(':').collect();
             if parts.len() != 4 {
@@ -286,7 +286,7 @@ impl Passwd {
             let name = parts[0];
             let gid: u32 = parts[2]
                 .parse()
-                .context("Failed to parse /etc/group from host")?;
+                .wrap_err("Failed to parse /etc/group from host")?;
             if let Some(group) = self.groups.get_mut(name) {
                 if group.gid != gid {
                     tracing::info!("Updating GID for {} from {} to {}", name, group.gid, gid);
@@ -304,7 +304,7 @@ impl Passwd {
     #[allow(clippy::needless_pass_by_value)]
     fn passwd_from_system(&mut self, users: Vec<String>) -> KResult<()> {
         let shadow = std::fs::read_to_string("/etc/shadow")
-            .context("Failed to read /etc/shadow from host")?;
+            .wrap_err("Failed to read /etc/shadow from host")?;
         for line in shadow.lines() {
             let parts: Vec<_> = line.split(':').collect();
             if parts.len() != 9 {
@@ -341,13 +341,13 @@ impl Passwd {
         let file_contents = String::from_utf8(
             package_manager
                 .file_contents(package, config_file)
-                .context("Failed to get sysusers file")?,
+                .wrap_err("Failed to get sysusers file")?,
         )
-        .with_context(|| format!("UTF-8 decoding error for {config_file} ({package})"))?;
+        .wrap_err_with(|| format!("UTF-8 decoding error for {config_file} ({package})"))?;
         let parsed = sysusers::parse_file
             .parse(&file_contents)
             .map_err(|error| sysusers::SysusersParseError::from_parse(&error, &file_contents))
-            .with_context(|| format!("Failed to parse {config_file} ({package})"))?;
+            .wrap_err_with(|| format!("Failed to parse {config_file} ({package})"))?;
         for directive in parsed {
             match directive {
                 sysusers::Directive::Comment => (),

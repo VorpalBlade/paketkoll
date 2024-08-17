@@ -3,7 +3,7 @@
 use super::error::KResult;
 use crate::engine::CFG_PATH;
 use camino::Utf8PathBuf;
-use eyre::Context;
+use eyre::WrapErr;
 use konfigkoll_utils::safe_path_join;
 use rune::alloc::fmt::TryWrite;
 use rune::runtime::Bytes;
@@ -62,7 +62,7 @@ impl TempDir {
     #[rune::function(path = Self::new)]
     fn new() -> KResult<Self> {
         let dir = tempfile::TempDir::with_prefix("konfigkoll_")
-            .context("Failed to create temporary directory")?
+            .wrap_err("Failed to create temporary directory")?
             .into_path();
         match Utf8PathBuf::from_path_buf(dir) {
             Ok(path) => Ok(Self { path }),
@@ -83,7 +83,7 @@ impl TempDir {
     #[rune::function]
     fn write(&self, path: &str, contents: &[u8]) -> KResult<String> {
         let p = safe_path_join(&self.path, path.into());
-        std::fs::write(&p, contents).with_context(|| format!("Failed to write to {p}"))?;
+        std::fs::write(&p, contents).wrap_err_with(|| format!("Failed to write to {p}"))?;
         Ok(p.into_string())
     }
 
@@ -93,9 +93,9 @@ impl TempDir {
     #[rune::function]
     fn read(&self, path: &str) -> KResult<Bytes> {
         let p = safe_path_join(&self.path, path.into());
-        let data = std::fs::read(&p).with_context(|| format!("Failed to read {p}"))?;
+        let data = std::fs::read(&p).wrap_err_with(|| format!("Failed to read {p}"))?;
         Ok(Bytes::from_vec(
-            data.try_into().context("Failed to convert data")?,
+            data.try_into().wrap_err("Failed to convert data")?,
         ))
     }
 }
@@ -120,7 +120,7 @@ impl File {
     /// Open a file (with normal user permissions)
     #[rune::function(path = Self::open)]
     pub fn open(path: &str) -> KResult<Self> {
-        let file = std::fs::File::open(path).with_context(|| format!("Failed to open {path}"))?;
+        let file = std::fs::File::open(path).wrap_err_with(|| format!("Failed to open {path}"))?;
         Ok(Self {
             file,
             need_root: false,
@@ -131,7 +131,7 @@ impl File {
     #[rune::function(path = Self::open_as_root)]
     pub fn open_as_root(path: &str) -> KResult<Self> {
         let file =
-            std::fs::File::open(path).with_context(|| format!("Failed to open {path} as root"))?;
+            std::fs::File::open(path).wrap_err_with(|| format!("Failed to open {path} as root"))?;
         Ok(Self {
             file,
             need_root: true,
@@ -146,7 +146,7 @@ impl File {
     pub fn open_from_config(path: &str) -> KResult<Self> {
         let p = safe_path_join(CFG_PATH.get().expect("CFG_PATH not set"), path.into());
         let file = std::fs::File::open(&p)
-            .with_context(|| format!("Failed to open {path} from config directory, tried {p}"))?;
+            .wrap_err_with(|| format!("Failed to open {path} from config directory, tried {p}"))?;
         Ok(Self {
             file,
             need_root: false,
@@ -190,11 +190,11 @@ fn exists(path: &str) -> Result<bool, std::io::Error> {
 /// Returns a `Result<Vec<String>>`
 #[rune::function]
 fn glob(pattern: &str) -> KResult<Vec<String>> {
-    let paths = glob::glob(pattern).context("Failed to construct glob")?;
+    let paths = glob::glob(pattern).wrap_err("Failed to construct glob")?;
 
     let mut result = Vec::new();
     for path in paths {
-        result.push(path.context("Glob error")?.to_string_lossy().to_string());
+        result.push(path.wrap_err("Glob error")?.to_string_lossy().to_string());
     }
 
     Ok(result)

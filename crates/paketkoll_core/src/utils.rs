@@ -3,7 +3,7 @@
 use ahash::AHashMap;
 use ahash::AHashSet;
 use compact_str::CompactString;
-use eyre::Context;
+use eyre::WrapErr;
 use smallvec::SmallVec;
 use std::io::BufReader;
 use std::io::Read;
@@ -29,7 +29,7 @@ pub(crate) fn package_manager_transaction(
     }
     let status = cmd
         .status()
-        .with_context(|| format!("Failed to execute {program_name}"))?;
+        .wrap_err_with(|| format!("Failed to execute {program_name}"))?;
     if !status.success() {
         match status.code() {
             Some(code) => eyre::bail!("{program_name} failed with exit code {code}"),
@@ -124,7 +124,7 @@ pub(crate) fn locate_package_file(
             match entries {
                 Ok(paths) => {
                     let mut paths: SmallVec<[_; 5]> =
-                        paths.collect::<Result<_, _>>().context("Glob error")?;
+                        paths.collect::<Result<_, _>>().wrap_err("Glob error")?;
                     paths.sort();
                     if paths.len() > 1 {
                         tracing::warn!(
@@ -220,10 +220,10 @@ pub(crate) fn extract_files(
 
     for entry in archive
         .entries()
-        .context("Failed to read package archive")?
+        .wrap_err("Failed to read package archive")?
     {
-        let mut entry = entry.context("TAR parsing error (entry)")?;
-        let path = entry.path().context("TAR parsing error (path)")?;
+        let mut entry = entry.wrap_err("TAR parsing error (entry)")?;
+        let path = entry.path().wrap_err("TAR parsing error (path)")?;
         let path = path
             .to_str()
             .ok_or_else(|| eyre::eyre!("Failed to convert path to string"))?;
@@ -236,7 +236,7 @@ pub(crate) fn extract_files(
             let mut contents = Vec::new();
             entry
                 .read_to_end(&mut contents)
-                .context("TAR parsing error (file contents)")?;
+                .wrap_err("TAR parsing error (file contents)")?;
             results.insert(
                 paketkoll_types::backend::OriginalFileQuery {
                     package: pkg.into(),
@@ -284,7 +284,7 @@ pub(crate) fn convert_archive_entries(
     let mut results = AHashMap::new();
     for entry in archive
         .entries()
-        .context("Failed to read package archive")?
+        .wrap_err("Failed to read package archive")?
     {
         let mut entry = entry?;
         let path = entry.path()?;

@@ -1,7 +1,7 @@
 //! Exposing regex to rune
 
 use super::error::KResult;
-use eyre::Context;
+use eyre::WrapErr;
 use regex::Regex as InnerRegex;
 use rune::Any;
 use rune::ContextError;
@@ -27,7 +27,7 @@ impl Regex {
     #[rune::function(path = Self::new)]
     fn new(pattern: &str) -> KResult<Self> {
         Ok(Self {
-            inner: InnerRegex::new(pattern).context("Failed to compile regular expression")?,
+            inner: InnerRegex::new(pattern).wrap_err("Failed to compile regular expression")?,
         })
     }
 

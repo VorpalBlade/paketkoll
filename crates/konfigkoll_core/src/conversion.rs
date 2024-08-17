@@ -4,7 +4,7 @@ use crate::utils::IdKey;
 use crate::utils::NumericToNameResolveCache;
 use camino::Utf8Path;
 use compact_str::format_compact;
-use eyre::Context;
+use eyre::WrapErr;
 use konfigkoll_types::FileContents;
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::FsOp;
@@ -111,7 +111,7 @@ fn convert_issue(
                     path: path.into(),
                     op: FsOp::CreateFile(
                         fs_load_contents(path, None)
-                            .with_context(|| format!("Failed to read {path:?}"))?,
+                            .wrap_err_with(|| format!("Failed to read {path:?}"))?,
                     ),
                     comment: None,
                     pkg,
@@ -125,7 +125,7 @@ fn convert_issue(
                     path: path.into(),
                     op: FsOp::CreateFile(
                         fs_load_contents(path, Some(actual))
-                            .with_context(|| format!("Failed to read {path:?}"))?,
+                            .wrap_err_with(|| format!("Failed to read {path:?}"))?,
                     ),
                     comment: None,
                     pkg,
@@ -210,7 +210,7 @@ fn from_fs(
 ) -> eyre::Result<impl Iterator<Item = FsInstruction>> {
     let metadata = path
         .symlink_metadata()
-        .with_context(|| eyre::eyre!("Failed to get metadata"))?;
+        .wrap_err_with(|| eyre::eyre!("Failed to get metadata"))?;
 
     let mut results = vec![];
 
@@ -218,7 +218,7 @@ fn from_fs(
         results.push(FsInstruction {
             path: path.into(),
             op: FsOp::CreateFile(
-                fs_load_contents(path, None).with_context(|| format!("Failed to load {path}"))?,
+                fs_load_contents(path, None).wrap_err_with(|| format!("Failed to load {path}"))?,
             ),
             comment: None,
             pkg,
@@ -235,7 +235,7 @@ fn from_fs(
             path: path.into(),
             op: FsOp::CreateSymlink {
                 target: std::fs::read_link(path)
-                    .with_context(|| eyre::eyre!("Failed to read symlink target"))?
+                    .wrap_err_with(|| eyre::eyre!("Failed to read symlink target"))?
                     .try_into()?,
             },
             comment: None,

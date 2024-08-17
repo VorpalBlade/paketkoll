@@ -7,7 +7,7 @@ use crate::Commands;
 use crate::Phase;
 use camino::Utf8PathBuf;
 use compact_str::CompactString;
-use eyre::Context;
+use eyre::WrapErr;
 use rune::Any;
 use rune::ContextError;
 use rune::Module;
@@ -119,9 +119,9 @@ impl Unit {
                         };
                         Ok(package_manager
                             .file_contents(package, &alt_path)
-                            .context("File contents query failed")?)
+                            .wrap_err("File contents query failed")?)
                     }
-                    Err(e) => Err(e).context("File contents query failed")?,
+                    Err(e) => Err(e).wrap_err("File contents query failed")?,
                 }
             }
         }
@@ -132,8 +132,8 @@ impl Unit {
     fn parse_unit_file(&self) -> eyre::Result<ini::Ini> {
         let contents = self.contents()?;
         let contents = std::str::from_utf8(&contents)
-            .context("UTF-8 conversion failed for systemd unit file")?;
-        ini::Ini::load_from_str(contents).context("Parsing unit file as INI failed")
+            .wrap_err("UTF-8 conversion failed for systemd unit file")?;
+        ini::Ini::load_from_str(contents).wrap_err("Parsing unit file as INI failed")
     }
 }
 

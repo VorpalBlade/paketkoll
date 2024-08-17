@@ -1,6 +1,6 @@
 //! Checksum utilities
 
-use eyre::Context;
+use eyre::WrapErr;
 use paketkoll_types::files::Checksum;
 use std::io::ErrorKind;
 
@@ -22,7 +22,7 @@ pub fn sha256_readable(reader: &mut impl std::io::Read) -> eyre::Result<Checksum
         digest
             .as_ref()
             .try_into()
-            .context("Invalid digest length")?,
+            .wrap_err("Invalid digest length")?,
     ))
 }
 

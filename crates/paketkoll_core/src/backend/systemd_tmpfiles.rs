@@ -2,8 +2,8 @@
 
 use ahash::AHashMap;
 use compact_str::CompactString;
-use eyre::Context;
 use eyre::ContextCompat;
+use eyre::WrapErr;
 use paketkoll_types::backend::ArchiveResult;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::Name;
@@ -80,15 +80,15 @@ impl Files for SystemdTmpfiles {
             )?;
         let output = cmd
             .wait_with_output()
-            .context("Failed to wait for systemd-tmpfiles --cat-config")?;
+            .wrap_err("Failed to wait for systemd-tmpfiles --cat-config")?;
         if !output.status.success() {
             eyre::bail!(
                 "Failed to run systemd-tmpfiles --cat-config: {}",
-                String::from_utf8(output.stderr).context("Failed to parse stderr")?
+                String::from_utf8(output.stderr).wrap_err("Failed to parse stderr")?
             );
         }
         let output = String::from_utf8(output.stdout)
-            .context("Failed to parse systemd-tmpfiles --cat-config as UTF-8")?;
+            .wrap_err("Failed to parse systemd-tmpfiles --cat-config as UTF-8")?;
 
         // Now parse it
         parse_systemd_tmpfiles_output(&output)
@@ -132,21 +132,21 @@ impl Files for SystemdTmpfiles {
 /// shared later stages.
 fn parse_systemd_tmpfiles_output(output: &str) -> Result<Vec<FileEntry>, eyre::Error> {
     let parsed = systemd_tmpfiles::parser::parse_str(output)
-        .context("Failed to parse systemd-tmpfiles output")?;
+        .wrap_err("Failed to parse systemd-tmpfiles output")?;
 
     let mut files = AHashMap::new();
 
     let mut id_cache = IdCache::default();
 
     let resolver = systemd_tmpfiles::specifier::SystemResolver::new_from_running_system()
-        .context("Failed to create systemd-tmpfiles specifier resolver")?;
+        .wrap_err("Failed to create systemd-tmpfiles specifier resolver")?;
 
     // Note! It may be tempting to parallelise this, but unfortunately it is "last
     // item wins" (at least per file), including possibly modifying previous
     // entries.
     for entry in parsed.iter() {
         process_entry(entry, &mut files, &mut id_cache, &resolver)
-            .with_context(|| format!("Failed to process entry for {}", entry.path()))?;
+            .wrap_err_with(|| format!("Failed to process entry for {}", entry.path()))?;
     }
 
     Ok(files.into_values().collect())
@@ -170,7 +170,7 @@ fn process_entry<'entry>(
     }
     let path: CompactString = resolver
         .resolve(entry.path())
-        .context("Failed to resolve path")?
+        .wrap_err("Failed to resolve path")?
         .into_owned()
         .into();
 
@@ -196,8 +196,8 @@ fn process_entry<'entry>(
         } => {
             let contents = match contents {
                 Some(c) => resolver
-                    .resolve(std::str::from_utf8(c).context("Non-UTF8 data")?)
-                    .context("Failed to apply specifiers")?,
+                    .resolve(std::str::from_utf8(c).wrap_err("Non-UTF8 data")?)
+                    .wrap_err("Failed to apply specifiers")?,
                 None => Cow::Borrowed(""),
             };
             Properties::RegularFileSystemd(RegularFileSystemd {
@@ -217,8 +217,8 @@ fn process_entry<'entry>(
             contents,
         } => {
             let contents = resolver
-                .resolve(std::str::from_utf8(contents).context("Non-UTF8 data")?)
-                .context("Failed to apply specifiers")?;
+                .resolve(std::str::from_utf8(contents).wrap_err("Non-UTF8 data")?)
+                .wrap_err("Failed to apply specifiers")?;
             Properties::RegularFileBasic(RegularFileBasic {
                 size: Some(contents.len() as u64),
                 checksum: sha256_buffer(contents.as_bytes()),
@@ -271,8 +271,8 @@ fn process_entry<'entry>(
         } => {
             let target = match target {
                 Some(c) => resolver
-                    .resolve(std::str::from_utf8(c).context("Non-UTF8 data")?)
-                    .context("Failed to apply specifiers")?,
+                    .resolve(std::str::from_utf8(c).wrap_err("Non-UTF8 data")?)
+                    .wrap_err("Failed to apply specifiers")?,
                 None => Cow::Owned(format!("/usr/share/factory/{}", path)),
             };
             Properties::Symlink(Symlink {
@@ -321,7 +321,7 @@ fn process_entry<'entry>(
             source,
         } => {
             let source = match source {
-                Some(c) => resolver.resolve(c).context("Failed to apply specifiers")?,
+                Some(c) => resolver.resolve(c).wrap_err("Failed to apply specifiers")?,
                 None => Cow::Owned(format!("/usr/share/factory/{}", path)),
             };
             // Now we need to figure out if the source is a directory or a file
@@ -499,7 +499,7 @@ fn recursive_copy(
             // Recurse though directory contents
             for entry in dir_iter {
                 let entry =
-                    entry.with_context(|| format!("Failed to read directory {source_path:?}"))?;
+                    entry.wrap_err_with(|| format!("Failed to read directory {source_path:?}"))?;
                 let entry_path = entry.path();
                 let entry_name = entry.file_name();
                 let entry_name = entry_name.to_string_lossy();
@@ -540,7 +540,7 @@ fn recursive_copy(
 /// Generate a checksum from a path on the system (needed for copy directives)
 fn generate_checksum_from_file(path: &Path) -> eyre::Result<Checksum> {
     let mut reader =
-        std::fs::File::open(path).with_context(|| format!("IO error while reading {:?}", path))?;
+        std::fs::File::open(path).wrap_err_with(|| format!("IO error while reading {:?}", path))?;
     sha256_readable(&mut reader)
 }
 
@@ -597,8 +597,8 @@ fn resolve_gid<'entry>(
                 IdCacheKey::Group(name.as_str()),
                 |name: &str| -> eyre::Result<u32> {
                     let entry = nix::unistd::Group::from_name(name)
-                        .with_context(|| format!("Failed to resolve GID for {name}"))?
-                        .with_context(|| format!("Failed to resolve GID for {name}"))?;
+                        .wrap_err_with(|| format!("Failed to resolve GID for {name}"))?
+                        .wrap_err_with(|| format!("Failed to resolve GID for {name}"))?;
                     Ok(entry.gid.as_raw())
                 },
             )
@@ -620,8 +620,8 @@ fn resolve_uid<'entry>(
                 IdCacheKey::User(name.as_str()),
                 |name: &str| -> eyre::Result<u32> {
                     let entry = nix::unistd::User::from_name(name)
-                        .with_context(|| format!("Failed to resolve UID for {name}"))?
-                        .with_context(|| format!("Failed to resolve UID for {name}"))?;
+                        .wrap_err_with(|| format!("Failed to resolve UID for {name}"))?
+                        .wrap_err_with(|| format!("Failed to resolve UID for {name}"))?;
                     Ok(entry.uid.as_raw())
                 },
             )

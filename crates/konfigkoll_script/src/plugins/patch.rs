@@ -1,7 +1,7 @@
 //! Facilities to patch a file compared to the default package provided one.
 
 use super::error::KResult;
-use eyre::Context;
+use eyre::WrapErr;
 use regex::Regex;
 use rune::runtime::Shared;
 use rune::runtime::VmResult;
@@ -101,7 +101,7 @@ impl TryFrom<&Selector> for konfigkoll_utils::line_edit::Selector {
             Selector::Eof => Ok(Self::Eof),
             Selector::Line(n) => Ok(Self::Line(*n)),
             Selector::Range(a, b) => Ok(Self::Range(*a, *b)),
-            Selector::Regex(r) => Ok(Self::Regex(Regex::new(r).context("invalid regex")?)),
+            Selector::Regex(r) => Ok(Self::Regex(Regex::new(r).wrap_err("invalid regex")?)),
             Selector::Function(ref f) => {
                 let f = f.clone();
                 Ok(Self::Function(Rc::new(move |lineno, s| {

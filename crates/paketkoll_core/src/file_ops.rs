@@ -1,6 +1,6 @@
 //! Contain file checking functionality
 
-use eyre::Context;
+use eyre::WrapErr;
 use ignore::overrides::OverrideBuilder;
 use ignore::Match;
 use ignore::WalkBuilder;
@@ -28,15 +28,15 @@ pub fn original_files(
     let interner = Interner::new();
     let backend_impl = backend
         .create_full(backend_config, &interner)
-        .with_context(|| format!("Failed to create backend for {backend}"))?;
+        .wrap_err_with(|| format!("Failed to create backend for {backend}"))?;
 
     let package_map = backend_impl
         .package_map_complete(&interner)
-        .with_context(|| format!("Failed to collect information from backend {backend}"))?;
+        .wrap_err_with(|| format!("Failed to collect information from backend {backend}"))?;
 
     let results = backend_impl
         .original_files(queries, &package_map, &interner)
-        .with_context(|| format!("Failed to collect original files from backend {backend}"))?;
+        .wrap_err_with(|| format!("Failed to collect original files from backend {backend}"))?;
 
     Ok(results)
 }
@@ -50,11 +50,11 @@ pub fn check_installed_files(
     let interner = Interner::new();
     let backend_impl = backend
         .create_files(backend_config, &interner)
-        .with_context(|| format!("Failed to create backend for {backend}"))?;
+        .wrap_err_with(|| format!("Failed to create backend for {backend}"))?;
     // Get distro specific file list
     let results = backend_impl
         .files(&interner)
-        .with_context(|| format!("Failed to collect information from backend {backend}"))?;
+        .wrap_err_with(|| format!("Failed to collect information from backend {backend}"))?;
 
     tracing::debug!("Checking file system");
     // For all file entries, check on file system
@@ -94,11 +94,11 @@ pub fn check_all_files(
     // Collect distro files
     let backend_impl = backend
         .create_files(backend_config, &interner)
-        .with_context(|| format!("Failed to create backend for {backend}"))?;
+        .wrap_err_with(|| format!("Failed to create backend for {backend}"))?;
     // Get distro specific file list
     let mut expected_files = backend_impl
         .files(&interner)
-        .with_context(|| format!("Failed to collect information from backend {backend}",))?;
+        .wrap_err_with(|| format!("Failed to collect information from backend {backend}",))?;
 
     // Possibly canonicalize paths
     if unexpected_cfg.canonicalize_paths {
