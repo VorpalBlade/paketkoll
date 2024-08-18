@@ -5,19 +5,21 @@ use crate::plugins::properties::Properties;
 use crate::plugins::settings::Settings;
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
+use color_eyre::Section;
+use color_eyre::SectionExt;
 use eyre::WrapErr;
 use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::PackageBackendMap;
 use paketkoll_types::backend::PackageMapMap;
 use paketkoll_types::intern::Interner;
+use rune::termcolor::Buffer;
 use rune::termcolor::ColorChoice;
 use rune::termcolor::StandardStream;
 use rune::Diagnostics;
 use rune::Source;
 use rune::Vm;
 use std::fmt::Display;
-use std::io::Write;
 use std::panic::catch_unwind;
 use std::panic::AssertUnwindSafe;
 use std::sync::Arc;
@@ -227,12 +229,18 @@ impl ScriptEngine {
             Err(e) => {
                 let err_str = format!("Rune error while executing {phase}: {}", &e);
                 tracing::error!("{}", err_str);
-                let mut writer = StandardStream::stderr(ColorChoice::Always);
-                writer.write_all(b"\n------\n\n")?;
+                let mut writer = Buffer::ansi();
                 e.emit(&mut writer, &self.sources)?;
-                writer.write_all(b"\n------\n\n")?;
 
-                return Err(e).context(err_str);
+                let rune_diag =
+                    std::str::from_utf8(writer.as_slice().trim_ascii_end())?.to_string();
+
+                return Err(e)
+                    .context("Rune runtime error")
+                    .section(rune_diag.header(
+                        "  ━━━━━━━━━━━━━━━━━━━━━━━━ Rune Diagnostics and Backtrace \
+                         ━━━━━━━━━━━━━━━━━━━━━━━━\n",
+                    ));
             }
         };
         tracing::info!("Returned from script");

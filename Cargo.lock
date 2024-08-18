@@ -1190,6 +1190,7 @@ version = "0.1.4"
 dependencies = [
  "ahash",
  "camino",
+ "color-eyre",
  "compact_str",
  "eyre",
  "glob",
