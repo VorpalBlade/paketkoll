@@ -46,7 +46,7 @@ lasso = { version = "0.7.2", features = [
     "inline-more",
     "multi-threaded",
 ] }
-libc = "0.2.156"
+libc = "0.2.157"
 md-5 = "0.10.6"
 memchr = "2.7.4"
 mimalloc = "0.1.43"
