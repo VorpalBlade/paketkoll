@@ -31,7 +31,7 @@ pub(crate) struct ScanResult {
     pub path_map: PathMap<'this>,
 }
 
-#[tracing::instrument(skip_all)]
+#[tracing::instrument(level = "info", skip_all)]
 pub(crate) fn scan_fs(
     interner: &Arc<Interner>,
     backend: &Arc<dyn Files>,

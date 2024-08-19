@@ -10,7 +10,7 @@ use paketkoll_types::package::PackageInstallStatus;
 use rayon::prelude::*;
 use std::sync::Arc;
 
-#[tracing::instrument(skip_all)]
+#[tracing::instrument(level = "info", skip_all)]
 pub(crate) fn load_packages(
     interner: &Arc<Interner>,
     backends_pkg: &PackageBackendMap,
