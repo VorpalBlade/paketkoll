@@ -12,3 +12,6 @@ jobs:
   lints:
     name: "Run lints"
     uses: ./.github/workflows/act_lint.yml
+    permissions:
+      contents: read
+      security-events: write
