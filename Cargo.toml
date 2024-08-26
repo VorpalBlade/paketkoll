@@ -41,7 +41,7 @@ globset = "0.4.14"
 ignore = { version = "0.4.22", features = ["simd-accel"] }
 indoc = "2.0.5"
 itertools = "0.13.0"
-lasso = { version = "0.7.2", features = [
+lasso = { version = "0.7.3", features = [
     "ahasher",
     "inline-more",
     "multi-threaded",
