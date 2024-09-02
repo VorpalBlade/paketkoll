@@ -23,7 +23,7 @@ color-eyre = "0.6.3"
 compact_str = { version = "0.8.0", features = ["serde", "smallvec"] }
 console = "0.15.8"
 dashmap = "6.0.1"
-derive_builder = "0.20.0"
+derive_builder = "0.20.1"
 directories = "5.0.1"
 dirs = "5.0.1"
 duct = "0.13.7"
