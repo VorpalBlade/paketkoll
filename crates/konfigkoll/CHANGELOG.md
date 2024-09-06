@@ -8,6 +8,28 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.7] - 2024-09-06
+
+### 🩺 Diagnostics & output formatting
+
+- Change span log levels
+- Switch from anyhow to color-eyre for better (and prettier) error messages
+- Improve formatting of Rune runtime errors
+- Add spans to async functions exposed to Rune (should help get better errors with color-eyre)
+- Switch to custom error wrapper to better traverse the Rune callstacks
+- Limit file data that we store inline leading to less verbose debug logs
+
+### 🚜 Refactoring
+
+- Switch to native eyre traits instead of anyhow compatibility (for Options)
+- Switch to native eyre traits instead of anyhow compatibility
+- Use anyhow::Result type alias consistently
+
+### ⚙️ Other stuff
+
+- Apply auto fixable clippy lints
+- Use nightly import grouping in rustfmt
+
 ## [0.1.6] - 2024-08-17
 
 ### 🚀 Features

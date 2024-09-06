@@ -8,6 +8,24 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.4.1] - 2024-09-06
+
+### 🩺 Diagnostics & output formatting
+
+- Switch from anyhow to color-eyre for better (and prettier) error messages
+- Limit file data that we store inline leading to less verbose debug logs
+
+### 🚜 Refactoring
+
+- Switch to native eyre traits instead of anyhow compatibility (for Options)
+- Switch to native eyre traits instead of anyhow compatibility
+- Use anyhow::Result type alias consistently
+
+### ⚙️ Other stuff
+
+- Apply auto fixable clippy lints
+- Use nightly import grouping in rustfmt
+
 ## [0.4.0] - 2024-08-17
 
 ### 🚀 Features
