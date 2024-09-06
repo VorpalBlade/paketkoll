@@ -196,8 +196,7 @@ impl InvariantProvider for SystemResolver {
     fn short_host_name(&self) -> &str {
         self.host_name
             .split_once('.')
-            .map(|(name, _)| name)
-            .unwrap_or(&self.host_name)
+            .map_or(&self.host_name, |(name, _)| name)
     }
 
     fn machine_id(&self) -> &str {

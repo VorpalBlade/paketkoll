@@ -67,7 +67,7 @@ use tracing::instrument;
 /// pipelines.
 #[rune::module(::process)]
 pub fn module(_stdio: bool) -> Result<Module, ContextError> {
-    let mut module = Module::from_meta(self::module_meta)?;
+    let mut module = Module::from_meta(module_meta)?;
     module.ty::<Command>()?;
     module.ty::<Child>()?;
     module.ty::<ExitStatus>()?;

@@ -172,7 +172,7 @@ enum FsEntry {
     /// A file
     File(FileContents),
     /// A symlink
-    Symlink { target: camino::Utf8PathBuf },
+    Symlink { target: Utf8PathBuf },
     /// Create a FIFO
     Fifo,
     /// Create a block device

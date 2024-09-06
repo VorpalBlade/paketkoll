@@ -86,7 +86,7 @@ impl Regex {
 #[rune::module(::regex)]
 /// A wrapper for the rust regex crate
 pub(crate) fn module() -> Result<Module, ContextError> {
-    let mut m = Module::from_meta(self::module_meta)?;
+    let mut m = Module::from_meta(module_meta)?;
     m.ty::<Regex>()?;
     m.function_meta(Regex::new)?;
     m.function_meta(Regex::is_match)?;

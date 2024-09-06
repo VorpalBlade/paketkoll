@@ -121,7 +121,7 @@ impl SysInfo {
 #[rune::module(::sysinfo)]
 /// Various functions to get system information
 pub(crate) fn module() -> Result<Module, ContextError> {
-    let mut m = Module::from_meta(self::module_meta)?;
+    let mut m = Module::from_meta(module_meta)?;
     m.ty::<SysInfo>()?;
     m.function_meta(SysInfo::new)?;
     m.function_meta(SysInfo::architecture)?;

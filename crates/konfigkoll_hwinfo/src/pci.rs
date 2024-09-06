@@ -99,6 +99,7 @@ impl PciDevice {
     }
 
     /// Get the vendor, device and possibly subsystem names
+    #[must_use]
     pub fn vendor_names<'db>(&self, db: &'db PciIdDb) -> PciVendorLookup<&'db str> {
         // Resolve vendor
         let vendor = db.vendors.get(&self.vendor);
@@ -121,6 +122,7 @@ impl PciDevice {
     }
 
     /// Get the class, subclass and program interface names
+    #[must_use]
     pub fn class_strings<'db>(&self, db: &'db PciIdDb) -> PciClassLookup<&'db str> {
         // Split up class 0xccsspp
         let class = (self.class >> 16) as u8;

@@ -86,6 +86,7 @@ where
     PackageT: std::fmt::Debug + PartialEq + Eq + Clone + Copy,
     ArchitectureT: std::fmt::Debug + PartialEq + Eq + Clone + Copy,
 {
+    #[must_use]
     pub fn builder() -> PackageBuilder<PackageRef, ArchitectureRef> {
         PackageBuilder::default()
     }
@@ -95,10 +96,10 @@ impl PackageInterned {
     /// Convert to direct representation
     pub fn into_direct(self, interner: &Interner) -> PackageDirect {
         PackageDirect {
-            name: self.name.to_str(interner).into(),
+            name: self.name.as_str(interner).into(),
             architecture: self
                 .architecture
-                .and_then(|arch| arch.try_to_str(interner))
+                .and_then(|arch| arch.try_as_str(interner))
                 .map(Into::into),
             version: self.version,
             desc: self.desc,
@@ -110,14 +111,14 @@ impl PackageInterned {
             provides: self
                 .provides
                 .into_iter()
-                .flat_map(|pkg| pkg.try_to_str(interner).map(Into::into))
+                .flat_map(|pkg| pkg.try_as_str(interner).map(Into::into))
                 .collect(),
             reason: self.reason,
             status: self.status,
             ids: self
                 .ids
                 .into_iter()
-                .flat_map(|pkg| pkg.try_to_str(interner).map(Into::into))
+                .flat_map(|pkg| pkg.try_as_str(interner).map(Into::into))
                 .collect(),
         }
     }
@@ -159,14 +160,14 @@ impl Dependency<PackageRef> {
     /// Format using string interner
     pub fn format(&self, interner: &Interner) -> String {
         match self {
-            Dependency::Single(pkg) => pkg.to_str(interner).to_string(),
+            Dependency::Single(pkg) => pkg.as_str(interner).to_string(),
             Dependency::Disjunction(packages) => {
                 let mut out = String::new();
                 for (idx, pkg) in packages.iter().enumerate() {
                     if idx > 0 {
                         out.push_str(" | ");
                     }
-                    out.push_str(pkg.to_str(interner));
+                    out.push_str(pkg.as_str(interner));
                 }
                 out
             }
@@ -175,11 +176,11 @@ impl Dependency<PackageRef> {
 
     fn to_direct(&self, interner: &Interner) -> Dependency<CompactString> {
         match self {
-            Dependency::Single(pkg) => Dependency::Single(pkg.to_str(interner).into()),
+            Dependency::Single(pkg) => Dependency::Single(pkg.as_str(interner).into()),
             Dependency::Disjunction(packages) => Dependency::Disjunction(
                 packages
                     .iter()
-                    .map(|pkg| pkg.to_str(interner).into())
+                    .map(|pkg| pkg.as_str(interner).into())
                     .collect(),
             ),
         }

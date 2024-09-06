@@ -17,6 +17,7 @@ pub struct CheckAllFilesConfiguration {
 
 impl CheckAllFilesConfiguration {
     /// Get a builder for this struct
+    #[must_use]
     pub fn builder() -> CheckAllFilesConfigurationBuilder {
         Default::default()
     }
@@ -37,6 +38,7 @@ pub struct CommonFileCheckConfiguration {
 
 impl CommonFileCheckConfiguration {
     /// Get a builder for this struct
+    #[must_use]
     pub fn builder() -> CommonFileCheckConfigurationBuilder {
         Default::default()
     }

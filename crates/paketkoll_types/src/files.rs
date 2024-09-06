@@ -16,11 +16,13 @@ pub struct Mode(u32);
 
 impl Mode {
     #[inline]
+    #[must_use]
     pub const fn new(value: u32) -> Self {
         Self(value)
     }
 
     #[inline]
+    #[must_use]
     pub const fn as_raw(&self) -> u32 {
         self.0
     }
@@ -92,11 +94,13 @@ pub struct Uid(u32);
 
 impl Uid {
     #[inline]
+    #[must_use]
     pub fn new(id: u32) -> Self {
         Self(id)
     }
 
     #[inline]
+    #[must_use]
     pub fn as_raw(&self) -> u32 {
         self.0
     }
@@ -129,11 +133,13 @@ pub struct Gid(u32);
 
 impl Gid {
     #[inline]
+    #[must_use]
     pub fn new(id: u32) -> Self {
         Self(id)
     }
 
     #[inline]
+    #[must_use]
     pub fn as_raw(&self) -> u32 {
         self.0
     }
@@ -346,6 +352,7 @@ pub enum Properties {
 }
 
 impl Properties {
+    #[must_use]
     pub fn is_regular_file(&self) -> Option<bool> {
         match self {
             Properties::RegularFileBasic(_) => Some(true),
@@ -362,6 +369,7 @@ impl Properties {
         }
     }
 
+    #[must_use]
     pub fn is_dir(&self) -> Option<bool> {
         match self {
             Properties::RegularFileBasic(_) => Some(false),
@@ -379,6 +387,7 @@ impl Properties {
     }
 
     /// Get mode (if available)
+    #[must_use]
     pub fn mode(&self) -> Option<Mode> {
         match self {
             Properties::RegularFileBasic(_) => None,
@@ -395,6 +404,7 @@ impl Properties {
         }
     }
 
+    #[must_use]
     pub fn owner(&self) -> Option<Uid> {
         match self {
             Properties::RegularFileBasic(_) => None,
@@ -411,6 +421,7 @@ impl Properties {
         }
     }
 
+    #[must_use]
     pub fn group(&self) -> Option<Gid> {
         match self {
             Properties::RegularFileBasic(_) => None,

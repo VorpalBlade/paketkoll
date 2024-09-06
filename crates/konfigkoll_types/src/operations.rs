@@ -127,6 +127,7 @@ pub struct PkgInstruction {
 
 impl PkgInstruction {
     // Toggle between install and uninstall
+    #[must_use]
     pub fn inverted(&self) -> Self {
         Self {
             op: match self.op {

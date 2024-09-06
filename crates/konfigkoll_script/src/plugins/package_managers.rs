@@ -228,7 +228,7 @@ impl OriginalFilesError {
 #[rune::module(::package_managers)]
 /// Interface to the package manager(s) in the system
 pub(crate) fn module() -> Result<Module, ContextError> {
-    let mut m = Module::from_meta(self::module_meta)?;
+    let mut m = Module::from_meta(module_meta)?;
     m.ty::<PackageManager>()?;
     m.function_meta(PackageManager::original_file_contents__meta)?;
     m.ty::<PackageManagers>()?;

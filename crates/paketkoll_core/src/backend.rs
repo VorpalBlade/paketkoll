@@ -192,6 +192,7 @@ pub struct BackendConfiguration {
 
 impl BackendConfiguration {
     /// Get a builder for this struct
+    #[must_use]
     pub fn builder() -> BackendConfigurationBuilder {
         Default::default()
     }
@@ -227,7 +228,7 @@ impl PackageFilter {
     pub(crate) fn should_include_interned(&self, package: PackageRef, interner: &Interner) -> bool {
         match self {
             PackageFilter::Everything => true,
-            PackageFilter::FilterFunction(f) => match f(package.to_str(interner)) {
+            PackageFilter::FilterFunction(f) => match f(package.as_str(interner)) {
                 FilterAction::Include => true,
                 FilterAction::Exclude => false,
             },

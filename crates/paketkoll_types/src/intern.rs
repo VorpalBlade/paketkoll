@@ -10,6 +10,7 @@ macro_rules! intern_newtype {
         /// Treat this as an opaque token
         #[repr(transparent)]
         #[derive(Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Clone, Copy)]
+        #[must_use]
         pub struct $name(pub(crate) lasso::Spur);
 
         impl $name {
@@ -39,13 +40,13 @@ macro_rules! intern_newtype {
 
             /// Convert to a string
             #[inline]
-            pub fn to_str<'interner>(&self, interner: &'interner Interner) -> &'interner str {
+            pub fn as_str<'interner>(&self, interner: &'interner Interner) -> &'interner str {
                 interner.resolve(&self.as_interner_ref())
             }
 
             /// Convert to a string
             #[inline]
-            pub fn try_to_str<'interner>(
+            pub fn try_as_str<'interner>(
                 &self,
                 interner: &'interner Interner,
             ) -> Option<&'interner str> {

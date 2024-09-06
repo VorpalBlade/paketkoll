@@ -46,7 +46,7 @@ pub(crate) fn load_packages(
             (backend, backend_pkgs)
         })
         .collect();
-    for (backend, backend_pkgs) in backend_maps.into_iter() {
+    for (backend, backend_pkgs) in backend_maps {
         let (backend_pkgs_map, pkg_instructions) = backend_pkgs?;
         package_maps.insert(backend.as_backend_enum(), backend_pkgs_map);
         pkgs_sys.extend(pkg_instructions.into_iter());

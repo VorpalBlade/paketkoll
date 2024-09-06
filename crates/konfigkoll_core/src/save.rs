@@ -32,13 +32,13 @@ pub fn save_fs_changes<'instruction>(
                 format_compact!(" // {comment}")
             }
             (Some(pkg), None) => {
-                format_compact!(" // [{}]", pkg.to_str(interner))
+                format_compact!(" // [{}]", pkg.as_str(interner))
             }
             (Some(pkg), Some(ref comment)) => {
-                format_compact!(" // [{}] {comment}", pkg.to_str(interner))
+                format_compact!(" // [{}] {comment}", pkg.as_str(interner))
             }
         };
-        let prefix = format!("    {}cmds", prefix);
+        let prefix = format!("    {prefix}cmds");
         match instruction.op {
             konfigkoll_types::FsOp::Remove => {
                 writeln!(output, "{prefix}.rm(\"{}\")?;{}", instruction.path, comment)?;
@@ -132,7 +132,7 @@ pub fn save_packages<'instructions>(
     output: &mut dyn std::io::Write,
     instructions: impl Iterator<Item = (&'instructions PkgIdent, PkgInstruction)>,
 ) -> eyre::Result<()> {
-    let prefix = format!("    {}cmds", prefix);
+    let prefix = format!("    {prefix}cmds");
     let instructions = instructions
         .into_iter()
         .sorted_unstable_by(|(ak, av), (bk, bv)| {
@@ -142,7 +142,7 @@ pub fn save_packages<'instructions>(
                 .then_with(|| ak.identifier.cmp(&bk.identifier))
         });
 
-    for (pkg_ident, pkg_instruction) in instructions.into_iter() {
+    for (pkg_ident, pkg_instruction) in instructions {
         let comment = match &pkg_instruction.comment {
             Some(comment) => format_compact!(" // {}", comment),
             None => CompactString::default(),

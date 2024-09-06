@@ -174,7 +174,7 @@ impl<'a> Keyword<'a> {
     /// Input must be a non-empty slice
     fn from_bytes(input: &'a [u8]) -> ParserResult<Keyword<'a>> {
         fn next<'a>(field: &'static str, val: Option<&'a [u8]>) -> ParserResult<&'a [u8]> {
-            val.ok_or_else(|| format!(r#""{}" requires a parameter, none found"#, field).into())
+            val.ok_or_else(|| format!(r#""{field}" requires a parameter, none found"#).into())
         }
         debug_assert!(!input.len() > 0, "Input must be non-empty");
         let mut iter = input.splitn(2, |ch| *ch == b'=');
@@ -254,7 +254,7 @@ impl<'a> DeviceRef<'a> {
             format: self.format,
             major: self.major.to_owned(),
             minor: self.minor.to_owned(),
-            subunit: self.subunit.map(std::borrow::ToOwned::to_owned),
+            subunit: self.subunit.map(ToOwned::to_owned),
         }
     }
 

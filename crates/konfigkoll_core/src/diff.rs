@@ -79,7 +79,7 @@ pub fn show_fs_instr_diff(
             println!(
                 "{}: Would change mode: {} -> {}",
                 instr.path,
-                style(format!("{:o}", old_mode)).red(),
+                style(format!("{old_mode:o}")).red(),
                 style(format!("{:o}", mode.as_raw())).green()
             );
         }
@@ -90,13 +90,14 @@ pub fn show_fs_instr_diff(
                 .unwrap_or(0);
             // Resolve to old user
             let old_user = nix::unistd::User::from_uid(nix::unistd::Uid::from_raw(old_uid))?
-                .map(|u| u.name)
-                .unwrap_or_else(|| "<user missing in passwd?>".to_string());
+                .map_or_else(|| "<user missing in passwd?>".to_string(), |u| u.name);
             // Resolve new owner to new UID
             let new_uid = nix::unistd::User::from_name(owner.as_str())?
                 .map(|u| u.uid.as_raw())
-                .map(|uid| format!("{}", uid))
-                .unwrap_or_else(|| "<uid missing in passwd?>".to_string());
+                .map_or_else(
+                    || "<uid missing in passwd?>".to_string(),
+                    |uid| format!("{uid}"),
+                );
             // Show diff
             println!(
                 "{}: Would change owner: {} ({}) -> {} ({})",
@@ -114,13 +115,14 @@ pub fn show_fs_instr_diff(
                 .unwrap_or(0);
             // Resolve to old group
             let old_group = nix::unistd::Group::from_gid(nix::unistd::Gid::from_raw(old_gid))?
-                .map(|g| g.name)
-                .unwrap_or_else(|| "<group missing in group?>".to_string());
+                .map_or_else(|| "<group missing in group?>".to_string(), |g| g.name);
             // Resolve new group to new GID
             let new_gid = nix::unistd::Group::from_name(group.as_str())?
                 .map(|g| g.gid.as_raw())
-                .map(|gid| format!("{}", gid))
-                .unwrap_or_else(|| "<gid missing in group?>".to_string());
+                .map_or_else(
+                    || "<gid missing in group?>".to_string(),
+                    |gid| format!("{gid}"),
+                );
             // Show diff
             println!(
                 "{}: Would change group: {} ({}) -> {} ({})",

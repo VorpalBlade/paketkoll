@@ -143,8 +143,7 @@ impl Files for FromArchiveCache {
         &self,
         paths: &ahash::AHashSet<&Path>,
         interner: &Interner,
-    ) -> eyre::Result<dashmap::DashMap<std::path::PathBuf, Option<PackageRef>, ahash::RandomState>>
-    {
+    ) -> eyre::Result<dashmap::DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>> {
         self.inner.owning_packages(paths, interner)
     }
 
@@ -210,7 +209,7 @@ impl Files for FromArchiveCache {
                 self.inner
                     .files_from_archives(&uncached_queries, package_map, interner)?;
             // Insert the uncached results into the cache and update the results
-            for inner_result in uncached_results.into_iter() {
+            for inner_result in uncached_results {
                 match inner_result {
                     Ok((query, result)) => {
                         let cache_key = cache_keys.remove(&query).ok_or_else(|| {
@@ -226,7 +225,7 @@ impl Files for FromArchiveCache {
                             .wrap_err_with(|| {
                                 format!(
                                     "Cache set failed: pkg={} cache_key={}",
-                                    query.to_str(interner),
+                                    query.as_str(interner),
                                     cache_key
                                 )
                             })?;
@@ -235,7 +234,7 @@ impl Files for FromArchiveCache {
                     Err(ArchiveQueryError::PackageMissing { query, alternates }) => {
                         let pkgs: SmallVec<[CompactString; 4]> = alternates
                             .iter()
-                            .map(|e| e.to_str(interner).into())
+                            .map(|e| e.as_str(interner).into())
                             .collect();
                         let cache_key = cache_keys.remove(&query).ok_or_else(|| {
                             eyre::eyre!("Cache key not found (archive): {pkgs:?}")
@@ -244,14 +243,14 @@ impl Files for FromArchiveCache {
                             .cache_set(
                                 cache_key.clone(),
                                 FileEntryCacheWrapper::Missing(
-                                    query.to_str(interner).into(),
+                                    query.as_str(interner).into(),
                                     pkgs.clone(),
                                 ),
                             )
                             .wrap_err_with(|| {
                                 format!(
-                                    "Negative cache set failed: pkgs={:?} cache_key={}",
-                                    pkgs, cache_key
+                                    "Negative cache set failed: pkgs={pkgs:?} \
+                                     cache_key={cache_key}"
                                 )
                             })?;
                         results.push(Err(ArchiveQueryError::PackageMissing { query, alternates }));

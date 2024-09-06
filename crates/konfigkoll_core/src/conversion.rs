@@ -367,9 +367,9 @@ pub fn convert_packages_to_pkg_instructions(
             continue;
         }
         let identifier = if package.ids.is_empty() {
-            package.name.to_str(interner).into()
+            package.name.as_str(interner).into()
         } else {
-            package.ids[0].to_str(interner).into()
+            package.ids[0].as_str(interner).into()
         };
         results.insert(
             PkgIdent {

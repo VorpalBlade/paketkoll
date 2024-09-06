@@ -43,7 +43,7 @@ pub(crate) fn scan_fs(
     let mut fs_instructions_sys = vec![];
     let files = if backend.prefer_files_from_archive() {
         tracing::debug!("Using files from archives");
-        let all = package_map.keys().cloned().collect::<Vec<_>>();
+        let all = package_map.keys().copied().collect::<Vec<_>>();
         let mut files = backend.files_from_archives(&all, package_map, interner)?;
         // For all the failures, attempt to resolve them with the traditional backend
         let missing: AHashSet<PackageRef> = files
@@ -60,7 +60,7 @@ pub(crate) fn scan_fs(
                 }
             })
             .flatten()
-            .cloned()
+            .copied()
             .collect();
         let mut extra_files = vec![];
         if !missing.is_empty() {
@@ -70,7 +70,7 @@ pub(crate) fn scan_fs(
                  extra time)"
             );
             let traditional_files = backend.files(interner)?;
-            for file in traditional_files.into_iter() {
+            for file in traditional_files {
                 if let Some(pkg_ref) = file.package {
                     if missing.contains(&pkg_ref) {
                         extra_files.push(file);
@@ -99,14 +99,14 @@ pub(crate) fn scan_fs(
             .for_each(|entry| {
                 file_map.insert(entry.path.clone(), entry);
             });
-        extra_files.into_iter().for_each(|entry| {
+        for entry in extra_files {
             let old = file_map.insert(entry.path.clone(), entry);
             if let Some(old) = old {
                 if old.properties.is_dir() == Some(false) {
                     tracing::warn!("Duplicate file entry for {}", old.path.display());
                 }
             }
-        });
+        }
         file_map.into_iter().map(|(_, v)| v).collect_vec()
     } else {
         let mut files = backend.files(interner).wrap_err_with(|| {

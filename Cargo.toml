@@ -105,13 +105,19 @@ zstd = "0.13.2"
 
 [workspace.lints.rust]
 rust-2018-idioms = "warn"
+unused_qualifications = "warn"
 
 [workspace.lints.clippy]
+assigning_clones = "warn"
 doc_markdown = "warn"
+format_push_string = "warn"
+redundant_clone = "warn"
 needless_pass_by_value = "warn"
+unnecessary_box_returns = "warn"
 redundant_closure_for_method_calls = "warn"
 semicolon_if_nothing_returned = "warn"
 undocumented_unsafe_blocks = "warn"
+uninlined_format_args = "warn"
 unnecessary_safety_doc = "warn"
 unwrap_used = "warn"
 wildcard_imports = "warn"

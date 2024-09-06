@@ -231,7 +231,7 @@ impl TryFrom<&Action> for konfigkoll_utils::line_edit::Action {
 #[rune::module(::patch)]
 /// Utilities for patching file contents conveniently.
 pub(crate) fn module() -> Result<Module, ContextError> {
-    let mut m = Module::from_meta(self::module_meta)?;
+    let mut m = Module::from_meta(module_meta)?;
     m.ty::<LineEditor>()?;
     m.function_meta(LineEditor::new)?;
     m.function_meta(LineEditor::apply)?;

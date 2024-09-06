@@ -135,10 +135,12 @@ fn convert_mtree(
             source: super::NAME,
             seen: Default::default(),
         }),
-        Some(mtree2::FileType::BlockDevice)
-        | Some(mtree2::FileType::CharacterDevice)
-        | Some(mtree2::FileType::Fifo)
-        | Some(mtree2::FileType::Socket)
+        Some(
+            mtree2::FileType::BlockDevice
+            | mtree2::FileType::CharacterDevice
+            | mtree2::FileType::Fifo
+            | mtree2::FileType::Socket,
+        )
         | None => Some(FileEntry {
             package: Some(pkg),
             path: extract_path(item),

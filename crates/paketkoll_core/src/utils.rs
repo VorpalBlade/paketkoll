@@ -111,8 +111,8 @@ pub(crate) fn locate_package_file(
 ) -> Result<Option<PathBuf>, paketkoll_types::backend::OriginalFileError> {
     for downloaded in [false, true] {
         // Try to locate package
-        for dir in dir_candidates.iter() {
-            let path = format!("{}/{}", dir, package_match);
+        for dir in dir_candidates {
+            let path = format!("{dir}/{package_match}");
             let entries = glob::glob_with(
                 &path,
                 glob::MatchOptions {
@@ -172,8 +172,8 @@ pub(crate) fn missing_packages<'strings>(
         package,
     } in package_matches
     {
-        for dir in dir_candidates.iter() {
-            let path = format!("{}/{}", dir, package_match);
+        for dir in dir_candidates {
+            let path = format!("{dir}/{package_match}");
             let entries = glob::glob_with(
                 &path,
                 glob::MatchOptions {
@@ -264,7 +264,7 @@ pub(crate) fn extract_files(
 
 /// Convert a stream of tar entries to a list of file entries
 pub(crate) fn convert_archive_entries(
-    mut archive: tar::Archive<impl std::io::Read>,
+    mut archive: tar::Archive<impl Read>,
     pkg_ref: paketkoll_types::intern::PackageRef,
     source: &'static str,
     name_map_filter: impl Fn(&std::path::Path) -> Option<std::borrow::Cow<'_, std::path::Path>>,
@@ -329,7 +329,7 @@ pub(crate) fn convert_archive_entries(
                     .get(&link)
                     .expect("Links must refer to already archived files");
                 let mut new = existing.clone();
-                new.path = path.clone();
+                new.path.clone_from(&path);
                 results.insert(path.clone(), new);
             }
             tar::EntryType::Symlink => {

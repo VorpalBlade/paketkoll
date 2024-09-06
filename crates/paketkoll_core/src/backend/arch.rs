@@ -261,7 +261,7 @@ impl ArchLinux {
             let pkg = packages
                 .get(pkg_ref)
                 .ok_or_eyre("Failed to find package in package map")?;
-            let name = pkg.name.to_str(interner);
+            let name = pkg.name.as_str(interner);
             // Get the full file name
             let filename = format_pkg_filename(interner, pkg);
 
@@ -314,12 +314,9 @@ const SPECIAL_ARCHIVE_FILES: phf::Set<&'static [u8]> = phf::phf_set! {
 fn format_pkg_filename(interner: &Interner, package: &PackageInterned) -> String {
     format!(
         "{}-{}-{}.pkg.tar.zst",
-        package.name.to_str(interner),
+        package.name.as_str(interner),
         package.version,
-        package
-            .architecture
-            .map(|e| e.to_str(interner))
-            .unwrap_or("*")
+        package.architecture.map_or("*", |e| e.as_str(interner))
     )
 }
 
@@ -329,10 +326,10 @@ fn guess_pkg_file_name(interner: &Interner, pkg: &str, packages: &PackageMap) ->
         if let Some(package) = packages.get(&PackageRef::new(pkgref)) {
             format_pkg_filename(interner, package)
         } else {
-            format!("{}-*-*.pkg.tar.zst", pkg)
+            format!("{pkg}-*-*.pkg.tar.zst")
         }
     } else {
-        format!("{}-*-*.pkg.tar.zst", pkg)
+        format!("{pkg}-*-*.pkg.tar.zst")
     };
     package_match
 }
@@ -540,7 +537,7 @@ fn load_pkg_for_file_listing(
         );
         desc::backup_files(readable)?
             .into_iter()
-            .map(|e| format!("./{}", e).into_bytes())
+            .map(|e| format!("./{e}").into_bytes())
             .collect()
     };
     Ok(Some(PackageData {

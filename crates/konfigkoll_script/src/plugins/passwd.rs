@@ -673,7 +673,7 @@ fn set_nologin_path(path: &str) {
 #[rune::module(::passwd)]
 /// Utilities for patching file contents conveniently.
 pub(crate) fn module() -> Result<Module, ContextError> {
-    let mut m = Module::from_meta(self::module_meta)?;
+    let mut m = Module::from_meta(module_meta)?;
     m.ty::<Passwd>()?;
     m.ty::<User>()?;
     m.ty::<Group>()?;

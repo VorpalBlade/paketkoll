@@ -234,7 +234,7 @@ impl Unit {
             if self.process_aliases {
                 for alias in install_section.get_all("Alias") {
                     for alias in alias.split_ascii_whitespace() {
-                        let p = format!("/etc/systemd/{}/{}", type_, alias);
+                        let p = format!("/etc/systemd/{type_}/{alias}");
                         commands.ln(&p, &unit_path)?;
                     }
                 }
@@ -243,7 +243,7 @@ impl Unit {
             if self.process_wanted_by {
                 for wanted_by in install_section.get_all("WantedBy") {
                     for wanted_by in wanted_by.split_ascii_whitespace() {
-                        let p = format!("/etc/systemd/{}/{}.wants/{}", type_, wanted_by, name);
+                        let p = format!("/etc/systemd/{type_}/{wanted_by}.wants/{name}");
                         commands.ln(&p, &unit_path)?;
                     }
                 }
@@ -283,7 +283,7 @@ static BASE_PATHS: LazyLock<(Utf8PathBuf, Utf8PathBuf)> = LazyLock::new(|| {
 #[rune::module(::systemd)]
 /// Functionality to simplify working with systemd
 pub(crate) fn module() -> Result<Module, ContextError> {
-    let mut m = Module::from_meta(self::module_meta)?;
+    let mut m = Module::from_meta(module_meta)?;
     m.ty::<Unit>()?;
     m.function_meta(Unit::from_file__meta)?;
     m.function_meta(Unit::from_pkg__meta)?;

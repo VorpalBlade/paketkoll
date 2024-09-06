@@ -26,6 +26,7 @@ pub fn sha256_readable(reader: &mut impl std::io::Read) -> eyre::Result<Checksum
     ))
 }
 
+#[must_use]
 pub fn sha256_buffer(contents: &[u8]) -> Checksum {
     let mut hasher = ring::digest::Context::new(&ring::digest::SHA256);
     hasher.update(contents);

@@ -196,7 +196,7 @@ pub(super) fn parse_status(
             let ctx = || {
                 format!(
                     "Error when processing package: {} (line: {line})",
-                    pkg.try_to_str(interner)
+                    pkg.try_as_str(interner)
                         .expect("Package must be interned at this point")
                 )
             };
@@ -307,8 +307,8 @@ fn fixup_pkg_ids(
 ) {
     match package.architecture {
         Some(arch) if arch == primary_architecture || arch == all_architecture => {
-            let pkg = package.name.to_str(interner);
-            let arch = arch.to_str(interner);
+            let pkg = package.name.as_str(interner);
+            let arch = arch.as_str(interner);
             package.ids.push(package.name);
             package.ids.push(PackageRef::get_or_intern(
                 interner,
@@ -316,8 +316,8 @@ fn fixup_pkg_ids(
             ));
         }
         Some(arch) => {
-            let pkg = package.name.to_str(interner);
-            let arch = arch.to_str(interner);
+            let pkg = package.name.as_str(interner);
+            let arch = arch.as_str(interner);
             package.ids.push(PackageRef::get_or_intern(
                 interner,
                 format_compact!("{pkg}:{arch}"),
@@ -326,7 +326,7 @@ fn fixup_pkg_ids(
         None => {
             tracing::error!(
                 "Package {} has no architecture",
-                package.name.to_str(interner)
+                package.name.as_str(interner)
             );
         }
     }

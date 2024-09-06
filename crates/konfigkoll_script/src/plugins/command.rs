@@ -367,7 +367,7 @@ impl Commands {
 #[rune::module(::command)]
 /// Commands describe the changes to apply to the system
 pub(crate) fn module() -> Result<Module, ContextError> {
-    let mut m = Module::from_meta(self::module_meta)?;
+    let mut m = Module::from_meta(module_meta)?;
     m.ty::<Commands>()?;
     m.function_meta(Commands::ignore_path__meta)?;
     m.function_meta(Commands::add_pkg__meta)?;

@@ -294,7 +294,7 @@ fn check_contents(
                 issues.push(IssueKind::PermissionDenied);
                 return Ok(());
             }
-            _ => Err(err).wrap_err_with(|| format!("IO error while reading {:?}", path))?,
+            _ => Err(err).wrap_err_with(|| format!("IO error while reading {path:?}"))?,
         },
     };
 

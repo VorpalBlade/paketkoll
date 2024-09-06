@@ -43,7 +43,7 @@ impl Properties {
     #[rune::function]
     pub fn dump(&self) {
         for (key, value) in self.properties.iter().sorted_by(|a, b| a.0.cmp(b.0)) {
-            println!("{} = {:?}", key, value);
+            println!("{key} = {value:?}");
         }
     }
 }
@@ -51,7 +51,7 @@ impl Properties {
 #[rune::module(::properties)]
 /// User defined persistent (between phases) properties
 pub(crate) fn module() -> Result<Module, ContextError> {
-    let mut m = Module::from_meta(self::module_meta)?;
+    let mut m = Module::from_meta(module_meta)?;
     m.ty::<Properties>()?;
     m.function_meta(Properties::get)?;
     m.function_meta(Properties::set)?;

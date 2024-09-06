@@ -18,6 +18,7 @@ pub trait Choices: Copy + PartialEq + Eq {
     fn options() -> &'static [(char, &'static str, Self)];
 
     /// Get the default choice (if any)
+    #[must_use]
     fn default() -> Option<Self> {
         None
     }
@@ -43,6 +44,7 @@ pub struct MultiOptionConfirm<T: Choices> {
 
 impl<T: Choices + 'static> MultiOptionConfirm<T> {
     /// Create a builder for this type
+    #[must_use]
     pub fn builder() -> MultiOptionConfirmBuilder<T> {
         MultiOptionConfirmBuilder::new()
     }
@@ -93,9 +95,9 @@ impl<T: Choices> MultiOptionConfirm<T> {
             let mut term = Term::stdout();
             let ch = inner_prompt(&mut term, &self.prompt, self.default)?;
             let lower_case: AHashSet<_> = ch.to_lowercase().collect();
-            let found = AHashSet::from_iter(self.options.keys().cloned())
+            let found = AHashSet::from_iter(self.options.keys().copied())
                 .intersection(&lower_case)
-                .cloned()
+                .copied()
                 .collect_vec();
             if found.len() == 1 {
                 return Ok(self.options[&ch]);
@@ -211,10 +213,9 @@ impl<T: Choices + 'static> MultiOptionConfirmBuilder<T> {
         self
     }
 
+    #[must_use]
     pub fn build(&self) -> MultiOptionConfirm<T> {
-        if T::options().len() < 2 {
-            panic!("At least two options are required");
-        }
+        assert!(T::options().len() >= 2, "At least two options are required");
         let mut default_char = None;
         let default = T::default();
         let options: AHashMap<char, T> = T::options()

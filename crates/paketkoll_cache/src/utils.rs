@@ -9,14 +9,14 @@ use paketkoll_types::package::PackageInterned;
 pub(crate) fn format_package(pkg: &PackageInterned, interner: &Interner) -> CompactString {
     format_compact!(
         "{}:{}:{}:{}",
-        pkg.name.to_str(interner),
+        pkg.name.as_str(interner),
         pkg.architecture
-            .map(|v| v.to_str(interner))
+            .map(|v| v.as_str(interner))
             .unwrap_or_default(),
         pkg.version,
         pkg.ids
             .iter()
-            .map(|v| v.to_str(interner))
+            .map(|v| v.as_str(interner))
             .collect::<Vec<_>>()
             .join("#")
     )

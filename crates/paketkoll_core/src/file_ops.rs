@@ -269,9 +269,9 @@ pub fn mismatching_and_unexpected_files<'a>(
 pub fn create_path_map(expected_files: &[FileEntry]) -> PathMap<'_> {
     let mut path_map: PathMap<'_> =
         PathMap::with_capacity_and_hasher(expected_files.len(), ahash::RandomState::new());
-    expected_files.iter().for_each(|file_entry| {
+    for file_entry in expected_files {
         path_map.insert(&file_entry.path, file_entry);
-    });
+    }
     path_map
 }
 

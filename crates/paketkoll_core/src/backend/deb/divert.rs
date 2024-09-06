@@ -62,8 +62,8 @@ fn parse_diversions(mut input: impl BufRead, interner: &Interner) -> eyre::Resul
                 .insert(
                     orig_path.clone(),
                     Diversion {
-                        new_path,
                         by_package,
+                        new_path,
                     },
                 )
                 .is_some();
@@ -93,13 +93,13 @@ mod tests {
     #[test]
     fn test_parse_diversions() {
         // Actual data from a raspberry pi
-        let input = indoc::indoc! {r#"
+        let input = indoc::indoc! {r"
             diversion of /usr/lib/python3.11/EXTERNALLY-MANAGED to /usr/lib/python3.11/EXTERNALLY-MANAGED.orig by raspberrypi-sys-mods
             diversion of /usr/share/man/man1/parallel.1.gz to /usr/share/man/man1/parallel.moreutils.1.gz by parallel
             diversion of /usr/share/man/man1/sh.1.gz to /usr/share/man/man1/sh.distrib.1.gz by dash
             diversion of /usr/bin/parallel to /usr/bin/parallel.moreutils by parallel
             diversion of /bin/sh to /bin/sh.distrib by dash
-            "#};
+            "};
 
         let interner = Interner::new();
         let parsed = parse_diversions(input.as_bytes(), &interner).unwrap();

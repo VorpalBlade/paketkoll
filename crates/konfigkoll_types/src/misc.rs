@@ -23,6 +23,7 @@ pub enum FileContents {
 }
 
 impl FileContents {
+    #[must_use]
     pub fn from_literal(data: Box<[u8]>) -> Self {
         let checksum = paketkoll_utils::checksum::sha256_buffer(&data);
         Self::Literal { checksum, data }
@@ -39,6 +40,7 @@ impl FileContents {
         })
     }
 
+    #[must_use]
     pub fn checksum(&self) -> &Checksum {
         match self {
             FileContents::Literal { checksum, .. } => checksum,

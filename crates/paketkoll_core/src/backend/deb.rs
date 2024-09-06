@@ -128,7 +128,7 @@ impl Files for Debian {
             let mut status = BufReader::new(File::open(STATUS_PATH)?);
             parsers::parse_status(interner, &mut status, self.primary_architecture)
         }
-        .context(format!("Failed to parse {}", STATUS_PATH))?;
+        .context(format!("Failed to parse {STATUS_PATH}"))?;
 
         tracing::debug!("Merging packages files into one map");
         let merged = DashMap::with_hasher(ahash::RandomState::new());
@@ -317,7 +317,7 @@ impl Debian {
                     .expect("Failed to find package in package map");
                 // For deb ids[0] always exist and may contain the architecture if it is not the
                 // primary
-                let name = pkg.ids[0].to_str(interner);
+                let name = pkg.ids[0].as_str(interner);
                 // Get the full deb file name
                 let deb_filename = format_deb_filename(interner, pkg);
 
@@ -392,7 +392,7 @@ fn archive_to_entries(
             let self_pkg = packages
                 .get(&pkg_ref)
                 .expect("Failed to find package in package map");
-            for entry in entries.iter_mut() {
+            for entry in &mut entries {
                 // Apply diversions
                 if let Some(diversion) = diversions.get(&entry.path) {
                     if !self_pkg.ids.contains(&diversion.by_package) {
@@ -402,8 +402,8 @@ fn archive_to_entries(
                              processing {pkg}",
                             opath = entry.path.display(),
                             npath = diversion.new_path.display(),
-                            diverting_pkg = diversion.by_package.to_str(interner),
-                            pkg = pkg_ref.to_str(interner),
+                            diverting_pkg = diversion.by_package.as_str(interner),
+                            pkg = pkg_ref.as_str(interner),
                         );
                         entry.path.clone_from(&diversion.new_path);
                     }
@@ -442,12 +442,9 @@ fn convert_deb_archive_path(path: &Path) -> Option<Cow<'_, Path>> {
 fn format_deb_filename(interner: &Interner, package: &PackageInterned) -> String {
     format!(
         "{}_{}_{}.deb",
-        package.name.to_str(interner),
+        package.name.as_str(interner),
         package.version.replace(':', "%3a"),
-        package
-            .architecture
-            .map(|e| e.to_str(interner))
-            .unwrap_or("*")
+        package.architecture.map_or("*", |e| e.as_str(interner))
     )
 }
 
@@ -458,10 +455,10 @@ fn guess_deb_file_name(interner: &Interner, pkg: &str, packages: &PackageMap) ->
         if let Some(package) = packages.get(&PackageRef::new(pkgref)) {
             format_deb_filename(interner, package)
         } else {
-            format!("{}_*_*.deb", pkg)
+            format!("{pkg}_*_*.deb")
         }
     } else {
-        format!("{}_*_*.deb", pkg)
+        format!("{pkg}_*_*.deb")
     }
 }
 
@@ -584,7 +581,7 @@ impl Packages for Debian {
             let mut status = BufReader::new(File::open(STATUS_PATH)?);
             parsers::parse_status(interner, &mut status, self.primary_architecture)
         }
-        .context(format!("Failed to parse {}", STATUS_PATH))?;
+        .context(format!("Failed to parse {STATUS_PATH}"))?;
 
         // Parse extended status
         tracing::debug!("Loading extended status to get auto installed packages");

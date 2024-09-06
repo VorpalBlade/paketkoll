@@ -66,7 +66,7 @@ impl Name for SystemdTmpfiles {
 }
 
 impl Files for SystemdTmpfiles {
-    fn files(&self, _interner: &paketkoll_types::intern::Interner) -> eyre::Result<Vec<FileEntry>> {
+    fn files(&self, _interner: &Interner) -> eyre::Result<Vec<FileEntry>> {
         // Get the entire config from sytemd-tmpfiles
         let cmd = std::process::Command::new("systemd-tmpfiles")
             .arg("--cat-config")
@@ -96,10 +96,8 @@ impl Files for SystemdTmpfiles {
     fn owning_packages(
         &self,
         _paths: &ahash::AHashSet<&Path>,
-        _interner: &paketkoll_types::intern::Interner,
-    ) -> eyre::Result<
-        dashmap::DashMap<PathBuf, Option<paketkoll_types::intern::PackageRef>, ahash::RandomState>,
-    > {
+        _interner: &Interner,
+    ) -> eyre::Result<dashmap::DashMap<PathBuf, Option<PackageRef>, ahash::RandomState>> {
         // This doesn't make sense for this provider
         eyre::bail!("Owning packages are not supported for systemd-tmpfiles")
     }
@@ -108,7 +106,7 @@ impl Files for SystemdTmpfiles {
         &self,
         _queries: &[OriginalFileQuery],
         _packages: &PackageMap,
-        _interner: &paketkoll_types::intern::Interner,
+        _interner: &Interner,
     ) -> Result<OriginalFilesResult, OriginalFileError> {
         Err(eyre::eyre!(
             "Original file queries are not supported for systemd-tmpfiles"
@@ -272,7 +270,7 @@ fn process_entry<'entry>(
                 Some(c) => resolver
                     .resolve(std::str::from_utf8(c).wrap_err("Non-UTF8 data")?)
                     .wrap_err("Failed to apply specifiers")?,
-                None => Cow::Owned(format!("/usr/share/factory/{}", path)),
+                None => Cow::Owned(format!("/usr/share/factory/{path}")),
             };
             Properties::Symlink(Symlink {
                 owner: Uid::new(0),
@@ -321,7 +319,7 @@ fn process_entry<'entry>(
         } => {
             let source = match source {
                 Some(c) => resolver.resolve(c).wrap_err("Failed to apply specifiers")?,
-                None => Cow::Owned(format!("/usr/share/factory/{}", path)),
+                None => Cow::Owned(format!("/usr/share/factory/{path}")),
             };
             // Now we need to figure out if the source is a directory or a file
             recursive_copy(files, Path::new(&source.as_ref()), path.as_str(), flags)?;
@@ -539,7 +537,7 @@ fn recursive_copy(
 /// Generate a checksum from a path on the system (needed for copy directives)
 fn generate_checksum_from_file(path: &Path) -> eyre::Result<Checksum> {
     let mut reader =
-        std::fs::File::open(path).wrap_err_with(|| format!("IO error while reading {:?}", path))?;
+        std::fs::File::open(path).wrap_err_with(|| format!("IO error while reading {path:?}"))?;
     sha256_readable(&mut reader)
 }
 
@@ -590,7 +588,7 @@ fn resolve_gid<'entry>(
 ) -> eyre::Result<Gid> {
     match group {
         systemd_tmpfiles::Id::Caller { new_only: _ } => Ok(Gid::new(0)),
-        systemd_tmpfiles::Id::Id { id, new_only: _ } => Ok(Gid::new(*id)),
+        systemd_tmpfiles::Id::Numeric { id, new_only: _ } => Ok(Gid::new(*id)),
         systemd_tmpfiles::Id::Name { name, new_only: _ } => id_cache
             .lookup(
                 IdCacheKey::Group(name.as_str()),
@@ -613,7 +611,7 @@ fn resolve_uid<'entry>(
 ) -> eyre::Result<Uid> {
     match user {
         systemd_tmpfiles::Id::Caller { new_only: _ } => Ok(Uid::new(0)),
-        systemd_tmpfiles::Id::Id { id, new_only: _ } => Ok(Uid::new(*id)),
+        systemd_tmpfiles::Id::Numeric { id, new_only: _ } => Ok(Uid::new(*id)),
         systemd_tmpfiles::Id::Name { name, new_only: _ } => id_cache
             .lookup(
                 IdCacheKey::User(name.as_str()),

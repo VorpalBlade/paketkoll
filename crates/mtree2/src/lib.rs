@@ -201,15 +201,12 @@ impl Entry {
     /// `contents` The full pathname of a file that holds the contents of this
     /// file.
     pub fn contents(&self) -> Option<&Path> {
-        self.params
-            .contents
-            .as_ref()
-            .map(std::convert::AsRef::as_ref)
+        self.params.contents.as_ref().map(AsRef::as_ref)
     }
 
     /// `flags` The file flags as a symbolic name.
     pub fn flags(&self) -> Option<&[u8]> {
-        self.params.flags.as_ref().map(std::convert::AsRef::as_ref)
+        self.params.flags.as_ref().map(AsRef::as_ref)
     }
 
     /// `gid` The file group as a numeric value.
@@ -222,7 +219,7 @@ impl Entry {
     /// The name can be up to 32 chars and must match regex
     /// `[a-z_][a-z0-9_-]*[$]?`.
     pub fn gname(&self) -> Option<&[u8]> {
-        self.params.gname.as_ref().map(std::convert::AsRef::as_ref)
+        self.params.gname.as_ref().map(AsRef::as_ref)
     }
 
     /// `ignore` Ignore any file hierarchy below this line.
@@ -237,7 +234,7 @@ impl Entry {
 
     /// `link` The target of the symbolic link when type=link.
     pub fn link(&self) -> Option<&Path> {
-        self.params.link.as_ref().map(std::convert::AsRef::as_ref)
+        self.params.link.as_ref().map(AsRef::as_ref)
     }
 
     /// `md5|md5digest` The MD5 message digest of the file.
@@ -278,12 +275,12 @@ impl Entry {
     /// `rmd160|rmd160digest|ripemd160digest` The RIPEMD160 message digest of
     /// the file.
     pub fn rmd160(&self) -> Option<&[u8; 20]> {
-        self.params.rmd160.as_ref().map(std::convert::AsRef::as_ref)
+        self.params.rmd160.as_ref().map(AsRef::as_ref)
     }
 
     /// `sha1|sha1digest` The FIPS 160-1 ("SHA-1") message digest of the file.
     pub fn sha1(&self) -> Option<&[u8; 20]> {
-        self.params.sha1.as_ref().map(std::convert::AsRef::as_ref)
+        self.params.sha1.as_ref().map(AsRef::as_ref)
     }
 
     /// `sha256|sha256digest` The FIPS 180-2 ("SHA-256") message digest of the
@@ -295,13 +292,13 @@ impl Entry {
     /// `sha384|sha384digest` The FIPS 180-2 ("SHA-384") message digest of the
     /// file.
     pub fn sha384(&self) -> Option<&[u8; 48]> {
-        self.params.sha384.as_ref().map(std::convert::AsRef::as_ref)
+        self.params.sha384.as_ref().map(AsRef::as_ref)
     }
 
     /// `sha512|sha512digest` The FIPS 180-2 ("SHA-512") message digest of the
     /// file.
     pub fn sha512(&self) -> Option<&[u8; 64]> {
-        self.params.sha512.as_ref().map(std::convert::AsRef::as_ref)
+        self.params.sha512.as_ref().map(AsRef::as_ref)
     }
 
     /// `size` The size, in bytes, of the file.
@@ -329,7 +326,7 @@ impl Entry {
     /// The name can be up to 32 chars and must match regex
     /// `[a-z_][a-z0-9_-]*[$]?`.
     pub fn uname(&self) -> Option<&[u8]> {
-        self.params.uname.as_ref().map(std::convert::AsRef::as_ref)
+        self.params.uname.as_ref().map(AsRef::as_ref)
     }
 }
 
@@ -488,20 +485,20 @@ impl Params {
 impl fmt::Display for Params {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(v) = self.checksum {
-            writeln!(f, "checksum: {}", v)?;
+            writeln!(f, "checksum: {v}")?;
         }
         if let Some(ref v) = self.device {
-            writeln!(f, "device: {:?}", v)?;
+            writeln!(f, "device: {v:?}")?;
         }
         if let Some(ref v) = self.contents {
             writeln!(f, "contents: {}", v.display())?;
         }
         if let Some(ref v) = self.flags {
-            writeln!(f, "flags: {:?}", v)?;
+            writeln!(f, "flags: {v:?}")?;
         }
         if let Some(v) = self.gid {
             if v != 0 {
-                writeln!(f, "gid: {}", v)?;
+                writeln!(f, "gid: {v}")?;
             }
         }
         if let Some(ref v) = self.gname {
@@ -511,19 +508,19 @@ impl fmt::Display for Params {
             writeln!(f, "ignore")?;
         }
         if let Some(v) = self.inode {
-            writeln!(f, "inode: {}", v)?;
+            writeln!(f, "inode: {v}")?;
         }
         if let Some(ref v) = self.link {
             writeln!(f, "link: {}", v.display())?;
         }
         if let Some(ref v) = self.md5 {
-            writeln!(f, "md5: {:x}", v)?;
+            writeln!(f, "md5: {v:x}")?;
         }
         if let Some(ref v) = self.mode {
-            writeln!(f, "mode: {}", v)?;
+            writeln!(f, "mode: {v}")?;
         }
         if let Some(v) = self.nlink {
-            writeln!(f, "nlink: {}", v)?;
+            writeln!(f, "nlink: {v}")?;
         }
         if self.no_change {
             writeln!(f, "no change")?;
@@ -532,55 +529,55 @@ impl fmt::Display for Params {
             writeln!(f, "optional")?;
         }
         if let Some(ref v) = self.resident_device {
-            writeln!(f, "resident device: {:?}", v)?;
+            writeln!(f, "resident device: {v:?}")?;
         }
         if let Some(ref v) = self.rmd160 {
             write!(f, "rmd160: ")?;
             for ch in v.iter() {
-                write!(f, "{:x}", ch)?;
+                write!(f, "{ch:x}")?;
             }
             writeln!(f)?;
         }
         if let Some(ref v) = self.sha1 {
             write!(f, "sha1: ")?;
             for ch in v.iter() {
-                write!(f, "{:x}", ch)?;
+                write!(f, "{ch:x}")?;
             }
             writeln!(f)?;
         }
         if let Some(ref v) = self.sha256 {
             write!(f, "sha256: ")?;
             for ch in v {
-                write!(f, "{:x}", ch)?;
+                write!(f, "{ch:x}")?;
             }
             writeln!(f)?;
         }
         if let Some(ref v) = self.sha384 {
             write!(f, "sha384: ")?;
             for ch in v.iter() {
-                write!(f, "{:x}", ch)?;
+                write!(f, "{ch:x}")?;
             }
             writeln!(f)?;
         }
         if let Some(ref v) = self.sha512 {
             write!(f, "sha512: ")?;
             for ch in v.iter() {
-                write!(f, "{:x}", ch)?;
+                write!(f, "{ch:x}")?;
             }
             writeln!(f)?;
         }
         if let Some(v) = self.size {
-            writeln!(f, "size: {}", v)?;
+            writeln!(f, "size: {v}")?;
         }
         if let Some(v) = self.time {
-            writeln!(f, "modification time: {:?}", v)?;
+            writeln!(f, "modification time: {v:?}")?;
         }
         if let Some(v) = self.file_type {
-            writeln!(f, "file type: {}", v)?;
+            writeln!(f, "file type: {v}")?;
         }
         if let Some(v) = self.uid {
             if v != 0 {
-                writeln!(f, "uid: {}", v)?;
+                writeln!(f, "uid: {v}")?;
             }
         }
         if let Some(ref v) = self.uname {

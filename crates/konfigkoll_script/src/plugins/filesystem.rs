@@ -244,7 +244,7 @@ fn config_path() -> String {
 /// This is generally not needed when working with konfigkoll, but can be useful
 /// for interacting with external commands via the `process` module.
 pub(crate) fn module() -> Result<Module, ContextError> {
-    let mut m = Module::from_meta(self::module_meta)?;
+    let mut m = Module::from_meta(module_meta)?;
     m.ty::<File>()?;
     m.function_meta(File::debug)?;
     m.function_meta(File::open)?;

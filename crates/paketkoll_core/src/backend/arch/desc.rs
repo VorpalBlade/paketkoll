@@ -108,8 +108,7 @@ fn parse_package_list(
         }
         let pkg = trimmed_line
             .split_once(['=', '>', '<'])
-            .map(|(name, _)| name)
-            .unwrap_or(trimmed_line);
+            .map_or(trimmed_line, |(name, _)| name);
         to_fill.push(PackageRef::get_or_intern(interner, pkg));
         line.clear();
     }
@@ -126,8 +125,7 @@ fn parse_backup(readable: &mut impl BufRead, to_fill: &mut Vec<String>) -> eyre:
         }
         let filename = trimmed_line
             .split_once('\t')
-            .map(|(name, _)| name.trim_end())
-            .unwrap_or(trimmed_line);
+            .map_or(trimmed_line, |(name, _)| name.trim_end());
         to_fill.push(filename.into());
         line.clear();
     }

@@ -33,7 +33,7 @@ mod _musl {
     static GLOBAL: MiMalloc = MiMalloc;
 }
 
-fn main() -> color_eyre::eyre::Result<Exit> {
+fn main() -> eyre::Result<Exit> {
     color_eyre::install()?;
     let filter = tracing_subscriber::EnvFilter::builder()
         .with_default_directive(tracing::level_filters::LevelFilter::INFO.into())
@@ -89,7 +89,7 @@ fn main() -> color_eyre::eyre::Result<Exit> {
                         .next()
                         .expect("Impossible with check above");
                     if let Some(package) = owner {
-                        package.to_str(&interner)
+                        package.as_str(&interner)
                     } else {
                         return Err(eyre::eyre!("No package owns the given file"));
                     }
@@ -122,7 +122,7 @@ fn main() -> color_eyre::eyre::Result<Exit> {
 
             for (path, owner) in file_map {
                 if let Some(package) = owner {
-                    println!("{}: {}", package.to_str(&interner), path.to_string_lossy());
+                    println!("{}: {}", package.as_str(&interner), path.to_string_lossy());
                 } else {
                     println!("No package owns this file");
                 }
@@ -153,7 +153,7 @@ fn main() -> color_eyre::eyre::Result<Exit> {
                     )
                 })?;
 
-            println!("{:?}", files);
+            println!("{files:?}");
 
             Ok(Exit::new(Code::SUCCESS))
         }
@@ -225,7 +225,7 @@ fn run_file_checks(cli: &Cli) -> eyre::Result<Exit> {
 
     let key_extractor = |(pkg, issue): &(Option<PackageRef>, Issue)| {
         (
-            pkg.and_then(|e| e.try_to_str(&interner)),
+            pkg.and_then(|e| e.try_as_str(&interner)),
             issue.path().to_path_buf(),
         )
     };
@@ -241,7 +241,7 @@ fn run_file_checks(cli: &Cli) -> eyre::Result<Exit> {
     match cli.format {
         Format::Human => {
             let mut stdout = BufWriter::new(stdout().lock());
-            for (pkg, issue) in found_issues.iter() {
+            for (pkg, issue) in &found_issues {
                 let pkg = pkg.and_then(|e| interner.try_resolve(&e.as_interner_ref()));
                 for kind in issue.kinds() {
                     if let Some(pkg) = pkg {

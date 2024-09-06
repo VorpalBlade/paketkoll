@@ -73,6 +73,7 @@ impl Settings {
         *guard
     }
 
+    /// Get enabled package backends
     pub fn enabled_pkg_backends(&self) -> impl Iterator<Item = paketkoll_types::backend::Backend> {
         let guard = self.enabled_pkg_backends.lock();
         let v: Vec<_> = guard.iter().cloned().collect();
@@ -246,7 +247,7 @@ impl Settings {
 #[rune::module(::settings)]
 /// Settings of how konfigkoll should behave.
 pub(crate) fn module() -> Result<Module, ContextError> {
-    let mut m = Module::from_meta(self::module_meta)?;
+    let mut m = Module::from_meta(module_meta)?;
     m.ty::<Settings>()?;
     m.function_meta(Settings::set_file_backend)?;
     m.function_meta(Settings::enable_pkg_backend)?;

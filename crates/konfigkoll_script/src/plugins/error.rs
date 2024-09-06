@@ -8,7 +8,7 @@ use rune::Module;
 use std::fmt::Display;
 
 /// Result alias using `KError`
-pub type KResult<T, E = KError> = core::result::Result<T, E>;
+pub type KResult<T, E = KError> = Result<T, E>;
 
 /// An opqaue error type that can be be printed (but does little else)
 ///
@@ -89,7 +89,7 @@ impl KError {
 #[rune::module(::error)]
 /// Generic error handling type(s) used by konfigkoll
 pub(crate) fn module() -> Result<Module, ContextError> {
-    let mut m = Module::from_meta(self::module_meta)?;
+    let mut m = Module::from_meta(module_meta)?;
     m.ty::<KError>()?;
     m.function_meta(KError::string_debug)?;
     m.function_meta(KError::string_display)?;

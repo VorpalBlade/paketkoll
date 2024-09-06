@@ -131,9 +131,9 @@ fn id_parser(i: &mut &str) -> PResult<Option<Id>> {
         '-'.value(None),
         // Numeric
         // TODO: Can these also be quoted?
-        (':', decimal).map(|(_, id): (_, u32)| Some(Id::Id { id, new_only: true })),
+        (':', decimal).map(|(_, id): (_, u32)| Some(Id::Numeric { id, new_only: true })),
         decimal.map(|id: u32| {
-            Some(Id::Id {
+            Some(Id::Numeric {
                 id,
                 new_only: false,
             })
@@ -336,7 +336,7 @@ mod tests {
         assert_eq!(rem, "\n");
         assert_eq!(
             out,
-            Some(Id::Id {
+            Some(Id::Numeric {
                 id: 1000,
                 new_only: false
             })
@@ -347,7 +347,7 @@ mod tests {
         assert_eq!(rem, "\n");
         assert_eq!(
             out,
-            Some(Id::Id {
+            Some(Id::Numeric {
                 id: 1000,
                 new_only: true
             })

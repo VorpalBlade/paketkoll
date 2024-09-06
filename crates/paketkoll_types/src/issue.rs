@@ -85,6 +85,7 @@ pub struct Issue {
 }
 
 impl Issue {
+    #[must_use]
     pub fn new(path: PathBuf, kinds: IssueVec, source: Option<&'static str>) -> Self {
         Self {
             path,
@@ -94,6 +95,7 @@ impl Issue {
     }
 
     /// Path of file
+    #[must_use]
     pub fn path(&self) -> &Path {
         &self.path
     }
@@ -103,6 +105,7 @@ impl Issue {
         self.kinds.iter()
     }
 
+    #[must_use]
     pub fn source(&self) -> Option<&'static str> {
         self.source
     }
@@ -214,7 +217,7 @@ impl Display for IssueKind {
 /// Especially backtraces are missing.
 fn format_error(f: &mut std::fmt::Formatter<'_>, err: &eyre::Error) -> std::fmt::Result {
     for cause in err.chain() {
-        write!(f, "\n   Caused by: {}", cause)?;
+        write!(f, "\n   Caused by: {cause}")?;
     }
     //if Ok("1".into()) == std::env::var("RUST_BACKTRACE") {
     //    write!(f, "\n   Backtrace: {}", err.backtrace())?;
@@ -226,5 +229,5 @@ fn serialize_error<S>(err: &eyre::Error, serializer: S) -> Result<S::Ok, S::Erro
 where
     S: serde::Serializer,
 {
-    serializer.serialize_str(&format!("{}", err))
+    serializer.serialize_str(&format!("{err}"))
 }

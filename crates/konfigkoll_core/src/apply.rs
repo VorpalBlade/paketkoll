@@ -229,7 +229,7 @@ impl InProcessApplicator {
                     .get(instr.path.as_std_path())
                     .ok_or_else(|| eyre::eyre!("Failed to find owner for {}", instr.path))?
                     .ok_or_else(|| eyre::eyre!("No owner for {}", instr.path))?;
-                let package = package.to_str(&self.interner);
+                let package = package.as_str(&self.interner);
                 // Get original contents:
                 let queries = [OriginalFileQuery {
                     package: package.into(),

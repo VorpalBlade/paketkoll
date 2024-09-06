@@ -129,6 +129,7 @@ pub enum Directive {
 }
 
 impl Directive {
+    #[must_use]
     pub fn mode(&self) -> Option<&Mode> {
         match self {
             Directive::CreateFile { mode, .. } => mode.as_ref(),
@@ -151,6 +152,7 @@ impl Directive {
         }
     }
 
+    #[must_use]
     pub fn user(&self) -> Option<&Id> {
         match self {
             Directive::CreateFile { user, .. } => Some(user),
@@ -173,6 +175,7 @@ impl Directive {
         }
     }
 
+    #[must_use]
     pub fn group(&self) -> Option<&Id> {
         match self {
             Directive::CreateFile { group, .. } => Some(group),
@@ -230,21 +233,25 @@ pub struct Entry {
 
 impl Entry {
     /// Get the path of the entry
+    #[must_use]
     pub fn path(&self) -> &str {
         self.path.as_str()
     }
 
     /// True if the path appears to be a glob
+    #[must_use]
     pub fn path_is_glob(&self) -> bool {
         self.directive.can_be_glob() && self.path().contains(['*', '?', '['])
     }
 
     /// Get the directive of the entry
+    #[must_use]
     pub fn directive(&self) -> &Directive {
         &self.directive
     }
 
     /// Get the flags of the entry
+    #[must_use]
     pub fn flags(&self) -> EntryFlags {
         self.flags
     }
@@ -290,12 +297,14 @@ pub enum Mode {
 }
 
 impl Mode {
+    #[must_use]
     pub fn new_only(&self) -> bool {
         match self {
             Mode::Set { new_only, .. } => *new_only,
         }
     }
 
+    #[must_use]
     pub fn mode(&self) -> libc::mode_t {
         match self {
             Mode::Set { mode, .. } => *mode,
@@ -310,7 +319,7 @@ pub enum Id {
     /// User or group will be set to caller of systemd-tmpfiles
     Caller { new_only: bool },
     /// UID or GID will be set
-    Id { id: libc::uid_t, new_only: bool },
+    Numeric { id: libc::uid_t, new_only: bool },
     /// User or group name will be set
     Name { name: CompactString, new_only: bool },
 }
@@ -318,17 +327,18 @@ pub enum Id {
 impl Default for Id {
     fn default() -> Self {
         const {
-            assert!(std::mem::size_of::<libc::uid_t>() == std::mem::size_of::<libc::gid_t>());
+            assert!(size_of::<libc::uid_t>() == size_of::<libc::gid_t>());
         };
         Self::Caller { new_only: false }
     }
 }
 
 impl Id {
+    #[must_use]
     pub fn new_only(&self) -> bool {
         match self {
             Id::Caller { new_only } => *new_only,
-            Id::Id { new_only, .. } => *new_only,
+            Id::Numeric { new_only, .. } => *new_only,
             Id::Name { new_only, .. } => *new_only,
         }
     }
@@ -345,6 +355,7 @@ pub struct Age {
 
 impl Age {
     /// Get the raw specifier string
+    #[must_use]
     pub fn raw(&self) -> &str {
         self.specifier.as_str()
     }

@@ -38,6 +38,7 @@ impl Default for EditProgram {
 
 impl EditProgram {
     /// Create a new empty program.
+    #[must_use]
     pub fn new() -> Self {
         Self::default()
     }

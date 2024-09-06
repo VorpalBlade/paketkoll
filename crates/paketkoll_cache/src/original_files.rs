@@ -160,7 +160,7 @@ impl Files for OriginalFilesCache {
             .wrap_err_with(|| format!("Inner query of {uncached_queries:?} failed"))?;
 
         // Insert the uncached results into the cache and update the results
-        for (query, result) in uncached_results.into_iter() {
+        for (query, result) in uncached_results {
             match cache_keys.remove(&query) {
                 Some(cache_key) => {
                     self.cache
