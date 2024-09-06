@@ -8,6 +8,13 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.0] - 2024-09-06
+
+### ⚙️ Other stuff
+
+- Apply auto fixable clippy lints
+- Use nightly import grouping in rustfmt
+
 ## [0.1.6] - 2024-08-17
 
 ### ⚙️ Other stuff

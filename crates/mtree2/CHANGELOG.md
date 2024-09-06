@@ -8,6 +8,17 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.6.6] - 2024-09-06
+
+### ⚡ Performance improvements
+
+- Arch doesn't use device nodes at all in the mtree files, outline the data
+
+### ⚙️ Other stuff
+
+- Apply auto fixable clippy lints
+- Use nightly import grouping in rustfmt
+
 ## [0.6.5] - 2024-08-17
 
 ### ⚙️ Other stuff
