@@ -103,7 +103,7 @@ pub(super) struct Group {
 pub(super) fn parse_file(i: &mut &str) -> PResult<Vec<Directive>> {
     let alternatives = (
         comment
-            .map(|_| Directive::Comment)
+            .map(|()| Directive::Comment)
             .context(StrContext::Label("comment")),
         user.context(StrContext::Label("user")),
         group.context(StrContext::Label("group")),
@@ -307,7 +307,7 @@ mod tests {
     #[test]
     fn test_comment() {
         let input = "# This is a comment\nblah";
-        let (rest, _) = comment.parse_peek(input).unwrap();
+        let (rest, ()) = comment.parse_peek(input).unwrap();
         assert_eq!(rest, "\nblah");
     }
 

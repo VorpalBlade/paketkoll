@@ -34,7 +34,7 @@ pub(super) struct Line {
 /// Top level parser
 pub(super) fn parse_file(i: &mut &str) -> PResult<Vec<Option<Line>>> {
     let alternatives = (
-        comment.map(|_| None).context(StrContext::Label("comment")),
+        comment.map(|()| None).context(StrContext::Label("comment")),
         directive.map(Some).context(StrContext::Label("directive")),
         "".map(|_| None).context(StrContext::Label("whitespace")), // Blank lines
     );

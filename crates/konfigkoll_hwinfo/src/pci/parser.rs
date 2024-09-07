@@ -231,7 +231,7 @@ fn build_hierarchy(lines: &[Line<'_>]) -> eyre::Result<super::PciIdDb> {
 
 fn parse_file<'input>(i: &mut &'input str) -> PResult<Vec<Line<'input>>> {
     let alternatives = (
-        comment.map(|_| None).context(StrContext::Label("comment")),
+        comment.map(|()| None).context(StrContext::Label("comment")),
         // Vendor hierarchy
         vendor
             .map(|v| Some(Line::Vendor(v)))

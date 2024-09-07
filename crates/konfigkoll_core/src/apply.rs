@@ -117,7 +117,7 @@ impl InProcessApplicator {
                 if let Ok(metadata) = existing {
                     if metadata.is_dir() {
                         match std::fs::remove_dir(&instr.path) {
-                            Ok(_) => (),
+                            Ok(()) => (),
                             Err(err) => match err.raw_os_error() {
                                 Some(libc::ENOTEMPTY) => {
                                     Err(err).context(
@@ -165,7 +165,7 @@ impl InProcessApplicator {
             }
             FsOp::CreateSymlink { target } => {
                 match std::os::unix::fs::symlink(target, &instr.path) {
-                    Ok(_) => Ok(()),
+                    Ok(()) => Ok(()),
                     Err(err) => {
                         if err.kind() == std::io::ErrorKind::AlreadyExists {
                             // If the symlink already exists, we can just remove it and try
