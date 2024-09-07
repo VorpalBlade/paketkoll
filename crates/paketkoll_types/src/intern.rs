@@ -34,6 +34,7 @@ macro_rules! intern_newtype {
             /// Specific type is not stable and public (i.e. what interner is used can
             /// change).
             #[inline]
+            #[must_use]
             pub fn as_interner_ref(&self) -> lasso::Spur {
                 self.0
             }

@@ -48,6 +48,7 @@ pub enum Phase {
 
 impl Phase {
     /// Convert to string
+    #[must_use]
     pub fn as_str(self) -> &'static str {
         match self {
             Self::SystemDiscovery => "phase_system_discovery",
@@ -81,6 +82,7 @@ pub struct EngineState {
 pub(crate) static CFG_PATH: OnceLock<Utf8PathBuf> = OnceLock::new();
 
 impl EngineState {
+    #[must_use]
     pub fn new(files_path: Utf8PathBuf) -> Self {
         let settings = Arc::new(Settings::default());
         Self {
@@ -108,10 +110,12 @@ impl EngineState {
         ));
     }
 
+    #[must_use]
     pub fn settings(&self) -> Arc<Settings> {
         Arc::clone(&self.settings)
     }
 
+    #[must_use]
     pub fn commands(&self) -> &Commands {
         &self.commands
     }
@@ -256,6 +260,7 @@ impl ScriptEngine {
     }
 
     #[inline]
+    #[must_use]
     pub fn state(&self) -> &EngineState {
         &self.state
     }
