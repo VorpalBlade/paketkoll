@@ -43,16 +43,16 @@ impl FileContents {
     #[must_use]
     pub fn checksum(&self) -> &Checksum {
         match self {
-            FileContents::Literal { checksum, .. } => checksum,
-            FileContents::FromFile { checksum, .. } => checksum,
+            Self::Literal { checksum, .. } => checksum,
+            Self::FromFile { checksum, .. } => checksum,
         }
     }
 
     /// Get a readable for the data in this operation
     pub fn readable(&self) -> eyre::Result<impl Read + '_> {
         match self {
-            FileContents::Literal { checksum: _, data } => Ok(Either::Left(data.as_ref())),
-            FileContents::FromFile { checksum: _, path } => Ok(Either::Right(
+            Self::Literal { checksum: _, data } => Ok(Either::Left(data.as_ref())),
+            Self::FromFile { checksum: _, path } => Ok(Either::Right(
                 File::open(path).wrap_err_with(|| format!("Failed to open {path}"))?,
             )),
         }
@@ -60,8 +60,8 @@ impl FileContents {
 
     pub fn contents(&self) -> eyre::Result<Cow<'_, [u8]>> {
         match self {
-            FileContents::Literal { data, .. } => Ok(Cow::Borrowed(data.as_ref())),
-            FileContents::FromFile { path, .. } => {
+            Self::Literal { data, .. } => Ok(Cow::Borrowed(data.as_ref())),
+            Self::FromFile { path, .. } => {
                 let mut reader = BufReader::new(
                     File::open(path).wrap_err_with(|| format!("Failed to open {path}"))?,
                 );

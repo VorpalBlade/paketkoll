@@ -12,14 +12,14 @@ enum PromptChoices {
 impl Choices for PromptChoices {
     fn options() -> &'static [(char, &'static str, Self)] {
         &[
-            ('y', "Yes", PromptChoices::Yes),
-            ('n', "No", PromptChoices::No),
-            ('d', "show Diff", PromptChoices::ShowDiff),
+            ('y', "Yes", Self::Yes),
+            ('n', "No", Self::No),
+            ('d', "show Diff", Self::ShowDiff),
         ]
     }
 
     fn default() -> Option<Self> {
-        Some(PromptChoices::No)
+        Some(Self::No)
     }
 }
 

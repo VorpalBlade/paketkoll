@@ -254,15 +254,15 @@ pub enum Selector {
 impl Selector {
     fn matches(&self, line_no: LineNo, line: &str) -> bool {
         match self {
-            Selector::All => true,
-            Selector::Eof => line_no == LineNo::Eof,
-            Selector::Line(v) => line_no == LineNo::Line(*v),
-            Selector::Range(l, u) => match line_no {
+            Self::All => true,
+            Self::Eof => line_no == LineNo::Eof,
+            Self::Line(v) => line_no == LineNo::Line(*v),
+            Self::Range(l, u) => match line_no {
                 LineNo::Line(line_no) => line_no >= *l && line_no <= *u,
                 _ => false,
             },
-            Selector::Regex(re) => re.is_match(line),
-            Selector::Function(func) => match line_no {
+            Self::Regex(re) => re.is_match(line),
+            Self::Function(func) => match line_no {
                 LineNo::Line(line_no) => func(line_no, line),
                 _ => false,
             },
@@ -327,30 +327,30 @@ pub enum Action {
 impl Action {
     fn apply(&self, pattern_space: &mut String, output: &mut String) -> ActionResult {
         match self {
-            Action::Print => {
+            Self::Print => {
                 output.push_str(pattern_space);
                 output.push('\n');
             }
-            Action::Delete => {
+            Self::Delete => {
                 pattern_space.clear();
                 return ActionResult::ShortCircuit;
             }
-            Action::Stop => return ActionResult::Stop,
-            Action::StopAndPrint => return ActionResult::StopAndPrint,
-            Action::InsertBefore(s) => {
+            Self::Stop => return ActionResult::Stop,
+            Self::StopAndPrint => return ActionResult::StopAndPrint,
+            Self::InsertBefore(s) => {
                 let old_pattern_space = std::mem::take(pattern_space);
                 *pattern_space = s.to_string();
                 pattern_space.push('\n');
                 pattern_space.push_str(&old_pattern_space);
             }
-            Action::InsertAfter(s) => {
+            Self::InsertAfter(s) => {
                 pattern_space.push('\n');
                 pattern_space.push_str(s);
             }
-            Action::Replace(s) => {
+            Self::Replace(s) => {
                 *pattern_space = s.to_string();
             }
-            Action::RegexReplace {
+            Self::RegexReplace {
                 regex,
                 replacement,
                 replace_all,
@@ -365,12 +365,12 @@ impl Action {
                     Cow::Owned(new_val) => *pattern_space = new_val,
                 };
             }
-            Action::Function(func) => {
+            Self::Function(func) => {
                 let new_val = func(pattern_space);
                 *pattern_space = new_val.into_owned();
             }
-            Action::NextLine => return ActionResult::NextLine,
-            Action::Subprogram(prog) => return ActionResult::Subprogram(prog.clone()),
+            Self::NextLine => return ActionResult::NextLine,
+            Self::Subprogram(prog) => return ActionResult::Subprogram(prog.clone()),
         }
         ActionResult::Continue
     }

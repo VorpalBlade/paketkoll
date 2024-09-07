@@ -63,15 +63,15 @@ impl From<std::fs::FileType> for EntryType {
 impl Display for EntryType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            EntryType::RegularFile => write!(f, "file"),
-            EntryType::Directory => write!(f, "directory"),
-            EntryType::Symlink => write!(f, "symlink"),
-            EntryType::BlockDevice => write!(f, "block device"),
-            EntryType::CharDevice => write!(f, "character device"),
-            EntryType::Fifo => write!(f, "FIFO"),
-            EntryType::Socket => write!(f, "socket"),
-            EntryType::Special => write!(f, "special file"),
-            EntryType::Unknown => write!(f, "unknown non-regular file"),
+            Self::RegularFile => write!(f, "file"),
+            Self::Directory => write!(f, "directory"),
+            Self::Symlink => write!(f, "symlink"),
+            Self::BlockDevice => write!(f, "block device"),
+            Self::CharDevice => write!(f, "character device"),
+            Self::Fifo => write!(f, "FIFO"),
+            Self::Socket => write!(f, "socket"),
+            Self::Special => write!(f, "special file"),
+            Self::Unknown => write!(f, "unknown non-regular file"),
         }
     }
 }
@@ -166,44 +166,44 @@ pub enum IssueKind {
 impl Display for IssueKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            IssueKind::Missing => write!(f, "missing or inaccessible file/directory/...")?,
-            IssueKind::Exists => write!(f, "unexpected file/directory/... (should be removed)")?,
-            IssueKind::Unexpected => write!(f, "unexpected file")?,
-            IssueKind::PermissionDenied => write!(f, "read error (Permission denied)")?,
-            IssueKind::TypeIncorrect { actual, expected } => {
+            Self::Missing => write!(f, "missing or inaccessible file/directory/...")?,
+            Self::Exists => write!(f, "unexpected file/directory/... (should be removed)")?,
+            Self::Unexpected => write!(f, "unexpected file")?,
+            Self::PermissionDenied => write!(f, "read error (Permission denied)")?,
+            Self::TypeIncorrect { actual, expected } => {
                 write!(f, "type mismatch (expected {expected}, actual {actual})")?;
             }
-            IssueKind::SizeIncorrect { actual, expected } => {
+            Self::SizeIncorrect { actual, expected } => {
                 write!(f, "size mismatch (expected {expected}, actual {actual})")?;
             }
-            IssueKind::ChecksumIncorrect { actual, expected } => write!(
+            Self::ChecksumIncorrect { actual, expected } => write!(
                 f,
                 "checksum mismatch (expected {expected}, actual {actual})"
             )?,
-            IssueKind::SymlinkTarget { actual, expected } => write!(
+            Self::SymlinkTarget { actual, expected } => write!(
                 f,
                 "symlink target mismatch (expected {expected:?}, actual {actual:?})"
             )?,
-            IssueKind::WrongOwner { actual, expected } => {
+            Self::WrongOwner { actual, expected } => {
                 write!(f, "UID mismatch (expected {expected}, actual {actual})")?;
             }
-            IssueKind::WrongGroup { actual, expected } => {
+            Self::WrongGroup { actual, expected } => {
                 write!(f, "GID mismatch (expected {expected}, actual {actual})")?;
             }
-            IssueKind::WrongMode { actual, expected } => write!(
+            Self::WrongMode { actual, expected } => write!(
                 f,
                 "permission mismatch (expected {expected}, actual {actual})"
             )?,
-            IssueKind::WrongDeviceNodeId { actual, expected } => write!(
+            Self::WrongDeviceNodeId { actual, expected } => write!(
                 f,
                 "device node ID mismatch (expected {} {}:{}, actual {} {}:{})",
                 expected.0, expected.1, expected.2, actual.0, actual.1, actual.2,
             )?,
-            IssueKind::MetadataError(err) => {
+            Self::MetadataError(err) => {
                 write!(f, "error with metadata parsing")?;
                 format_error(f, err)?;
             }
-            IssueKind::FsCheckError(err) => {
+            Self::FsCheckError(err) => {
                 write!(f, "error when checking file")?;
                 format_error(f, err)?;
             }

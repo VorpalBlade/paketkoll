@@ -28,7 +28,7 @@ pub enum MTreeLine<'a> {
 }
 
 impl<'a> MTreeLine<'a> {
-    pub fn from_bytes(input: &'a [u8]) -> ParserResult<MTreeLine<'a>> {
+    pub fn from_bytes(input: &'a [u8]) -> ParserResult<Self> {
         let mut parts =
             crate::util::MemchrSplitter::new(b' ', input).filter(|word| !word.is_empty());
         // Blank
@@ -81,10 +81,10 @@ pub enum SpecialKind {
 }
 
 impl SpecialKind {
-    fn from_bytes(input: &[u8]) -> ParserResult<SpecialKind> {
+    fn from_bytes(input: &[u8]) -> ParserResult<Self> {
         Ok(match input {
-            b"set" => SpecialKind::Set,
-            b"unset" => SpecialKind::Unset,
+            b"set" => Self::Set,
+            b"unset" => Self::Unset,
             _ => {
                 return Err(format!(
                     r#""{}" is not a special command"#,
@@ -172,7 +172,7 @@ impl<'a> Keyword<'a> {
     /// Parse a keyword with optional value.
     ///
     /// Input must be a non-empty slice
-    fn from_bytes(input: &'a [u8]) -> ParserResult<Keyword<'a>> {
+    fn from_bytes(input: &'a [u8]) -> ParserResult<Self> {
         fn next<'a>(field: &'static str, val: Option<&'a [u8]>) -> ParserResult<&'a [u8]> {
             val.ok_or_else(|| format!(r#""{field}" requires a parameter, none found"#).into())
         }
@@ -258,7 +258,7 @@ impl<'a> DeviceRef<'a> {
         }
     }
 
-    fn from_bytes(input: &'a [u8]) -> ParserResult<DeviceRef<'a>> {
+    fn from_bytes(input: &'a [u8]) -> ParserResult<Self> {
         let mut iter = input.splitn(4, |ch| *ch == b',');
         let format = Format::from_bytes(iter.next().ok_or_else(|| {
             format!(
@@ -311,24 +311,24 @@ pub enum Format {
 }
 
 impl Format {
-    fn from_bytes(bytes: &[u8]) -> ParserResult<Format> {
+    fn from_bytes(bytes: &[u8]) -> ParserResult<Self> {
         Ok(match bytes {
-            b"native" => Format::Native,
-            b"386bsd" => Format::Bsd386,
-            b"4bsd" => Format::Bsd4,
-            b"bsdos" => Format::BsdOs,
-            b"freebsd" => Format::FreeBsd,
-            b"hpux" => Format::Hpux,
-            b"isc" => Format::Isc,
-            b"linux" => Format::Linux,
-            b"netbsd" => Format::NetBsd,
-            b"osf1" => Format::Osf1,
-            b"sco" => Format::Sco,
-            b"solaris" => Format::Solaris,
-            b"sunos" => Format::SunOs,
-            b"svr3" => Format::Svr3,
-            b"svr4" => Format::Svr4,
-            b"ultrix" => Format::Ultrix,
+            b"native" => Self::Native,
+            b"386bsd" => Self::Bsd386,
+            b"4bsd" => Self::Bsd4,
+            b"bsdos" => Self::BsdOs,
+            b"freebsd" => Self::FreeBsd,
+            b"hpux" => Self::Hpux,
+            b"isc" => Self::Isc,
+            b"linux" => Self::Linux,
+            b"netbsd" => Self::NetBsd,
+            b"osf1" => Self::Osf1,
+            b"sco" => Self::Sco,
+            b"solaris" => Self::Solaris,
+            b"sunos" => Self::SunOs,
+            b"svr3" => Self::Svr3,
+            b"svr4" => Self::Svr4,
+            b"ultrix" => Self::Ultrix,
             other => {
                 return Err(format!(
                     r#""{}" is not a valid format"#,
@@ -387,15 +387,15 @@ pub enum FileType {
 }
 
 impl FileType {
-    fn from_bytes(input: &[u8]) -> ParserResult<FileType> {
+    fn from_bytes(input: &[u8]) -> ParserResult<Self> {
         Ok(match input {
-            b"block" => FileType::BlockDevice,
-            b"char" => FileType::CharacterDevice,
-            b"dir" => FileType::Directory,
-            b"fifo" => FileType::Fifo,
-            b"file" => FileType::File,
-            b"link" => FileType::SymbolicLink,
-            b"socket" => FileType::Socket,
+            b"block" => Self::BlockDevice,
+            b"char" => Self::CharacterDevice,
+            b"dir" => Self::Directory,
+            b"fifo" => Self::Fifo,
+            b"file" => Self::File,
+            b"link" => Self::SymbolicLink,
+            b"socket" => Self::Socket,
             _ => {
                 return Err(format!(
                     r#""{}" is not a valid file type"#,
@@ -408,13 +408,13 @@ impl FileType {
 
     fn as_str(&self) -> &'static str {
         match self {
-            FileType::BlockDevice => "block",
-            FileType::CharacterDevice => "char",
-            FileType::Directory => "dir",
-            FileType::Fifo => "fifo",
-            FileType::File => "file",
-            FileType::SymbolicLink => "link",
-            FileType::Socket => "socket",
+            Self::BlockDevice => "block",
+            Self::CharacterDevice => "char",
+            Self::Directory => "dir",
+            Self::Fifo => "fifo",
+            Self::File => "file",
+            Self::SymbolicLink => "link",
+            Self::Socket => "socket",
         }
     }
 }
@@ -456,17 +456,17 @@ bitflags::bitflags! {
 
 impl fmt::Display for Perms {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if self.contains(Perms::READ) {
+        if self.contains(Self::READ) {
             f.write_str("r")?;
         } else {
             f.write_str("-")?;
         }
-        if self.contains(Perms::WRITE) {
+        if self.contains(Self::WRITE) {
             f.write_str("w")?;
         } else {
             f.write_str("-")?;
         }
-        if self.contains(Perms::EXECUTE) {
+        if self.contains(Self::EXECUTE) {
             f.write_str("x")?;
         } else {
             f.write_str("-")?;
@@ -482,7 +482,7 @@ pub struct FileMode {
 }
 
 impl FileMode {
-    fn from_bytes(input: &[u8]) -> ParserResult<FileMode> {
+    fn from_bytes(input: &[u8]) -> ParserResult<Self> {
         // file mode can either be symbolic, or octal. For now only support octal
         if input.len() > 4 {
             return Err(format!(
@@ -491,7 +491,7 @@ impl FileMode {
             )
             .into());
         }
-        Ok(FileMode {
+        Ok(Self {
             mode: u32::from_str_radix(
                 std::str::from_utf8(input)
                     .map_err(|err| ParserError(format!("failed to parse mode value: {err}")))?,
@@ -565,8 +565,8 @@ pub(crate) type ParserResult<T> = Result<T, ParserError>;
 pub struct ParserError(pub String);
 
 impl From<String> for ParserError {
-    fn from(s: String) -> ParserError {
-        ParserError(s)
+    fn from(s: String) -> Self {
+        Self(s)
     }
 }
 

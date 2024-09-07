@@ -132,92 +132,92 @@ impl Directive {
     #[must_use]
     pub fn mode(&self) -> Option<&Mode> {
         match self {
-            Directive::CreateFile { mode, .. } => mode.as_ref(),
-            Directive::WriteToFile { .. } => None,
-            Directive::CreateDirectory { mode, .. } => mode.as_ref(),
-            Directive::AdjustPermissionsAndTmpFiles { mode, .. } => mode.as_ref(),
-            Directive::CreateSubvolume { mode, .. } => mode.as_ref(),
-            Directive::CreateFifo { mode, .. } => mode.as_ref(),
-            Directive::CreateSymlink { .. } => None,
-            Directive::CreateCharDeviceNode { mode, .. } => mode.as_ref(),
-            Directive::CreateBlockDeviceNode { mode, .. } => mode.as_ref(),
-            Directive::RecursiveCopy { .. } => None,
-            Directive::IgnorePathDuringCleaning { .. } => None,
-            Directive::IgnoreDirectoryDuringCleaning { .. } => None,
-            Directive::RemoveFile { .. } => None,
-            Directive::AdjustAccess { mode, .. } => mode.as_ref(),
-            Directive::SetExtendedAttributes { .. } => None,
-            Directive::SetAttributes { .. } => None,
-            Directive::SetAcl { .. } => None,
+            Self::CreateFile { mode, .. } => mode.as_ref(),
+            Self::WriteToFile { .. } => None,
+            Self::CreateDirectory { mode, .. } => mode.as_ref(),
+            Self::AdjustPermissionsAndTmpFiles { mode, .. } => mode.as_ref(),
+            Self::CreateSubvolume { mode, .. } => mode.as_ref(),
+            Self::CreateFifo { mode, .. } => mode.as_ref(),
+            Self::CreateSymlink { .. } => None,
+            Self::CreateCharDeviceNode { mode, .. } => mode.as_ref(),
+            Self::CreateBlockDeviceNode { mode, .. } => mode.as_ref(),
+            Self::RecursiveCopy { .. } => None,
+            Self::IgnorePathDuringCleaning { .. } => None,
+            Self::IgnoreDirectoryDuringCleaning { .. } => None,
+            Self::RemoveFile { .. } => None,
+            Self::AdjustAccess { mode, .. } => mode.as_ref(),
+            Self::SetExtendedAttributes { .. } => None,
+            Self::SetAttributes { .. } => None,
+            Self::SetAcl { .. } => None,
         }
     }
 
     #[must_use]
     pub fn user(&self) -> Option<&Id> {
         match self {
-            Directive::CreateFile { user, .. } => Some(user),
-            Directive::WriteToFile { .. } => None,
-            Directive::CreateDirectory { user, .. } => Some(user),
-            Directive::AdjustPermissionsAndTmpFiles { user, .. } => Some(user),
-            Directive::CreateSubvolume { user, .. } => Some(user),
-            Directive::CreateFifo { user, .. } => Some(user),
-            Directive::CreateSymlink { .. } => None,
-            Directive::CreateCharDeviceNode { user, .. } => Some(user),
-            Directive::CreateBlockDeviceNode { user, .. } => Some(user),
-            Directive::RecursiveCopy { .. } => None,
-            Directive::IgnorePathDuringCleaning { .. } => None,
-            Directive::IgnoreDirectoryDuringCleaning { .. } => None,
-            Directive::RemoveFile { .. } => None,
-            Directive::AdjustAccess { user, .. } => Some(user),
-            Directive::SetExtendedAttributes { .. } => None,
-            Directive::SetAttributes { .. } => None,
-            Directive::SetAcl { .. } => None,
+            Self::CreateFile { user, .. } => Some(user),
+            Self::WriteToFile { .. } => None,
+            Self::CreateDirectory { user, .. } => Some(user),
+            Self::AdjustPermissionsAndTmpFiles { user, .. } => Some(user),
+            Self::CreateSubvolume { user, .. } => Some(user),
+            Self::CreateFifo { user, .. } => Some(user),
+            Self::CreateSymlink { .. } => None,
+            Self::CreateCharDeviceNode { user, .. } => Some(user),
+            Self::CreateBlockDeviceNode { user, .. } => Some(user),
+            Self::RecursiveCopy { .. } => None,
+            Self::IgnorePathDuringCleaning { .. } => None,
+            Self::IgnoreDirectoryDuringCleaning { .. } => None,
+            Self::RemoveFile { .. } => None,
+            Self::AdjustAccess { user, .. } => Some(user),
+            Self::SetExtendedAttributes { .. } => None,
+            Self::SetAttributes { .. } => None,
+            Self::SetAcl { .. } => None,
         }
     }
 
     #[must_use]
     pub fn group(&self) -> Option<&Id> {
         match self {
-            Directive::CreateFile { group, .. } => Some(group),
-            Directive::WriteToFile { .. } => None,
-            Directive::CreateDirectory { group, .. } => Some(group),
-            Directive::AdjustPermissionsAndTmpFiles { group, .. } => Some(group),
-            Directive::CreateSubvolume { group, .. } => Some(group),
-            Directive::CreateFifo { group, .. } => Some(group),
-            Directive::CreateSymlink { .. } => None,
-            Directive::CreateCharDeviceNode { group, .. } => Some(group),
-            Directive::CreateBlockDeviceNode { group, .. } => Some(group),
-            Directive::RecursiveCopy { .. } => None,
-            Directive::IgnorePathDuringCleaning { .. } => None,
-            Directive::IgnoreDirectoryDuringCleaning { .. } => None,
-            Directive::RemoveFile { .. } => None,
-            Directive::AdjustAccess { group, .. } => Some(group),
-            Directive::SetExtendedAttributes { .. } => None,
-            Directive::SetAttributes { .. } => None,
-            Directive::SetAcl { .. } => None,
+            Self::CreateFile { group, .. } => Some(group),
+            Self::WriteToFile { .. } => None,
+            Self::CreateDirectory { group, .. } => Some(group),
+            Self::AdjustPermissionsAndTmpFiles { group, .. } => Some(group),
+            Self::CreateSubvolume { group, .. } => Some(group),
+            Self::CreateFifo { group, .. } => Some(group),
+            Self::CreateSymlink { .. } => None,
+            Self::CreateCharDeviceNode { group, .. } => Some(group),
+            Self::CreateBlockDeviceNode { group, .. } => Some(group),
+            Self::RecursiveCopy { .. } => None,
+            Self::IgnorePathDuringCleaning { .. } => None,
+            Self::IgnoreDirectoryDuringCleaning { .. } => None,
+            Self::RemoveFile { .. } => None,
+            Self::AdjustAccess { group, .. } => Some(group),
+            Self::SetExtendedAttributes { .. } => None,
+            Self::SetAttributes { .. } => None,
+            Self::SetAcl { .. } => None,
         }
     }
 
     /// True if the path could be a glob for this type of directive
     fn can_be_glob(&self) -> bool {
         match self {
-            Directive::CreateFile { .. } => false,
-            Directive::WriteToFile { .. } => true,
-            Directive::CreateDirectory { .. } => false,
-            Directive::AdjustPermissionsAndTmpFiles { .. } => true,
-            Directive::CreateSubvolume { .. } => false,
-            Directive::CreateFifo { .. } => false,
-            Directive::CreateSymlink { .. } => false,
-            Directive::CreateCharDeviceNode { .. } => false,
-            Directive::CreateBlockDeviceNode { .. } => false,
-            Directive::RecursiveCopy { .. } => false,
-            Directive::IgnorePathDuringCleaning { .. } => true,
-            Directive::IgnoreDirectoryDuringCleaning { .. } => true,
-            Directive::RemoveFile { .. } => true,
-            Directive::AdjustAccess { .. } => true,
-            Directive::SetExtendedAttributes { .. } => true,
-            Directive::SetAttributes { .. } => true,
-            Directive::SetAcl { .. } => true,
+            Self::CreateFile { .. } => false,
+            Self::WriteToFile { .. } => true,
+            Self::CreateDirectory { .. } => false,
+            Self::AdjustPermissionsAndTmpFiles { .. } => true,
+            Self::CreateSubvolume { .. } => false,
+            Self::CreateFifo { .. } => false,
+            Self::CreateSymlink { .. } => false,
+            Self::CreateCharDeviceNode { .. } => false,
+            Self::CreateBlockDeviceNode { .. } => false,
+            Self::RecursiveCopy { .. } => false,
+            Self::IgnorePathDuringCleaning { .. } => true,
+            Self::IgnoreDirectoryDuringCleaning { .. } => true,
+            Self::RemoveFile { .. } => true,
+            Self::AdjustAccess { .. } => true,
+            Self::SetExtendedAttributes { .. } => true,
+            Self::SetAttributes { .. } => true,
+            Self::SetAcl { .. } => true,
         }
     }
 }
@@ -300,14 +300,14 @@ impl Mode {
     #[must_use]
     pub fn new_only(&self) -> bool {
         match self {
-            Mode::Set { new_only, .. } => *new_only,
+            Self::Set { new_only, .. } => *new_only,
         }
     }
 
     #[must_use]
     pub fn mode(&self) -> libc::mode_t {
         match self {
-            Mode::Set { mode, .. } => *mode,
+            Self::Set { mode, .. } => *mode,
         }
     }
 }
@@ -337,9 +337,9 @@ impl Id {
     #[must_use]
     pub fn new_only(&self) -> bool {
         match self {
-            Id::Caller { new_only } => *new_only,
-            Id::Numeric { new_only, .. } => *new_only,
-            Id::Name { new_only, .. } => *new_only,
+            Self::Caller { new_only } => *new_only,
+            Self::Numeric { new_only, .. } => *new_only,
+            Self::Name { new_only, .. } => *new_only,
         }
     }
 }

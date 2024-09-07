@@ -69,7 +69,7 @@ impl From<std::fmt::Error> for KError {
 }
 
 impl From<KError> for eyre::Error {
-    fn from(error: KError) -> eyre::Error {
+    fn from(error: KError) -> Self {
         error.inner.expect("Must be initialised")
     }
 }

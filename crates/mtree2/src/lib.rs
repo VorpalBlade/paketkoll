@@ -92,8 +92,8 @@ where
     R: Read,
 {
     /// The constructor function for an `MTree` instance.
-    pub fn from_reader(reader: R) -> MTree<R> {
-        MTree {
+    pub fn from_reader(reader: R) -> Self {
+        Self {
             inner: BufReader::new(reader).split(b'\n'),
             cwd: env::current_dir().unwrap_or_default(),
             default_params: Params::default(),
@@ -617,8 +617,8 @@ pub enum Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(match self {
-            Error::Io(..) => "an i/o error occured while reading the mtree",
-            Error::Parser(..) => "an error occured while parsing the mtree",
+            Self::Io(..) => "an i/o error occured while reading the mtree",
+            Self::Parser(..) => "an error occured while parsing the mtree",
         })
     }
 }
@@ -626,20 +626,20 @@ impl fmt::Display for Error {
 impl std::error::Error for Error {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
         match self {
-            Error::Io(err) => Some(err),
-            Error::Parser(err) => Some(err),
+            Self::Io(err) => Some(err),
+            Self::Parser(err) => Some(err),
         }
     }
 }
 
 impl From<io::Error> for Error {
-    fn from(from: io::Error) -> Error {
-        Error::Io(from)
+    fn from(from: io::Error) -> Self {
+        Self::Io(from)
     }
 }
 
 impl From<ParserError> for Error {
-    fn from(from: ParserError) -> Error {
-        Error::Parser(from)
+    fn from(from: ParserError) -> Self {
+        Self::Parser(from)
     }
 }

@@ -81,7 +81,7 @@ impl Octal for Mode {
 
 impl From<Mode> for nix::sys::stat::Mode {
     fn from(mode: Mode) -> Self {
-        nix::sys::stat::Mode::from_bits_truncate(mode.0)
+        Self::from_bits_truncate(mode.0)
     }
 }
 
@@ -114,13 +114,13 @@ impl std::fmt::Display for Uid {
 
 impl From<Uid> for nix::unistd::Uid {
     fn from(uid: Uid) -> Self {
-        nix::unistd::Uid::from_raw(uid.0)
+        Self::from_raw(uid.0)
     }
 }
 
 impl From<&Uid> for nix::unistd::Uid {
     fn from(uid: &Uid) -> Self {
-        nix::unistd::Uid::from_raw(uid.0)
+        Self::from_raw(uid.0)
     }
 }
 
@@ -147,13 +147,13 @@ impl Gid {
 
 impl From<Gid> for nix::unistd::Gid {
     fn from(gid: Gid) -> Self {
-        nix::unistd::Gid::from_raw(gid.0)
+        Self::from_raw(gid.0)
     }
 }
 
 impl From<&Gid> for nix::unistd::Gid {
     fn from(gid: &Gid) -> Self {
-        nix::unistd::Gid::from_raw(gid.0)
+        Self::from_raw(gid.0)
     }
 }
 
@@ -246,8 +246,8 @@ pub enum DeviceType {
 impl std::fmt::Display for DeviceType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            DeviceType::Block => write!(f, "block"),
-            DeviceType::Char => write!(f, "char"),
+            Self::Block => write!(f, "block"),
+            Self::Char => write!(f, "char"),
         }
     }
 }
@@ -355,34 +355,34 @@ impl Properties {
     #[must_use]
     pub fn is_regular_file(&self) -> Option<bool> {
         match self {
-            Properties::RegularFileBasic(_) => Some(true),
-            Properties::RegularFileSystemd(_) => Some(true),
-            Properties::RegularFile(_) => Some(true),
-            Properties::Symlink(_) => Some(false),
-            Properties::Directory(_) => Some(false),
-            Properties::Fifo(_) => Some(false),
-            Properties::DeviceNode(_) => Some(false),
-            Properties::Special => Some(false),
-            Properties::Removed => None,
-            Properties::Unknown => None,
-            Properties::Permissions(_) => None,
+            Self::RegularFileBasic(_) => Some(true),
+            Self::RegularFileSystemd(_) => Some(true),
+            Self::RegularFile(_) => Some(true),
+            Self::Symlink(_) => Some(false),
+            Self::Directory(_) => Some(false),
+            Self::Fifo(_) => Some(false),
+            Self::DeviceNode(_) => Some(false),
+            Self::Special => Some(false),
+            Self::Removed => None,
+            Self::Unknown => None,
+            Self::Permissions(_) => None,
         }
     }
 
     #[must_use]
     pub fn is_dir(&self) -> Option<bool> {
         match self {
-            Properties::RegularFileBasic(_) => Some(false),
-            Properties::RegularFileSystemd(_) => Some(false),
-            Properties::RegularFile(_) => Some(false),
-            Properties::Symlink(_) => Some(false),
-            Properties::Directory(_) => Some(true),
-            Properties::Special => Some(false),
-            Properties::Fifo(_) => Some(false),
-            Properties::DeviceNode(_) => Some(false),
-            Properties::Removed => None,
-            Properties::Unknown => None,
-            Properties::Permissions(_) => None,
+            Self::RegularFileBasic(_) => Some(false),
+            Self::RegularFileSystemd(_) => Some(false),
+            Self::RegularFile(_) => Some(false),
+            Self::Symlink(_) => Some(false),
+            Self::Directory(_) => Some(true),
+            Self::Special => Some(false),
+            Self::Fifo(_) => Some(false),
+            Self::DeviceNode(_) => Some(false),
+            Self::Removed => None,
+            Self::Unknown => None,
+            Self::Permissions(_) => None,
         }
     }
 
@@ -390,51 +390,51 @@ impl Properties {
     #[must_use]
     pub fn mode(&self) -> Option<Mode> {
         match self {
-            Properties::RegularFileBasic(_) => None,
-            Properties::RegularFileSystemd(val) => Some(val.mode),
-            Properties::RegularFile(val) => Some(val.mode),
-            Properties::Symlink(_) => None,
-            Properties::Directory(val) => Some(val.mode),
-            Properties::Fifo(val) => Some(val.mode),
-            Properties::DeviceNode(val) => Some(val.mode),
-            Properties::Special => None,
-            Properties::Removed => None,
-            Properties::Unknown => None,
-            Properties::Permissions(val) => Some(val.mode),
+            Self::RegularFileBasic(_) => None,
+            Self::RegularFileSystemd(val) => Some(val.mode),
+            Self::RegularFile(val) => Some(val.mode),
+            Self::Symlink(_) => None,
+            Self::Directory(val) => Some(val.mode),
+            Self::Fifo(val) => Some(val.mode),
+            Self::DeviceNode(val) => Some(val.mode),
+            Self::Special => None,
+            Self::Removed => None,
+            Self::Unknown => None,
+            Self::Permissions(val) => Some(val.mode),
         }
     }
 
     #[must_use]
     pub fn owner(&self) -> Option<Uid> {
         match self {
-            Properties::RegularFileBasic(_) => None,
-            Properties::RegularFileSystemd(val) => Some(val.owner),
-            Properties::RegularFile(val) => Some(val.owner),
-            Properties::Symlink(val) => Some(val.owner),
-            Properties::Directory(val) => Some(val.owner),
-            Properties::Fifo(val) => Some(val.owner),
-            Properties::DeviceNode(val) => Some(val.owner),
-            Properties::Special => None,
-            Properties::Removed => None,
-            Properties::Unknown => None,
-            Properties::Permissions(val) => Some(val.owner),
+            Self::RegularFileBasic(_) => None,
+            Self::RegularFileSystemd(val) => Some(val.owner),
+            Self::RegularFile(val) => Some(val.owner),
+            Self::Symlink(val) => Some(val.owner),
+            Self::Directory(val) => Some(val.owner),
+            Self::Fifo(val) => Some(val.owner),
+            Self::DeviceNode(val) => Some(val.owner),
+            Self::Special => None,
+            Self::Removed => None,
+            Self::Unknown => None,
+            Self::Permissions(val) => Some(val.owner),
         }
     }
 
     #[must_use]
     pub fn group(&self) -> Option<Gid> {
         match self {
-            Properties::RegularFileBasic(_) => None,
-            Properties::RegularFileSystemd(val) => Some(val.group),
-            Properties::RegularFile(val) => Some(val.group),
-            Properties::Symlink(val) => Some(val.group),
-            Properties::Directory(val) => Some(val.group),
-            Properties::Fifo(val) => Some(val.group),
-            Properties::DeviceNode(val) => Some(val.group),
-            Properties::Special => None,
-            Properties::Removed => None,
-            Properties::Unknown => None,
-            Properties::Permissions(val) => Some(val.group),
+            Self::RegularFileBasic(_) => None,
+            Self::RegularFileSystemd(val) => Some(val.group),
+            Self::RegularFile(val) => Some(val.group),
+            Self::Symlink(val) => Some(val.group),
+            Self::Directory(val) => Some(val.group),
+            Self::Fifo(val) => Some(val.group),
+            Self::DeviceNode(val) => Some(val.group),
+            Self::Special => None,
+            Self::Removed => None,
+            Self::Unknown => None,
+            Self::Permissions(val) => Some(val.group),
         }
     }
 }

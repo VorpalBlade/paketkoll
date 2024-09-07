@@ -102,7 +102,7 @@ impl FromHex for u128 {
     fn from_hex(input: &[u8]) -> ParserResult<Self> {
         let mut dst = [0; 16];
         faster_hex::hex_decode(input, &mut dst).map_err(|e| map_faster_hex_err(input, e))?;
-        Ok(u128::from_be_bytes(dst))
+        Ok(Self::from_be_bytes(dst))
     }
 }
 
@@ -191,7 +191,7 @@ pub struct MemchrSplitter<'haystack> {
 }
 
 impl<'haystack> MemchrSplitter<'haystack> {
-    pub fn new(needle: u8, haystack: &'haystack [u8]) -> MemchrSplitter<'haystack> {
+    pub fn new(needle: u8, haystack: &'haystack [u8]) -> Self {
         Self {
             inner: memchr::memchr_iter(needle, haystack),
             haystack,

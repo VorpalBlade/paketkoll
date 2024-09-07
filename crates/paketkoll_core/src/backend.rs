@@ -64,12 +64,12 @@ impl From<ConcreteBackend> for paketkoll_types::backend::Backend {
     fn from(value: ConcreteBackend) -> Self {
         match value {
             #[cfg(feature = "arch_linux")]
-            ConcreteBackend::Pacman => paketkoll_types::backend::Backend::Pacman,
+            ConcreteBackend::Pacman => Self::Pacman,
             #[cfg(feature = "debian")]
-            ConcreteBackend::Apt => paketkoll_types::backend::Backend::Apt,
-            ConcreteBackend::Flatpak => paketkoll_types::backend::Backend::Flatpak,
+            ConcreteBackend::Apt => Self::Apt,
+            ConcreteBackend::Flatpak => Self::Flatpak,
             #[cfg(feature = "systemd_tmpfiles")]
-            ConcreteBackend::SystemdTmpfiles => paketkoll_types::backend::Backend::SystemdTmpfiles,
+            ConcreteBackend::SystemdTmpfiles => Self::SystemdTmpfiles,
         }
     }
 }
@@ -80,7 +80,7 @@ impl Default for ConcreteBackend {
     fn default() -> Self {
         cfg_if::cfg_if! {
             if #[cfg(feature = "arch_linux")] {
-                ConcreteBackend::Pacman
+                Self::Pacman
             } else if #[cfg(feature = "debian")] {
                 ConcreteBackend::Apt
             } else {
@@ -99,22 +99,20 @@ impl ConcreteBackend {
     ) -> eyre::Result<Box<dyn Files>> {
         match self {
             #[cfg(feature = "arch_linux")]
-            ConcreteBackend::Pacman => Ok(Box::new({
+            Self::Pacman => Ok(Box::new({
                 let mut builder = arch::ArchLinuxBuilder::default();
                 builder.package_filter(configuration.package_filter);
                 builder.build()?
             })),
             #[cfg(feature = "debian")]
-            ConcreteBackend::Apt => Ok(Box::new({
+            Self::Apt => Ok(Box::new({
                 let mut builder = deb::DebianBuilder::default();
                 builder.package_filter(configuration.package_filter);
                 builder.build(interner)
             })),
-            ConcreteBackend::Flatpak => {
-                Err(eyre::eyre!("Flatpak backend does not support file checks"))
-            }
+            Self::Flatpak => Err(eyre::eyre!("Flatpak backend does not support file checks")),
             #[cfg(feature = "systemd_tmpfiles")]
-            ConcreteBackend::SystemdTmpfiles => Ok(Box::new({
+            Self::SystemdTmpfiles => Ok(Box::new({
                 let builder = systemd_tmpfiles::SystemdTmpfilesBuilder::default();
                 builder.build()
             })),
@@ -129,23 +127,23 @@ impl ConcreteBackend {
     ) -> eyre::Result<Box<dyn Packages>> {
         match self {
             #[cfg(feature = "arch_linux")]
-            ConcreteBackend::Pacman => Ok(Box::new({
+            Self::Pacman => Ok(Box::new({
                 let mut builder = arch::ArchLinuxBuilder::default();
                 builder.package_filter(configuration.package_filter);
                 builder.build()?
             })),
             #[cfg(feature = "debian")]
-            ConcreteBackend::Apt => Ok(Box::new({
+            Self::Apt => Ok(Box::new({
                 let mut builder = deb::DebianBuilder::default();
                 builder.package_filter(configuration.package_filter);
                 builder.build(interner)
             })),
-            ConcreteBackend::Flatpak => Ok(Box::new({
+            Self::Flatpak => Ok(Box::new({
                 let builder = flatpak::FlatpakBuilder::default();
                 builder.build()
             })),
             #[cfg(feature = "systemd_tmpfiles")]
-            ConcreteBackend::SystemdTmpfiles => Err(eyre::eyre!(
+            Self::SystemdTmpfiles => Err(eyre::eyre!(
                 "SystemdTmpfiles backend does not support package checks"
             )),
         }
@@ -159,22 +157,20 @@ impl ConcreteBackend {
     ) -> eyre::Result<Box<dyn FullBackend>> {
         match self {
             #[cfg(feature = "arch_linux")]
-            ConcreteBackend::Pacman => Ok(Box::new({
+            Self::Pacman => Ok(Box::new({
                 let mut builder = arch::ArchLinuxBuilder::default();
                 builder.package_filter(configuration.package_filter);
                 builder.build()?
             })),
             #[cfg(feature = "debian")]
-            ConcreteBackend::Apt => Ok(Box::new({
+            Self::Apt => Ok(Box::new({
                 let mut builder = deb::DebianBuilder::default();
                 builder.package_filter(configuration.package_filter);
                 builder.build(interner)
             })),
-            ConcreteBackend::Flatpak => {
-                Err(eyre::eyre!("Flatpak backend does not support file checks"))
-            }
+            Self::Flatpak => Err(eyre::eyre!("Flatpak backend does not support file checks")),
             #[cfg(feature = "systemd_tmpfiles")]
-            ConcreteBackend::SystemdTmpfiles => Err(eyre::eyre!(
+            Self::SystemdTmpfiles => Err(eyre::eyre!(
                 "SystemdTmpfiles backend does not support package checks"
             )),
         }
@@ -227,8 +223,8 @@ impl PackageFilter {
     /// everything.
     pub(crate) fn should_include_interned(&self, package: PackageRef, interner: &Interner) -> bool {
         match self {
-            PackageFilter::Everything => true,
-            PackageFilter::FilterFunction(f) => match f(package.as_str(interner)) {
+            Self::Everything => true,
+            Self::FilterFunction(f) => match f(package.as_str(interner)) {
                 FilterAction::Include => true,
                 FilterAction::Exclude => false,
             },
@@ -239,8 +235,8 @@ impl PackageFilter {
 impl Debug for PackageFilter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            PackageFilter::Everything => write!(f, "Everything"),
-            PackageFilter::FilterFunction(_) => write!(f, "FilterFunction(...)"),
+            Self::Everything => write!(f, "Everything"),
+            Self::FilterFunction(_) => write!(f, "FilterFunction(...)"),
         }
     }
 }

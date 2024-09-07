@@ -160,8 +160,8 @@ impl Dependency<PackageRef> {
     /// Format using string interner
     pub fn format(&self, interner: &Interner) -> String {
         match self {
-            Dependency::Single(pkg) => pkg.as_str(interner).to_string(),
-            Dependency::Disjunction(packages) => {
+            Self::Single(pkg) => pkg.as_str(interner).to_string(),
+            Self::Disjunction(packages) => {
                 let mut out = String::new();
                 for (idx, pkg) in packages.iter().enumerate() {
                     if idx > 0 {
@@ -176,8 +176,8 @@ impl Dependency<PackageRef> {
 
     fn to_direct(&self, interner: &Interner) -> Dependency<CompactString> {
         match self {
-            Dependency::Single(pkg) => Dependency::Single(pkg.as_str(interner).into()),
-            Dependency::Disjunction(packages) => Dependency::Disjunction(
+            Self::Single(pkg) => Dependency::Single(pkg.as_str(interner).into()),
+            Self::Disjunction(packages) => Dependency::Disjunction(
                 packages
                     .iter()
                     .map(|pkg| pkg.as_str(interner).into())
@@ -193,8 +193,8 @@ impl serde::Serialize for Dependency<CompactString> {
         S: serde::Serializer,
     {
         match self {
-            Dependency::Single(pkg) => serializer.serialize_str(pkg),
-            Dependency::Disjunction(packages) => {
+            Self::Single(pkg) => serializer.serialize_str(pkg),
+            Self::Disjunction(packages) => {
                 serializer.serialize_newtype_variant("Dependency", 1, "or", &packages)
             }
         }

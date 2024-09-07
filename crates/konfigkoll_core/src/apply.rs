@@ -61,15 +61,15 @@ where
         uninstall: &[&'instructions str],
     ) -> eyre::Result<()> {
         match self {
-            Either::Left(inner) => inner.apply_pkgs(backend, install, mark_explicit, uninstall),
-            Either::Right(inner) => inner.apply_pkgs(backend, install, mark_explicit, uninstall),
+            Self::Left(inner) => inner.apply_pkgs(backend, install, mark_explicit, uninstall),
+            Self::Right(inner) => inner.apply_pkgs(backend, install, mark_explicit, uninstall),
         }
     }
 
     fn apply_files(&mut self, instructions: &[FsInstruction]) -> eyre::Result<()> {
         match self {
-            Either::Left(inner) => inner.apply_files(instructions),
-            Either::Right(inner) => inner.apply_files(instructions),
+            Self::Left(inner) => inner.apply_files(instructions),
+            Self::Right(inner) => inner.apply_files(instructions),
         }
     }
 }
@@ -325,9 +325,9 @@ enum PkgPromptChoices {
 impl Choices for PkgPromptChoices {
     fn options() -> &'static [(char, &'static str, Self)] {
         &[
-            ('y', "Yes", PkgPromptChoices::Yes),
-            ('a', "Abort", PkgPromptChoices::Abort),
-            ('s', "Skip", PkgPromptChoices::Skip),
+            ('y', "Yes", Self::Yes),
+            ('a', "Abort", Self::Abort),
+            ('s', "Skip", Self::Skip),
         ]
     }
 }
@@ -343,14 +343,10 @@ enum FsPromptChoices {
 impl Choices for FsPromptChoices {
     fn options() -> &'static [(char, &'static str, Self)] {
         &[
-            ('y', "Yes", FsPromptChoices::Yes),
-            ('a', "Abort", FsPromptChoices::Abort),
-            ('s', "Skip", FsPromptChoices::Skip),
-            (
-                'i',
-                "Interactive (change by change)",
-                FsPromptChoices::Interactive,
-            ),
+            ('y', "Yes", Self::Yes),
+            ('a', "Abort", Self::Abort),
+            ('s', "Skip", Self::Skip),
+            ('i', "Interactive (change by change)", Self::Interactive),
         ]
     }
 }
@@ -366,10 +362,10 @@ enum InteractivePromptChoices {
 impl Choices for InteractivePromptChoices {
     fn options() -> &'static [(char, &'static str, Self)] {
         &[
-            ('y', "Yes", InteractivePromptChoices::Yes),
-            ('a', "Abort", InteractivePromptChoices::Abort),
-            ('s', "Skip", InteractivePromptChoices::Skip),
-            ('d', "show Diff", InteractivePromptChoices::ShowDiff),
+            ('y', "Yes", Self::Yes),
+            ('a', "Abort", Self::Abort),
+            ('s', "Skip", Self::Skip),
+            ('d', "show Diff", Self::ShowDiff),
         ]
     }
 }

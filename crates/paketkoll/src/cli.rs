@@ -80,9 +80,9 @@ pub enum Format {
 impl Display for Format {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Format::Human => write!(f, "human"),
+            Self::Human => write!(f, "human"),
             #[cfg(feature = "json")]
-            Format::Json => write!(f, "json"),
+            Self::Json => write!(f, "json"),
         }
     }
 }
@@ -108,14 +108,14 @@ pub enum Backend {
 impl Display for Backend {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Backend::Auto => write!(f, "auto"),
+            Self::Auto => write!(f, "auto"),
             #[cfg(feature = "arch_linux")]
-            Backend::ArchLinux => write!(f, "arch-linux"),
+            Self::ArchLinux => write!(f, "arch-linux"),
             #[cfg(feature = "debian")]
-            Backend::Debian => write!(f, "debian"),
-            Backend::Flatpak => write!(f, "flatpak"),
+            Self::Debian => write!(f, "debian"),
+            Self::Flatpak => write!(f, "flatpak"),
             #[cfg(feature = "systemd_tmpfiles")]
-            Backend::SystemdTmpfiles => write!(f, "systemd-tmpfiles"),
+            Self::SystemdTmpfiles => write!(f, "systemd-tmpfiles"),
         }
     }
 }
@@ -134,9 +134,9 @@ pub enum ConfigFiles {
 impl Display for ConfigFiles {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ConfigFiles::Include => write!(f, "include"),
-            ConfigFiles::Exclude => write!(f, "exclude"),
-            ConfigFiles::Only => write!(f, "only"),
+            Self::Include => write!(f, "include"),
+            Self::Exclude => write!(f, "exclude"),
+            Self::Only => write!(f, "only"),
         }
     }
 }

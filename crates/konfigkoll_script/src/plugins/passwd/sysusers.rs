@@ -289,8 +289,8 @@ struct CompactStringWrapper(CompactString);
 impl<'i> Accumulate<&'i str> for CompactStringWrapper {
     fn initial(capacity: Option<usize>) -> Self {
         match capacity {
-            Some(capacity) => CompactStringWrapper(CompactString::with_capacity(capacity)),
-            None => CompactStringWrapper(CompactString::new("")),
+            Some(capacity) => Self(CompactString::with_capacity(capacity)),
+            None => Self(CompactString::new("")),
         }
     }
 

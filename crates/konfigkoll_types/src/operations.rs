@@ -43,20 +43,20 @@ pub enum FsOp {
 impl std::fmt::Display for FsOp {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            FsOp::Remove => write!(f, "remove"),
-            FsOp::Restore => {
+            Self::Remove => write!(f, "remove"),
+            Self::Restore => {
                 write!(f, "restore (from package manager)")
             }
-            FsOp::CreateDirectory => write!(f, "mkdir"),
-            FsOp::CreateFile(contents) => write!(f, "create file (with {})", contents.checksum()),
-            FsOp::CreateSymlink { target } => write!(f, "symlink to {target}"),
-            FsOp::CreateFifo => write!(f, "mkfifo"),
-            FsOp::CreateBlockDevice { .. } => write!(f, "mknod (block device)"),
-            FsOp::CreateCharDevice { .. } => write!(f, "mknod (char device)"),
-            FsOp::SetMode { mode } => write!(f, "chmod {mode}"),
-            FsOp::SetOwner { owner } => write!(f, "chown {owner}"),
-            FsOp::SetGroup { group } => write!(f, "chgrp {group}"),
-            FsOp::Comment => write!(f, "COMMENT"),
+            Self::CreateDirectory => write!(f, "mkdir"),
+            Self::CreateFile(contents) => write!(f, "create file (with {})", contents.checksum()),
+            Self::CreateSymlink { target } => write!(f, "symlink to {target}"),
+            Self::CreateFifo => write!(f, "mkfifo"),
+            Self::CreateBlockDevice { .. } => write!(f, "mknod (block device)"),
+            Self::CreateCharDevice { .. } => write!(f, "mknod (char device)"),
+            Self::SetMode { mode } => write!(f, "chmod {mode}"),
+            Self::SetOwner { owner } => write!(f, "chown {owner}"),
+            Self::SetGroup { group } => write!(f, "chgrp {group}"),
+            Self::Comment => write!(f, "COMMENT"),
         }
     }
 }
