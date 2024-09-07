@@ -30,14 +30,8 @@ pub fn unsorted_additions(props, cmds) {
     ctx.cmds.ln("/etc/systemd/user/sockets.target.wants/pipewire.socket", "/usr/lib/systemd/user/pipewire.socket")?;
     // /nosuchdir:  // .mkdir() in config should be removed. NOTE: mkdir may be implicit from changes to contained files
     ctx.cmds.chmod("/srv/ftp", 0o755)?; // [filesystem]
-    ctx.cmds.mkdir("/usr")?;
-    ctx.cmds.mkdir("/usr/bin")?;
     ctx.cmds.chmod("/usr/bin/groupmems", 0o2750)?; // [shadow]
     ctx.cmds.chgrp("/usr/bin/groupmems", "groups")?; // [shadow]
-    ctx.cmds.copy("/usr/bin/konfigkoll")?;
-    ctx.cmds.chmod("/usr/bin/konfigkoll", 0o755)?;
-    ctx.cmds.copy("/usr/bin/paketkoll")?;
-    ctx.cmds.chmod("/usr/bin/paketkoll", 0o755)?;
     ctx.cmds.mkdir("/var")?;
     ctx.cmds.mkdir("/var/lib")?;
     ctx.cmds.mkdir("/var/lib/lastlog")?;

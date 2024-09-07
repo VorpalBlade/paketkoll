@@ -30,6 +30,8 @@ pub fn phase_ignores(props, cmds) {
 
     // No recursive things please
     cmds.ignore_path("/test_dir");
+    cmds.ignore_path("/bin_dir");
+    cmds.ignore_path("/test_runner_inner.sh");
 
     // Container image is stripped down
     cmds.ignore_path("/usr/share/doc");

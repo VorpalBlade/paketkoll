@@ -2,4 +2,4 @@
 
 set -ex
 
-podman build . --build-context binaries=../../../target/debug --tag test_img
+podman build . --tag test_img

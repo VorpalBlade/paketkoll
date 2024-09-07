@@ -57,5 +57,3 @@ INFO konfigkoll::save: Would save file data for /etc/passwd-
 WARN konfigkoll: /etc/shadow has changes, but it is marked sensitive, won't auto-save
 WARN konfigkoll: /etc/shadow- has changes, but it is marked sensitive, won't auto-save
 INFO konfigkoll::save: Would save file data for /etc/shells
-INFO konfigkoll::save: Would save file data for /usr/bin/konfigkoll
-INFO konfigkoll::save: Would save file data for /usr/bin/paketkoll

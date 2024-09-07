@@ -10,8 +10,7 @@ RUN pacman -Syyuu --noconfirm && \
 
 FROM base_image AS test_image
 
-COPY --from=binaries ./paketkoll /usr/bin/paketkoll
-COPY --from=binaries ./konfigkoll /usr/bin/konfigkoll
+COPY ./test_runner_inner.sh /test_runner_inner.sh
 
 ENV CI=1
 ENV RUST_BACKTRACE=1

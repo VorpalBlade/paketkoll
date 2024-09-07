@@ -41,11 +41,9 @@ INFO konfigkoll_core::apply:  /etc/shadow: chmod 600
 INFO konfigkoll_core::apply: Would install 1, mark 0 explicit and uninstall 1 with backend Pacman
 INFO konfigkoll_core::apply:  + nano
 INFO konfigkoll_core::apply:  - git
-INFO konfigkoll_core::apply: Would apply 12 file instructions
+INFO konfigkoll_core::apply: Would apply 10 file instructions
 INFO konfigkoll_core::apply:  /var/lib/libuuid: remove
 INFO konfigkoll_core::apply:  /var/lib/lastlog: remove
-INFO konfigkoll_core::apply:  /usr/bin/paketkoll: remove
-INFO konfigkoll_core::apply:  /usr/bin/konfigkoll: remove
 INFO konfigkoll_core::apply:  /etc/systemd/user/sockets.target.wants/pipewire.socket: remove
 INFO konfigkoll_core::apply:  /etc/systemd/user/sockets.target.wants: remove
 INFO konfigkoll_core::apply:  /etc/shadow-: remove
@@ -59,14 +57,12 @@ INFO konfigkoll_core::apply:  /etc/hosts: restore (from package manager)
 INFO konfigkoll_core::apply:  /etc/ld.so.conf: restore (from package manager)
 INFO konfigkoll_core::apply:  /etc/pacman.d/mirrorlist: restore (from package manager)
 INFO konfigkoll_core::apply:  /etc/shells: restore (from package manager)
-INFO konfigkoll_core::apply: Would apply 9 file instructions
+INFO konfigkoll_core::apply: Would apply 7 file instructions
 INFO konfigkoll_core::apply:  /etc: mkdir
 INFO konfigkoll_core::apply:  /etc/pacman.d: mkdir
 INFO konfigkoll_core::apply:  /etc/systemd: mkdir
 INFO konfigkoll_core::apply:  /etc/systemd/user: mkdir
 INFO konfigkoll_core::apply:  /nosuchdir: mkdir
-INFO konfigkoll_core::apply:  /usr: mkdir
-INFO konfigkoll_core::apply:  /usr/bin: mkdir
 INFO konfigkoll_core::apply:  /var: mkdir
 INFO konfigkoll_core::apply:  /var/lib: mkdir
 INFO konfigkoll_core::apply: Would apply 2 file instructions

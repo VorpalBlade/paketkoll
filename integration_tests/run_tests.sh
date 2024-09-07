@@ -13,7 +13,7 @@ echo "::endgroup::"
 
 for test in arch/*/; do
     echo "::group::Test: $test"
-    if ! ./images/arch/test_runner.sh "$test"; then
+    if ! ./images/arch/test_runner.sh "$test" "../target/debug"; then
         exit_code=1
         echo "::error::FAILED: $test"
     fi
