@@ -1,0 +1,61 @@
+INFO script{phase=SystemDiscovery}: konfigkoll_script::engine: Calling script
+"System discovery phase"
+Configuring for distro: arch
+Some("x86_64")
+INFO script{phase=SystemDiscovery}: konfigkoll_script::engine: Returned from script
+INFO konfigkoll: Creating backends
+INFO konfigkoll: Starting package loading background job
+INFO script{phase=Ignores}: konfigkoll_script::engine: Calling script
+"Ignore phase"
+INFO script{phase=Ignores}: konfigkoll_script::engine: Returned from script
+INFO konfigkoll: Waiting for package loading results...
+INFO konfigkoll: Got package loading results
+INFO konfigkoll: Starting filesystem scan background job
+INFO script{phase=ScriptDependencies}: konfigkoll_script::engine: Calling script
+"Script dependencies phase"
+INFO script{phase=ScriptDependencies}: konfigkoll_script::engine: Returned from script
+INFO script{phase=Main}: konfigkoll_script::engine: Calling script
+"Main phase"
+Some(123)
+INFO script{phase=Main}: paketkoll_core::utils: Downloading package for filesystem
+resolving dependencies...
+
+Package (1)      Old Version   New Version   Net Change  Download Size
+
+core/filesystem  2024.04.07-1  2024.04.07-1    0.00 MiB       0.01 MiB
+
+Total Download Size:  0.01 MiB
+
+:: Proceed with download? [Y/n] 
+:: Retrieving packages...
+ filesystem-2024.04.07-1-any downloading...
+checking keyring...
+checking package integrity...
+Ok("# Dynamic linker/loader configuration.\n# See ld.so(8) and ldconfig(8) for details.\n\ninclude /etc/ld.so.conf.d/*.conf\ninclude /usr/lib/ld.so.conf.d/*.conf\n")
+Ok("# Dynamic linker/loader configuration.\n# See ld.so(8) and ldconfig(8) for details.\n\ninclude /etc/ld.so.conf.d/*.conf\ninclude /usr/lib/ld.so.conf.d/*.conf\n# HI!\n")
+-rw-r--r-- 1 root root      1 Apr  7 18:02 arch-release
+-rw-r--r-- 1 root root    411 Sep  6 23:15 os-release
+"output:"
+Ok("")
+"bor\nbar\nbar\nquux hi there\n"
+INFO script{phase=Main}: konfigkoll_script::engine: Returned from script
+INFO konfigkoll: Waiting for file system scan results...
+INFO konfigkoll: Got file system scan results
+WARN konfigkoll: There are differences (saving to unsorted.rn)
+INFO konfigkoll::save: Would save file data for /etc/group
+INFO konfigkoll::save: Would save file data for /etc/group-
+WARN konfigkoll: /etc/gshadow has changes, but it is marked sensitive, won't auto-save
+WARN konfigkoll: /etc/gshadow- has changes, but it is marked sensitive, won't auto-save
+INFO konfigkoll::save: Would save file data for /etc/hostname
+INFO konfigkoll::save: Would save file data for /etc/hosts
+INFO konfigkoll::save: Would save file data for /etc/ld.so.conf
+INFO konfigkoll::save: Would save file data for /etc/locale.conf
+INFO konfigkoll::save: Would save file data for /etc/pacman.conf
+INFO konfigkoll::save: Would save file data for /etc/pacman.d/mirrorlist
+INFO konfigkoll::save: Would save file data for /etc/passwd
+INFO konfigkoll::save: Would save file data for /etc/passwd-
+WARN konfigkoll: /etc/shadow has changes, but it is marked sensitive, won't auto-save
+WARN konfigkoll: /etc/shadow- has changes, but it is marked sensitive, won't auto-save
+INFO konfigkoll::save: Would save file data for /etc/shells
+INFO konfigkoll::save: Would save file data for /usr/bin/konfigkoll
+INFO konfigkoll::save: Would save file data for /usr/bin/paketkoll

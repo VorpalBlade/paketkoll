@@ -210,7 +210,7 @@ fn from_fs(
 ) -> eyre::Result<impl Iterator<Item = FsInstruction>> {
     let metadata = path
         .symlink_metadata()
-        .wrap_err_with(|| eyre::eyre!("Failed to get metadata"))?;
+        .wrap_err_with(|| eyre::eyre!("Failed to get metadata for {path:?}"))?;
 
     let mut results = vec![];
 

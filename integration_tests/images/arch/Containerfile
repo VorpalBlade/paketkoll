@@ -1,0 +1,18 @@
+FROM archlinux:base-devel-20240825.0.257728 AS base_image
+
+# Signatures expire, repos expire, and so on. Make this image reproducible
+# (update this once in a while)
+RUN sed -i "s/^SigLevel.*/SigLevel = Never/" /etc/pacman.conf && \
+    echo 'Server=https://archive.archlinux.org/repos/2024/09/01/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+
+RUN pacman -Syyuu --noconfirm && \
+    pacman -S --needed --noconfirm base-devel git flatpak
+
+FROM base_image AS test_image
+
+COPY --from=binaries ./paketkoll /usr/bin/paketkoll
+COPY --from=binaries ./konfigkoll /usr/bin/konfigkoll
+
+ENV CI=1
+ENV RUST_BACKTRACE=1
+ENV NO_COLOR=1

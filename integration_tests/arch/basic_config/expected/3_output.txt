@@ -1,0 +1,85 @@
+INFO script{phase=SystemDiscovery}: konfigkoll_script::engine: Calling script
+"System discovery phase"
+Configuring for distro: arch
+Some("x86_64")
+INFO script{phase=SystemDiscovery}: konfigkoll_script::engine: Returned from script
+INFO konfigkoll: Creating backends
+INFO konfigkoll: Starting package loading background job
+INFO script{phase=Ignores}: konfigkoll_script::engine: Calling script
+"Ignore phase"
+INFO script{phase=Ignores}: konfigkoll_script::engine: Returned from script
+INFO konfigkoll: Waiting for package loading results...
+INFO konfigkoll: Got package loading results
+INFO konfigkoll: Starting filesystem scan background job
+INFO script{phase=ScriptDependencies}: konfigkoll_script::engine: Calling script
+"Script dependencies phase"
+INFO script{phase=ScriptDependencies}: konfigkoll_script::engine: Returned from script
+INFO konfigkoll: Applying early packages (if any are missing)
+INFO script{phase=Main}: konfigkoll_script::engine: Calling script
+"Main phase"
+Some(123)
+Ok("# Dynamic linker/loader configuration.\n# See ld.so(8) and ldconfig(8) for details.\n\ninclude /etc/ld.so.conf.d/*.conf\ninclude /usr/lib/ld.so.conf.d/*.conf\n")
+Ok("# Dynamic linker/loader configuration.\n# See ld.so(8) and ldconfig(8) for details.\n\ninclude /etc/ld.so.conf.d/*.conf\ninclude /usr/lib/ld.so.conf.d/*.conf\n# HI!\n")
+-rw-r--r-- 1 root root      1 Apr  7 18:02 arch-release
+-rw-r--r-- 1 root root    411 Sep  6 23:15 os-release
+"output:"
+Ok("")
+"bor\nbar\nbar\nquux hi there\n"
+INFO script{phase=Main}: konfigkoll_script::engine: Returned from script
+INFO konfigkoll: Waiting for file system scan results...
+INFO konfigkoll: Got file system scan results
+WARN konfigkoll: Applying changes
+INFO konfigkoll_core::apply: Would apply 5 file instructions
+INFO konfigkoll_core::apply:  /etc/group: restore (from package manager)
+INFO konfigkoll_core::apply:  /etc/gshadow: restore (from package manager)
+INFO konfigkoll_core::apply:  /etc/pacman.conf: restore (from package manager)
+INFO konfigkoll_core::apply:  /etc/passwd: restore (from package manager)
+INFO konfigkoll_core::apply:  /etc/shadow: restore (from package manager)
+INFO konfigkoll_core::apply: Would apply 2 file instructions
+INFO konfigkoll_core::apply:  /etc/gshadow: chmod 600
+INFO konfigkoll_core::apply:  /etc/shadow: chmod 600
+INFO konfigkoll_core::apply: Would install 1, mark 0 explicit and uninstall 1 with backend Pacman
+INFO konfigkoll_core::apply:  + nano
+INFO konfigkoll_core::apply:  - git
+INFO konfigkoll_core::apply: Would apply 12 file instructions
+INFO konfigkoll_core::apply:  /var/lib/libuuid: remove
+INFO konfigkoll_core::apply:  /var/lib/lastlog: remove
+INFO konfigkoll_core::apply:  /usr/bin/paketkoll: remove
+INFO konfigkoll_core::apply:  /usr/bin/konfigkoll: remove
+INFO konfigkoll_core::apply:  /etc/systemd/user/sockets.target.wants/pipewire.socket: remove
+INFO konfigkoll_core::apply:  /etc/systemd/user/sockets.target.wants: remove
+INFO konfigkoll_core::apply:  /etc/shadow-: remove
+INFO konfigkoll_core::apply:  /etc/passwd-: remove
+INFO konfigkoll_core::apply:  /etc/locale.conf: remove
+INFO konfigkoll_core::apply:  /etc/hostname: remove
+INFO konfigkoll_core::apply:  /etc/gshadow-: remove
+INFO konfigkoll_core::apply:  /etc/group-: remove
+INFO konfigkoll_core::apply: Would apply 4 file instructions
+INFO konfigkoll_core::apply:  /etc/hosts: restore (from package manager)
+INFO konfigkoll_core::apply:  /etc/ld.so.conf: restore (from package manager)
+INFO konfigkoll_core::apply:  /etc/pacman.d/mirrorlist: restore (from package manager)
+INFO konfigkoll_core::apply:  /etc/shells: restore (from package manager)
+INFO konfigkoll_core::apply: Would apply 9 file instructions
+INFO konfigkoll_core::apply:  /etc: mkdir
+INFO konfigkoll_core::apply:  /etc/pacman.d: mkdir
+INFO konfigkoll_core::apply:  /etc/systemd: mkdir
+INFO konfigkoll_core::apply:  /etc/systemd/user: mkdir
+INFO konfigkoll_core::apply:  /nosuchdir: mkdir
+INFO konfigkoll_core::apply:  /usr: mkdir
+INFO konfigkoll_core::apply:  /usr/bin: mkdir
+INFO konfigkoll_core::apply:  /var: mkdir
+INFO konfigkoll_core::apply:  /var/lib: mkdir
+INFO konfigkoll_core::apply: Would apply 2 file instructions
+INFO konfigkoll_core::apply:  /dummy.txt: create file (with sha256:0ba904eae8773b70c75333db4de2f3ac45a8ad4ddba1b242f0b3cfc199391dd8)
+INFO konfigkoll_core::apply:  /dummy2.txt: create file (with sha256:e5e9beba29f1b4589fd1c77c01fadba4319cce965db7c2b4967666664311226c)
+INFO konfigkoll_core::apply: Would apply 3 file instructions
+INFO konfigkoll_core::apply:  /: chmod 755
+INFO konfigkoll_core::apply:  /srv/ftp: chmod 555
+INFO konfigkoll_core::apply:  /usr/bin/groupmems: chmod 750
+INFO konfigkoll_core::apply: Would apply 6 file instructions
+INFO konfigkoll_core::apply:  /srv/ftp: chgrp ftp
+INFO konfigkoll_core::apply:  /usr/bin/groupmems: chgrp root
+INFO konfigkoll_core::apply:  /usr/bin/wall: chgrp tty
+INFO konfigkoll_core::apply:  /usr/bin/write: chgrp tty
+INFO konfigkoll_core::apply:  /usr/lib/dbus-1.0/dbus-daemon-launch-helper: chgrp dbus
+INFO konfigkoll_core::apply:  /var/games: chgrp games

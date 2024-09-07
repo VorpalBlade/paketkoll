@@ -1,0 +1,31 @@
+INFO script{phase=SystemDiscovery}: konfigkoll_script::engine: Calling script
+"System discovery phase"
+Configuring for distro: arch
+Some("x86_64")
+INFO script{phase=SystemDiscovery}: konfigkoll_script::engine: Returned from script
+INFO konfigkoll: Creating backends
+INFO konfigkoll: Starting package loading background job
+INFO script{phase=Ignores}: konfigkoll_script::engine: Calling script
+"Ignore phase"
+INFO script{phase=Ignores}: konfigkoll_script::engine: Returned from script
+INFO konfigkoll: Waiting for package loading results...
+INFO konfigkoll: Got package loading results
+INFO konfigkoll: Starting filesystem scan background job
+INFO script{phase=ScriptDependencies}: konfigkoll_script::engine: Calling script
+"Script dependencies phase"
+INFO script{phase=ScriptDependencies}: konfigkoll_script::engine: Returned from script
+INFO script{phase=Main}: konfigkoll_script::engine: Calling script
+"Main phase"
+Some(123)
+Ok("# Dynamic linker/loader configuration.\n# See ld.so(8) and ldconfig(8) for details.\n\ninclude /etc/ld.so.conf.d/*.conf\ninclude /usr/lib/ld.so.conf.d/*.conf\n")
+Ok("# Dynamic linker/loader configuration.\n# See ld.so(8) and ldconfig(8) for details.\n\ninclude /etc/ld.so.conf.d/*.conf\ninclude /usr/lib/ld.so.conf.d/*.conf\n# HI!\n")
+-rw-r--r-- 1 root root      1 Apr  7 18:02 arch-release
+-rw-r--r-- 1 root root    411 Sep  6 23:15 os-release
+"output:"
+Ok("")
+"bor\nbar\nbar\nquux hi there\n"
+INFO script{phase=Main}: konfigkoll_script::engine: Returned from script
+INFO konfigkoll: Waiting for file system scan results...
+INFO konfigkoll: Got file system scan results
+INFO konfigkoll: Computing diff
+/etc/passwd: Would restore to original package manager state

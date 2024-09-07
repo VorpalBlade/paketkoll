@@ -83,20 +83,25 @@ jobs:
       - name: Cross test
         run: cross test --locked --target ${{ matrix.target }} --verbose
       - name: Compress binary
-        if: matrix.rust == 'stable' && matrix.target != 'x86_64-pc-windows-gnu'
+        if: matrix.rust == 'stable' && contains(matrix.target, 'musl')
         run: |
           mkdir paketkoll
           cp target/${{ matrix.target }}/debug/paketkoll paketkoll/
+          cp target/${{ matrix.target }}/debug/konfigkoll paketkoll/
           if [[ -f target/${{ matrix.target }}/debug/paketkoll.dwp ]]; then
             # No split debug info for RISCV
             cp target/${{ matrix.target }}/debug/paketkoll.dwp paketkoll/
           fi
+          if [[ -f target/${{ matrix.target }}/debug/konfigkoll.dwp ]]; then
+            # No split debug info for RISCV
+            cp target/${{ matrix.target }}/debug/konfigkoll.dwp paketkoll/
+          fi
           tar cf paketkoll.tar paketkoll
           zstd -T0 -6 paketkoll.tar
       - uses: actions/upload-artifact@v4
-        if: matrix.rust == 'stable' && matrix.target != 'x86_64-pc-windows-gnu'
+        if: matrix.rust == 'stable' && contains(matrix.target, 'musl')
         with:
-          name: paketkoll_${{ matrix.target }}.zst
+          name: paketkoll_${{ matrix.target }}.tar.zst
           path: paketkoll.tar.zst
           retention-days: 7
       - name: Clean up temporary items
@@ -137,3 +142,27 @@ jobs:
     env:
       # Warnings are ok for now here due to private APIs that will be public in the future.
       RUSTFLAGS: ""
+
+  integration:
+    name: "Integration tests"
+    runs-on: ubuntu-24.04
+    needs: modern-default
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: paketkoll_x86_64-unknown-linux-musl.tar.zst
+      - name: Unpack binaries
+        run: |
+          tar xf ${GITHUB_WORKSPACE}/paketkoll.tar.zst
+          mkdir -p target/debug
+          mv paketkoll/* target/debug/
+      - name: Install podman
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman
+          podman --version
+      - name: Run integration tests
+        run: |
+          cd integration_tests
+          ./run_tests.sh
