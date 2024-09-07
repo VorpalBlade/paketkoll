@@ -122,7 +122,7 @@ impl Files for OriginalFilesCache {
         let mut cache_keys = AHashMap::new();
         let inner_name = self.name();
         let cache_version = self.cache_version();
-        for query in queries.iter() {
+        for query in queries {
             // Resolve exact version and ID of packages from the package map
             let cache_key = match packages.get(&PackageRef::get_or_intern(interner, &query.package))
             {

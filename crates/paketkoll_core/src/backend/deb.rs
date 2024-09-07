@@ -432,10 +432,9 @@ fn convert_deb_archive_path(path: &Path) -> Option<Cow<'_, Path>> {
     // broken in this respect
     if p.starts_with(b"/") {
         return Some(Cow::Borrowed(p.to_path().expect("Invalid path")));
-    } else {
-        let p = bstr::concat([b"/", p]);
-        return Some(Cow::Owned(p.into_path_buf().expect("Invalid path")));
     }
+    let p = bstr::concat([b"/", p]);
+    return Some(Cow::Owned(p.into_path_buf().expect("Invalid path")));
 }
 
 /// Given a package name, try to figure out the full deb file name

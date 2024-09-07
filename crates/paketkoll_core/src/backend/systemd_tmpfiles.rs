@@ -141,7 +141,7 @@ fn parse_systemd_tmpfiles_output(output: &str) -> Result<Vec<FileEntry>, eyre::E
     // Note! It may be tempting to parallelise this, but unfortunately it is "last
     // item wins" (at least per file), including possibly modifying previous
     // entries.
-    for entry in parsed.iter() {
+    for entry in &parsed {
         process_entry(entry, &mut files, &mut id_cache, &resolver)
             .wrap_err_with(|| format!("Failed to process entry for {}", entry.path()))?;
     }

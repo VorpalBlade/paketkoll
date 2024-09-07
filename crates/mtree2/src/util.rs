@@ -35,7 +35,7 @@ macro_rules! impl_from_dec_uint {
                         .ok_or_else(|| {
                             ParserError::from("could not parse integer - shift overflow".to_owned())
                         })?
-                        .checked_add(val as $from)
+                        .checked_add(<$from>::from(val))
                         .ok_or_else(|| {
                             ParserError::from(
                                 "could not parse integer - addition overflow".to_owned(),

@@ -29,7 +29,7 @@ pub enum ParseError {
 }
 
 /// Sub-error type for the first splitting layer
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct SplitterError {
     message: String,
     pos: usize,
@@ -209,7 +209,7 @@ fn parse_directive(line: Line) -> Result<Entry, ParseError> {
         ('r', false) => Directive::RemoveFile { recursive: false },
         ('R', false) => Directive::RemoveFile { recursive: true },
         // m is a legacy alias for z
-        ('z', false) | ('m', false) => Directive::AdjustAccess {
+        ('z' | 'm', false) => Directive::AdjustAccess {
             recursive: false,
             mode: line.mode,
             user: line.user,

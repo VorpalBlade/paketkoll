@@ -111,14 +111,14 @@ impl PackageInterned {
             provides: self
                 .provides
                 .into_iter()
-                .flat_map(|pkg| pkg.try_as_str(interner).map(Into::into))
+                .filter_map(|pkg| pkg.try_as_str(interner).map(Into::into))
                 .collect(),
             reason: self.reason,
             status: self.status,
             ids: self
                 .ids
                 .into_iter()
-                .flat_map(|pkg| pkg.try_as_str(interner).map(Into::into))
+                .filter_map(|pkg| pkg.try_as_str(interner).map(Into::into))
                 .collect(),
         }
     }

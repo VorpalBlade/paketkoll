@@ -478,7 +478,7 @@ pub fn diff(
                         });
                     }
                     (Some(v1), Some(v2)) if v1 == v2 => (),
-                    (None, Some(v)) | (Some(_), Some(v)) => {
+                    (None | Some(_), Some(v)) => {
                         results.push(FsInstruction {
                             path: path.clone(),
                             op: FsOp::SetMode { mode: v },
@@ -498,7 +498,7 @@ pub fn diff(
                         });
                     }
                     (Some(v1), Some(v2)) if v1 == v2 => (),
-                    (None, Some(v)) | (Some(_), Some(v)) => {
+                    (None | Some(_), Some(v)) => {
                         results.push(FsInstruction {
                             path: path.clone(),
                             op: FsOp::SetOwner { owner: v },
@@ -518,7 +518,7 @@ pub fn diff(
                         });
                     }
                     (Some(v1), Some(v2)) if v1 == v2 => (),
-                    (None, Some(v)) | (Some(_), Some(v)) => {
+                    (None | Some(_), Some(v)) => {
                         results.push(FsInstruction {
                             path: path.clone(),
                             op: FsOp::SetGroup { group: v },
@@ -590,7 +590,7 @@ pub fn diff(
                                     }
                                 }
                                 match (entry.properties.mode(), before.1.mode) {
-                                    (None, None) | (None, Some(_)) | (Some(_), None) => (),
+                                    (None | Some(_), None) | (None, Some(_)) => (),
                                     (Some(v1), Some(v2)) if v1 == v2 => (),
                                     (Some(v1), Some(_)) => {
                                         results.push(FsInstruction {
@@ -607,7 +607,7 @@ pub fn diff(
                                     .map(|v| id_resolver.lookup(&IdKey::User(v)))
                                     .transpose()?;
                                 match (fs_owner, before.1.owner) {
-                                    (None, None) | (None, Some(_)) | (Some(_), None) => (),
+                                    (None | Some(_), None) | (None, Some(_)) => (),
                                     (Some(v1), Some(v2)) if v1 == v2 => (),
                                     (Some(v1), Some(_)) => {
                                         results.push(FsInstruction {
@@ -624,7 +624,7 @@ pub fn diff(
                                     .map(|v| id_resolver.lookup(&IdKey::Group(v)))
                                     .transpose()?;
                                 match (fs_group, before.1.group) {
-                                    (None, None) | (None, Some(_)) | (Some(_), None) => (),
+                                    (None | Some(_), None) | (None, Some(_)) => (),
                                     (Some(v1), Some(v2)) if v1 == v2 => (),
                                     (Some(v1), Some(_)) => {
                                         results.push(FsInstruction {

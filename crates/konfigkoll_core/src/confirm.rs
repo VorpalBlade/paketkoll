@@ -68,9 +68,8 @@ fn inner_prompt(
             Key::Enter => {
                 if let Some(default) = default {
                     return Ok(default);
-                } else {
-                    term.write_line("Please select an option (this prompt has no default)")?;
                 }
+                term.write_line("Please select an option (this prompt has no default)")?;
             }
             Key::Char(c) => return Ok(c),
             Key::Escape => {
@@ -101,9 +100,8 @@ impl<T: Choices> MultiOptionConfirm<T> {
                 .collect_vec();
             if found.len() == 1 {
                 return Ok(self.options[&ch]);
-            } else {
-                term.write_line("Invalid option, try again")?;
             }
+            term.write_line("Invalid option, try again")?;
         }
     }
 }

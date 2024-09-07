@@ -68,7 +68,7 @@ async fn main() -> eyre::Result<()> {
     };
 
     // This must be done before we instantiate the script engine
-    if let Commands::Init {} = cli.command {
+    if matches!(cli.command, Commands::Init {}) {
         init::init_directory(&config_path)?;
         return Ok(());
     }
@@ -200,7 +200,7 @@ async fn main() -> eyre::Result<()> {
     );
 
     // Apply early packages (if any)
-    if let Commands::Apply {} = cli.command {
+    if matches!(cli.command, Commands::Apply {}) {
         tracing::info!("Applying early packages (if any are missing)");
         let mut applicator = create_applicator(
             cli.confirmation,
@@ -391,7 +391,7 @@ fn cmd_save_changes(
         fs_changes.iter(),
         interner,
     )?;
-    output.write_all("}\n".as_bytes())?;
+    output.write_all(b"}\n")?;
 
     output.write_all(
         "\n// These are entries in your config that are not applied to the current system\n"
@@ -403,7 +403,7 @@ fn cmd_save_changes(
     output.write_all("// (e.g. write and copy will get mixed up).\n".as_bytes())?;
     output.write_all("pub fn unsorted_removals(props, cmds) {\n".as_bytes())?;
     konfigkoll_core::save::save_packages(&prefix, &mut output, pkg_removals.into_iter())?;
-    output.write_all("}\n".as_bytes())?;
+    output.write_all(b"}\n")?;
     Ok(())
 }
 

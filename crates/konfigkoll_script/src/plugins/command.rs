@@ -73,7 +73,7 @@ impl Commands {
             })
     }
 
-    fn verify_path(&self, path: &str) -> eyre::Result<()> {
+    fn verify_path(path: &str) -> eyre::Result<()> {
         if path.contains("..") {
             return Err(eyre::eyre!("Path {} contains '..'", path));
         }
@@ -209,8 +209,8 @@ impl Commands {
                 eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
             );
         }
-        self.verify_path(path)?;
-        self.verify_path(src)?;
+        Self::verify_path(path)?;
+        Self::verify_path(src)?;
         let contents = FileContents::from_file(&safe_path_join(&self.base_files_path, src.into()));
         let contents = match contents {
             Ok(v) => v,
@@ -238,7 +238,7 @@ impl Commands {
                 eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
             );
         }
-        self.verify_path(path)?;
+        Self::verify_path(path)?;
         self.fs_actions.push(FsInstruction {
             op: FsOp::CreateSymlink {
                 target: target.into(),
@@ -258,7 +258,7 @@ impl Commands {
                 eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
             );
         }
-        self.verify_path(path)?;
+        Self::verify_path(path)?;
         self.fs_actions.push(FsInstruction {
             op: FsOp::CreateFile(FileContents::from_literal(contents.into())),
             path: path.into(),
@@ -276,7 +276,7 @@ impl Commands {
                 eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
             );
         }
-        self.verify_path(path)?;
+        Self::verify_path(path)?;
         self.fs_actions.push(FsInstruction {
             op: FsOp::CreateDirectory,
             path: path.into(),
@@ -294,7 +294,7 @@ impl Commands {
                 eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
             );
         }
-        self.verify_path(path)?;
+        Self::verify_path(path)?;
         self.fs_actions.push(FsInstruction {
             op: FsOp::SetOwner {
                 owner: owner.into(),
@@ -314,7 +314,7 @@ impl Commands {
                 eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
             );
         }
-        self.verify_path(path)?;
+        Self::verify_path(path)?;
         self.fs_actions.push(FsInstruction {
             op: FsOp::SetGroup {
                 group: group.into(),
@@ -334,7 +334,7 @@ impl Commands {
                 eyre::eyre!("File system actions are only possible in the 'main' phase").into(),
             );
         }
-        self.verify_path(path)?;
+        Self::verify_path(path)?;
         let numeric_mode = match mode {
             Value::Integer(m) => Mode::new(m as u32),
             Value::String(str) => {

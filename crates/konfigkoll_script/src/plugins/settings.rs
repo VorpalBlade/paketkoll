@@ -51,7 +51,7 @@ impl Default for Settings {
             )),
             diff: Mutex::new(vec!["diff".into(), "-Naur".into()]),
             pager: Mutex::new(vec![]),
-            save_prefix: Mutex::new("".into()),
+            save_prefix: Mutex::new(String::new()),
         }
     }
 }
@@ -76,7 +76,7 @@ impl Settings {
     /// Get enabled package backends
     pub fn enabled_pkg_backends(&self) -> impl Iterator<Item = paketkoll_types::backend::Backend> {
         let guard = self.enabled_pkg_backends.lock();
-        let v: Vec<_> = guard.iter().cloned().collect();
+        let v: Vec<_> = guard.iter().copied().collect();
         v.into_iter()
     }
 

@@ -115,9 +115,10 @@ where
             MTreeLine::Relative(path, keywords) => {
                 let mut params = self.default_params.clone();
                 params.set_list(keywords.into_iter());
-                if self.cwd.file_name().is_none() {
-                    panic!("relative without a current working dir");
-                }
+                assert!(
+                    self.cwd.file_name().is_some(),
+                    "relative without a current working dir"
+                );
                 Some(Entry {
                     path: decode_escapes_path(self.cwd.join(OsStr::from_bytes(path))).ok_or_else(
                         || Error::Parser(ParserError("Failed to decode escapes".into())),

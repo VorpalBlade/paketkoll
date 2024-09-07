@@ -539,8 +539,8 @@ impl User {
     }
 
     fn format_shadow(&self) -> String {
-        let f64 = |v: Option<u64>| v.map(|v| format!("{v}")).unwrap_or("".into());
-        let f32 = |v: Option<u32>| v.map(|v| format!("{v}")).unwrap_or("".into());
+        let f64 = |v: Option<u64>| v.map(|v| format!("{v}")).unwrap_or_default();
+        let f32 = |v: Option<u32>| v.map(|v| format!("{v}")).unwrap_or_default();
         format!(
             "{name}:{passwd}:{change}:{min}:{max}:{warn}:{inact}:{expire}:",
             name = self.name,

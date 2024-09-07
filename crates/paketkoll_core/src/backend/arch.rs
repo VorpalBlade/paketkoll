@@ -65,7 +65,7 @@ pub(crate) struct ArchLinuxBuilder {
 
 impl ArchLinuxBuilder {
     /// Load pacman config
-    fn load_config(&mut self) -> eyre::Result<pacman_conf::PacmanConfig> {
+    fn load_config() -> eyre::Result<pacman_conf::PacmanConfig> {
         tracing::debug!("Loading pacman config");
         let mut readable = BufReader::new(std::fs::File::open("/etc/pacman.conf")?);
         let pacman_config: pacman_conf::PacmanConfig =
@@ -82,8 +82,8 @@ impl ArchLinuxBuilder {
         self
     }
 
-    pub fn build(mut self) -> eyre::Result<ArchLinux> {
-        let pacman_config = self.load_config().wrap_err("Failed to load pacman.conf")?;
+    pub fn build(self) -> eyre::Result<ArchLinux> {
+        let pacman_config = Self::load_config().wrap_err("Failed to load pacman.conf")?;
         Ok(ArchLinux {
             // Impossible unwrap: We just loaded it
             pacman_config,

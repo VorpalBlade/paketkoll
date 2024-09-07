@@ -19,8 +19,7 @@ pub fn comm<L, R>(left: L, right: R) -> impl FusedIterator<Item = EitherOrBoth<L
 where
     L: Iterator,
     R: Iterator<Item = L::Item>,
-    L::Item: Ord,
-    L::Item: PartialEq,
+    L::Item: Ord + PartialEq,
 {
     left.merge_join_by(right, Ord::cmp)
 }

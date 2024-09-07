@@ -119,7 +119,7 @@ impl EditProgram {
         // Run end of file match:
         pattern_space.clear();
         for instr in &self.instructions {
-            if let Selector::Eof = instr.selector {
+            if matches!(instr.selector, Selector::Eof) {
                 match instr.action.apply(&mut pattern_space, &mut output) {
                     ActionResult::Continue => (),
                     ActionResult::ShortCircuit => break,
