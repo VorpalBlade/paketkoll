@@ -32,7 +32,7 @@ struct CacheKey {
 }
 
 impl CacheKey {
-    pub fn new(
+    pub const fn new(
         backend: &'static str,
         cache_version: u16,
         package: CompactString,

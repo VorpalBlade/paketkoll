@@ -41,7 +41,7 @@ impl FileContents {
     }
 
     #[must_use]
-    pub fn checksum(&self) -> &Checksum {
+    pub const fn checksum(&self) -> &Checksum {
         match self {
             Self::Literal { checksum, .. } => checksum,
             Self::FromFile { checksum, .. } => checksum,

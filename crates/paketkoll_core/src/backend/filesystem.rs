@@ -33,7 +33,7 @@ use std::os::unix::fs::MetadataExt;
 use std::path::PathBuf;
 
 /// Determine if a given file should be processed
-fn should_process(file: &FileEntry, config: &CommonFileCheckConfiguration) -> bool {
+const fn should_process(file: &FileEntry, config: &CommonFileCheckConfiguration) -> bool {
     match (config.config_files, file.flags.contains(FileFlags::CONFIG)) {
         (ConfigFiles::Include, _) | (ConfigFiles::Only, true) | (ConfigFiles::Exclude, false) => {
             true

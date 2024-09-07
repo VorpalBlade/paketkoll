@@ -46,7 +46,7 @@ enum Type {
 }
 
 impl Type {
-    fn as_str(&self) -> &'static str {
+    const fn as_str(&self) -> &'static str {
         match self {
             Self::System => "system",
             Self::User => "user",
@@ -187,7 +187,7 @@ impl Unit {
 
     /// Mark this as a user unit instead of (the default) system unit type
     #[rune::function(keep)]
-    pub fn user(mut self) -> Self {
+    pub const fn user(mut self) -> Self {
         self.type_ = Type::User;
         self
     }
@@ -202,14 +202,14 @@ impl Unit {
 
     /// Skip installing aliases
     #[rune::function(keep)]
-    pub fn skip_aliases(mut self) -> Self {
+    pub const fn skip_aliases(mut self) -> Self {
         self.process_aliases = false;
         self
     }
 
     /// Skip installing wanted-by
     #[rune::function(keep)]
-    pub fn skip_wanted_by(mut self) -> Self {
+    pub const fn skip_wanted_by(mut self) -> Self {
         self.process_wanted_by = false;
         self
     }

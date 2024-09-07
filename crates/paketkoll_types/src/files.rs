@@ -95,13 +95,13 @@ pub struct Uid(u32);
 impl Uid {
     #[inline]
     #[must_use]
-    pub fn new(id: u32) -> Self {
+    pub const fn new(id: u32) -> Self {
         Self(id)
     }
 
     #[inline]
     #[must_use]
-    pub fn as_raw(self) -> u32 {
+    pub const fn as_raw(self) -> u32 {
         self.0
     }
 }
@@ -134,13 +134,13 @@ pub struct Gid(u32);
 impl Gid {
     #[inline]
     #[must_use]
-    pub fn new(id: u32) -> Self {
+    pub const fn new(id: u32) -> Self {
         Self(id)
     }
 
     #[inline]
     #[must_use]
-    pub fn as_raw(self) -> u32 {
+    pub const fn as_raw(self) -> u32 {
         self.0
     }
 }
@@ -353,7 +353,7 @@ pub enum Properties {
 
 impl Properties {
     #[must_use]
-    pub fn is_regular_file(&self) -> Option<bool> {
+    pub const fn is_regular_file(&self) -> Option<bool> {
         match self {
             Self::RegularFileBasic(_) => Some(true),
             Self::RegularFileSystemd(_) => Some(true),
@@ -370,7 +370,7 @@ impl Properties {
     }
 
     #[must_use]
-    pub fn is_dir(&self) -> Option<bool> {
+    pub const fn is_dir(&self) -> Option<bool> {
         match self {
             Self::RegularFileBasic(_) => Some(false),
             Self::RegularFileSystemd(_) => Some(false),
@@ -388,7 +388,7 @@ impl Properties {
 
     /// Get mode (if available)
     #[must_use]
-    pub fn mode(&self) -> Option<Mode> {
+    pub const fn mode(&self) -> Option<Mode> {
         match self {
             Self::RegularFileBasic(_) => None,
             Self::RegularFileSystemd(val) => Some(val.mode),
@@ -405,7 +405,7 @@ impl Properties {
     }
 
     #[must_use]
-    pub fn owner(&self) -> Option<Uid> {
+    pub const fn owner(&self) -> Option<Uid> {
         match self {
             Self::RegularFileBasic(_) => None,
             Self::RegularFileSystemd(val) => Some(val.owner),
@@ -422,7 +422,7 @@ impl Properties {
     }
 
     #[must_use]
-    pub fn group(&self) -> Option<Gid> {
+    pub const fn group(&self) -> Option<Gid> {
         match self {
             Self::RegularFileBasic(_) => None,
             Self::RegularFileSystemd(val) => Some(val.group),

@@ -86,7 +86,7 @@ pub struct Issue {
 
 impl Issue {
     #[must_use]
-    pub fn new(path: PathBuf, kinds: IssueVec, source: Option<&'static str>) -> Self {
+    pub const fn new(path: PathBuf, kinds: IssueVec, source: Option<&'static str>) -> Self {
         Self {
             path,
             kinds,
@@ -106,7 +106,7 @@ impl Issue {
     }
 
     #[must_use]
-    pub fn source(&self) -> Option<&'static str> {
+    pub const fn source(&self) -> Option<&'static str> {
         self.source
     }
 }

@@ -25,7 +25,7 @@ macro_rules! intern_newtype {
 
             /// Create a new instance wrapping an interning token
             #[inline]
-            pub fn new(spur: lasso::Spur) -> Self {
+            pub const fn new(spur: lasso::Spur) -> Self {
                 Self(spur)
             }
 
@@ -35,7 +35,7 @@ macro_rules! intern_newtype {
             /// change).
             #[inline]
             #[must_use]
-            pub fn as_interner_ref(&self) -> lasso::Spur {
+            pub const fn as_interner_ref(&self) -> lasso::Spur {
                 self.0
             }
 

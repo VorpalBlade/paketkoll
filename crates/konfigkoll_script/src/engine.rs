@@ -49,7 +49,7 @@ pub enum Phase {
 impl Phase {
     /// Convert to string
     #[must_use]
-    pub fn as_str(self) -> &'static str {
+    pub const fn as_str(self) -> &'static str {
         match self {
             Self::SystemDiscovery => "phase_system_discovery",
             Self::Ignores => "phase_ignores",
@@ -116,7 +116,7 @@ impl EngineState {
     }
 
     #[must_use]
-    pub fn commands(&self) -> &Commands {
+    pub const fn commands(&self) -> &Commands {
         &self.commands
     }
 
@@ -261,7 +261,7 @@ impl ScriptEngine {
 
     #[inline]
     #[must_use]
-    pub fn state(&self) -> &EngineState {
+    pub const fn state(&self) -> &EngineState {
         &self.state
     }
 

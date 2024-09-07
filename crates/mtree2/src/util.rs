@@ -108,7 +108,7 @@ impl FromHex for u128 {
 
 /// If possible, quickly convert a character of a decimal number into a u8.
 #[inline]
-fn from_dec_ch(i: u8) -> Option<u8> {
+const fn from_dec_ch(i: u8) -> Option<u8> {
     match i {
         b'0'..=b'9' => Some(i - b'0'),
         _ => None,
@@ -117,7 +117,7 @@ fn from_dec_ch(i: u8) -> Option<u8> {
 
 /// If possible, quickly convert a character of a hexadecimal number into a u8.
 #[inline]
-fn from_oct_ch(i: u8) -> Option<u8> {
+const fn from_oct_ch(i: u8) -> Option<u8> {
     match i {
         b'0'..=b'7' => Some(i - b'0'),
         _ => None,

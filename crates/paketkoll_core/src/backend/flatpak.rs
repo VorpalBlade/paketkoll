@@ -23,7 +23,7 @@ pub(crate) struct Flatpak {}
 pub(crate) struct FlatpakBuilder {}
 
 impl FlatpakBuilder {
-    pub fn build(self) -> Flatpak {
+    pub const fn build(self) -> Flatpak {
         Flatpak {}
     }
 }

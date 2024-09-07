@@ -50,7 +50,7 @@ pub(crate) struct SystemdTmpfiles {}
 pub(crate) struct SystemdTmpfilesBuilder {}
 
 impl SystemdTmpfilesBuilder {
-    pub fn build(self) -> SystemdTmpfiles {
+    pub const fn build(self) -> SystemdTmpfiles {
         SystemdTmpfiles {}
     }
 }
@@ -553,7 +553,7 @@ enum IdCacheKey<'a> {
 }
 
 impl IdCacheKey<'_> {
-    fn as_str(&self) -> &str {
+    const fn as_str(&self) -> &str {
         match self {
             IdCacheKey::User(s) => s,
             IdCacheKey::Group(s) => s,

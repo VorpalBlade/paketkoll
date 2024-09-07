@@ -16,7 +16,7 @@ pub struct Regex {
 
 /// Rust API
 impl Regex {
-    pub fn inner(&self) -> &InnerRegex {
+    pub const fn inner(&self) -> &InnerRegex {
         &self.inner
     }
 }

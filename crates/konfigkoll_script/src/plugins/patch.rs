@@ -178,7 +178,7 @@ enum Action {
 impl Action {
     /// Create an action for a nested sub-program
     #[rune::function(path = Self::sub_program)]
-    fn sub_program(sub: LineEditor) -> Self {
+    const fn sub_program(sub: LineEditor) -> Self {
         Self::Subprogram(sub)
     }
 }
