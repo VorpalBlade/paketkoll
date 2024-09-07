@@ -227,9 +227,8 @@ pub(crate) fn extract_files(
         let path = path
             .to_str()
             .ok_or_else(|| eyre::eyre!("Failed to convert path to string"))?;
-        let path = match name_map_filter(path) {
-            Some(v) => v,
-            None => continue,
+        let Some(path) = name_map_filter(path) else {
+            continue;
         };
         if let Some(pkg_idx) = queries.get(path.as_str()) {
             seen.insert(*pkg_idx);

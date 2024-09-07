@@ -224,9 +224,8 @@ impl Child {
     /// Once taken this can not be taken again.
     #[rune::function(instance)]
     fn stdin(&mut self) -> Option<ChildStdin> {
-        let inner = match &mut self.inner {
-            Some(inner) => inner,
-            None => return None,
+        let Some(inner) = &mut self.inner else {
+            return None;
         };
         let stdin = inner.stdin.take()?;
         Some(ChildStdin { inner: stdin })
@@ -237,9 +236,8 @@ impl Child {
     /// Once taken this can not be taken again.
     #[rune::function(instance)]
     fn stdout(&mut self) -> Option<ChildStdout> {
-        let inner = match &mut self.inner {
-            Some(inner) => inner,
-            None => return None,
+        let Some(inner) = &mut self.inner else {
+            return None;
         };
         let stdout = inner.stdout.take()?;
         Some(ChildStdout { inner: stdout })
@@ -250,9 +248,8 @@ impl Child {
     /// Once taken this can not be taken again.
     #[rune::function(instance)]
     fn stderr(&mut self) -> Option<ChildStderr> {
-        let inner = match &mut self.inner {
-            Some(inner) => inner,
-            None => return None,
+        let Some(inner) = &mut self.inner else {
+            return None;
         };
         let stderr = inner.stderr.take()?;
         Some(ChildStderr { inner: stderr })
@@ -271,11 +268,8 @@ impl Child {
 
     #[rune::function(vm_result, instance)]
     fn start_kill(&mut self) -> io::Result<()> {
-        let inner = match &mut self.inner {
-            Some(inner) => inner,
-            None => {
-                rune::vm_panic!("already completed");
-            }
+        let Some(inner) = &mut self.inner else {
+            rune::vm_panic!("already completed");
         };
 
         inner.start_kill()
@@ -285,11 +279,8 @@ impl Child {
     #[rune::function(vm_result, instance, path = Self::kill)]
     #[instrument(level = "info", skip_all)]
     async fn kill(mut this: Mut<Self>) -> io::Result<()> {
-        let inner = match &mut this.inner {
-            Some(inner) => inner,
-            None => {
-                rune::vm_panic!("already completed");
-            }
+        let Some(inner) = &mut this.inner else {
+            rune::vm_panic!("already completed");
         };
 
         inner.kill().await
@@ -301,11 +292,8 @@ impl Child {
     #[rune::function(vm_result, instance)]
     #[instrument(level = "info", skip_all)]
     async fn wait(self) -> io::Result<ExitStatus> {
-        let mut inner = match self.inner {
-            Some(inner) => inner,
-            None => {
-                rune::vm_panic!("already completed");
-            }
+        let Some(mut inner) = self.inner else {
+            rune::vm_panic!("already completed");
         };
 
         let status = inner.wait().await?;
@@ -318,11 +306,8 @@ impl Child {
     #[rune::function(vm_result, instance)]
     #[instrument(level = "info", skip_all)]
     async fn wait_with_output(self) -> io::Result<Output> {
-        let inner = match self.inner {
-            Some(inner) => inner,
-            None => {
-                rune::vm_panic!("already completed");
-            }
+        let Some(inner) = self.inner else {
+            rune::vm_panic!("already completed");
         };
 
         let output = inner.wait_with_output().await?;

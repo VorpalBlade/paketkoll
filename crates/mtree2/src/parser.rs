@@ -32,9 +32,8 @@ impl<'a> MTreeLine<'a> {
         let mut parts =
             crate::util::MemchrSplitter::new(b' ', input).filter(|word| !word.is_empty());
         // Blank
-        let first = match parts.next() {
-            Some(f) => f,
-            None => return Ok(MTreeLine::Blank),
+        let Some(first) = parts.next() else {
+            return Ok(MTreeLine::Blank);
         };
         // Comment
         if first[0] == b'#' {
