@@ -6,7 +6,7 @@ use paketkoll_types::package::PackageInterned;
 
 /// Get a list of all installed packages
 pub fn installed_packages(
-    backend: &crate::backend::ConcreteBackend,
+    backend: crate::backend::ConcreteBackend,
     backend_config: &crate::backend::BackendConfiguration,
 ) -> eyre::Result<(Interner, Vec<PackageInterned>)> {
     let interner = Interner::new();

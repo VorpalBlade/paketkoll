@@ -21,7 +21,7 @@ use std::path::PathBuf;
 /// Perform a query of original files
 #[doc(hidden)]
 pub fn original_files(
-    backend: &crate::backend::ConcreteBackend,
+    backend: crate::backend::ConcreteBackend,
     backend_config: &crate::backend::BackendConfiguration,
     queries: &[OriginalFileQuery],
 ) -> eyre::Result<OriginalFilesResult> {
@@ -43,7 +43,7 @@ pub fn original_files(
 
 /// Check file system for differences using the given configuration
 pub fn check_installed_files(
-    backend: &crate::backend::ConcreteBackend,
+    backend: crate::backend::ConcreteBackend,
     backend_config: &crate::backend::BackendConfiguration,
     filecheck_config: &crate::config::CommonFileCheckConfiguration,
 ) -> eyre::Result<(Interner, Vec<PackageIssue>)> {
@@ -85,7 +85,7 @@ pub fn check_installed_files(
 /// Check file system for differences (including unexpected files) using the
 /// given configuration
 pub fn check_all_files(
-    backend: &crate::backend::ConcreteBackend,
+    backend: crate::backend::ConcreteBackend,
     backend_config: &crate::backend::BackendConfiguration,
     filecheck_config: &crate::config::CommonFileCheckConfiguration,
     unexpected_cfg: &crate::config::CheckAllFilesConfiguration,

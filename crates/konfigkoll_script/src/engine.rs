@@ -48,7 +48,7 @@ pub enum Phase {
 
 impl Phase {
     /// Convert to string
-    pub fn as_str(&self) -> &'static str {
+    pub fn as_str(self) -> &'static str {
         match self {
             Self::SystemDiscovery => "phase_system_discovery",
             Self::Ignores => "phase_ignores",

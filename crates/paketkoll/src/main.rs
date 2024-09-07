@@ -49,7 +49,7 @@ fn main() -> eyre::Result<Exit> {
         Commands::Check { .. } | Commands::CheckUnexpected { .. } => run_file_checks(&cli),
         Commands::InstalledPackages => {
             let (interner, packages) =
-                package_ops::installed_packages(&(cli.backend.try_into()?), &(&cli).try_into()?)?;
+                package_ops::installed_packages(cli.backend.try_into()?, &(&cli).try_into()?)?;
             let mut stdout = BufWriter::new(stdout().lock());
 
             print_packages(&cli, packages, &interner, &mut stdout)?;
@@ -202,7 +202,7 @@ fn print_packages(
 fn run_file_checks(cli: &Cli) -> eyre::Result<Exit> {
     let (interner, mut found_issues) = match cli.command {
         Commands::Check { .. } => file_ops::check_installed_files(
-            &(cli.backend.try_into()?),
+            cli.backend.try_into()?,
             &cli.try_into()?,
             &cli.try_into()?,
         )?,
@@ -210,7 +210,7 @@ fn run_file_checks(cli: &Cli) -> eyre::Result<Exit> {
             ref ignore,
             canonicalize,
         } => file_ops::check_all_files(
-            &(cli.backend.try_into()?),
+            cli.backend.try_into()?,
             &cli.try_into()?,
             &cli.try_into()?,
             &{

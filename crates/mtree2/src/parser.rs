@@ -406,7 +406,7 @@ impl FileType {
         })
     }
 
-    fn as_str(&self) -> &'static str {
+    fn as_str(self) -> &'static str {
         match self {
             Self::BlockDevice => "block",
             Self::CharacterDevice => "char",
@@ -503,35 +503,35 @@ impl FileMode {
 
     /// Executable files with this bit set will
     /// run with effective uid set to the uid of the file owner.
-    pub fn setuid(&self) -> bool {
+    pub fn setuid(self) -> bool {
         self.mode & 0o4000 != 0
     }
 
     /// Executable files with this bit set will
     /// run with effective gid set to the gid of the file owner.
-    pub fn setgid(&self) -> bool {
+    pub fn setgid(self) -> bool {
         self.mode & 0o2000 != 0
     }
 
     /// Is the sticky bit set?
-    pub fn sticky(&self) -> bool {
+    pub fn sticky(self) -> bool {
         self.mode & 0o1000 != 0
     }
 
     /// The permissions for the owner of the file.
-    pub fn owner(&self) -> Perms {
+    pub fn owner(self) -> Perms {
         const MASK: u32 = 0o700;
         Perms::from_bits_truncate(((self.mode & MASK) >> 6) as u8)
     }
 
     /// The permissions for everyone who is not the owner, but in the group.
-    pub fn group(&self) -> Perms {
+    pub fn group(self) -> Perms {
         const MASK: u32 = 0o070;
         Perms::from_bits_truncate(((self.mode & MASK) >> 3) as u8)
     }
 
     /// The permissions for everyone who is not the owner and not in the group.
-    pub fn other(&self) -> Perms {
+    pub fn other(self) -> Perms {
         const MASK: u32 = 0o007;
         Perms::from_bits_truncate((self.mode & MASK) as u8)
     }

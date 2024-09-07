@@ -23,7 +23,7 @@ impl Mode {
 
     #[inline]
     #[must_use]
-    pub const fn as_raw(&self) -> u32 {
+    pub const fn as_raw(self) -> u32 {
         self.0
     }
 
@@ -101,7 +101,7 @@ impl Uid {
 
     #[inline]
     #[must_use]
-    pub fn as_raw(&self) -> u32 {
+    pub fn as_raw(self) -> u32 {
         self.0
     }
 }
@@ -140,7 +140,7 @@ impl Gid {
 
     #[inline]
     #[must_use]
-    pub fn as_raw(&self) -> u32 {
+    pub fn as_raw(self) -> u32 {
         self.0
     }
 }
