@@ -315,6 +315,7 @@ impl Mode {
 /// UID or GID
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 #[non_exhaustive]
+#[allow(variant_size_differences)]
 pub enum Id {
     /// User or group will be set to caller of systemd-tmpfiles
     Caller { new_only: bool },
