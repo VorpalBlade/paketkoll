@@ -252,6 +252,10 @@ impl Passwd {
     /// the system (based on name)
     #[rune::function]
     fn align_ids_with_system(&mut self) -> KResult<()> {
+        tracing::info!(
+            "Updating GIDs/UIDs to match system (more info available with log level \
+             RUST_LOG=debug)"
+        );
         self.sanity_check().inspect_err(|e| {
             tracing::error!("Sanity check *before* aligning passwd IDs failed: {e}");
         })?;
@@ -269,7 +273,7 @@ impl Passwd {
                 .wrap_err("Failed to parse /etc/passwd from host")?;
             if let Some(user) = self.users.get_mut(name) {
                 if user.uid != uid {
-                    tracing::info!("Updating UID for {} from {} to {}", name, user.uid, uid);
+                    tracing::debug!("Updating UID for {} from {} to {}", name, user.uid, uid);
                     user.uid = uid;
                 }
             }
@@ -289,7 +293,7 @@ impl Passwd {
                 .wrap_err("Failed to parse /etc/group from host")?;
             if let Some(group) = self.groups.get_mut(name) {
                 if group.gid != gid {
-                    tracing::info!("Updating GID for {} from {} to {}", name, group.gid, gid);
+                    tracing::debug!("Updating GID for {} from {} to {}", name, group.gid, gid);
                     group.gid = gid;
                 }
             }
