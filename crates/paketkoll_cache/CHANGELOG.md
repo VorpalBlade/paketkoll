@@ -8,6 +8,13 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.5] - 2024-09-19
+
+### ⚙️ Other stuff
+
+- Change to some functions to const
+- Fix and enable various clippy lints
+
 ## [0.2.4] - 2024-09-06
 
 ### 🩺 Diagnostics & output formatting

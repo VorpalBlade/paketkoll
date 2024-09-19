@@ -7,7 +7,7 @@ license = "Apache-2.0 OR MIT"
 name = "mtree2"
 readme = "README.md"
 repository = "https://github.com/VorpalBlade/paketkoll"
-version = "0.6.6"
+version = "0.6.7"
 
 [dependencies]
 bitflags.workspace = true

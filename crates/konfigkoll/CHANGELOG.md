@@ -8,6 +8,31 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.8] - 2024-09-19
+
+### 🐛 Bug fixes
+
+- Fix handling of comment instructions in apply
+
+### 🩺 Diagnostics & output formatting
+
+- Make ID update less chatty (info isn't usually relevant)
+- Improve error message when failing to delete non-empty directory
+
+### 🧪 Testing
+
+- Add integration tests based on containers
+
+### ⚙️ Other stuff
+
+- Fix and enable various clippy lints
+- Change to some functions to const
+- Enable clippy::ignored_unit_patterns
+- Add some must_use as suggested by clippy
+- Enable clippy::manual_let_else
+- Fix some cases of clippy::trivially-copy-pass-by-ref
+- Enable clippy::use_self
+
 ## [0.1.7] - 2024-09-06
 
 ### 🩺 Diagnostics & output formatting

@@ -8,6 +8,22 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.6] - 2024-09-19
+
+### 🩺 Diagnostics & output formatting
+
+- Make ID update less chatty (info isn't usually relevant)
+
+### ⚙️ Other stuff
+
+- Change to some functions to const
+- Enable clippy::ignored_unit_patterns
+- Add some must_use as suggested by clippy
+- Enable clippy::manual_let_else
+- Fix and enable various clippy lints
+- Fix some cases of clippy::trivially-copy-pass-by-ref
+- Enable clippy::use_self
+
 ## [0.1.5] - 2024-09-06
 
 ### 🩺 Diagnostics & output formatting

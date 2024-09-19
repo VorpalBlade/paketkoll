@@ -8,6 +8,13 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.3.6] - 2024-09-19
+
+### ⚙️ Other stuff
+
+- Fix some cases of clippy::trivially-copy-pass-by-ref
+- Enable clippy::use_self
+
 ## [0.3.5] - 2024-09-06
 
 ### 🩺 Diagnostics & output formatting

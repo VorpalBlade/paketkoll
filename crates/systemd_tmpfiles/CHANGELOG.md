@@ -8,6 +8,15 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.1] - 2024-09-19
+
+### ⚙️ Other stuff
+
+- Enable additional rustc and clippy lints
+- Enable clippy::ignored_unit_patterns
+- Fix and enable various clippy lints
+- Enable clippy::use_self
+
 ## [0.2.0] - 2024-09-06
 
 ### ⚙️ Other stuff

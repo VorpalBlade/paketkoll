@@ -8,6 +8,26 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.4.2] - 2024-09-19
+
+### 🐛 Bug fixes
+
+- Fix handling of comment instructions in apply
+
+### 🩺 Diagnostics & output formatting
+
+- Improve error message when failing to delete non-empty directory
+
+### 🧪 Testing
+
+- Add integration tests based on containers
+
+### ⚙️ Other stuff
+
+- Enable clippy::ignored_unit_patterns
+- Fix and enable various clippy lints
+- Enable clippy::use_self
+
 ## [0.4.1] - 2024-09-06
 
 ### 🩺 Diagnostics & output formatting

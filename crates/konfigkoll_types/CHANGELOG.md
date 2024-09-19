@@ -8,6 +8,13 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.2] - 2024-09-19
+
+### ⚙️ Other stuff
+
+- Change to some functions to const
+- Enable clippy::use_self
+
 ## [0.2.1] - 2024-09-06
 
 ### 🩺 Diagnostics & output formatting
