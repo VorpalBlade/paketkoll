@@ -246,7 +246,12 @@ impl InProcessApplicator {
                     std::fs::write(&instr.path, contents)?;
                 }
             }
-            FsOp::Comment => (),
+            FsOp::Comment => {
+                tracing::warn!(
+                    "Ignoring comment instruction, we shouldn't ever get here: {:?}",
+                    instr
+                );
+            }
         };
         Ok(())
     }
@@ -577,6 +582,16 @@ pub fn apply_files(
         if chunk[0].op == FsOp::Remove {
             chunk.reverse();
         };
+        // These make no sense during apply (only for save)
+        if chunk[0].op == FsOp::Comment {
+            tracing::warn!("There are entries in your config that are no longer needed:");
+            for instr in chunk {
+                if let Some(comment) = &instr.comment {
+                    tracing::warn!(" * {}: {comment}", instr.path);
+                }
+            }
+            continue;
+        }
         applicator
             .apply_files(&*chunk)
             .wrap_err("Error while applying files")?;
