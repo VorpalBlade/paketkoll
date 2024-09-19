@@ -6,6 +6,7 @@ use crate::diff::show_fs_instr_diff;
 use crate::utils::IdKey;
 use crate::utils::NameToNumericResolveCache;
 use ahash::AHashMap;
+use color_eyre::Section;
 use console::style;
 use either::Either;
 use eyre::WrapErr;
@@ -120,12 +121,16 @@ impl InProcessApplicator {
                             Ok(()) => (),
                             Err(err) => match err.raw_os_error() {
                                 Some(libc::ENOTEMPTY) => {
-                                    Err(err).context(
-                                        "Failed to remove directory: it is not empty (possibly it \
-                                         contains some ignored files). You will have to \
-                                         investigate and resolve this yourself, since we don't \
-                                         want to delete things we shouldn't.",
-                                    )?;
+                                    Err(err)
+                                        .wrap_err(
+                                            "Failed to remove directory: it is not empty \
+                                             (possibly it contains some ignored files)",
+                                        )
+                                        .suggestion(
+                                            "You will have to investigate the non-empty directory \
+                                             and decide if you want to remove it yourself, since \
+                                             we don't want to delete things we shouldn't.",
+                                        )?;
                                 }
                                 Some(_) | None => {
                                     Err(err).wrap_err("Failed to remove directory")?;

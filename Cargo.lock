@@ -1136,6 +1136,7 @@ dependencies = [
  "ahash",
  "camino",
  "clru",
+ "color-eyre",
  "compact_str",
  "console",
  "duct",

@@ -11,6 +11,7 @@ version = "0.4.1"
 ahash.workspace = true
 camino.workspace = true
 clru.workspace = true
+color-eyre.workspace = true
 compact_str.workspace = true
 console.workspace = true
 duct.workspace = true
