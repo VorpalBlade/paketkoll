@@ -154,10 +154,10 @@ impl Files for OriginalFilesCache {
             }
         }
         // Fetch uncached queries
+        // NOTE: Never wrap this error, we need to just carry it through to the caller.
         let uncached_results = self
             .inner
-            .original_files(&uncached_queries, packages, interner)
-            .wrap_err_with(|| format!("Inner query of {uncached_queries:?} failed"))?;
+            .original_files(&uncached_queries, packages, interner)?;
 
         // Insert the uncached results into the cache and update the results
         for (query, result) in uncached_results {
