@@ -8,6 +8,12 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.5.7] - 2024-09-20
+
+### 🚀 Features
+
+- Support uncompressed tar files in deb packages
+
 ## [0.5.6] - 2024-09-19
 
 ### ⚙️ Other stuff
