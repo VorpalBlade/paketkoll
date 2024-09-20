@@ -39,6 +39,9 @@ pub(crate) fn create_applicator(
             inner_applicator,
             diff_command,
             pager_command,
+            files_backend,
+            interner,
+            package_maps,
         )),
         Paranoia::DryRun => Box::new(konfigkoll_core::apply::NoopApplicator::default()),
     };

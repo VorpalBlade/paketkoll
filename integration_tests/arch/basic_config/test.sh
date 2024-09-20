@@ -11,7 +11,7 @@ compare() {
         mv /test_dir/unsorted.rn /test_dir/actual/${1}_unsorted.rn
     fi
     # Remove timestamps
-    sed 's/^20[^ ]* *//' -i /test_dir/actual/${1}_output.txt
+    sed -e 's/^20[^ ]* *//' -e 's/20[-0-9]* [0-9:.]*//' -i /test_dir/actual/${1}_output.txt
     # Compare
     echo "--- Diff of ${1}_output.txt ---"
     if ! diff -Naur /test_dir/expected/${1}_output.txt /test_dir/actual/${1}_output.txt; then

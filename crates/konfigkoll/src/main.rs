@@ -15,6 +15,7 @@ use konfigkoll_core::apply::apply_packages;
 use konfigkoll_core::diff::show_fs_instr_diff;
 use konfigkoll_core::state::DiffGoal;
 use konfigkoll_core::state::FsEntries;
+use konfigkoll_core::utils::pkg_backend_for_files;
 use konfigkoll_script::Phase;
 use konfigkoll_script::ScriptEngine;
 use konfigkoll_types::FsInstruction;
@@ -303,9 +304,17 @@ async fn main() -> eyre::Result<()> {
 
             let diff_cmd = script_engine.state().settings().diff();
             let pager_cmd = script_engine.state().settings().pager();
+            let pkg_file_backend = pkg_backend_for_files(&package_maps, &*backend_files)?;
             for change in fs_changes {
                 if change.path.starts_with(&path) {
-                    show_fs_instr_diff(&change, &diff_cmd, &pager_cmd)?;
+                    show_fs_instr_diff(
+                        &change,
+                        &diff_cmd,
+                        &pager_cmd,
+                        &interner,
+                        &*backend_files,
+                        &pkg_file_backend,
+                    )?;
                 }
             }
             // Let the OS clean these up, freeing in the program is slower

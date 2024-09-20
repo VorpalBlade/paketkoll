@@ -3,6 +3,8 @@
 use crate::confirm::Choices;
 use crate::confirm::MultiOptionConfirm;
 use crate::diff::show_fs_instr_diff;
+use crate::utils::original_file_contents;
+use crate::utils::pkg_backend_for_files;
 use crate::utils::IdKey;
 use crate::utils::NameToNumericResolveCache;
 use ahash::AHashMap;
@@ -18,7 +20,6 @@ use konfigkoll_types::PkgInstruction;
 use konfigkoll_types::PkgOp;
 use paketkoll_types::backend::Backend;
 use paketkoll_types::backend::Files;
-use paketkoll_types::backend::OriginalFileQuery;
 use paketkoll_types::backend::PackageBackendMap;
 use paketkoll_types::backend::PackageMap;
 use paketkoll_types::backend::PackageMapMap;
@@ -225,31 +226,10 @@ impl InProcessApplicator {
                 nix::unistd::chown(instr.path.as_std_path(), None, Some(gid))?;
             }
             FsOp::Restore => {
-                // Get package:
-                let owners = self
-                    .file_backend
-                    .owning_packages(&[instr.path.as_std_path()].into(), &self.interner)
-                    .wrap_err_with(|| format!("Failed to find owner for {}", instr.path))?;
-                let package = owners
-                    .get(instr.path.as_std_path())
-                    .ok_or_else(|| eyre::eyre!("Failed to find owner for {}", instr.path))?
-                    .ok_or_else(|| eyre::eyre!("No owner for {}", instr.path))?;
-                let package = package.as_str(&self.interner);
-                // Get original contents:
-                let queries = [OriginalFileQuery {
-                    package: package.into(),
-                    path: instr.path.as_str().into(),
-                }];
-                let original_contents =
-                    self.file_backend
-                        .original_files(&queries, pkg_map, &self.interner)?;
+                let contents =
+                    original_file_contents(&*self.file_backend, &self.interner, instr, pkg_map)?;
                 // Apply
-                for query in queries {
-                    let contents = original_contents
-                        .get(&query)
-                        .ok_or_else(|| eyre::eyre!("No original contents for {:?}", query))?;
-                    std::fs::write(&instr.path, contents)?;
-                }
+                std::fs::write(&instr.path, contents)?;
             }
             FsOp::Comment => {
                 tracing::warn!(
@@ -306,16 +286,7 @@ impl Applicator for InProcessApplicator {
     }
 
     fn apply_files(&mut self, instructions: &[FsInstruction]) -> eyre::Result<()> {
-        let pkg_map = self
-            .package_maps
-            .get(&self.file_backend.as_backend_enum())
-            .ok_or_else(|| {
-                eyre::eyre!(
-                    "No package map for file backend {:?}",
-                    self.file_backend.as_backend_enum()
-                )
-            })?
-            .clone();
+        let pkg_map = pkg_backend_for_files(&self.package_maps, &*self.file_backend)?;
         for instr in instructions {
             self.apply_single_file(instr, &pkg_map).wrap_err_with(|| {
                 format!("Failed to apply change for {}: {:?}", instr.path, instr.op)
@@ -389,10 +360,20 @@ pub struct InteractiveApplicator<Inner: std::fmt::Debug> {
     interactive_confirmer: MultiOptionConfirm<InteractivePromptChoices>,
     diff_command: Vec<String>,
     pager_command: Vec<String>,
+    file_backend: Arc<dyn Files>,
+    interner: Arc<Interner>,
+    package_maps: PackageMapMap,
 }
 
 impl<Inner: std::fmt::Debug> InteractiveApplicator<Inner> {
-    pub fn new(inner: Inner, diff_command: Vec<String>, pager_command: Vec<String>) -> Self {
+    pub fn new(
+        inner: Inner,
+        diff_command: Vec<String>,
+        pager_command: Vec<String>,
+        file_backend: &Arc<dyn Files>,
+        interner: &Arc<Interner>,
+        package_maps: &PackageMapMap,
+    ) -> Self {
         let mut prompt_builder = MultiOptionConfirm::builder();
         prompt_builder.prompt("Do you want to apply these changes?");
         let pkg_confirmer = prompt_builder.build();
@@ -411,6 +392,9 @@ impl<Inner: std::fmt::Debug> InteractiveApplicator<Inner> {
             interactive_confirmer,
             diff_command,
             pager_command,
+            file_backend: file_backend.clone(),
+            interner: interner.clone(),
+            package_maps: package_maps.clone(),
         }
     }
 }
@@ -465,8 +449,9 @@ impl<Inner: Applicator + std::fmt::Debug> Applicator for InteractiveApplicator<I
                 Ok(())
             }
             FsPromptChoices::Interactive => {
+                let pkg_map = pkg_backend_for_files(&self.package_maps, &*self.file_backend)?;
                 for instr in instructions {
-                    self.interactive_apply_single_file(instr)?;
+                    self.interactive_apply_single_file(instr, &pkg_map)?;
                 }
                 Ok(())
             }
@@ -495,7 +480,11 @@ fn show_pkg_diff(backend: Backend, install: &[&str], mark_explicit: &[&str], uni
 }
 
 impl<Inner: Applicator + std::fmt::Debug> InteractiveApplicator<Inner> {
-    fn interactive_apply_single_file(&mut self, instr: &FsInstruction) -> eyre::Result<()> {
+    fn interactive_apply_single_file(
+        &mut self,
+        instr: &FsInstruction,
+        pkg_map: &PackageMap,
+    ) -> eyre::Result<()> {
         println!(
             "Under consideration: {} with change {}",
             style(instr.path.as_str()).blue(),
@@ -520,6 +509,9 @@ impl<Inner: Applicator + std::fmt::Debug> InteractiveApplicator<Inner> {
                         instr,
                         self.diff_command.as_slice(),
                         self.pager_command.as_slice(),
+                        &self.interner,
+                        &*self.file_backend,
+                        pkg_map,
                     )?;
                 }
             };

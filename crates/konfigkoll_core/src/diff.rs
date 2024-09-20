@@ -2,6 +2,7 @@
 //!
 //! This module implements a generic algorithm similar to comm(1)
 
+use crate::utils::original_file_contents;
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use console::style;
@@ -9,6 +10,9 @@ use itertools::EitherOrBoth;
 use itertools::Itertools;
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::FsOp;
+use paketkoll_types::backend::Files;
+use paketkoll_types::backend::PackageMap;
+use paketkoll_types::intern::Interner;
 use paketkoll_utils::MODE_MASK;
 use std::iter::FusedIterator;
 use std::os::unix::fs::MetadataExt;
@@ -28,6 +32,9 @@ pub fn show_fs_instr_diff(
     instr: &FsInstruction,
     diff_command: &[String],
     pager_command: &[String],
+    interner: &Interner,
+    file_backend: &dyn Files,
+    pkg_map: &PackageMap,
 ) -> eyre::Result<()> {
     match &instr.op {
         FsOp::CreateFile(contents) => {
@@ -137,6 +144,9 @@ pub fn show_fs_instr_diff(
                 "{}: Would restore to original package manager state",
                 style(&instr.path).color256(202)
             );
+            let contents = original_file_contents(file_backend, interner, instr, pkg_map)?;
+            let contents = konfigkoll_types::FileContents::from_literal(contents.into());
+            show_file_diff(&instr.path, &contents, diff_command, pager_command)?;
         }
         FsOp::Comment => (),
     };
