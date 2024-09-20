@@ -40,6 +40,7 @@ pub(crate) fn package_manager_transaction(
 }
 
 pub(crate) enum CompressionFormat<'archive, R: Read + 'archive> {
+    Tar(R),
     #[cfg(feature = "__gzip")]
     Gzip(flate2::read::GzDecoder<R>),
     #[cfg(feature = "__xz")]
@@ -53,6 +54,7 @@ pub(crate) enum CompressionFormat<'archive, R: Read + 'archive> {
 impl<'archive, R: Read + 'archive> CompressionFormat<'archive, R> {
     pub(crate) fn from_extension(ext: &str, stream: R) -> eyre::Result<Self> {
         match ext {
+            "tar" => Ok(Self::Tar(stream)),
             #[cfg(feature = "__gzip")]
             "gz" => Ok(Self::Gzip(flate2::read::GzDecoder::new(stream))),
             #[cfg(feature = "__xz")]
@@ -69,6 +71,7 @@ impl<'archive, R: Read + 'archive> CompressionFormat<'archive, R> {
 impl<'archive, R: Read + 'archive> Read for CompressionFormat<'archive, R> {
     fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
         match self {
+            Self::Tar(inner) => inner.read(buf),
             #[cfg(feature = "__gzip")]
             Self::Gzip(inner) => inner.read(buf),
             #[cfg(feature = "__xz")]
