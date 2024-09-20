@@ -8,6 +8,16 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.9] - 2024-09-20
+
+### 🚀 Features
+
+- Improve diff view when restoring to package manager state (fixes [#91](https://github.com/VorpalBlade/paketkoll/pull/91))
+
+### ⚙️ Other stuff
+
+- Add crates.io package keywords & categories
+
 ## [0.1.8] - 2024-09-19
 
 ### 🐛 Bug fixes

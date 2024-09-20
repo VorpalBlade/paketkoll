@@ -8,6 +8,12 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.6] - 2024-09-20
+
+### 🐛 Bug fixes
+
+- Do not wrap the error in the caching layer, it breaks the systemd path fallback logic
+
 ## [0.2.5] - 2024-09-19
 
 ### ⚙️ Other stuff
