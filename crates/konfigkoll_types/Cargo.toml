@@ -1,6 +1,7 @@
 [package]
 description = "Type definitions for konfigkoll backend (internal helper crate)"
 edition = "2021"
+keywords = ["konfigkoll"]
 license = "MPL-2.0"
 name = "konfigkoll_types"
 repository = "https://github.com/VorpalBlade/paketkoll"

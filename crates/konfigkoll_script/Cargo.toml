@@ -1,6 +1,8 @@
 [package]
+categories = ["os::unix-apis"]
 description = "Scripting language for Konfigkoll (not for direct public use)"
 edition = "2021"
+keywords = ["scripting-language", "rune", "konfigkoll"]
 license = "MPL-2.0"
 name = "konfigkoll_script"
 repository = "https://github.com/VorpalBlade/paketkoll"

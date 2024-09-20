@@ -1,6 +1,7 @@
 [package]
 description = "Konfigkoll utilities"
 edition = "2021"
+keywords = ["konfigkoll"]
 license = "MPL-2.0"
 name = "konfigkoll_utils"
 repository = "https://github.com/VorpalBlade/paketkoll"

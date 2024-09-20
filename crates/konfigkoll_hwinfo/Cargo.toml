@@ -1,6 +1,8 @@
 [package]
+categories = ["os::unix-apis"]
 description = "Hardware info provider for Konfigkoll"
 edition = "2021"
+keywords = ["hardware", "system-info"]
 license = "MPL-2.0"
 name = "konfigkoll_hwinfo"
 repository = "https://github.com/VorpalBlade/paketkoll"
