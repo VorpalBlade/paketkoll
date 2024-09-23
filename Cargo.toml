@@ -15,7 +15,7 @@ cached = { version = "0.53.1", features = [
 ], default-features = false }
 camino = "1.1.9"
 cfg-if = "1.0.0"
-clap = { version = "4.5.17", features = ["derive"] }
+clap = { version = "4.5.18", features = ["derive"] }
 clap_complete = "4.5.28"
 clap_mangen = "0.2.23"
 clru = "0.6.2"
