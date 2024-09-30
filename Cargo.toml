@@ -46,7 +46,7 @@ lasso = { version = "0.7.3", features = [
     "inline-more",
     "multi-threaded",
 ] }
-libc = "0.2.158"
+libc = "0.2.159"
 md-5 = "0.10.6"
 memchr = "2.7.4"
 mimalloc = "0.1.43"
@@ -85,7 +85,7 @@ sysinfo = { version = "0.31.4", default-features = false, features = [
     "system",
 ] }
 tar = "0.4.42"
-tempfile = "3.12.0"
+tempfile = "3.13.0"
 thiserror = "1.0.64"
 tokio = { version = "1.40.0", features = [
     "macros",
