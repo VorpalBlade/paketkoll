@@ -99,7 +99,7 @@ tracing-subscriber = { version = "0.3.18", features = [
     "env-filter",
     "parking_lot",
 ] }
-winnow = { version = "0.6.18", features = ["simd"] }
+winnow = { version = "0.6.20", features = ["simd"] }
 xz2 = "0.1.7"
 zstd = "0.13.2"
 
