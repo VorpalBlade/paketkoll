@@ -1150,6 +1150,7 @@ dependencies = [
  "paketkoll_cache",
  "paketkoll_core",
  "paketkoll_types",
+ "paketkoll_workspace_hack",
  "rayon",
  "rune",
  "tokio",
@@ -1177,6 +1178,7 @@ dependencies = [
  "nix",
  "paketkoll_types",
  "paketkoll_utils",
+ "paketkoll_workspace_hack",
  "parking_lot 0.12.3",
  "pretty_assertions",
  "rayon",
@@ -1193,6 +1195,7 @@ dependencies = [
  "eyre",
  "indoc",
  "itertools 0.13.0",
+ "paketkoll_workspace_hack",
  "pretty_assertions",
  "rune",
  "winnow 0.6.20",
@@ -1215,6 +1218,7 @@ dependencies = [
  "konfigkoll_types",
  "konfigkoll_utils",
  "paketkoll_types",
+ "paketkoll_workspace_hack",
  "parking_lot 0.12.3",
  "pretty_assertions",
  "regex",
@@ -1239,6 +1243,7 @@ dependencies = [
  "eyre",
  "paketkoll_types",
  "paketkoll_utils",
+ "paketkoll_workspace_hack",
  "strum",
 ]
 
@@ -1248,6 +1253,7 @@ version = "0.1.6"
 dependencies = [
  "camino",
  "compact_str",
+ "paketkoll_workspace_hack",
  "regex",
  "tracing",
 ]
@@ -1438,6 +1444,7 @@ dependencies = [
  "bitflags 2.6.0",
  "faster-hex",
  "memchr",
+ "paketkoll_workspace_hack",
  "smallvec",
 ]
 
@@ -1748,6 +1755,7 @@ dependencies = [
  "os_info",
  "paketkoll_core",
  "paketkoll_types",
+ "paketkoll_workspace_hack",
  "proc-exit",
  "rayon",
  "serde",
@@ -1767,6 +1775,7 @@ dependencies = [
  "dashmap",
  "eyre",
  "paketkoll_types",
+ "paketkoll_workspace_hack",
  "serde",
  "smallvec",
  "tracing",
@@ -1799,6 +1808,7 @@ dependencies = [
  "num_cpus",
  "paketkoll_types",
  "paketkoll_utils",
+ "paketkoll_workspace_hack",
  "parking_lot 0.12.3",
  "phf",
  "pretty_assertions",
@@ -1829,6 +1839,7 @@ dependencies = [
  "faster-hex",
  "lasso",
  "nix",
+ "paketkoll_workspace_hack",
  "serde",
  "serde_bytes",
  "smallvec",
@@ -1842,8 +1853,13 @@ version = "0.1.6"
 dependencies = [
  "eyre",
  "paketkoll_types",
+ "paketkoll_workspace_hack",
  "ring",
 ]
+
+[[package]]
+name = "paketkoll_workspace_hack"
+version = "0.1.0"
 
 [[package]]
 name = "parking_lot"
@@ -2800,6 +2816,7 @@ dependencies = [
  "libc",
  "memchr",
  "nix",
+ "paketkoll_workspace_hack",
  "pretty_assertions",
  "smallvec",
  "strum",
@@ -3612,6 +3629,7 @@ dependencies = [
  "eyre",
  "konfigkoll",
  "paketkoll",
+ "paketkoll_workspace_hack",
  "tracing",
  "tracing-subscriber",
 ]

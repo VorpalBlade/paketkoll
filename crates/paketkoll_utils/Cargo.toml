@@ -10,6 +10,7 @@ version = "0.1.6"
 [dependencies]
 eyre.workspace = true
 paketkoll_types = { version = "0.2.1", path = "../paketkoll_types" }
+paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 ring.workspace = true
 
 [lints]

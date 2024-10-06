@@ -19,6 +19,7 @@ eyre.workspace = true
 faster-hex.workspace = true
 lasso.workspace = true
 nix = { workspace = true, features = ["fs", "user"] }
+paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 serde.workspace = true
 serde_bytes.workspace = true
 smallvec.workspace = true

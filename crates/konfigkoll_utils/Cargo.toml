@@ -11,6 +11,7 @@ version = "0.1.6"
 [dependencies]
 camino.workspace = true
 compact_str.workspace = true
+paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 regex.workspace = true
 tracing.workspace = true
 

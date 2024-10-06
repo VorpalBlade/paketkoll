@@ -54,6 +54,7 @@ ouroboros.workspace = true
 paketkoll_cache = { version = "0.2.6", path = "../paketkoll_cache" }
 paketkoll_core = { version = "0.5.7", path = "../paketkoll_core" }
 paketkoll_types = { version = "0.2.1", path = "../paketkoll_types" }
+paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 rayon.workspace = true
 rune = { workspace = true, features = ["cli"] }
 tokio.workspace = true

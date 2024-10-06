@@ -16,6 +16,7 @@ rune = ["dep:rune"]
 ahash.workspace = true
 eyre.workspace = true
 itertools.workspace = true
+paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 rune = { workspace = true, optional = true }
 winnow.workspace = true
 

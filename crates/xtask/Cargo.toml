@@ -33,6 +33,7 @@ color-eyre.workspace = true
 eyre.workspace = true
 konfigkoll = { version = "0.1.9", path = "../konfigkoll" }
 paketkoll = { version = "0.3.7", path = "../paketkoll" }
+paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 tracing-subscriber.workspace = true
 tracing.workspace = true
 

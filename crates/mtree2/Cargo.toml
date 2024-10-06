@@ -14,6 +14,7 @@ version = "0.6.8"
 bitflags.workspace = true
 faster-hex.workspace = true
 memchr.workspace = true
+paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 smallvec.workspace = true
 
 [lints]
