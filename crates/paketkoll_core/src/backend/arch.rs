@@ -242,7 +242,9 @@ impl Files for ArchLinux {
         let results: Vec<_> = archives
             .par_bridge()
             .map(|value| {
-                value.and_then(|(pkg_ref, path)| Ok((pkg_ref, archive_to_entries(pkg_ref, &path)?)))
+                value.and_then(|(pkg_ref, path)| {
+                    Ok((pkg_ref, archive_to_entries(pkg_ref, &path, interner)?))
+                })
             })
             .collect();
         Ok(results)
@@ -283,7 +285,11 @@ impl ArchLinux {
 }
 
 /// Convert deb archives to file entries
-fn archive_to_entries(pkg_ref: PackageRef, pkg_file: &Path) -> eyre::Result<Vec<FileEntry>> {
+fn archive_to_entries(
+    pkg_ref: PackageRef,
+    pkg_file: &Path,
+    interner: &Interner,
+) -> eyre::Result<Vec<FileEntry>> {
     // The package is a .tar.zst
     let package_file = std::fs::File::open(pkg_file)?;
     let decompressed = zstd::Decoder::new(package_file)?;
@@ -299,6 +305,12 @@ fn archive_to_entries(pkg_ref: PackageRef, pkg_file: &Path) -> eyre::Result<Vec<
             let path = bstr::concat([b"/", path]);
             Some(Cow::Owned(path.into_path_buf().expect("Invalid path")))
         }
+    })
+    .wrap_err_with(|| {
+        format!(
+            "Failed extracting file entries from package file for {}",
+            pkg_ref.as_str(interner)
+        )
     })
 }
 

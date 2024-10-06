@@ -387,7 +387,14 @@ fn archive_to_entries(
             let archive = tar::Archive::new(&mut decompressed);
             // Now, lets extract the requested files from the package
             let mut entries =
-                convert_archive_entries(archive, pkg_ref, NAME, convert_deb_archive_path)?;
+                convert_archive_entries(archive, pkg_ref, NAME, convert_deb_archive_path)
+                    .wrap_err_with(|| {
+                        format!(
+                            "Failed extracting file entries from data archive in deb file for \
+                             package {}",
+                            pkg_ref.as_str(interner)
+                        )
+                    })?;
 
             let self_pkg = packages
                 .get(&pkg_ref)
