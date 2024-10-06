@@ -1860,6 +1860,48 @@ dependencies = [
 [[package]]
 name = "paketkoll_workspace_hack"
 version = "0.1.0"
+dependencies = [
+ "ahash",
+ "aho-corasick",
+ "bitflags 2.6.0",
+ "bstr",
+ "byteorder",
+ "cc",
+ "clap",
+ "clap_builder",
+ "crossbeam-epoch",
+ "dashmap",
+ "either",
+ "flate2",
+ "getrandom",
+ "hashbrown 0.14.5",
+ "libc",
+ "linux-raw-sys",
+ "log",
+ "memchr",
+ "musli",
+ "nix",
+ "num-traits",
+ "once_cell",
+ "phf_shared",
+ "rand",
+ "rand_core",
+ "regex",
+ "regex-automata 0.4.8",
+ "rune",
+ "rune-core",
+ "rustix",
+ "scopeguard",
+ "serde",
+ "smallvec",
+ "spin",
+ "syn",
+ "tokio",
+ "tracing",
+ "tracing-core",
+ "tracing-subscriber",
+ "zerocopy",
+]
 
 [[package]]
 name = "parking_lot"

@@ -10,14 +10,93 @@ name = "paketkoll_workspace_hack"
 repository = "https://github.com/VorpalBlade/paketkoll"
 version = "0.1.0"
 # You can choose to publish this crate: see https://docs.rs/cargo-hakari/latest/cargo_hakari/publishing.
-publish = true
+publish = false
 
 # The parts of the file between the BEGIN HAKARI SECTION and END HAKARI SECTION comments
 # are managed by hakari.
 
 ### BEGIN HAKARI SECTION
+[dependencies]
+ahash = { version = "0.8", features = ["no-rng"] }
+aho-corasick = { version = "1" }
+bitflags = { version = "2", default-features = false, features = ["serde"] }
+bstr = { version = "1" }
+byteorder = { version = "1" }
+clap = { version = "4", features = ["derive", "env"] }
+clap_builder = { version = "4", default-features = false, features = ["color", "env", "help", "std", "suggestions", "usage"] }
+crossbeam-epoch = { version = "0.9" }
+dashmap = { version = "6", default-features = false, features = ["raw-api", "rayon"] }
+either = { version = "1" }
+flate2 = { version = "1", features = ["zlib-ng"] }
+getrandom = { version = "0.2", default-features = false, features = ["std"] }
+hashbrown = { version = "0.14", features = ["raw"] }
+log = { version = "0.4", default-features = false, features = ["std"] }
+memchr = { version = "2" }
+musli = { version = "0.0.42", default-features = false, features = ["std"] }
+nix = { version = "0.29", default-features = false, features = ["fs", "user"] }
+num-traits = { version = "0.2", default-features = false, features = ["i128", "std"] }
+once_cell = { version = "1", features = ["critical-section"] }
+phf_shared = { version = "0.11", default-features = false, features = ["std"] }
+rand = { version = "0.8", features = ["small_rng"] }
+rand_core = { version = "0.6", default-features = false, features = ["std"] }
+regex = { version = "1" }
+regex-automata = { version = "0.4", default-features = false, features = ["dfa-onepass", "dfa-search", "hybrid", "meta", "nfa", "perf", "unicode"] }
+rune = { version = "0.13", features = ["cli"] }
+rune-core = { version = "0.13", features = ["doc", "musli", "std"] }
+scopeguard = { version = "1" }
+serde = { version = "1", features = ["alloc", "derive", "rc"] }
+smallvec = { version = "1", default-features = false, features = ["const_new", "serde", "union"] }
+tokio = { version = "1", features = ["fs", "io-std", "io-util", "macros", "parking_lot", "process", "rt-multi-thread", "sync"] }
+tracing = { version = "0.1" }
+tracing-core = { version = "0.1" }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "parking_lot"] }
+zerocopy = { version = "0.7", features = ["derive", "simd"] }
 
-# Disabled by running `cargo hakari disable`.
-# To re-enable, run:
-#     cargo hakari generate
+[build-dependencies]
+ahash = { version = "0.8", features = ["no-rng"] }
+byteorder = { version = "1" }
+cc = { version = "1", default-features = false, features = ["parallel"] }
+either = { version = "1" }
+getrandom = { version = "0.2", default-features = false, features = ["std"] }
+memchr = { version = "2" }
+musli = { version = "0.0.42", default-features = false, features = ["std"] }
+once_cell = { version = "1", features = ["critical-section"] }
+phf_shared = { version = "0.11", default-features = false, features = ["std"] }
+rand = { version = "0.8", features = ["small_rng"] }
+rand_core = { version = "0.6", default-features = false, features = ["std"] }
+rune-core = { version = "0.13", features = ["doc", "musli", "std"] }
+serde = { version = "1", features = ["alloc", "derive", "rc"] }
+syn = { version = "2", features = ["extra-traits", "full", "visit-mut"] }
+zerocopy = { version = "0.7", features = ["derive", "simd"] }
+
+[target.x86_64-unknown-linux-gnu.dependencies]
+bitflags = { version = "2", default-features = false, features = ["std"] }
+libc = { version = "0.2", features = ["extra_traits"] }
+linux-raw-sys = { version = "0.4", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
+rustix = { version = "0.38", features = ["fs"] }
+spin = { version = "0.9" }
+
+[target.x86_64-unknown-linux-gnu.build-dependencies]
+libc = { version = "0.2", features = ["extra_traits"] }
+
+[target.x86_64-unknown-linux-musl.dependencies]
+bitflags = { version = "2", default-features = false, features = ["std"] }
+libc = { version = "0.2", features = ["extra_traits"] }
+linux-raw-sys = { version = "0.4", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
+rustix = { version = "0.38", features = ["fs"] }
+spin = { version = "0.9" }
+
+[target.x86_64-unknown-linux-musl.build-dependencies]
+libc = { version = "0.2", features = ["extra_traits"] }
+
+[target.aarch64-unknown-linux-musl.dependencies]
+bitflags = { version = "2", default-features = false, features = ["std"] }
+libc = { version = "0.2", features = ["extra_traits"] }
+linux-raw-sys = { version = "0.4", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
+rustix = { version = "0.38", features = ["fs"] }
+spin = { version = "0.9" }
+
+[target.aarch64-unknown-linux-musl.build-dependencies]
+libc = { version = "0.2", features = ["extra_traits"] }
+
 ### END HAKARI SECTION
