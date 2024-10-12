@@ -174,13 +174,12 @@ pub async fn phase_main(props, cmds, package_managers) {
     dbg(passwd.read_all_string());
 
     // Test command execution
-    let cmd = process::Command::new("ls");
-    cmd.arg("-l");
-    cmd.arg("/etc");
+    let cmd = process::Command::new("/usr/bin/echo");
+    cmd.arg("Hello world\nHi there\n");
     cmd.stdout(process::Stdio::piped());
     let child = cmd.spawn()?;
     let cmd2 = process::Command::new("grep");
-    cmd2.arg("release");
+    cmd2.arg("world");
     cmd2.stdin(child.stdout().unwrap().try_into_stdio()?);
     let child2 = cmd2.spawn()?;
     let output = child2.wait_with_output().await?;

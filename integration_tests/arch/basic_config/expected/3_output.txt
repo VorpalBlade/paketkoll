@@ -20,8 +20,7 @@ INFO script{phase=Main}: konfigkoll_script::engine: Calling script
 Some(123)
 Ok("# Dynamic linker/loader configuration.\n# See ld.so(8) and ldconfig(8) for details.\n\ninclude /etc/ld.so.conf.d/*.conf\ninclude /usr/lib/ld.so.conf.d/*.conf\n")
 Ok("# Dynamic linker/loader configuration.\n# See ld.so(8) and ldconfig(8) for details.\n\ninclude /etc/ld.so.conf.d/*.conf\ninclude /usr/lib/ld.so.conf.d/*.conf\n# HI!\n")
--rw-r--r-- 1 root root      1 Apr  7 18:02 arch-release
--rw-r--r-- 1 root root    411 Sep  6 23:15 os-release
+Hello world
 "output:"
 Ok("")
 "bor\nbar\nbar\nquux hi there\n"
