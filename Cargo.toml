@@ -15,15 +15,15 @@ cached = { version = "0.53.1", features = [
 ], default-features = false }
 camino = "1.1.9"
 cfg-if = "1.0.0"
-clap = { version = "4.5.19", features = ["derive"] }
-clap_complete = "4.5.32"
-clap_mangen = "0.2.23"
+clap = { version = "4.5.20", features = ["derive"] }
+clap_complete = "4.5.33"
+clap_mangen = "0.2.24"
 clru = "0.6.2"
 color-eyre = "0.6.3"
 compact_str = { version = "0.8.0", features = ["serde", "smallvec"] }
 console = "0.15.8"
 dashmap = "6.1.0"
-derive_builder = "0.20.1"
+derive_builder = "0.20.2"
 directories = "5.0.1"
 dirs = "5.0.1"
 duct = "0.13.7"
