@@ -344,7 +344,9 @@ pub(crate) fn convert_archive_entries(
                         properties: Properties::Symlink(Symlink {
                             owner,
                             group,
-                            target: link.ok_or(eyre::eyre!("Failed to get link target"))?.into(),
+                            target: link
+                                .ok_or_else(|| eyre::eyre!("Failed to get link target"))?
+                                .into(),
                         }),
                         flags: FileFlags::empty(),
                         source,

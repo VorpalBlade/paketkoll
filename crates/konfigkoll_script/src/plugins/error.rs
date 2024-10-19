@@ -36,13 +36,10 @@ impl KError {
 
 impl Display for KError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(
-            &self
-                .inner
-                .as_ref()
-                .unwrap_or(&eyre::eyre!("<ALREADY TAKEN>")),
-            f,
-        )
+        match &self.inner {
+            Some(inner) => Display::fmt(inner, f),
+            None => Display::fmt(&eyre::eyre!("<ALREADY TAKEN>"), f),
+        }
     }
 }
 
