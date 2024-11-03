@@ -1,10 +1,5 @@
 name: Release (helper)
 
-permissions:
-  attestations: write
-  contents: write
-  id-token: write
-
 on:
   workflow_call:
     inputs:
@@ -48,6 +43,8 @@ defaults:
 jobs:
   cargo-about:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
     - uses: actions/checkout@v4
       with:
@@ -69,6 +66,10 @@ jobs:
   upload:
     name: "Upload ${{ inputs.project }}: ${{ matrix.target }}"
     runs-on: ubuntu-latest
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
     strategy:
       matrix:
         include:
@@ -122,12 +123,15 @@ jobs:
         with:
           persist-credentials: false
       - name: Get AUR repo
-        run: git clone https://aur.archlinux.org/${{ inputs.project }}.git aur
+        run: git clone "https://aur.archlinux.org/${PROJECT}.git" aur
+        env:
+          PROJECT: ${{ inputs.project }}
       - name: Update PKGBUILD
         run: |
-          sed -i '/^_pkgver/s/=.*$/='${RELEASE_TAG#refs/tags/${{ inputs.project }}-v}'/' "aur/PKGBUILD"
+          sed -i '/^_pkgver/s/=.*$/='${RELEASE_TAG#refs/tags/${PROJECT}-v}'/' "aur/PKGBUILD"
           sed -i '/^pkgrel/s/=.*$/=1/' "aur/PKGBUILD"
         env:
+          PROJECT: ${{ inputs.project }}
           RELEASE_TAG: ${{ github.ref }}
       - name: Publish AUR package
         uses: KSXGitHub/github-actions-deploy-aur@v3.0.1

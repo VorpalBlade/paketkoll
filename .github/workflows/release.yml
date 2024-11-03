@@ -1,10 +1,5 @@
 name: Release
 
-permissions:
-  attestations: write
-  contents: write
-  id-token: write
-
 on:
   release:
     types: [published]
@@ -21,6 +16,10 @@ jobs:
 
   paketkoll:
     name: "Release paketkoll"
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
     if: github.repository_owner == 'VorpalBlade' && startsWith(github.event.release.name, 'paketkoll-v')
     uses: ./.github/workflows/act_build_release.yml
     with:
@@ -35,6 +34,10 @@ jobs:
 
   konfigkoll:
     name: "Release konfigkoll"
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
     if: github.repository_owner == 'VorpalBlade' && startsWith(github.event.release.name, 'konfigkoll-v')
     uses: ./.github/workflows/act_build_release.yml
     with:
