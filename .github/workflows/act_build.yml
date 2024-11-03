@@ -52,6 +52,8 @@ jobs:
             debug_info: off
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Install Rust
         run: rustup install --profile minimal ${{ matrix.rust }} && rustup default ${{ matrix.rust }}
       - name: Print environment info
@@ -127,6 +129,8 @@ jobs:
             rust: nightly
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Install Rust
         run: rustup install --profile minimal  ${{ matrix.rust }} && rustup default ${{ matrix.rust }}
       - name: Get cargo-binstall
@@ -152,6 +156,8 @@ jobs:
     needs: modern-default
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
           name: paketkoll_x86_64-unknown-linux-musl.tar.zst

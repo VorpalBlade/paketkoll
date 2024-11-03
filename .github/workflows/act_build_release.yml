@@ -50,6 +50,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
     - name: Setup Rust
       run: rustup update stable && rustup default stable && rustup component add clippy
     - name: Get cargo-binstall
@@ -92,6 +94,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - uses: taiki-e/install-action@cross
@@ -115,6 +119,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Get AUR repo
         run: git clone https://aur.archlinux.org/${{ inputs.project }}.git aur
       - name: Update PKGBUILD
