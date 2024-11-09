@@ -66,7 +66,7 @@ rand = { version = "0.8", features = ["small_rng"] }
 rand_core = { version = "0.6", default-features = false, features = ["std"] }
 rune-core = { version = "0.13", features = ["doc", "musli", "std"] }
 serde = { version = "1", features = ["alloc", "derive", "rc"] }
-syn = { version = "2", features = ["extra-traits", "full", "visit-mut"] }
+syn = { version = "2", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 zerocopy = { version = "0.7", features = ["derive", "simd"] }
 
 [target.x86_64-unknown-linux-gnu.dependencies]
@@ -75,6 +75,7 @@ libc = { version = "0.2", features = ["extra_traits"] }
 linux-raw-sys = { version = "0.4", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
 rustix = { version = "0.38", features = ["fs"] }
 spin = { version = "0.9" }
+stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
 
 [target.x86_64-unknown-linux-gnu.build-dependencies]
 libc = { version = "0.2", features = ["extra_traits"] }
@@ -85,6 +86,7 @@ libc = { version = "0.2", features = ["extra_traits"] }
 linux-raw-sys = { version = "0.4", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
 rustix = { version = "0.38", features = ["fs"] }
 spin = { version = "0.9" }
+stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
 
 [target.x86_64-unknown-linux-musl.build-dependencies]
 libc = { version = "0.2", features = ["extra_traits"] }
@@ -95,6 +97,7 @@ libc = { version = "0.2", features = ["extra_traits"] }
 linux-raw-sys = { version = "0.4", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
 rustix = { version = "0.38", features = ["fs"] }
 spin = { version = "0.9" }
+stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
 
 [target.aarch64-unknown-linux-musl.build-dependencies]
 libc = { version = "0.2", features = ["extra_traits"] }
