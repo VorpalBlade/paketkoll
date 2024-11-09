@@ -33,10 +33,10 @@ jobs:
         uses: Swatinem/rust-cache@v2.7.5
 
       - name: Run rust-clippy
-        run:
-          cargo clippy
-          --all-features
-          --all-targets
+        run: |
+          cargo clippy \
+          --all-features \
+          --all-targets \
           --message-format=json -- -D warnings | clippy-sarif | tee rust-clippy-results.sarif | sarif-fmt
         continue-on-error: true
 
@@ -53,70 +53,70 @@ jobs:
     name: Rustfmt
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        persist-credentials: false
-    - name: Install Rust
-      run: rustup install --profile minimal nightly && rustup default nightly && rustup component add rustfmt
-    - run: cargo +nightly fmt -- --check
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install Rust
+        run: rustup install --profile minimal nightly && rustup default nightly && rustup component add rustfmt
+      - run: cargo +nightly fmt -- --check
 
   cargo-deny:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-    - name: Setup Rust
-      run: rustup update stable && rustup default stable && rustup component add clippy
+      - name: Setup Rust
+        run: rustup update stable && rustup default stable && rustup component add clippy
 
-    - name: Get cargo-binstall
-      run: |
-        curl -L https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-musl.tgz | tar -zxf - && mv cargo-binstall $HOME/.cargo/bin/
+      - name: Get cargo-binstall
+        run: |
+          curl -L https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-musl.tgz | tar -zxf - && mv cargo-binstall $HOME/.cargo/bin/
 
-    - name: Install required cargo addons
-      run: cargo binstall --no-confirm --no-symlinks cargo-deny
+      - name: Install required cargo addons
+        run: cargo binstall --no-confirm --no-symlinks cargo-deny
 
-    - run: cargo deny check
+      - run: cargo deny check
 
   cargo-about:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-    - name: Setup Rust
-      run: rustup update stable && rustup default stable && rustup component add clippy
+      - name: Setup Rust
+        run: rustup update stable && rustup default stable && rustup component add clippy
 
-    - name: Get cargo-binstall
-      run: |
-        curl -L https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-musl.tgz | tar -zxf - && mv cargo-binstall $HOME/.cargo/bin/
+      - name: Get cargo-binstall
+        run: |
+          curl -L https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-musl.tgz | tar -zxf - && mv cargo-binstall $HOME/.cargo/bin/
 
-    - name: Install required cargo addons
-      run: cargo binstall --no-confirm --no-symlinks cargo-about
+      - name: Install required cargo addons
+        run: cargo binstall --no-confirm --no-symlinks cargo-about
 
-    - run: mkdir target && cargo about generate  about.hbs > target/license.html
+      - run: mkdir target && cargo about generate  about.hbs > target/license.html
 
   cargo-hakari:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      with:
-        persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
-    - name: Setup Rust
-      run: rustup update stable && rustup default stable && rustup component add clippy
+      - name: Setup Rust
+        run: rustup update stable && rustup default stable && rustup component add clippy
 
-    - name: Get cargo-binstall
-      run: |
-        curl -L https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-musl.tgz | tar -zxf - && mv cargo-binstall $HOME/.cargo/bin/
+      - name: Get cargo-binstall
+        run: |
+          curl -L https://github.com/cargo-bins/cargo-binstall/releases/latest/download/cargo-binstall-x86_64-unknown-linux-musl.tgz | tar -zxf - && mv cargo-binstall $HOME/.cargo/bin/
 
-    - name: Install required cargo addons
-      run: cargo binstall --no-confirm --no-symlinks cargo-hakari
+      - name: Install required cargo addons
+        run: cargo binstall --no-confirm --no-symlinks cargo-hakari
 
-    - name : Check that workspace-hack Cargo.toml is up-to-date
-      run: cargo hakari generate --diff
+      - name: Check that workspace-hack Cargo.toml is up-to-date
+        run: cargo hakari generate --diff
 
-    - name : Check that all workspace crates depend on workspace-hack
-      run: cargo hakari manage-deps --dry-run
+      - name: Check that all workspace crates depend on workspace-hack
+        run: cargo hakari manage-deps --dry-run

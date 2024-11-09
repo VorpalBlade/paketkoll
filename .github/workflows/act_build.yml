@@ -172,6 +172,6 @@ jobs:
           sudo apt-get install -y podman
           podman --version
       - name: Run integration tests
-        run: |
+        run: |-
           cd integration_tests
           ./run_tests.sh
