@@ -7,7 +7,7 @@ ahash = "0.8.11"
 ar = "0.9.0"
 base64-simd = "0.8.0"
 bitflags = { version = "2.6.0", features = ["serde"] }
-bstr = "1.10.0"
+bstr = "1.11.0"
 bzip2 = "0.4.4"
 cached = { version = "0.54.0", features = [
     "disk_store",
