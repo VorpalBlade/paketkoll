@@ -8,6 +8,16 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.8] - 2024-12-02
+
+### 🚀 Features
+
+- Prepare workspace hack with cargo-hakari
+
+### 🐛 Bug fixes
+
+- Fix new clippy warnings on Rust 1.82
+
 ## [0.1.7] - 2024-09-20
 
 ### ⚙️ Other stuff

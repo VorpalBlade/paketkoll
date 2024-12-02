@@ -8,6 +8,20 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.10] - 2024-12-02
+
+### 🚀 Features
+
+- Prepare workspace hack with cargo-hakari
+
+### 🐛 Bug fixes
+
+- Fix new clippy warnings on Rust 1.82
+
+### ⚙️ Other stuff
+
+- Fix clippy on newer rust
+
 ## [0.1.9] - 2024-09-20
 
 ### 🚀 Features
