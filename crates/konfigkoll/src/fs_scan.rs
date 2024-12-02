@@ -121,8 +121,6 @@ pub(crate) fn scan_fs(
         }
         files
     };
-    // Drop mutability
-    let files = files;
 
     tracing::debug!("Building path map");
     let scan_result = ScanResultBuilder {

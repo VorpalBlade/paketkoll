@@ -316,13 +316,13 @@ mod user {
             let uid = nix::unistd::Uid::current();
             let user = nix::unistd::User::from_uid(uid)
                 .map_err(ProviderError::UserError)?
-                .ok_or_else(|| ProviderError::UserMissingError)?;
+                .ok_or(ProviderError::UserMissingError)?;
             let group = nix::unistd::Group::from_gid(user.gid)
                 .map_err(ProviderError::UserError)?
-                .ok_or_else(|| ProviderError::UserMissingError)?;
+                .ok_or(ProviderError::UserMissingError)?;
             let home_dir = user.dir.as_os_str().to_string_lossy();
-            let state_dir = dirs::state_dir()
-                .ok_or_else(|| ProviderError::DirectoryError("$XDG_STATE_HOME"))?;
+            let state_dir =
+                dirs::state_dir().ok_or(ProviderError::DirectoryError("$XDG_STATE_HOME"))?;
             let state_dir = state_dir.to_string_lossy();
             Ok(Self {
                 system: system_provider,
@@ -333,12 +333,12 @@ mod user {
                 home_directory: home_dir.clone().into(),
                 log_directory: format!("{state_dir}/log").into(),
                 cache_directory: dirs::cache_dir()
-                    .ok_or_else(|| ProviderError::DirectoryError("$XDG_CACHE_HOME"))?
+                    .ok_or(ProviderError::DirectoryError("$XDG_CACHE_HOME"))?
                     .to_string_lossy()
                     .into(),
                 state_directory: state_dir.into(),
                 runtime_directory: dirs::runtime_dir()
-                    .ok_or_else(|| ProviderError::DirectoryError("$XDG_RUNTIME_DIR"))?
+                    .ok_or(ProviderError::DirectoryError("$XDG_RUNTIME_DIR"))?
                     .to_string_lossy()
                     .into(),
             })
