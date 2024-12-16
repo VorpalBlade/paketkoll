@@ -46,13 +46,13 @@ directories.workspace = true
 either.workspace = true
 eyre.workspace = true
 itertools.workspace = true
-konfigkoll_core = { version = "0.5.1", path = "../konfigkoll_core" }
+konfigkoll_core = { version = "0.5.2", path = "../konfigkoll_core" }
 konfigkoll_script = { version = "0.1.8", path = "../konfigkoll_script" }
-konfigkoll_types = { version = "0.2.4", path = "../konfigkoll_types" }
+konfigkoll_types = { version = "0.2.5", path = "../konfigkoll_types" }
 konfigkoll_utils = { version = "0.1.7", path = "../konfigkoll_utils" }
 ouroboros.workspace = true
 paketkoll_cache = { version = "0.2.7", path = "../paketkoll_cache" }
-paketkoll_core = { version = "0.5.8", path = "../paketkoll_core" }
+paketkoll_core = { version = "0.5.9", path = "../paketkoll_core" }
 paketkoll_types = { version = "0.2.2", path = "../paketkoll_types" }
 paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 rayon.workspace = true

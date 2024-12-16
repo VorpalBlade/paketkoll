@@ -22,7 +22,7 @@ itertools.workspace = true
 konfigkoll_hwinfo = { version = "0.1.7", path = "../konfigkoll_hwinfo", features = [
     "rune",
 ] }
-konfigkoll_types = { version = "0.2.4", path = "../konfigkoll_types" }
+konfigkoll_types = { version = "0.2.5", path = "../konfigkoll_types" }
 konfigkoll_utils = { version = "0.1.7", path = "../konfigkoll_utils" }
 paketkoll_types = { version = "0.2.2", path = "../paketkoll_types" }
 paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }

@@ -1313,7 +1313,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_core"
-version = "0.5.1"
+version = "0.5.2"
 dependencies = [
  "ahash",
  "camino",
@@ -1388,7 +1388,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_types"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "camino",
  "compact_str",
@@ -1941,7 +1941,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_core"
-version = "0.5.8"
+version = "0.5.9"
 dependencies = [
  "ahash",
  "ar",
@@ -2007,7 +2007,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_utils"
-version = "0.1.7"
+version = "0.1.8"
 dependencies = [
  "eyre",
  "paketkoll_types",
