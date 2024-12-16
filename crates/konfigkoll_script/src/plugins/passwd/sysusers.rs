@@ -21,7 +21,7 @@ use winnow::Parser;
 #[derive(Debug, PartialEq)]
 pub(super) struct SysusersParseError {
     message: String,
-    pos: usize,
+    span: std::ops::Range<usize>,
     input: String,
 }
 
@@ -32,9 +32,13 @@ impl SysusersParseError {
     ) -> Self {
         let message = error.inner().to_string();
         let input = input.to_owned();
+        let start = error.offset();
+        let end = (start + 1..)
+            .find(|e| input.is_char_boundary(*e))
+            .unwrap_or(start);
         Self {
             message,
-            pos: error.offset(),
+            span: start..end,
             input,
         }
     }
@@ -42,17 +46,16 @@ impl SysusersParseError {
 
 impl std::fmt::Display for SysusersParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let pos = self.pos;
-        let input = &self.input;
-        let message = &self.message;
-        write!(
-            f,
-            "Error at position {}: {}\n{}\n{}^",
-            pos,
-            message,
-            &input[..pos],
-            " ".repeat(pos)
-        )
+        let message = annotate_snippets::Level::Error
+            .title(&self.message)
+            .snippet(
+                annotate_snippets::Snippet::source(&self.input)
+                    .fold(true)
+                    .annotation(annotate_snippets::Level::Error.span(self.span.clone())),
+            );
+        let renderer = annotate_snippets::Renderer::plain();
+        let rendered = renderer.render(message);
+        rendered.fmt(f)
     }
 }
 

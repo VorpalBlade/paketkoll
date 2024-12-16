@@ -11,6 +11,7 @@ version = "0.1.7"
 
 [dependencies]
 ahash.workspace = true
+annotate-snippets.workspace = true
 camino.workspace = true
 color-eyre.workspace = true
 compact_str.workspace = true

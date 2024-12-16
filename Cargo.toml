@@ -4,6 +4,7 @@ resolver = "2"
 
 [workspace.dependencies]
 ahash = "0.8.11"
+annotate-snippets = { version = "0.11.5", features = ["simd"] }
 ar = "0.9.0"
 base64-simd = "0.8.0"
 bitflags = { version = "2.6.0", features = ["serde"] }
