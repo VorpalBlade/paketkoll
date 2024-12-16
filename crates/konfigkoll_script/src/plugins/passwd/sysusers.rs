@@ -80,6 +80,7 @@ pub(super) struct User {
     pub gecos: Option<CompactString>,
     pub home: Option<CompactString>,
     pub shell: Option<CompactString>,
+    pub locked: bool,
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -127,6 +128,7 @@ fn flattener<T>(e: Option<(&str, Option<T>)>) -> Option<T> {
 
 fn user(i: &mut &str) -> PResult<Directive> {
     let entry_type = 'u';
+    let locked = opt('!').context(StrContext::Label("locked"));
     let user_name = any_string.context(StrContext::Label("user_name"));
     let id = user_id_parser.context(StrContext::Label("id"));
     let gecos = optional_string.context(StrContext::Label("gecos"));
@@ -135,6 +137,7 @@ fn user(i: &mut &str) -> PResult<Directive> {
 
     let mut parser = (
         entry_type,
+        locked,
         space1,
         user_name,
         opt((space1, id)).map(flattener),
@@ -142,13 +145,14 @@ fn user(i: &mut &str) -> PResult<Directive> {
         opt((space1, home_dir)).map(flattener),
         opt((space1, shell)).map(flattener),
     )
-        .map(|(_, _, name, id, gecos, home, shell)| {
+        .map(|(_, maybe_locked, _, name, id, gecos, home, shell)| {
             Directive::User(User {
                 name,
                 id,
                 gecos,
                 home,
                 shell,
+                locked: maybe_locked.is_some(),
             })
         });
     parser.parse_next(i)
@@ -323,6 +327,23 @@ mod tests {
             gecos: Some("GECOS quux".into()),
             home: Some("/home/user".into()),
             shell: Some("/bin/bash".into()),
+            locked: false,
+        });
+        let (rest, result) = user.parse_peek(input).unwrap();
+        assert_eq!(rest, "\n");
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn test_locked_user() {
+        let input = "u! user 1000:2000 \"GECOS quux\" /home/user /bin/bash\n";
+        let expected = Directive::User(User {
+            name: "user".into(),
+            id: Some(UserId::UidGid(1000, 2000)),
+            gecos: Some("GECOS quux".into()),
+            home: Some("/home/user".into()),
+            shell: Some("/bin/bash".into()),
+            locked: true,
         });
         let (rest, result) = user.parse_peek(input).unwrap();
         assert_eq!(rest, "\n");
@@ -399,6 +420,7 @@ mod tests {
                 gecos: Some("GECOS quux".into()),
                 home: Some("/home/user".into()),
                 shell: Some("/bin/bash".into()),
+                locked: false,
             }),
             Directive::User(User {
                 name: "user".into(),
@@ -406,6 +428,7 @@ mod tests {
                 gecos: Some("GECOS bar".into()),
                 home: None,
                 shell: None,
+                locked: false,
             }),
             Directive::Group(Group {
                 name: "group".into(),
