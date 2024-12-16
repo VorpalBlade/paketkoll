@@ -32,6 +32,7 @@ INFO konfigkoll: Computing diff
 +++ /dev/stdin	 +0000
 @@ -1,22 +1 @@
  root:x:0:0::/root:/usr/bin/bash
+-alpm:x:980:980:Arch Linux Package Management:/:/usr/bin/nologin
 -bin:x:1:1::/:/usr/bin/nologin
 -daemon:x:2:2::/:/usr/bin/nologin
 -mail:x:8:12::/var/spool/mail:/usr/bin/nologin
@@ -39,17 +40,16 @@ INFO konfigkoll: Computing diff
 -http:x:33:33::/srv/http:/usr/bin/nologin
 -nobody:x:65534:65534:Kernel Overflow User:/:/usr/bin/nologin
 -dbus:x:81:81:System Message Bus:/:/usr/bin/nologin
--systemd-coredump:x:980:980:systemd Core Dumper:/:/usr/bin/nologin
--systemd-network:x:979:979:systemd Network Management:/:/usr/bin/nologin
--systemd-oom:x:978:978:systemd Userspace OOM Killer:/:/usr/bin/nologin
--systemd-journal-remote:x:977:977:systemd Journal Remote:/:/usr/bin/nologin
--systemd-resolve:x:976:976:systemd Resolver:/:/usr/bin/nologin
--systemd-timesync:x:975:975:systemd Time Synchronization:/:/usr/bin/nologin
--tss:x:974:974:tss user for tpm2:/:/usr/bin/nologin
+-systemd-coredump:x:979:979:systemd Core Dumper:/:/usr/bin/nologin
+-systemd-network:x:978:978:systemd Network Management:/:/usr/bin/nologin
+-systemd-oom:x:977:977:systemd Userspace OOM Killer:/:/usr/bin/nologin
+-systemd-journal-remote:x:976:976:systemd Journal Remote:/:/usr/bin/nologin
+-systemd-resolve:x:975:975:systemd Resolver:/:/usr/bin/nologin
+-systemd-timesync:x:974:974:systemd Time Synchronization:/:/usr/bin/nologin
+-tss:x:973:973:tss user for tpm2:/:/usr/bin/nologin
 -uuidd:x:68:68::/:/usr/bin/nologin
--avahi:x:973:973:Avahi mDNS/DNS-SD daemon:/:/usr/bin/nologin
--flatpak:x:972:972:Flatpak system helper:/:/usr/bin/nologin
--geoclue:x:971:971:Geoinformation service:/var/lib/geoclue:/usr/bin/nologin
+-avahi:x:972:972:Avahi mDNS/DNS-SD daemon:/:/usr/bin/nologin
+-flatpak:x:971:971:Flatpak system helper:/:/usr/bin/nologin
 -git:x:970:970:git daemon user:/:/usr/bin/git-shell
 -polkitd:x:102:102:User for polkitd:/:/usr/bin/nologin
 -rtkit:x:133:133:RealtimeKit:/proc:/usr/bin/nologin

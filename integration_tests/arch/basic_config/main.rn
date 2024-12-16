@@ -170,8 +170,8 @@ pub async fn phase_main(props, cmds, package_managers) {
     let pkgs = package_managers.get("pacman")?;
     dbg(String::from_utf8(pkgs.original_file_contents("filesystem", "/etc/ld.so.conf")?));
 
-    let passwd = filesystem::File::open("/etc/ld.so.conf")?;
-    dbg(passwd.read_all_string());
+    let ldso = filesystem::File::open("/etc/ld.so.conf")?;
+    dbg(ldso.read_all_string());
 
     // Test command execution
     let cmd = process::Command::new("/usr/bin/echo");
