@@ -8,6 +8,24 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.5.8] - 2024-12-16
+
+### 🚀 Features
+
+- Prepare workspace hack with cargo-hakari
+
+### 🐛 Bug fixes
+
+- Fix new clippy warnings on Rust 1.82
+
+### 🩺 Diagnostics & output formatting
+
+- Better errors when package archive reading fails
+
+### ⚙️ Other stuff
+
+- Fix clippy on newer rust
+
 ## [0.5.7] - 2024-09-20
 
 ### 🚀 Features

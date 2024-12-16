@@ -8,6 +8,12 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.3.8] - 2024-12-16
+
+### ⚙️ Other stuff
+
+- Use workspace hack with cargo-hakari for faster dev builds
+
 ## [0.3.7] - 2024-09-20
 
 ### ⚙️ Other stuff

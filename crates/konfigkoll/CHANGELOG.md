@@ -8,6 +8,24 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.10] - 2024-12-16
+
+### 🚀 Features
+
+- Add support for locked users in sysusers parser (needed to work on newer systemd)
+
+### 🐛 Bug fixes
+
+- Fix new clippy warnings on Rust 1.82
+
+### 🩺 Diagnostics & output formatting
+
+- Improve parse errors from sysusers
+
+### ⚙️ Other stuff
+
+- Use workspace hack with cargo-hakari for faster dev builds
+
 ## [0.1.9] - 2024-09-20
 
 ### 🚀 Features
