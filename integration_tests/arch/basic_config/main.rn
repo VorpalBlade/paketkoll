@@ -42,7 +42,6 @@ pub fn phase_ignores(props, cmds) {
     cmds.ignore_path("/usr/share/man");
     cmds.ignore_path("/usr/share/X11/locale");
 
-
     // Systemd
     cmds.ignore_path("/etc/.updated");
     cmds.ignore_path("/etc/machine-id");
@@ -90,7 +89,6 @@ pub fn phase_ignores(props, cmds) {
     cmds.ignore_path("/var/lib/btrfs");
     cmds.ignore_path("/var/lib/rkhunter");
     cmds.ignore_path("/var/lib/upower");
-
 
     cmds.ignore_path("/var/cache"); // tmpfiles.d
     cmds.ignore_path("/var/empty"); // tmpfiles.d
@@ -168,7 +166,9 @@ pub async fn phase_main(props, cmds, package_managers) {
     dbg(props.get("user.test"));
 
     let pkgs = package_managers.get("pacman")?;
-    dbg(String::from_utf8(pkgs.original_file_contents("filesystem", "/etc/ld.so.conf")?));
+    dbg(
+        String::from_utf8(pkgs.original_file_contents("filesystem", "/etc/ld.so.conf")?),
+    );
 
     let ldso = filesystem::File::open("/etc/ld.so.conf")?;
     dbg(ldso.read_all_string());
@@ -205,7 +205,74 @@ pub async fn phase_main(props, cmds, package_managers) {
     // This we want to add
     cmds.add_pkg("pacman", "nano")?; // Basic tools to build Arch Linux packages
 
+    // Test sysusers integration
+    let passwd = passwd::Passwd::new(USER_MAPPING, GROUP_MAPPING)?;
+    let files = package_managers.files();
+    passwd.add_from_sysusers(files, "systemd", "/usr/lib/sysusers.d/basic.conf")?;
+    passwd.add_from_sysusers(files, "filesystem", "/usr/lib/sysusers.d/arch.conf")?;
+
+    passwd.add_from_sysusers(files, "flatpak", "/usr/lib/sysusers.d/flatpak.conf")?;
+    passwd.add_from_sysusers(files, "git", "/usr/lib/sysusers.d/git.conf")?;
+    passwd.add_from_sysusers(files, "systemd", "/usr/lib/sysusers.d/systemd-coredump.conf")?;
+    passwd.add_from_sysusers(files, "systemd", "/usr/lib/sysusers.d/systemd-journal.conf")?;
+    passwd.add_from_sysusers(files, "systemd", "/usr/lib/sysusers.d/systemd-oom.conf")?;
+    passwd.add_from_sysusers(files, "systemd", "/usr/lib/sysusers.d/systemd-remote.conf")?;
+    passwd.add_from_sysusers(files, "systemd", "/usr/lib/sysusers.d/systemd-resolve.conf")?;
+    passwd.add_from_sysusers(files, "systemd", "/usr/lib/sysusers.d/systemd-timesync.conf")?;
+    passwd.align_ids_with_system()?;
+    passwd.apply(cmds)?;
+
     // We skip out on git (which is in our image) so we can test that case
 
     Ok(())
 }
+
+pub const USER_MAPPING = [
+    ("polkitd", 102),
+    ("systemd-journal-upload", 962),
+    ("flatpak", 969),
+    ("geoclue", 970),
+    ("colord", 971),
+    ("avahi", 972),
+    ("chrony", 973),
+    ("dnsmasq", 974),
+    ("git", 975),
+    ("systemd-timesync", 976),
+    ("systemd-resolve", 977),
+    ("systemd-journal-remote", 978),
+    ("systemd-oom", 979),
+    ("systemd-network", 980),
+    ("systemd-coredump", 981),
+];
+
+pub const GROUP_MAPPING = [
+    ("groups", 959),
+    ("systemd-journal-upload", 962),
+    ("flatpak", 969),
+    ("git", 975),
+    ("systemd-timesync", 976),
+    ("systemd-resolve", 977),
+    ("systemd-journal-remote", 978),
+    ("systemd-oom", 979),
+    ("systemd-network", 980),
+    ("systemd-coredump", 981),
+    ("rfkill", 982),
+    ("systemd-journal", 983),
+
+    ("users", 984),
+    ("video", 985),
+    ("uucp", 986),
+    ("storage", 987),
+    ("sgx", 988),
+    ("render", 989),
+    ("optical", 990),
+    ("lp", 991),
+    ("kvm", 992),
+    ("kmem", 993),
+    ("input", 994),
+    ("disk", 995),
+    ("audio", 996),
+    ("utmp", 997),
+    ("wheel", 998),
+    ("adm", 999),
+];

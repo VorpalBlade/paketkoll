@@ -24,49 +24,47 @@ Hello world
 "output:"
 Ok("")
 "bor\nbar\nbar\nquux hi there\n"
+INFO script{phase=Main}: konfigkoll_script::plugins::passwd: Updating GIDs/UIDs to match system (more info available with log level RUST_LOG=debug)
 INFO script{phase=Main}: konfigkoll_script::engine: Returned from script
 INFO konfigkoll: Waiting for file system scan results...
 INFO konfigkoll: Got file system scan results
 WARN konfigkoll: Applying changes
-INFO konfigkoll_core::apply: Would apply 5 file instructions
-INFO konfigkoll_core::apply:  /etc/group: restore (from package manager)
-INFO konfigkoll_core::apply:  /etc/gshadow: restore (from package manager)
+INFO konfigkoll_core::apply: Would apply 1 file instructions
 INFO konfigkoll_core::apply:  /etc/pacman.conf: restore (from package manager)
-INFO konfigkoll_core::apply:  /etc/passwd: restore (from package manager)
-INFO konfigkoll_core::apply:  /etc/shadow: restore (from package manager)
-INFO konfigkoll_core::apply: Would apply 2 file instructions
-INFO konfigkoll_core::apply:  /etc/gshadow: chmod 600
-INFO konfigkoll_core::apply:  /etc/shadow: chmod 600
+INFO konfigkoll_core::apply: Would apply 4 file instructions
+INFO konfigkoll_core::apply:  /etc/group: create file (with sha256:6341b6f97c7fa7cb43c9b8cb7812eb9718e7b713d0c24e7ad013e533104806a1)
+INFO konfigkoll_core::apply:  /etc/gshadow: create file (with sha256:dbdaa27be5b58d77675b38c1c9e03c80a3064022a73a59481d5ef1262e42a5a6)
+INFO konfigkoll_core::apply:  /etc/passwd: create file (with sha256:82b0240478f72b5009c823c5cdad0b9f2cf8ada30b35594811125727f45eb9c6)
+INFO konfigkoll_core::apply:  /etc/shadow: create file (with sha256:c4a9700370dc59fa9c6108d9b1c4bee38991823dd8f4aa557540d2a8905dfbfb)
 INFO konfigkoll_core::apply: Would install 1, mark 0 explicit and uninstall 1 with backend Pacman
 INFO konfigkoll_core::apply:  + nano
 INFO konfigkoll_core::apply:  - git
-INFO konfigkoll_core::apply: Would apply 10 file instructions
+INFO konfigkoll_core::apply: Would apply 6 file instructions
 INFO konfigkoll_core::apply:  /var/lib/libuuid: remove
 INFO konfigkoll_core::apply:  /var/lib/lastlog: remove
 INFO konfigkoll_core::apply:  /etc/systemd/user/sockets.target.wants/pipewire.socket: remove
 INFO konfigkoll_core::apply:  /etc/systemd/user/sockets.target.wants: remove
-INFO konfigkoll_core::apply:  /etc/shadow-: remove
-INFO konfigkoll_core::apply:  /etc/passwd-: remove
 INFO konfigkoll_core::apply:  /etc/locale.conf: remove
 INFO konfigkoll_core::apply:  /etc/hostname: remove
-INFO konfigkoll_core::apply:  /etc/gshadow-: remove
-INFO konfigkoll_core::apply:  /etc/group-: remove
 INFO konfigkoll_core::apply: Would apply 4 file instructions
 INFO konfigkoll_core::apply:  /etc/hosts: restore (from package manager)
 INFO konfigkoll_core::apply:  /etc/ld.so.conf: restore (from package manager)
 INFO konfigkoll_core::apply:  /etc/pacman.d/mirrorlist: restore (from package manager)
 INFO konfigkoll_core::apply:  /etc/shells: restore (from package manager)
-INFO konfigkoll_core::apply: Would apply 7 file instructions
-INFO konfigkoll_core::apply:  /etc: mkdir
+INFO konfigkoll_core::apply: Would apply 6 file instructions
 INFO konfigkoll_core::apply:  /etc/pacman.d: mkdir
 INFO konfigkoll_core::apply:  /etc/systemd: mkdir
 INFO konfigkoll_core::apply:  /etc/systemd/user: mkdir
 INFO konfigkoll_core::apply:  /nosuchdir: mkdir
 INFO konfigkoll_core::apply:  /var: mkdir
 INFO konfigkoll_core::apply:  /var/lib: mkdir
-INFO konfigkoll_core::apply: Would apply 2 file instructions
+INFO konfigkoll_core::apply: Would apply 6 file instructions
 INFO konfigkoll_core::apply:  /dummy.txt: create file (with sha256:0ba904eae8773b70c75333db4de2f3ac45a8ad4ddba1b242f0b3cfc199391dd8)
 INFO konfigkoll_core::apply:  /dummy2.txt: create file (with sha256:e5e9beba29f1b4589fd1c77c01fadba4319cce965db7c2b4967666664311226c)
+INFO konfigkoll_core::apply:  /etc/group-: create file (with sha256:6341b6f97c7fa7cb43c9b8cb7812eb9718e7b713d0c24e7ad013e533104806a1)
+INFO konfigkoll_core::apply:  /etc/gshadow-: create file (with sha256:dbdaa27be5b58d77675b38c1c9e03c80a3064022a73a59481d5ef1262e42a5a6)
+INFO konfigkoll_core::apply:  /etc/passwd-: create file (with sha256:82b0240478f72b5009c823c5cdad0b9f2cf8ada30b35594811125727f45eb9c6)
+INFO konfigkoll_core::apply:  /etc/shadow-: create file (with sha256:c4a9700370dc59fa9c6108d9b1c4bee38991823dd8f4aa557540d2a8905dfbfb)
 INFO konfigkoll_core::apply: Would apply 3 file instructions
 INFO konfigkoll_core::apply:  /: chmod 755
 INFO konfigkoll_core::apply:  /srv/ftp: chmod 555

@@ -5,12 +5,10 @@ pub fn unsorted_additions(props, cmds) {
     ctx.cmds.chmod("/", 0o555)?;
     // /dummy.txt:  // On the system, this file is either unchanged or doesn't exist at all
     // /dummy2.txt:  // On the system, this file is either unchanged or doesn't exist at all
-    ctx.cmds.mkdir("/etc")?;
     ctx.cmds.copy("/etc/group")?; // [filesystem]
     ctx.cmds.copy("/etc/group-")?;
     ctx.cmds.copy("/etc/gshadow")?; // [filesystem]
     ctx.cmds.copy("/etc/gshadow-")?;
-    ctx.cmds.chmod("/etc/gshadow-", 0o600)?;
     ctx.cmds.copy("/etc/hostname")?;
     ctx.cmds.copy("/etc/hosts")?; // [filesystem]
     ctx.cmds.copy("/etc/ld.so.conf")?; // [filesystem]
@@ -22,7 +20,6 @@ pub fn unsorted_additions(props, cmds) {
     ctx.cmds.copy("/etc/passwd-")?;
     ctx.cmds.copy("/etc/shadow")?; // [filesystem]
     ctx.cmds.copy("/etc/shadow-")?;
-    ctx.cmds.chmod("/etc/shadow-", 0o600)?;
     ctx.cmds.copy("/etc/shells")?; // [filesystem]
     ctx.cmds.mkdir("/etc/systemd")?;
     ctx.cmds.mkdir("/etc/systemd/user")?;

@@ -23,21 +23,22 @@ Hello world
 "output:"
 Ok("")
 "bor\nbar\nbar\nquux hi there\n"
+INFO script{phase=Main}: konfigkoll_script::plugins::passwd: Updating GIDs/UIDs to match system (more info available with log level RUST_LOG=debug)
 INFO script{phase=Main}: konfigkoll_script::engine: Returned from script
 INFO konfigkoll: Waiting for file system scan results...
 INFO konfigkoll: Got file system scan results
 INFO konfigkoll: Computing diff
-/etc/passwd: Would restore to original package manager state
 --- /etc/passwd	 +0000
 +++ /dev/stdin	 +0000
-@@ -1,22 +1 @@
- root:x:0:0::/root:/usr/bin/bash
+@@ -1,22 +1,14 @@
+-root:x:0:0::/root:/usr/bin/bash
 -alpm:x:980:980:Arch Linux Package Management:/:/usr/bin/nologin
--bin:x:1:1::/:/usr/bin/nologin
--daemon:x:2:2::/:/usr/bin/nologin
--mail:x:8:12::/var/spool/mail:/usr/bin/nologin
--ftp:x:14:11::/srv/ftp:/usr/bin/nologin
--http:x:33:33::/srv/http:/usr/bin/nologin
++root:x:0:0:Super User:/root:/usr/bin/nologin
+ bin:x:1:1::/:/usr/bin/nologin
+ daemon:x:2:2::/:/usr/bin/nologin
+ mail:x:8:12::/var/spool/mail:/usr/bin/nologin
+ ftp:x:14:11::/srv/ftp:/usr/bin/nologin
+ http:x:33:33::/srv/http:/usr/bin/nologin
 -nobody:x:65534:65534:Kernel Overflow User:/:/usr/bin/nologin
 -dbus:x:81:81:System Message Bus:/:/usr/bin/nologin
 -systemd-coredump:x:979:979:systemd Core Dumper:/:/usr/bin/nologin
@@ -50,6 +51,13 @@ INFO konfigkoll: Computing diff
 -uuidd:x:68:68::/:/usr/bin/nologin
 -avahi:x:972:972:Avahi mDNS/DNS-SD daemon:/:/usr/bin/nologin
 -flatpak:x:971:971:Flatpak system helper:/:/usr/bin/nologin
--git:x:970:970:git daemon user:/:/usr/bin/git-shell
+ git:x:970:970:git daemon user:/:/usr/bin/git-shell
 -polkitd:x:102:102:User for polkitd:/:/usr/bin/nologin
 -rtkit:x:133:133:RealtimeKit:/proc:/usr/bin/nologin
++flatpak:x:971:971:Flatpak system helper:/:/usr/bin/nologin
++systemd-timesync:x:974:974:systemd Time Synchronization:/:/usr/bin/nologin
++systemd-resolve:x:975:975:systemd Resolver:/:/usr/bin/nologin
++systemd-journal-remote:x:976:976:systemd Journal Remote:/:/usr/bin/nologin
++systemd-oom:x:977:977:systemd Userspace OOM Killer:/:/usr/bin/nologin
++systemd-coredump:x:979:979:systemd Core Dumper:/:/usr/bin/nologin
++nobody:x:65534:65534:Kernel Overflow User:/:/usr/bin/nologin
