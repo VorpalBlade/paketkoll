@@ -21,7 +21,7 @@ clap_complete = "4.5.38"
 clap_mangen = "0.2.24"
 clru = "0.6.2"
 color-eyre = "0.6.3"
-compact_str = { version = "0.8.0", features = ["serde", "smallvec"] }
+compact_str = { version = "0.8.1", features = ["serde", "smallvec"] }
 console = "0.15.8"
 dashmap = "6.1.0"
 derive_builder = "0.20.2"
