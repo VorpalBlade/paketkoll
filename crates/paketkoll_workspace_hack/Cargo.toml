@@ -56,7 +56,6 @@ zerocopy = { version = "0.7", features = ["derive", "simd"] }
 ahash = { version = "0.8", features = ["no-rng"] }
 byteorder = { version = "1" }
 cc = { version = "1", default-features = false, features = ["parallel"] }
-either = { version = "1" }
 getrandom = { version = "0.2", default-features = false, features = ["std"] }
 memchr = { version = "2" }
 musli = { version = "0.0.42", default-features = false, features = ["std"] }

@@ -36,14 +36,14 @@ impl SysInfo {
     #[rune::function]
     fn total_memory(&mut self) -> u64 {
         self.inner
-            .refresh_memory_specifics(MemoryRefreshKind::new().with_ram());
+            .refresh_memory_specifics(MemoryRefreshKind::nothing().with_ram());
         self.inner.total_memory() / 1024
     }
 
     /// The system architecture
     #[rune::function]
     fn architecture(&self) -> Option<String> {
-        sysinfo::System::cpu_arch()
+        Some(sysinfo::System::cpu_arch())
     }
 
     /// The kernel version
