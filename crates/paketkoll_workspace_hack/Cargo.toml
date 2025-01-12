@@ -32,7 +32,7 @@ getrandom = { version = "0.2", default-features = false, features = ["std"] }
 hashbrown = { version = "0.14", features = ["raw"] }
 log = { version = "0.4", default-features = false, features = ["std"] }
 memchr = { version = "2" }
-musli = { version = "0.0.42", default-features = false, features = ["std"] }
+musli = { version = "0.0.126", default-features = false, features = ["std"] }
 nix = { version = "0.29", default-features = false, features = ["fs", "user"] }
 num-traits = { version = "0.2", default-features = false, features = ["i128", "std"] }
 once_cell = { version = "1", features = ["critical-section"] }
@@ -58,7 +58,7 @@ byteorder = { version = "1" }
 cc = { version = "1", default-features = false, features = ["parallel"] }
 getrandom = { version = "0.2", default-features = false, features = ["std"] }
 memchr = { version = "2" }
-musli = { version = "0.0.42", default-features = false, features = ["std"] }
+musli = { version = "0.0.126", default-features = false, features = ["std"] }
 once_cell = { version = "1", features = ["critical-section"] }
 phf_shared = { version = "0.11", default-features = false, features = ["std"] }
 rand = { version = "0.8", features = ["small_rng"] }
