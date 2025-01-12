@@ -5,7 +5,7 @@ keywords = ["package-management"]
 license = "MPL-2.0"
 name = "paketkoll_utils"
 repository = "https://github.com/VorpalBlade/paketkoll"
-rust-version = "1.80.0"
+rust-version = "1.81.0"
 version = "0.1.7"
 
 [dependencies]
