@@ -71,7 +71,7 @@ jobs:
       - name: Install cross
         uses: taiki-e/install-action@cross
       - name: Cache builds
-        uses: Swatinem/rust-cache@v2.7.5
+        uses: Swatinem/rust-cache@v2.7.7
         with:
           key: ${{ matrix.target }}-${{ matrix.rust }}
       - name: Cross compile binary
@@ -141,7 +141,7 @@ jobs:
       - name: Disable cargo workspace hack (to properly test features)
         run: cargo hakari disable
       - name: Cache builds
-        uses: Swatinem/rust-cache@v2.7.5
+        uses: Swatinem/rust-cache@v2.7.7
       - name: Compile
         run: cargo test --locked ${{ matrix.features }} --verbose --no-run
       - name: Test
