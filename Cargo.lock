@@ -189,9 +189,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bitflags"
-version = "2.7.0"
+version = "2.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1be3f42a67d6d345ecd59f675f3f012d6974981560836e938c22b424b85ce1be"
+checksum = "8f68f53c83ab957f72c32642f3868eec03eb974d1fb82e453128456482613d36"
 dependencies = [
  "serde",
 ]
@@ -1441,7 +1441,7 @@ version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c0ff37bd590ca25063e35af745c343cb7a0271906fb7b37e4813e8f79f00268d"
 dependencies = [
- "bitflags 2.7.0",
+ "bitflags 2.8.0",
  "libc",
  "redox_syscall 0.5.8",
 ]
@@ -1590,7 +1590,7 @@ dependencies = [
 name = "mtree2"
 version = "0.6.9"
 dependencies = [
- "bitflags 2.7.0",
+ "bitflags 2.8.0",
  "faster-hex",
  "memchr",
  "paketkoll_workspace_hack",
@@ -1648,7 +1648,7 @@ version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71e2746dc3a24dd78b3cfcb7be93368c6de9963d30f43a6a73998a9cf4b17b46"
 dependencies = [
- "bitflags 2.7.0",
+ "bitflags 2.8.0",
  "cfg-if",
  "cfg_aliases",
  "libc",
@@ -1979,7 +1979,7 @@ name = "paketkoll_types"
 version = "0.2.2"
 dependencies = [
  "ahash",
- "bitflags 2.7.0",
+ "bitflags 2.8.0",
  "compact_str",
  "dashmap",
  "derive_builder",
@@ -2011,7 +2011,7 @@ version = "0.1.0"
 dependencies = [
  "ahash",
  "aho-corasick",
- "bitflags 2.7.0",
+ "bitflags 2.8.0",
  "bstr",
  "byteorder",
  "cc",
@@ -2315,7 +2315,7 @@ version = "0.9.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "57206b407293d2bcd3af849ce869d52068623f19e1b5ff8e8778e3309439682b"
 dependencies = [
- "bitflags 2.7.0",
+ "bitflags 2.8.0",
  "getopts",
  "memchr",
  "unicase",
@@ -2410,7 +2410,7 @@ version = "0.5.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "03a862b389f93e68874fbf580b9de08dd02facb9a788ebadaf4a3fd33cf58834"
 dependencies = [
- "bitflags 2.7.0",
+ "bitflags 2.8.0",
 ]
 
 [[package]]
@@ -2695,7 +2695,7 @@ version = "0.38.43"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a78891ee6bf2340288408954ac787aa063d8e8817e9f53abb37c695c6d834ef6"
 dependencies = [
- "bitflags 2.7.0",
+ "bitflags 2.8.0",
  "errno",
  "libc",
  "linux-raw-sys",
@@ -3011,7 +3011,7 @@ name = "systemd_tmpfiles"
 version = "0.2.2"
 dependencies = [
  "base64-simd",
- "bitflags 2.7.0",
+ "bitflags 2.8.0",
  "compact_str",
  "dirs",
  "indoc",
