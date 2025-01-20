@@ -33,7 +33,7 @@ jobs:
       - name: Install Rust
         run: rustup update stable && rustup default stable
       - name: Cache builds
-        uses: Swatinem/rust-cache@v2.7.5
+        uses: Swatinem/rust-cache@v2.7.7
         with:
           key: website
 
