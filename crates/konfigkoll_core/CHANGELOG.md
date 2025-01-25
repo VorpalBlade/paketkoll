@@ -8,6 +8,12 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.5.2] - 2025-01-25
+
+### ⚙️ Other stuff
+
+- Bump mimumum required Rust version to 1.81.0
+
 ## [0.5.1] - 2024-12-16
 
 ### 🚀 Features
