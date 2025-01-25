@@ -533,7 +533,9 @@ fn merge_deb_fileentries(
     }
 }
 
-fn get_package_files(interner: &Interner) -> eyre::Result<impl Iterator<Item = Vec<FileEntry>>> {
+fn get_package_files(
+    interner: &Interner,
+) -> eyre::Result<impl Iterator<Item = Vec<FileEntry>> + use<>> {
     let files: Vec<_> = std::fs::read_dir(DB_PATH)?.collect();
     let results: eyre::Result<Vec<_>> = files
         .into_par_iter()

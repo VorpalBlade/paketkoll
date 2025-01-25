@@ -102,7 +102,7 @@ impl TryFrom<&Selector> for konfigkoll_utils::line_edit::Selector {
             Selector::Line(n) => Ok(Self::Line(*n)),
             Selector::Range(a, b) => Ok(Self::Range(*a, *b)),
             Selector::Regex(r) => Ok(Self::Regex(Regex::new(r).wrap_err("invalid regex")?)),
-            Selector::Function(ref f) => {
+            &Selector::Function(ref f) => {
                 let f = f.clone();
                 Ok(Self::Function(Rc::new(move |lineno, s| {
                     let guard = f.borrow_mut().expect("Failed to borrow function object");
@@ -205,7 +205,7 @@ impl TryFrom<&Action> for konfigkoll_utils::line_edit::Action {
                 replacement: b.into(),
                 replace_all: true,
             }),
-            Action::Function(ref f) => {
+            &Action::Function(ref f) => {
                 let f = f.clone();
                 Ok(Self::Function(Rc::new(move |s| {
                     let guard = f.borrow_mut().expect("Failed to borrow function object");

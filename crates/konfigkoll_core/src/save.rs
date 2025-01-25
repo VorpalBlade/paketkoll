@@ -28,13 +28,13 @@ pub fn save_fs_changes<'instruction>(
     for instruction in instructions {
         let comment = match (instruction.pkg, &instruction.comment) {
             (None, None) => CompactString::default(),
-            (None, Some(ref comment)) => {
+            (None, &Some(ref comment)) => {
                 format_compact!(" // {comment}")
             }
             (Some(pkg), None) => {
                 format_compact!(" // [{}]", pkg.as_str(interner))
             }
-            (Some(pkg), Some(ref comment)) => {
+            (Some(pkg), &Some(ref comment)) => {
                 format_compact!(" // [{}] {comment}", pkg.as_str(interner))
             }
         };

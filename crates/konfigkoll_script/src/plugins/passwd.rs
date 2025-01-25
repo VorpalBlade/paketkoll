@@ -431,10 +431,13 @@ impl Passwd {
                         });
                 }
                 sysusers::Directive::AddUserToGroup { user, group } => {
-                    if let Some(group) = self.groups.get_mut(group.as_str()) {
-                        group.members.insert(user.into_string());
-                    } else {
-                        tracing::error!("Group {} not found", group);
+                    match self.groups.get_mut(group.as_str()) {
+                        Some(group) => {
+                            group.members.insert(user.into_string());
+                        }
+                        _ => {
+                            tracing::error!("Group {} not found", group);
+                        }
                     }
                 }
                 sysusers::Directive::SetRange(_, _) => (),

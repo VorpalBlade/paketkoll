@@ -4,7 +4,7 @@
 
 [package]
 description = "workspace-hack package, managed by hakari"
-edition = "2021"
+edition = "2024"
 license = "MPL-2.0"
 name = "paketkoll_workspace_hack"
 repository = "https://github.com/VorpalBlade/paketkoll"

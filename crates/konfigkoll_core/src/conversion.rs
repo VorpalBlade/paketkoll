@@ -207,7 +207,7 @@ fn from_fs(
     path: &Utf8Path,
     pkg: Option<PackageRef>,
     id_resolver: &Mutex<NumericToNameResolveCache>,
-) -> eyre::Result<impl Iterator<Item = FsInstruction>> {
+) -> eyre::Result<impl Iterator<Item = FsInstruction> + use<>> {
     let metadata = path
         .symlink_metadata()
         .wrap_err_with(|| eyre::eyre!("Failed to get metadata for {path:?}"))?;

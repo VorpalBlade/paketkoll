@@ -54,7 +54,7 @@ impl_from_dec_uint!(u32);
 impl_from_dec_uint!(u64);
 
 macro_rules! impl_from_hex_arr {
-    ($size:expr) => {
+    ($size:expr_2021) => {
         impl FromHex for [u8; $size] {
             #[inline]
             fn from_hex(input: &[u8]) -> ParserResult<Self> {
