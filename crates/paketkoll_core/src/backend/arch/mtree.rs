@@ -41,7 +41,7 @@ pub(super) fn extract_mtree<'seen>(
     path: &Path,
     backup_files: BTreeSet<Vec<u8>>,
     seen_directories: &'seen DashSet<(PathBuf, Directory)>,
-) -> eyre::Result<impl Iterator<Item = eyre::Result<FileEntry>> + 'seen + use<'seen>> {
+) -> eyre::Result<impl Iterator<Item = eyre::Result<FileEntry>> + use<'seen>> {
     let file = BufReader::new(File::open(path)?);
     let decoder = GzDecoder::new(file);
     if decoder.header().is_none() {
