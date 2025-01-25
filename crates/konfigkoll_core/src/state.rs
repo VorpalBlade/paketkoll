@@ -532,7 +532,7 @@ pub fn diff(
                 tracing::debug!("{:?} -> ()", before);
                 let pkg = before.1.pkg;
                 match goal {
-                    &DiffGoal::Apply(ref _backend_impl, ref path_map) => {
+                    &DiffGoal::Apply(ref _backend_impl, path_map) => {
                         // Figure out what the previous state of this file was:
                         match path_map.get(before.0.as_std_path()) {
                             Some(entry) => {
