@@ -3,6 +3,8 @@
 use crate::Id;
 use crate::Mode;
 use compact_str::CompactString;
+use winnow::PResult;
+use winnow::Parser;
 use winnow::ascii::digit1;
 use winnow::ascii::escaped_transform;
 use winnow::ascii::newline;
@@ -16,8 +18,6 @@ use winnow::error::StrContext;
 use winnow::stream::Accumulate;
 use winnow::token::take_till;
 use winnow::token::take_while;
-use winnow::PResult;
-use winnow::Parser;
 
 /// Low level parser that doesn't make a difference between entry types
 #[derive(Debug, Default, PartialEq, Eq)]
@@ -383,133 +383,112 @@ mod tests {
             .parse_peek("L /tmp/foo 0644 - - - /tmp/target\n")
             .unwrap();
         assert_eq!(rest, "\n");
-        assert_eq!(
-            line,
-            Line {
-                entry_type: "L".into(),
-                path: "/tmp/foo".into(),
-                mode: Some(Mode::Set {
-                    mode: 0o644,
-                    new_only: false,
-                    masked: false
-                }),
-                user: Id::Caller { new_only: false },
-                group: Id::Caller { new_only: false },
-                age: None,
-                argument: Some("/tmp/target".into())
-            }
-        );
+        assert_eq!(line, Line {
+            entry_type: "L".into(),
+            path: "/tmp/foo".into(),
+            mode: Some(Mode::Set {
+                mode: 0o644,
+                new_only: false,
+                masked: false
+            }),
+            user: Id::Caller { new_only: false },
+            group: Id::Caller { new_only: false },
+            age: None,
+            argument: Some("/tmp/target".into())
+        });
 
         // Last field missing
         let (rest, line) = directive.parse_peek("L /tmp/foo 0644 - - -\n").unwrap();
         assert_eq!(rest, "\n");
-        assert_eq!(
-            line,
-            Line {
-                entry_type: "L".into(),
-                path: "/tmp/foo".into(),
-                mode: Some(Mode::Set {
-                    mode: 0o644,
-                    new_only: false,
-                    masked: false
-                }),
-                user: Id::Caller { new_only: false },
-                group: Id::Caller { new_only: false },
-                age: None,
-                argument: None
-            }
-        );
+        assert_eq!(line, Line {
+            entry_type: "L".into(),
+            path: "/tmp/foo".into(),
+            mode: Some(Mode::Set {
+                mode: 0o644,
+                new_only: false,
+                masked: false
+            }),
+            user: Id::Caller { new_only: false },
+            group: Id::Caller { new_only: false },
+            age: None,
+            argument: None
+        });
 
         // Two fields missing
         let (rest, line) = directive.parse_peek("L /tmp/foo 0644 - -\n").unwrap();
         assert_eq!(rest, "\n");
-        assert_eq!(
-            line,
-            Line {
-                entry_type: "L".into(),
-                path: "/tmp/foo".into(),
-                mode: Some(Mode::Set {
-                    mode: 0o644,
-                    new_only: false,
-                    masked: false
-                }),
-                user: Id::Caller { new_only: false },
-                group: Id::Caller { new_only: false },
-                age: None,
-                argument: None
-            }
-        );
+        assert_eq!(line, Line {
+            entry_type: "L".into(),
+            path: "/tmp/foo".into(),
+            mode: Some(Mode::Set {
+                mode: 0o644,
+                new_only: false,
+                masked: false
+            }),
+            user: Id::Caller { new_only: false },
+            group: Id::Caller { new_only: false },
+            age: None,
+            argument: None
+        });
 
         // Three fields missing
         let (rest, line) = directive.parse_peek("L /tmp/foo 0644 -\n").unwrap();
         assert_eq!(rest, "\n");
-        assert_eq!(
-            line,
-            Line {
-                entry_type: "L".into(),
-                path: "/tmp/foo".into(),
-                mode: Some(Mode::Set {
-                    mode: 0o644,
-                    new_only: false,
-                    masked: false
-                }),
-                user: Id::Caller { new_only: false },
-                group: Id::Caller { new_only: false },
-                age: None,
-                argument: None
-            }
-        );
+        assert_eq!(line, Line {
+            entry_type: "L".into(),
+            path: "/tmp/foo".into(),
+            mode: Some(Mode::Set {
+                mode: 0o644,
+                new_only: false,
+                masked: false
+            }),
+            user: Id::Caller { new_only: false },
+            group: Id::Caller { new_only: false },
+            age: None,
+            argument: None
+        });
 
         // Four fields missing
         let (rest, line) = directive.parse_peek("L /tmp/foo 0644\n").unwrap();
         assert_eq!(rest, "\n");
-        assert_eq!(
-            line,
-            Line {
-                entry_type: "L".into(),
-                path: "/tmp/foo".into(),
-                mode: Some(Mode::Set {
-                    mode: 0o644,
-                    new_only: false,
-                    masked: false
-                }),
-                user: Id::Caller { new_only: false },
-                group: Id::Caller { new_only: false },
-                age: None,
-                argument: None
-            }
-        );
+        assert_eq!(line, Line {
+            entry_type: "L".into(),
+            path: "/tmp/foo".into(),
+            mode: Some(Mode::Set {
+                mode: 0o644,
+                new_only: false,
+                masked: false
+            }),
+            user: Id::Caller { new_only: false },
+            group: Id::Caller { new_only: false },
+            age: None,
+            argument: None
+        });
 
         // Five fields missing
         let (rest, line) = directive.parse_peek("L /tmp/foo\n").unwrap();
         assert_eq!(rest, "\n");
-        assert_eq!(
-            line,
-            Line {
-                entry_type: "L".into(),
-                path: "/tmp/foo".into(),
-                mode: None,
-                user: Id::Caller { new_only: false },
-                group: Id::Caller { new_only: false },
-                age: None,
-                argument: None
-            }
-        );
+        assert_eq!(line, Line {
+            entry_type: "L".into(),
+            path: "/tmp/foo".into(),
+            mode: None,
+            user: Id::Caller { new_only: false },
+            group: Id::Caller { new_only: false },
+            age: None,
+            argument: None
+        });
 
         // Partial line
         let (rest, line) = directive.parse_peek("C /var\n").unwrap();
         assert_eq!(rest, "\n");
-        assert_eq!(
-            line,
-            Line {
-                entry_type: "C".into(),
-                path: "/var".into(),
-                mode: None,
-                user: Id::Caller { new_only: false },
-                group: Id::Caller { new_only: false },
-                age: None,
-                argument: None
-            }
-        );
+        assert_eq!(line, Line {
+            entry_type: "C".into(),
+            path: "/var".into(),
+            mode: None,
+            user: Id::Caller { new_only: false },
+            group: Id::Caller { new_only: false },
+            age: None,
+            argument: None
+        });
     }
 }

@@ -173,8 +173,8 @@ fn parse_flatpak_output(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pretty_assertions::assert_eq;
     use Package;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_parse_flatpak_output() {
@@ -197,250 +197,233 @@ mod tests {
         };
         let packages = parse_flatpak_output(output, &interner).unwrap();
         assert_eq!(packages.len(), 14);
-        assert_eq!(
-            packages,
-            vec![
-                Package {
-                    name: PackageRef::get_or_intern(&interner, "Flatseal"),
-                    version: "2.2.0".into(),
-                    desc: Some("Manage Flatpak permissions".into()),
-                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
-                    depends: vec![],
-                    provides: vec![],
-                    reason: None,
-                    status: PackageInstallStatus::Installed,
-                    ids: smallvec::smallvec![
-                        PackageRef::get_or_intern(&interner, "com.github.tchx84.Flatseal"),
-                        PackageRef::get_or_intern(
-                            &interner,
-                            "com.github.tchx84.Flatseal/x86_64/stable"
-                        )
-                    ],
-                },
-                Package {
-                    name: PackageRef::get_or_intern(&interner, "Fedora Media Writer"),
-                    version: "5.1.1".into(),
-                    desc: Some(
-                        "A tool to create a live USB drive with an edition of Fedora".into()
-                    ),
-                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
-                    depends: vec![],
-                    provides: vec![],
-                    reason: None,
-                    status: PackageInstallStatus::Installed,
-                    ids: smallvec::smallvec![
-                        PackageRef::get_or_intern(&interner, "org.fedoraproject.MediaWriter"),
-                        PackageRef::get_or_intern(
-                            &interner,
-                            "org.fedoraproject.MediaWriter/x86_64/stable"
-                        )
-                    ],
-                },
-                Package {
-                    name: PackageRef::get_or_intern(&interner, "Freedesktop Platform"),
-                    version: "23.08.19".into(),
-                    desc: Some("Runtime platform for applications".into()),
-                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
-                    depends: vec![],
-                    provides: vec![],
-                    reason: Some(InstallReason::Dependency),
-                    status: PackageInstallStatus::Installed,
-                    ids: smallvec::smallvec![
-                        PackageRef::get_or_intern(&interner, "org.freedesktop.Platform"),
-                        PackageRef::get_or_intern(
-                            &interner,
-                            "org.freedesktop.Platform/x86_64/23.08"
-                        )
-                    ],
-                },
-                Package {
-                    name: PackageRef::get_or_intern(&interner, "Mesa"),
-                    version: "24.0.7".into(),
-                    desc: Some("Mesa - The 3D Graphics Library".into()),
-                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
-                    depends: vec![],
-                    provides: vec![],
-                    reason: Some(InstallReason::Dependency),
-                    status: PackageInstallStatus::Installed,
-                    ids: smallvec::smallvec![
-                        PackageRef::get_or_intern(&interner, "org.freedesktop.Platform.GL.default"),
-                        PackageRef::get_or_intern(
-                            &interner,
-                            "org.freedesktop.Platform.GL.default/x86_64/23.08"
-                        )
-                    ],
-                },
-                Package {
-                    name: PackageRef::get_or_intern(&interner, "Mesa (Extra)"),
-                    version: "24.0.7".into(),
-                    desc: Some("Mesa - The 3D Graphics Library".into()),
-                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
-                    depends: vec![],
-                    provides: vec![],
-                    reason: Some(InstallReason::Dependency),
-                    status: PackageInstallStatus::Installed,
-                    ids: smallvec::smallvec![
-                        PackageRef::get_or_intern(&interner, "org.freedesktop.Platform.GL.default"),
-                        PackageRef::get_or_intern(
-                            &interner,
-                            "org.freedesktop.Platform.GL.default/x86_64/23.08-extra"
-                        )
-                    ],
-                },
-                Package {
-                    name: PackageRef::get_or_intern(&interner, "nvidia-550-78"),
-                    version: "".into(),
-                    desc: None,
-                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
-                    depends: vec![],
-                    provides: vec![],
-                    reason: Some(InstallReason::Dependency),
-                    status: PackageInstallStatus::Installed,
-                    ids: smallvec::smallvec![
-                        PackageRef::get_or_intern(
-                            &interner,
-                            "org.freedesktop.Platform.GL.nvidia-550-78"
-                        ),
-                        PackageRef::get_or_intern(
-                            &interner,
-                            "org.freedesktop.Platform.GL.nvidia-550-78/x86_64/1.4"
-                        )
-                    ],
-                },
-                Package {
-                    name: PackageRef::get_or_intern(&interner, "Intel"),
-                    version: "".into(),
-                    desc: None,
-                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
-                    depends: vec![],
-                    provides: vec![],
-                    reason: Some(InstallReason::Dependency),
-                    status: PackageInstallStatus::Installed,
-                    ids: smallvec::smallvec![
-                        PackageRef::get_or_intern(
-                            &interner,
-                            "org.freedesktop.Platform.VAAPI.Intel"
-                        ),
-                        PackageRef::get_or_intern(
-                            &interner,
-                            "org.freedesktop.Platform.VAAPI.Intel/x86_64/23.08"
-                        )
-                    ],
-                },
-                Package {
-                    name: PackageRef::get_or_intern(&interner, "openh264"),
-                    version: "2.1.0".into(),
-                    desc: Some("OpenH264 Video Codec provided by Cisco Systems, Inc.".into()),
-                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
-                    depends: vec![],
-                    provides: vec![],
-                    reason: Some(InstallReason::Dependency),
-                    status: PackageInstallStatus::Installed,
-                    ids: smallvec::smallvec![
-                        PackageRef::get_or_intern(&interner, "org.freedesktop.Platform.openh264"),
-                        PackageRef::get_or_intern(
-                            &interner,
-                            "org.freedesktop.Platform.openh264/x86_64/2.2.0"
-                        )
-                    ],
-                },
-                Package {
-                    name: PackageRef::get_or_intern(&interner, "openh264"),
-                    version: "2.4.1".into(),
-                    desc: Some("OpenH264 Video Codec provided by Cisco Systems, Inc.".into()),
-                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
-                    depends: vec![],
-                    provides: vec![],
-                    reason: Some(InstallReason::Dependency),
-                    status: PackageInstallStatus::Installed,
-                    ids: smallvec::smallvec![
-                        PackageRef::get_or_intern(&interner, "org.freedesktop.Platform.openh264"),
-                        PackageRef::get_or_intern(
-                            &interner,
-                            "org.freedesktop.Platform.openh264/x86_64/2.4.1"
-                        )
-                    ],
-                },
-                Package {
-                    name: PackageRef::get_or_intern(
+        assert_eq!(packages, vec![
+            Package {
+                name: PackageRef::get_or_intern(&interner, "Flatseal"),
+                version: "2.2.0".into(),
+                desc: Some("Manage Flatpak permissions".into()),
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
+                depends: vec![],
+                provides: vec![],
+                reason: None,
+                status: PackageInstallStatus::Installed,
+                ids: smallvec::smallvec![
+                    PackageRef::get_or_intern(&interner, "com.github.tchx84.Flatseal"),
+                    PackageRef::get_or_intern(
                         &interner,
-                        "GNOME Application Platform version 46"
+                        "com.github.tchx84.Flatseal/x86_64/stable"
+                    )
+                ],
+            },
+            Package {
+                name: PackageRef::get_or_intern(&interner, "Fedora Media Writer"),
+                version: "5.1.1".into(),
+                desc: Some("A tool to create a live USB drive with an edition of Fedora".into()),
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
+                depends: vec![],
+                provides: vec![],
+                reason: None,
+                status: PackageInstallStatus::Installed,
+                ids: smallvec::smallvec![
+                    PackageRef::get_or_intern(&interner, "org.fedoraproject.MediaWriter"),
+                    PackageRef::get_or_intern(
+                        &interner,
+                        "org.fedoraproject.MediaWriter/x86_64/stable"
+                    )
+                ],
+            },
+            Package {
+                name: PackageRef::get_or_intern(&interner, "Freedesktop Platform"),
+                version: "23.08.19".into(),
+                desc: Some("Runtime platform for applications".into()),
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
+                depends: vec![],
+                provides: vec![],
+                reason: Some(InstallReason::Dependency),
+                status: PackageInstallStatus::Installed,
+                ids: smallvec::smallvec![
+                    PackageRef::get_or_intern(&interner, "org.freedesktop.Platform"),
+                    PackageRef::get_or_intern(&interner, "org.freedesktop.Platform/x86_64/23.08")
+                ],
+            },
+            Package {
+                name: PackageRef::get_or_intern(&interner, "Mesa"),
+                version: "24.0.7".into(),
+                desc: Some("Mesa - The 3D Graphics Library".into()),
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
+                depends: vec![],
+                provides: vec![],
+                reason: Some(InstallReason::Dependency),
+                status: PackageInstallStatus::Installed,
+                ids: smallvec::smallvec![
+                    PackageRef::get_or_intern(&interner, "org.freedesktop.Platform.GL.default"),
+                    PackageRef::get_or_intern(
+                        &interner,
+                        "org.freedesktop.Platform.GL.default/x86_64/23.08"
+                    )
+                ],
+            },
+            Package {
+                name: PackageRef::get_or_intern(&interner, "Mesa (Extra)"),
+                version: "24.0.7".into(),
+                desc: Some("Mesa - The 3D Graphics Library".into()),
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
+                depends: vec![],
+                provides: vec![],
+                reason: Some(InstallReason::Dependency),
+                status: PackageInstallStatus::Installed,
+                ids: smallvec::smallvec![
+                    PackageRef::get_or_intern(&interner, "org.freedesktop.Platform.GL.default"),
+                    PackageRef::get_or_intern(
+                        &interner,
+                        "org.freedesktop.Platform.GL.default/x86_64/23.08-extra"
+                    )
+                ],
+            },
+            Package {
+                name: PackageRef::get_or_intern(&interner, "nvidia-550-78"),
+                version: "".into(),
+                desc: None,
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
+                depends: vec![],
+                provides: vec![],
+                reason: Some(InstallReason::Dependency),
+                status: PackageInstallStatus::Installed,
+                ids: smallvec::smallvec![
+                    PackageRef::get_or_intern(
+                        &interner,
+                        "org.freedesktop.Platform.GL.nvidia-550-78"
                     ),
-                    version: "".into(),
-                    desc: Some("Shared libraries used by GNOME applications".into()),
-                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
-                    depends: vec![],
-                    provides: vec![],
-                    reason: Some(InstallReason::Dependency),
-                    status: PackageInstallStatus::Installed,
-                    ids: smallvec::smallvec![
-                        PackageRef::get_or_intern(&interner, "org.gnome.Platform"),
-                        PackageRef::get_or_intern(&interner, "org.gnome.Platform/x86_64/46")
-                    ],
-                },
-                Package {
-                    name: PackageRef::get_or_intern(&interner, "Adwaita dark GTK theme"),
-                    version: "".into(),
-                    desc: Some("Dark variant of the Adwaita GTK theme".into()),
-                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
-                    depends: vec![],
-                    provides: vec![],
-                    reason: Some(InstallReason::Dependency),
-                    status: PackageInstallStatus::Installed,
-                    ids: smallvec::smallvec![
-                        PackageRef::get_or_intern(&interner, "org.gtk.Gtk3theme.Adwaita-dark"),
-                        PackageRef::get_or_intern(
-                            &interner,
-                            "org.gtk.Gtk3theme.Adwaita-dark/x86_64/3.22"
-                        )
-                    ],
-                },
-                Package {
-                    name: PackageRef::get_or_intern(&interner, "Breeze GTK theme"),
-                    version: "6.0.5".into(),
-                    desc: Some("Breeze GTK theme matching the KDE Breeze theme".into()),
-                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
-                    depends: vec![],
-                    provides: vec![],
-                    reason: Some(InstallReason::Dependency),
-                    status: PackageInstallStatus::Installed,
-                    ids: smallvec::smallvec![
-                        PackageRef::get_or_intern(&interner, "org.gtk.Gtk3theme.Breeze"),
-                        PackageRef::get_or_intern(
-                            &interner,
-                            "org.gtk.Gtk3theme.Breeze/x86_64/3.22"
-                        )
-                    ],
-                },
-                Package {
-                    name: PackageRef::get_or_intern(&interner, "Adwaita theme"),
-                    version: "".into(),
-                    desc: Some("Adwaita widget theme matching the GNOME adwaita theme".into()),
-                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
-                    depends: vec![],
-                    provides: vec![],
-                    reason: Some(InstallReason::Dependency),
-                    status: PackageInstallStatus::Installed,
-                    ids: smallvec::smallvec![
-                        PackageRef::get_or_intern(&interner, "org.kde.KStyle.Adwaita"),
-                        PackageRef::get_or_intern(&interner, "org.kde.KStyle.Adwaita/x86_64/6.6")
-                    ],
-                },
-                Package {
-                    name: PackageRef::get_or_intern(&interner, "KDE Application Platform"),
-                    version: "".into(),
-                    desc: Some("Shared libraries used by KDE applications".into()),
-                    architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
-                    depends: vec![],
-                    provides: vec![],
-                    reason: Some(InstallReason::Dependency),
-                    status: PackageInstallStatus::Installed,
-                    ids: smallvec::smallvec![
-                        PackageRef::get_or_intern(&interner, "org.kde.Platform"),
-                        PackageRef::get_or_intern(&interner, "org.kde.Platform/x86_64/6.6")
-                    ],
-                },
-            ]
-        );
+                    PackageRef::get_or_intern(
+                        &interner,
+                        "org.freedesktop.Platform.GL.nvidia-550-78/x86_64/1.4"
+                    )
+                ],
+            },
+            Package {
+                name: PackageRef::get_or_intern(&interner, "Intel"),
+                version: "".into(),
+                desc: None,
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
+                depends: vec![],
+                provides: vec![],
+                reason: Some(InstallReason::Dependency),
+                status: PackageInstallStatus::Installed,
+                ids: smallvec::smallvec![
+                    PackageRef::get_or_intern(&interner, "org.freedesktop.Platform.VAAPI.Intel"),
+                    PackageRef::get_or_intern(
+                        &interner,
+                        "org.freedesktop.Platform.VAAPI.Intel/x86_64/23.08"
+                    )
+                ],
+            },
+            Package {
+                name: PackageRef::get_or_intern(&interner, "openh264"),
+                version: "2.1.0".into(),
+                desc: Some("OpenH264 Video Codec provided by Cisco Systems, Inc.".into()),
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
+                depends: vec![],
+                provides: vec![],
+                reason: Some(InstallReason::Dependency),
+                status: PackageInstallStatus::Installed,
+                ids: smallvec::smallvec![
+                    PackageRef::get_or_intern(&interner, "org.freedesktop.Platform.openh264"),
+                    PackageRef::get_or_intern(
+                        &interner,
+                        "org.freedesktop.Platform.openh264/x86_64/2.2.0"
+                    )
+                ],
+            },
+            Package {
+                name: PackageRef::get_or_intern(&interner, "openh264"),
+                version: "2.4.1".into(),
+                desc: Some("OpenH264 Video Codec provided by Cisco Systems, Inc.".into()),
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
+                depends: vec![],
+                provides: vec![],
+                reason: Some(InstallReason::Dependency),
+                status: PackageInstallStatus::Installed,
+                ids: smallvec::smallvec![
+                    PackageRef::get_or_intern(&interner, "org.freedesktop.Platform.openh264"),
+                    PackageRef::get_or_intern(
+                        &interner,
+                        "org.freedesktop.Platform.openh264/x86_64/2.4.1"
+                    )
+                ],
+            },
+            Package {
+                name: PackageRef::get_or_intern(&interner, "GNOME Application Platform version 46"),
+                version: "".into(),
+                desc: Some("Shared libraries used by GNOME applications".into()),
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
+                depends: vec![],
+                provides: vec![],
+                reason: Some(InstallReason::Dependency),
+                status: PackageInstallStatus::Installed,
+                ids: smallvec::smallvec![
+                    PackageRef::get_or_intern(&interner, "org.gnome.Platform"),
+                    PackageRef::get_or_intern(&interner, "org.gnome.Platform/x86_64/46")
+                ],
+            },
+            Package {
+                name: PackageRef::get_or_intern(&interner, "Adwaita dark GTK theme"),
+                version: "".into(),
+                desc: Some("Dark variant of the Adwaita GTK theme".into()),
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
+                depends: vec![],
+                provides: vec![],
+                reason: Some(InstallReason::Dependency),
+                status: PackageInstallStatus::Installed,
+                ids: smallvec::smallvec![
+                    PackageRef::get_or_intern(&interner, "org.gtk.Gtk3theme.Adwaita-dark"),
+                    PackageRef::get_or_intern(
+                        &interner,
+                        "org.gtk.Gtk3theme.Adwaita-dark/x86_64/3.22"
+                    )
+                ],
+            },
+            Package {
+                name: PackageRef::get_or_intern(&interner, "Breeze GTK theme"),
+                version: "6.0.5".into(),
+                desc: Some("Breeze GTK theme matching the KDE Breeze theme".into()),
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
+                depends: vec![],
+                provides: vec![],
+                reason: Some(InstallReason::Dependency),
+                status: PackageInstallStatus::Installed,
+                ids: smallvec::smallvec![
+                    PackageRef::get_or_intern(&interner, "org.gtk.Gtk3theme.Breeze"),
+                    PackageRef::get_or_intern(&interner, "org.gtk.Gtk3theme.Breeze/x86_64/3.22")
+                ],
+            },
+            Package {
+                name: PackageRef::get_or_intern(&interner, "Adwaita theme"),
+                version: "".into(),
+                desc: Some("Adwaita widget theme matching the GNOME adwaita theme".into()),
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
+                depends: vec![],
+                provides: vec![],
+                reason: Some(InstallReason::Dependency),
+                status: PackageInstallStatus::Installed,
+                ids: smallvec::smallvec![
+                    PackageRef::get_or_intern(&interner, "org.kde.KStyle.Adwaita"),
+                    PackageRef::get_or_intern(&interner, "org.kde.KStyle.Adwaita/x86_64/6.6")
+                ],
+            },
+            Package {
+                name: PackageRef::get_or_intern(&interner, "KDE Application Platform"),
+                version: "".into(),
+                desc: Some("Shared libraries used by KDE applications".into()),
+                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
+                depends: vec![],
+                provides: vec![],
+                reason: Some(InstallReason::Dependency),
+                status: PackageInstallStatus::Installed,
+                ids: smallvec::smallvec![
+                    PackageRef::get_or_intern(&interner, "org.kde.Platform"),
+                    PackageRef::get_or_intern(&interner, "org.kde.Platform/x86_64/6.6")
+                ],
+            },
+        ]);
     }
 }

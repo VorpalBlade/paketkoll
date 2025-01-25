@@ -1,11 +1,11 @@
 //! Parsers for Debian package files.
 
-use bstr::io::BufReadExt;
 use bstr::ByteSlice;
 use bstr::ByteVec;
+use bstr::io::BufReadExt;
 use compact_str::format_compact;
-use eyre::bail;
 use eyre::WrapErr;
+use eyre::bail;
 use paketkoll_types::files::Checksum;
 use paketkoll_types::files::FileEntry;
 use paketkoll_types::files::FileFlags;
@@ -425,43 +425,40 @@ mod tests {
         let interner = Interner::default();
         let package_ref = PackageRef::get_or_intern(&interner, "libc6");
         let result = parse_paths(package_ref, &mut input).unwrap();
-        assert_eq!(
-            result,
-            vec![
-                FileEntry {
-                    package: Some(package_ref),
-                    path: "/usr/share/doc/libc6/README".into(),
-                    properties: Properties::Unknown,
-                    flags: FileFlags::empty(),
-                    source: super::super::NAME,
-                    seen: Default::default(),
-                },
-                FileEntry {
-                    package: Some(package_ref),
-                    path: "/usr/share/doc/libc6/changelog.Debian.gz".into(),
-                    properties: Properties::Unknown,
-                    flags: FileFlags::empty(),
-                    source: super::super::NAME,
-                    seen: Default::default(),
-                },
-                FileEntry {
-                    package: Some(package_ref),
-                    path: "/usr/share/doc/libc6/copyright".into(),
-                    properties: Properties::Unknown,
-                    flags: FileFlags::empty(),
-                    source: super::super::NAME,
-                    seen: Default::default(),
-                },
-                FileEntry {
-                    package: Some(package_ref),
-                    path: "/usr/share/doc/libc6/NEWS.gz".into(),
-                    properties: Properties::Unknown,
-                    flags: FileFlags::empty(),
-                    source: super::super::NAME,
-                    seen: Default::default(),
-                },
-            ]
-        );
+        assert_eq!(result, vec![
+            FileEntry {
+                package: Some(package_ref),
+                path: "/usr/share/doc/libc6/README".into(),
+                properties: Properties::Unknown,
+                flags: FileFlags::empty(),
+                source: super::super::NAME,
+                seen: Default::default(),
+            },
+            FileEntry {
+                package: Some(package_ref),
+                path: "/usr/share/doc/libc6/changelog.Debian.gz".into(),
+                properties: Properties::Unknown,
+                flags: FileFlags::empty(),
+                source: super::super::NAME,
+                seen: Default::default(),
+            },
+            FileEntry {
+                package: Some(package_ref),
+                path: "/usr/share/doc/libc6/copyright".into(),
+                properties: Properties::Unknown,
+                flags: FileFlags::empty(),
+                source: super::super::NAME,
+                seen: Default::default(),
+            },
+            FileEntry {
+                package: Some(package_ref),
+                path: "/usr/share/doc/libc6/NEWS.gz".into(),
+                properties: Properties::Unknown,
+                flags: FileFlags::empty(),
+                source: super::super::NAME,
+                seen: Default::default(),
+            },
+        ]);
     }
 
     fn hex_to_md5(hex: &[u8]) -> Checksum {
@@ -481,55 +478,52 @@ mod tests {
         let interner = Interner::default();
         let package_ref = PackageRef::get_or_intern(&interner, "libc6");
         let result = parse_md5sums(package_ref, &mut input).unwrap();
-        assert_eq!(
-            result,
-            vec![
-                FileEntry {
-                    package: Some(package_ref),
-                    path: "/usr/share/doc/libc6/README".into(),
-                    properties: Properties::RegularFileBasic(RegularFileBasic {
-                        size: None,
-                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9a")
-                    }),
-                    flags: FileFlags::empty(),
-                    source: super::super::NAME,
-                    seen: Default::default(),
-                },
-                FileEntry {
-                    package: Some(package_ref),
-                    path: "/usr/share/doc/libc6/changelog.Debian.gz".into(),
-                    properties: Properties::RegularFileBasic(RegularFileBasic {
-                        size: None,
-                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9b")
-                    }),
-                    flags: FileFlags::empty(),
-                    source: super::super::NAME,
-                    seen: Default::default(),
-                },
-                FileEntry {
-                    package: Some(package_ref),
-                    path: "/usr/share/doc/libc6/copyright".into(),
-                    properties: Properties::RegularFileBasic(RegularFileBasic {
-                        size: None,
-                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9c")
-                    }),
-                    flags: FileFlags::empty(),
-                    source: super::super::NAME,
-                    seen: Default::default(),
-                },
-                FileEntry {
-                    package: Some(package_ref),
-                    path: "/usr/share/doc/libc6/NEWS.gz".into(),
-                    properties: Properties::RegularFileBasic(RegularFileBasic {
-                        size: None,
-                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9d")
-                    }),
-                    flags: FileFlags::empty(),
-                    source: super::super::NAME,
-                    seen: Default::default(),
-                },
-            ]
-        );
+        assert_eq!(result, vec![
+            FileEntry {
+                package: Some(package_ref),
+                path: "/usr/share/doc/libc6/README".into(),
+                properties: Properties::RegularFileBasic(RegularFileBasic {
+                    size: None,
+                    checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9a")
+                }),
+                flags: FileFlags::empty(),
+                source: super::super::NAME,
+                seen: Default::default(),
+            },
+            FileEntry {
+                package: Some(package_ref),
+                path: "/usr/share/doc/libc6/changelog.Debian.gz".into(),
+                properties: Properties::RegularFileBasic(RegularFileBasic {
+                    size: None,
+                    checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9b")
+                }),
+                flags: FileFlags::empty(),
+                source: super::super::NAME,
+                seen: Default::default(),
+            },
+            FileEntry {
+                package: Some(package_ref),
+                path: "/usr/share/doc/libc6/copyright".into(),
+                properties: Properties::RegularFileBasic(RegularFileBasic {
+                    size: None,
+                    checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9c")
+                }),
+                flags: FileFlags::empty(),
+                source: super::super::NAME,
+                seen: Default::default(),
+            },
+            FileEntry {
+                package: Some(package_ref),
+                path: "/usr/share/doc/libc6/NEWS.gz".into(),
+                properties: Properties::RegularFileBasic(RegularFileBasic {
+                    size: None,
+                    checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9d")
+                }),
+                flags: FileFlags::empty(),
+                source: super::super::NAME,
+                seen: Default::default(),
+            },
+        ]);
     }
 
     #[test]
@@ -540,50 +534,44 @@ mod tests {
         let interner = Interner::default();
         let result = super::parse_depends(&interner, input);
 
-        assert_eq!(
-            result,
-            vec![
-                Dependency::Single(PackageRef::get_or_intern(&interner, "libc6")),
-                Dependency::Single(PackageRef::get_or_intern(&interner, "libice6")),
-                Dependency::Single(PackageRef::get_or_intern(&interner, "libx11-6")),
-                Dependency::Single(PackageRef::get_or_intern(&interner, "libxaw7")),
-                Dependency::Single(PackageRef::get_or_intern(&interner, "libxcursor1")),
-                Dependency::Single(PackageRef::get_or_intern(&interner, "libxext6")),
-                Dependency::Single(PackageRef::get_or_intern(&interner, "libxi6")),
-                Dependency::Single(PackageRef::get_or_intern(&interner, "libxmu6")),
-                Dependency::Single(PackageRef::get_or_intern(&interner, "libxmuu1")),
-                Dependency::Single(PackageRef::get_or_intern(&interner, "libxrandr2")),
-                Dependency::Single(PackageRef::get_or_intern(&interner, "libxt6")),
-                Dependency::Single(PackageRef::get_or_intern(&interner, "libxxf86vm1")),
-                Dependency::Single(PackageRef::get_or_intern(&interner, "cpp")),
-            ]
-        );
+        assert_eq!(result, vec![
+            Dependency::Single(PackageRef::get_or_intern(&interner, "libc6")),
+            Dependency::Single(PackageRef::get_or_intern(&interner, "libice6")),
+            Dependency::Single(PackageRef::get_or_intern(&interner, "libx11-6")),
+            Dependency::Single(PackageRef::get_or_intern(&interner, "libxaw7")),
+            Dependency::Single(PackageRef::get_or_intern(&interner, "libxcursor1")),
+            Dependency::Single(PackageRef::get_or_intern(&interner, "libxext6")),
+            Dependency::Single(PackageRef::get_or_intern(&interner, "libxi6")),
+            Dependency::Single(PackageRef::get_or_intern(&interner, "libxmu6")),
+            Dependency::Single(PackageRef::get_or_intern(&interner, "libxmuu1")),
+            Dependency::Single(PackageRef::get_or_intern(&interner, "libxrandr2")),
+            Dependency::Single(PackageRef::get_or_intern(&interner, "libxt6")),
+            Dependency::Single(PackageRef::get_or_intern(&interner, "libxxf86vm1")),
+            Dependency::Single(PackageRef::get_or_intern(&interner, "cpp")),
+        ]);
 
         let input = "python3-attr, python3-importlib-metadata | python3 (>> 3.8), \
                      python3-importlib-resources | python3 (>> 3.9), python3-pyrsistent, \
                      python3-typing-extensions | python3 (>> 3.8), python3:any";
         let result = super::parse_depends(&interner, input);
 
-        assert_eq!(
-            result,
-            vec![
-                Dependency::Single(PackageRef::get_or_intern(&interner, "python3-attr")),
-                Dependency::Disjunction(vec![
-                    PackageRef::get_or_intern(&interner, "python3-importlib-metadata"),
-                    PackageRef::get_or_intern(&interner, "python3")
-                ]),
-                Dependency::Disjunction(vec![
-                    PackageRef::get_or_intern(&interner, "python3-importlib-resources"),
-                    PackageRef::get_or_intern(&interner, "python3")
-                ]),
-                Dependency::Single(PackageRef::get_or_intern(&interner, "python3-pyrsistent")),
-                Dependency::Disjunction(vec![
-                    PackageRef::get_or_intern(&interner, "python3-typing-extensions"),
-                    PackageRef::get_or_intern(&interner, "python3")
-                ]),
-                Dependency::Single(PackageRef::get_or_intern(&interner, "python3")),
-            ]
-        );
+        assert_eq!(result, vec![
+            Dependency::Single(PackageRef::get_or_intern(&interner, "python3-attr")),
+            Dependency::Disjunction(vec![
+                PackageRef::get_or_intern(&interner, "python3-importlib-metadata"),
+                PackageRef::get_or_intern(&interner, "python3")
+            ]),
+            Dependency::Disjunction(vec![
+                PackageRef::get_or_intern(&interner, "python3-importlib-resources"),
+                PackageRef::get_or_intern(&interner, "python3")
+            ]),
+            Dependency::Single(PackageRef::get_or_intern(&interner, "python3-pyrsistent")),
+            Dependency::Disjunction(vec![
+                PackageRef::get_or_intern(&interner, "python3-typing-extensions"),
+                PackageRef::get_or_intern(&interner, "python3")
+            ]),
+            Dependency::Single(PackageRef::get_or_intern(&interner, "python3")),
+        ]);
     }
 
     #[test]
@@ -616,76 +604,70 @@ mod tests {
         let interner = Interner::default();
         let primary_arch = ArchitectureRef::get_or_intern(&interner, "arm64");
         let (files, packages) = parse_status(&interner, &mut input, primary_arch).unwrap();
-        assert_eq!(
-            packages,
-            vec![Package {
-                name: PackageRef::get_or_intern(&interner, "libc6"),
-                architecture: Some(ArchitectureRef::get_or_intern(&interner, "arm64")),
-                version: "2.36-9+rpt2+deb12u4".into(),
-                desc: Some("Very important library".into()),
-                depends: vec![
-                    Dependency::Single(PackageRef::get_or_intern(&interner, "libgcc")),
-                    Dependency::Single(PackageRef::get_or_intern(&interner, "something-else")),
-                    Dependency::Single(PackageRef::get_or_intern(&interner, "dummy")),
-                ],
-                provides: vec![],
-                reason: Some(InstallReason::Explicit),
-                status: PackageInstallStatus::Installed,
-                ids: smallvec::smallvec![
-                    PackageRef::get_or_intern(&interner, "libc6"),
-                    PackageRef::get_or_intern(&interner, "libc6:arm64"),
-                ],
-            }]
-        );
-        assert_eq!(
-            files,
-            vec![
-                FileEntry {
-                    package: Some(PackageRef::get_or_intern(&interner, "libc6")),
-                    path: "/etc/ld.so.conf".into(),
-                    properties: Properties::RegularFileBasic(RegularFileBasic {
-                        size: None,
-                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9a")
-                    }),
-                    flags: FileFlags::CONFIG,
-                    source: super::super::NAME,
-                    seen: Default::default(),
-                },
-                FileEntry {
-                    package: Some(PackageRef::get_or_intern(&interner, "libc6")),
-                    path: "/etc/ld.so.conf.d/1.conf".into(),
-                    properties: Properties::RegularFileBasic(RegularFileBasic {
-                        size: None,
-                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9b")
-                    }),
-                    flags: FileFlags::CONFIG,
-                    source: super::super::NAME,
-                    seen: Default::default(),
-                },
-                FileEntry {
-                    package: Some(PackageRef::get_or_intern(&interner, "libc6")),
-                    path: "/etc/ld.so.conf.d/2.conf".into(),
-                    properties: Properties::RegularFileBasic(RegularFileBasic {
-                        size: None,
-                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9c")
-                    }),
-                    flags: FileFlags::CONFIG,
-                    source: super::super::NAME,
-                    seen: Default::default(),
-                },
-                FileEntry {
-                    package: Some(PackageRef::get_or_intern(&interner, "libc6")),
-                    path: "/etc/ld.so.conf.d/3.conf".into(),
-                    properties: Properties::RegularFileBasic(RegularFileBasic {
-                        size: None,
-                        checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9d")
-                    }),
-                    flags: FileFlags::CONFIG,
-                    source: super::super::NAME,
-                    seen: Default::default(),
-                },
-            ]
-        );
+        assert_eq!(packages, vec![Package {
+            name: PackageRef::get_or_intern(&interner, "libc6"),
+            architecture: Some(ArchitectureRef::get_or_intern(&interner, "arm64")),
+            version: "2.36-9+rpt2+deb12u4".into(),
+            desc: Some("Very important library".into()),
+            depends: vec![
+                Dependency::Single(PackageRef::get_or_intern(&interner, "libgcc")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "something-else")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "dummy")),
+            ],
+            provides: vec![],
+            reason: Some(InstallReason::Explicit),
+            status: PackageInstallStatus::Installed,
+            ids: smallvec::smallvec![
+                PackageRef::get_or_intern(&interner, "libc6"),
+                PackageRef::get_or_intern(&interner, "libc6:arm64"),
+            ],
+        }]);
+        assert_eq!(files, vec![
+            FileEntry {
+                package: Some(PackageRef::get_or_intern(&interner, "libc6")),
+                path: "/etc/ld.so.conf".into(),
+                properties: Properties::RegularFileBasic(RegularFileBasic {
+                    size: None,
+                    checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9a")
+                }),
+                flags: FileFlags::CONFIG,
+                source: super::super::NAME,
+                seen: Default::default(),
+            },
+            FileEntry {
+                package: Some(PackageRef::get_or_intern(&interner, "libc6")),
+                path: "/etc/ld.so.conf.d/1.conf".into(),
+                properties: Properties::RegularFileBasic(RegularFileBasic {
+                    size: None,
+                    checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9b")
+                }),
+                flags: FileFlags::CONFIG,
+                source: super::super::NAME,
+                seen: Default::default(),
+            },
+            FileEntry {
+                package: Some(PackageRef::get_or_intern(&interner, "libc6")),
+                path: "/etc/ld.so.conf.d/2.conf".into(),
+                properties: Properties::RegularFileBasic(RegularFileBasic {
+                    size: None,
+                    checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9c")
+                }),
+                flags: FileFlags::CONFIG,
+                source: super::super::NAME,
+                seen: Default::default(),
+            },
+            FileEntry {
+                package: Some(PackageRef::get_or_intern(&interner, "libc6")),
+                path: "/etc/ld.so.conf.d/3.conf".into(),
+                properties: Properties::RegularFileBasic(RegularFileBasic {
+                    size: None,
+                    checksum: hex_to_md5(b"1f7b7e9e7e9e7e9e7e9e7e9e7e9e7e9d")
+                }),
+                flags: FileFlags::CONFIG,
+                source: super::super::NAME,
+                seen: Default::default(),
+            },
+        ]);
     }
 
     #[test]

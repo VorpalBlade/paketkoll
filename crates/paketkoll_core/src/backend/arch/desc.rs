@@ -195,26 +195,23 @@ mod tests {
         let interner = Interner::default();
         let desc = from_arch_linux_desc(input.as_bytes(), &interner).unwrap();
 
-        assert_eq!(
-            desc,
-            Package {
-                name: PackageRef::get_or_intern(&interner, "library-subpackage"),
-                version: "1.2.3-4".into(),
-                desc: Some("Some library".into()),
-                architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
-                depends: vec![
-                    Dependency::Single(PackageRef::get_or_intern(&interner, "gcc-libs")),
-                    Dependency::Single(PackageRef::get_or_intern(&interner, "glibc")),
-                    Dependency::Single(PackageRef::get_or_intern(&interner, "somelib")),
-                    Dependency::Single(PackageRef::get_or_intern(&interner, "some-other-lib.so")),
-                    Dependency::Single(PackageRef::get_or_intern(&interner, "linux-api-headers")),
-                ],
-                provides: vec![PackageRef::get_or_intern(&interner, "libfoo.so"),],
-                reason: Some(InstallReason::Dependency),
-                status: PackageInstallStatus::Installed,
-                ids: Default::default(),
-            }
-        );
+        assert_eq!(desc, Package {
+            name: PackageRef::get_or_intern(&interner, "library-subpackage"),
+            version: "1.2.3-4".into(),
+            desc: Some("Some library".into()),
+            architecture: Some(ArchitectureRef::get_or_intern(&interner, "x86_64")),
+            depends: vec![
+                Dependency::Single(PackageRef::get_or_intern(&interner, "gcc-libs")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "glibc")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "somelib")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "some-other-lib.so")),
+                Dependency::Single(PackageRef::get_or_intern(&interner, "linux-api-headers")),
+            ],
+            provides: vec![PackageRef::get_or_intern(&interner, "libfoo.so"),],
+            reason: Some(InstallReason::Dependency),
+            status: PackageInstallStatus::Installed,
+            ids: Default::default(),
+        });
     }
 
     #[test]
@@ -231,13 +228,10 @@ mod tests {
 
         let backup_files = backup_files(input.as_bytes()).unwrap();
 
-        assert_eq!(
-            backup_files,
-            vec![
-                "etc/backup".to_string(),
-                "etc/backup2".to_string(),
-                "etc/backup3".to_string()
-            ]
-        );
+        assert_eq!(backup_files, vec![
+            "etc/backup".to_string(),
+            "etc/backup2".to_string(),
+            "etc/backup3".to_string()
+        ]);
     }
 }

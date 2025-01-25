@@ -59,13 +59,10 @@ fn parse_diversions(mut input: impl BufRead, interner: &Interner) -> eyre::Resul
             );
 
             let had_entry = results
-                .insert(
-                    orig_path.clone(),
-                    Diversion {
-                        by_package,
-                        new_path,
-                    },
-                )
+                .insert(orig_path.clone(), Diversion {
+                    by_package,
+                    new_path,
+                })
                 .is_some();
             if had_entry {
                 return Err(eyre::eyre!(
@@ -83,9 +80,9 @@ fn parse_diversions(mut input: impl BufRead, interner: &Interner) -> eyre::Resul
 
 #[cfg(test)]
 mod tests {
-    use super::parse_diversions;
     use super::Diversion;
     use super::Diversions;
+    use super::parse_diversions;
     use paketkoll_types::intern::Interner;
     use paketkoll_types::intern::PackageRef;
     use pretty_assertions::assert_eq;
@@ -105,41 +102,26 @@ mod tests {
         let parsed = parse_diversions(input.as_bytes(), &interner).unwrap();
 
         let expected = Diversions::from_iter(vec![
-            (
-                "/usr/lib/python3.11/EXTERNALLY-MANAGED".into(),
-                Diversion {
-                    new_path: "/usr/lib/python3.11/EXTERNALLY-MANAGED.orig".into(),
-                    by_package: PackageRef::get_or_intern(&interner, "raspberrypi-sys-mods"),
-                },
-            ),
-            (
-                "/usr/share/man/man1/parallel.1.gz".into(),
-                Diversion {
-                    new_path: "/usr/share/man/man1/parallel.moreutils.1.gz".into(),
-                    by_package: PackageRef::get_or_intern(&interner, "parallel"),
-                },
-            ),
-            (
-                "/usr/share/man/man1/sh.1.gz".into(),
-                Diversion {
-                    new_path: "/usr/share/man/man1/sh.distrib.1.gz".into(),
-                    by_package: PackageRef::get_or_intern(&interner, "dash"),
-                },
-            ),
-            (
-                "/usr/bin/parallel".into(),
-                Diversion {
-                    new_path: "/usr/bin/parallel.moreutils".into(),
-                    by_package: PackageRef::get_or_intern(&interner, "parallel"),
-                },
-            ),
-            (
-                "/bin/sh".into(),
-                Diversion {
-                    new_path: "/bin/sh.distrib".into(),
-                    by_package: PackageRef::get_or_intern(&interner, "dash"),
-                },
-            ),
+            ("/usr/lib/python3.11/EXTERNALLY-MANAGED".into(), Diversion {
+                new_path: "/usr/lib/python3.11/EXTERNALLY-MANAGED.orig".into(),
+                by_package: PackageRef::get_or_intern(&interner, "raspberrypi-sys-mods"),
+            }),
+            ("/usr/share/man/man1/parallel.1.gz".into(), Diversion {
+                new_path: "/usr/share/man/man1/parallel.moreutils.1.gz".into(),
+                by_package: PackageRef::get_or_intern(&interner, "parallel"),
+            }),
+            ("/usr/share/man/man1/sh.1.gz".into(), Diversion {
+                new_path: "/usr/share/man/man1/sh.distrib.1.gz".into(),
+                by_package: PackageRef::get_or_intern(&interner, "dash"),
+            }),
+            ("/usr/bin/parallel".into(), Diversion {
+                new_path: "/usr/bin/parallel.moreutils".into(),
+                by_package: PackageRef::get_or_intern(&interner, "parallel"),
+            }),
+            ("/bin/sh".into(), Diversion {
+                new_path: "/bin/sh.distrib".into(),
+                by_package: PackageRef::get_or_intern(&interner, "dash"),
+            }),
         ]);
 
         assert_eq!(parsed, expected);

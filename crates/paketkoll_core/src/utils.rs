@@ -116,14 +116,11 @@ pub(crate) fn locate_package_file(
         // Try to locate package
         for dir in dir_candidates {
             let path = format!("{dir}/{package_match}");
-            let entries = glob::glob_with(
-                &path,
-                glob::MatchOptions {
-                    case_sensitive: true,
-                    require_literal_separator: true,
-                    require_literal_leading_dot: true,
-                },
-            );
+            let entries = glob::glob_with(&path, glob::MatchOptions {
+                case_sensitive: true,
+                require_literal_separator: true,
+                require_literal_leading_dot: true,
+            });
             match entries {
                 Ok(paths) => {
                     let mut paths: SmallVec<[_; 5]> =
@@ -177,14 +174,11 @@ pub(crate) fn missing_packages<'strings>(
     {
         for dir in dir_candidates {
             let path = format!("{dir}/{package_match}");
-            let entries = glob::glob_with(
-                &path,
-                glob::MatchOptions {
-                    case_sensitive: true,
-                    require_literal_separator: true,
-                    require_literal_leading_dot: true,
-                },
-            );
+            let entries = glob::glob_with(&path, glob::MatchOptions {
+                case_sensitive: true,
+                require_literal_separator: true,
+                require_literal_leading_dot: true,
+            });
             match entries {
                 Ok(paths) => {
                     let mut paths: SmallVec<[_; 5]> = paths.collect::<Result<_, _>>()?;
@@ -303,24 +297,21 @@ pub(crate) fn convert_archive_entries(
                 let size = entry.size();
                 assert_eq!(size, entry.header().size()?);
                 let mtime = entry.header().mtime()?;
-                results.insert(
-                    path.clone(),
-                    FileEntry {
-                        package: Some(pkg_ref),
-                        path,
-                        properties: Properties::RegularFile(RegularFile {
-                            mode,
-                            owner,
-                            group,
-                            size,
-                            mtime: SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(mtime),
-                            checksum: sha256_readable(&mut entry)?,
-                        }),
-                        flags: FileFlags::empty(),
-                        source,
-                        seen: Default::default(),
-                    },
-                );
+                results.insert(path.clone(), FileEntry {
+                    package: Some(pkg_ref),
+                    path,
+                    properties: Properties::RegularFile(RegularFile {
+                        mode,
+                        owner,
+                        group,
+                        size,
+                        mtime: SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(mtime),
+                        checksum: sha256_readable(&mut entry)?,
+                    }),
+                    flags: FileFlags::empty(),
+                    source,
+                    seen: Default::default(),
+                });
             }
             tar::EntryType::Link | tar::EntryType::GNULongLink => {
                 let link = entry.link_name()?.expect("No link name");
@@ -336,49 +327,40 @@ pub(crate) fn convert_archive_entries(
             }
             tar::EntryType::Symlink => {
                 let link = entry.link_name()?;
-                results.insert(
-                    path.clone(),
-                    FileEntry {
-                        package: Some(pkg_ref),
-                        path,
-                        properties: Properties::Symlink(Symlink {
-                            owner,
-                            group,
-                            target: link
-                                .ok_or_else(|| eyre::eyre!("Failed to get link target"))?
-                                .into(),
-                        }),
-                        flags: FileFlags::empty(),
-                        source,
-                        seen: Default::default(),
-                    },
-                );
+                results.insert(path.clone(), FileEntry {
+                    package: Some(pkg_ref),
+                    path,
+                    properties: Properties::Symlink(Symlink {
+                        owner,
+                        group,
+                        target: link
+                            .ok_or_else(|| eyre::eyre!("Failed to get link target"))?
+                            .into(),
+                    }),
+                    flags: FileFlags::empty(),
+                    source,
+                    seen: Default::default(),
+                });
             }
             tar::EntryType::Char | tar::EntryType::Block | tar::EntryType::Fifo => {
-                results.insert(
-                    path.clone(),
-                    FileEntry {
-                        package: Some(pkg_ref),
-                        path,
-                        properties: Properties::Special,
-                        flags: FileFlags::empty(),
-                        source,
-                        seen: Default::default(),
-                    },
-                );
+                results.insert(path.clone(), FileEntry {
+                    package: Some(pkg_ref),
+                    path,
+                    properties: Properties::Special,
+                    flags: FileFlags::empty(),
+                    source,
+                    seen: Default::default(),
+                });
             }
             tar::EntryType::Directory => {
-                results.insert(
-                    path.clone(),
-                    FileEntry {
-                        package: Some(pkg_ref),
-                        path,
-                        properties: Properties::Directory(Directory { mode, owner, group }),
-                        flags: FileFlags::empty(),
-                        source,
-                        seen: Default::default(),
-                    },
-                );
+                results.insert(path.clone(), FileEntry {
+                    package: Some(pkg_ref),
+                    path,
+                    properties: Properties::Directory(Directory { mode, owner, group }),
+                    flags: FileFlags::empty(),
+                    source,
+                    seen: Default::default(),
+                });
             }
             tar::EntryType::GNUSparse
             | tar::EntryType::GNULongName

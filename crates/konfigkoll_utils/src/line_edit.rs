@@ -420,15 +420,11 @@ mod tests {
     #[test]
     fn test_regex_replace() {
         let mut program = EditProgram::new();
-        program.add(
-            Selector::All,
-            false,
-            Action::RegexReplace {
-                regex: Regex::new("^foo$").unwrap(),
-                replacement: "bar".into(),
-                replace_all: false,
-            },
-        );
+        program.add(Selector::All, false, Action::RegexReplace {
+            regex: Regex::new("^foo$").unwrap(),
+            replacement: "bar".into(),
+            replace_all: false,
+        });
         let input = "foo\nbar\nbaz";
         let output = program.apply(input);
         assert_eq!(output, "bar\nbar\nbaz\n");
@@ -437,29 +433,21 @@ mod tests {
     #[test]
     fn test_regex_replace_no_anchors() {
         let mut program = EditProgram::new();
-        program.add(
-            Selector::All,
-            false,
-            Action::RegexReplace {
-                regex: Regex::new("foo").unwrap(),
-                replacement: "bar".into(),
-                replace_all: false,
-            },
-        );
+        program.add(Selector::All, false, Action::RegexReplace {
+            regex: Regex::new("foo").unwrap(),
+            replacement: "bar".into(),
+            replace_all: false,
+        });
         let input = "foo foo\nbar\nbaz";
         let output = program.apply(input);
         assert_eq!(output, "bar foo\nbar\nbaz\n");
 
         let mut program = EditProgram::new();
-        program.add(
-            Selector::All,
-            false,
-            Action::RegexReplace {
-                regex: Regex::new("foo").unwrap(),
-                replacement: "bar".into(),
-                replace_all: true,
-            },
-        );
+        program.add(Selector::All, false, Action::RegexReplace {
+            regex: Regex::new("foo").unwrap(),
+            replacement: "bar".into(),
+            replace_all: true,
+        });
         let input = "foo foo\nbar\nbaz";
         let output = program.apply(input);
         assert_eq!(output, "bar bar\nbar\nbaz\n");
@@ -468,29 +456,21 @@ mod tests {
     #[test]
     fn test_regex_replace_capture_groups() {
         let mut program = EditProgram::new();
-        program.add(
-            Selector::All,
-            false,
-            Action::RegexReplace {
-                regex: Regex::new("f(a|o)o").unwrap(),
-                replacement: "b${1}r".into(),
-                replace_all: true,
-            },
-        );
+        program.add(Selector::All, false, Action::RegexReplace {
+            regex: Regex::new("f(a|o)o").unwrap(),
+            replacement: "b${1}r".into(),
+            replace_all: true,
+        });
         let input = "foo\nfao foo fee\nbar\nbaz";
         let output = program.apply(input);
         assert_eq!(output, "bor\nbar bor fee\nbar\nbaz\n");
 
         let mut program = EditProgram::new();
-        program.add(
-            Selector::All,
-            false,
-            Action::RegexReplace {
-                regex: Regex::new("f(a|o)o").unwrap(),
-                replacement: "b${1}r".into(),
-                replace_all: false,
-            },
-        );
+        program.add(Selector::All, false, Action::RegexReplace {
+            regex: Regex::new("f(a|o)o").unwrap(),
+            replacement: "b${1}r".into(),
+            replace_all: false,
+        });
         let input = "foo\nfoo\nfao foo fee\nbar\nbaz";
         let output = program.apply(input);
         assert_eq!(output, "bor\nbor\nbar foo fee\nbar\nbaz\n");

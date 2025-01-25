@@ -199,102 +199,81 @@ impl FsEntries {
             tracing::debug!("{:?}", instr);
             match instr.op {
                 FsOp::Remove => {
-                    self.fs.insert(
-                        instr.path,
-                        FsNode {
-                            entry: FsEntry::Removed,
-                            mode: Some(DEFAULT_FILE_MODE),
-                            owner: Some(ROOT),
-                            group: Some(ROOT),
-                            removed_before_added: true,
-                            comment: instr.comment,
-                            pkg: instr.pkg,
-                        },
-                    );
+                    self.fs.insert(instr.path, FsNode {
+                        entry: FsEntry::Removed,
+                        mode: Some(DEFAULT_FILE_MODE),
+                        owner: Some(ROOT),
+                        group: Some(ROOT),
+                        removed_before_added: true,
+                        comment: instr.comment,
+                        pkg: instr.pkg,
+                    });
                 }
                 FsOp::CreateDirectory => {
-                    self.replace_node(
-                        instr.path,
-                        FsNode {
-                            entry: FsEntry::Directory,
-                            mode: Some(DEFAULT_DIR_MODE),
-                            owner: Some(ROOT),
-                            group: Some(ROOT),
-                            removed_before_added: false,
-                            comment: instr.comment,
-                            pkg: instr.pkg,
-                        },
-                    );
+                    self.replace_node(instr.path, FsNode {
+                        entry: FsEntry::Directory,
+                        mode: Some(DEFAULT_DIR_MODE),
+                        owner: Some(ROOT),
+                        group: Some(ROOT),
+                        removed_before_added: false,
+                        comment: instr.comment,
+                        pkg: instr.pkg,
+                    });
                 }
                 FsOp::CreateFile(contents) => {
-                    self.replace_node(
-                        instr.path,
-                        FsNode {
-                            entry: FsEntry::File(contents),
-                            mode: Some(DEFAULT_FILE_MODE),
-                            owner: Some(ROOT),
-                            group: Some(ROOT),
-                            removed_before_added: false,
-                            comment: instr.comment,
-                            pkg: instr.pkg,
-                        },
-                    );
+                    self.replace_node(instr.path, FsNode {
+                        entry: FsEntry::File(contents),
+                        mode: Some(DEFAULT_FILE_MODE),
+                        owner: Some(ROOT),
+                        group: Some(ROOT),
+                        removed_before_added: false,
+                        comment: instr.comment,
+                        pkg: instr.pkg,
+                    });
                 }
                 FsOp::CreateSymlink { target } => {
-                    self.replace_node(
-                        instr.path,
-                        FsNode {
-                            entry: FsEntry::Symlink { target },
-                            mode: Some(DEFAULT_FILE_MODE),
-                            owner: Some(ROOT),
-                            group: Some(ROOT),
-                            removed_before_added: false,
-                            comment: instr.comment,
-                            pkg: instr.pkg,
-                        },
-                    );
+                    self.replace_node(instr.path, FsNode {
+                        entry: FsEntry::Symlink { target },
+                        mode: Some(DEFAULT_FILE_MODE),
+                        owner: Some(ROOT),
+                        group: Some(ROOT),
+                        removed_before_added: false,
+                        comment: instr.comment,
+                        pkg: instr.pkg,
+                    });
                 }
                 FsOp::CreateFifo => {
-                    self.replace_node(
-                        instr.path,
-                        FsNode {
-                            entry: FsEntry::Fifo,
-                            mode: Some(DEFAULT_FILE_MODE),
-                            owner: Some(ROOT),
-                            group: Some(ROOT),
-                            removed_before_added: false,
-                            comment: instr.comment,
-                            pkg: instr.pkg,
-                        },
-                    );
+                    self.replace_node(instr.path, FsNode {
+                        entry: FsEntry::Fifo,
+                        mode: Some(DEFAULT_FILE_MODE),
+                        owner: Some(ROOT),
+                        group: Some(ROOT),
+                        removed_before_added: false,
+                        comment: instr.comment,
+                        pkg: instr.pkg,
+                    });
                 }
                 FsOp::CreateBlockDevice { major, minor } => {
-                    self.replace_node(
-                        instr.path,
-                        FsNode {
-                            entry: FsEntry::BlockDevice { major, minor },
-                            mode: Some(DEFAULT_FILE_MODE),
-                            owner: Some(ROOT),
-                            group: Some(ROOT),
-                            removed_before_added: false,
-                            comment: instr.comment,
-                            pkg: instr.pkg,
-                        },
-                    );
+                    self.replace_node(instr.path, FsNode {
+                        entry: FsEntry::BlockDevice { major, minor },
+                        mode: Some(DEFAULT_FILE_MODE),
+                        owner: Some(ROOT),
+                        group: Some(ROOT),
+                        removed_before_added: false,
+                        comment: instr.comment,
+                        pkg: instr.pkg,
+                    });
                 }
                 FsOp::CreateCharDevice { major, minor } => {
-                    self.replace_node(
-                        instr.path,
-                        FsNode {
-                            entry: FsEntry::CharDevice { major, minor },
-                            mode: Some(DEFAULT_FILE_MODE),
-                            owner: Some(ROOT),
-                            group: Some(ROOT),
-                            removed_before_added: false,
-                            comment: instr.comment,
-                            pkg: instr.pkg,
-                        },
-                    );
+                    self.replace_node(instr.path, FsNode {
+                        entry: FsEntry::CharDevice { major, minor },
+                        mode: Some(DEFAULT_FILE_MODE),
+                        owner: Some(ROOT),
+                        group: Some(ROOT),
+                        removed_before_added: false,
+                        comment: instr.comment,
+                        pkg: instr.pkg,
+                    });
                 }
                 FsOp::SetMode { mode } => {
                     self.fs

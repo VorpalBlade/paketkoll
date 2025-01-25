@@ -22,8 +22,8 @@ use paketkoll_types::intern::PackageRef;
 use paketkoll_types::issue::Issue;
 use paketkoll_types::package::InstallReason;
 use paketkoll_types::package::PackageInterned;
-use paketkoll_utils::checksum::sha256_readable;
 use paketkoll_utils::MODE_MASK;
+use paketkoll_utils::checksum::sha256_readable;
 use parking_lot::Mutex;
 use rayon::prelude::*;
 use std::fs::File;
@@ -435,30 +435,27 @@ mod tests {
             convert_packages_to_pkg_instructions(packages.into_iter(), Backend::Apt, &interner);
 
         assert_eq!(instructions.len(), 2);
-        assert_eq!(
-            instructions.iter().sorted().collect::<Vec<_>>(),
-            vec![
-                (
-                    &PkgIdent {
-                        package_manager: Backend::Apt,
-                        identifier: "foo".into()
-                    },
-                    &PkgInstruction {
-                        op: PkgOp::Install,
-                        comment: Some("A package".into())
-                    }
-                ),
-                (
-                    &PkgIdent {
-                        package_manager: Backend::Apt,
-                        identifier: "quux/x86-64".into()
-                    },
-                    &PkgInstruction {
-                        op: PkgOp::Install,
-                        comment: Some("Yet another package".into())
-                    }
-                )
-            ]
-        );
+        assert_eq!(instructions.iter().sorted().collect::<Vec<_>>(), vec![
+            (
+                &PkgIdent {
+                    package_manager: Backend::Apt,
+                    identifier: "foo".into()
+                },
+                &PkgInstruction {
+                    op: PkgOp::Install,
+                    comment: Some("A package".into())
+                }
+            ),
+            (
+                &PkgIdent {
+                    package_manager: Backend::Apt,
+                    identifier: "quux/x86-64".into()
+                },
+                &PkgInstruction {
+                    op: PkgOp::Install,
+                    comment: Some("Yet another package".into())
+                }
+            )
+        ]);
     }
 }

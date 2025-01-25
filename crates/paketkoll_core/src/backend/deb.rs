@@ -1,18 +1,18 @@
 //! Backend for Debian and derivatives
 use super::FullBackend;
 use crate::backend::PackageFilter;
+use crate::utils::CompressionFormat;
+use crate::utils::PackageQuery;
 use crate::utils::convert_archive_entries;
 use crate::utils::extract_files;
 use crate::utils::group_queries_by_pkg;
 use crate::utils::locate_package_file;
 use crate::utils::missing_packages;
 use crate::utils::package_manager_transaction;
-use crate::utils::CompressionFormat;
-use crate::utils::PackageQuery;
 use bstr::ByteSlice;
 use bstr::ByteVec;
-use compact_str::format_compact;
 use compact_str::CompactString;
+use compact_str::format_compact;
 use dashmap::DashMap;
 use eyre::WrapErr;
 use paketkoll_types::backend::ArchiveQueryError;

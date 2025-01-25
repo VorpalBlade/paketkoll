@@ -1,8 +1,8 @@
 //! Stuff for parsing mtree files.
-use crate::util::parse_time;
+use crate::Device;
 use crate::util::FromDec;
 use crate::util::FromHex;
-use crate::Device;
+use crate::util::parse_time;
 use smallvec::SmallVec;
 use std::fmt;
 use std::time::Duration;

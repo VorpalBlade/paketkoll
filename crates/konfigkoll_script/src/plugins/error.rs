@@ -1,10 +1,10 @@
 //! Support error type
 
+use rune::ContextError;
+use rune::Module;
 use rune::alloc::fmt::TryWrite;
 use rune::runtime::Formatter;
 use rune::vm_write;
-use rune::ContextError;
-use rune::Module;
 use std::fmt::Display;
 
 /// Result alias using `KError`

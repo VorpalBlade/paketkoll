@@ -7,8 +7,8 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use file::Line;
 use smallvec::SmallVec;
-use winnow::error::ContextError;
 use winnow::Parser;
+use winnow::error::ContextError;
 
 mod file;
 
@@ -251,7 +251,7 @@ fn parse_directive(line: Line) -> Result<Entry, ParseError> {
             return Err(ParseError::InvalidDirective(
                 line.path.clone(),
                 entry_type.clone(),
-            ))?
+            ))?;
         }
     };
     Ok(Entry {
@@ -349,49 +349,43 @@ mod tests {
         "};
         let parsed = super::parse_str(input).unwrap();
         assert_eq!(parsed.len(), 10);
-        assert_eq!(
-            parsed[0],
-            Entry {
-                path: "/tmp/.X11-unix".into(),
-                directive: super::Directive::CreateDirectory {
-                    remove_if_exists: true,
-                    user: Id::Name {
-                        name: "root".into(),
-                        new_only: false
-                    },
-                    group: Id::Name {
-                        name: "root".into(),
-                        new_only: false
-                    },
-                    cleanup_age: Some(Age {
-                        specifier: "10d".into()
-                    }),
-                    mode: Some(crate::Mode::Set {
-                        mode: 0o1777,
-                        new_only: false,
-                        masked: false,
-                    }),
+        assert_eq!(parsed[0], Entry {
+            path: "/tmp/.X11-unix".into(),
+            directive: super::Directive::CreateDirectory {
+                remove_if_exists: true,
+                user: Id::Name {
+                    name: "root".into(),
+                    new_only: false
                 },
-                flags: super::super::EntryFlags::BOOT_ONLY,
-            }
-        );
-        assert_eq!(
-            parsed[1],
-            Entry {
-                path: "/var/cache".into(),
-                directive: super::Directive::CreateDirectory {
-                    remove_if_exists: false,
-                    user: Id::Caller { new_only: false },
-                    group: Id::Caller { new_only: false },
-                    cleanup_age: None,
-                    mode: Some(crate::Mode::Set {
-                        mode: 0o755,
-                        new_only: false,
-                        masked: false,
-                    }),
+                group: Id::Name {
+                    name: "root".into(),
+                    new_only: false
                 },
-                flags: super::super::EntryFlags::empty(),
-            }
-        );
+                cleanup_age: Some(Age {
+                    specifier: "10d".into()
+                }),
+                mode: Some(crate::Mode::Set {
+                    mode: 0o1777,
+                    new_only: false,
+                    masked: false,
+                }),
+            },
+            flags: super::super::EntryFlags::BOOT_ONLY,
+        });
+        assert_eq!(parsed[1], Entry {
+            path: "/var/cache".into(),
+            directive: super::Directive::CreateDirectory {
+                remove_if_exists: false,
+                user: Id::Caller { new_only: false },
+                group: Id::Caller { new_only: false },
+                cleanup_age: None,
+                mode: Some(crate::Mode::Set {
+                    mode: 0o755,
+                    new_only: false,
+                    masked: false,
+                }),
+            },
+            flags: super::super::EntryFlags::empty(),
+        });
     }
 }

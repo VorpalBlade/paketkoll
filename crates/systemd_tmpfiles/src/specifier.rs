@@ -283,12 +283,12 @@ fn parse_os_release(buffer: &str) -> HashMap<&str, &str> {
 
 #[cfg(feature = "user")]
 mod user {
-    use super::private;
     use super::InvariantProvider;
     use super::ProviderError;
     use super::Resolve;
     use super::SystemResolver;
     use super::VariantProvider;
+    use super::private;
     use compact_str::CompactString;
 
     /// Resolver for user instance of systemd-tmpfiles

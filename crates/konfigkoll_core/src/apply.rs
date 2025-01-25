@@ -3,10 +3,10 @@
 use crate::confirm::Choices;
 use crate::confirm::MultiOptionConfirm;
 use crate::diff::show_fs_instr_diff;
-use crate::utils::original_file_contents;
-use crate::utils::pkg_backend_for_files;
 use crate::utils::IdKey;
 use crate::utils::NameToNumericResolveCache;
+use crate::utils::original_file_contents;
+use crate::utils::pkg_backend_for_files;
 use ahash::AHashMap;
 use color_eyre::Section;
 use console::style;

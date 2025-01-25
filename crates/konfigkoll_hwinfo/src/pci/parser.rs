@@ -4,6 +4,8 @@ use super::Class;
 use super::ProgrammingInterface;
 use super::Subclass;
 use ahash::AHashMap;
+use winnow::PResult;
+use winnow::Parser;
 use winnow::ascii::hex_uint;
 use winnow::ascii::newline;
 use winnow::ascii::space1;
@@ -16,8 +18,6 @@ use winnow::error::StrContext;
 use winnow::stream::AsChar;
 use winnow::token::take;
 use winnow::token::take_until;
-use winnow::PResult;
-use winnow::Parser;
 
 #[derive(Debug, PartialEq, Eq)]
 enum Line<'input> {
@@ -140,12 +140,9 @@ fn build_hierarchy(lines: &[Line<'_>]) -> eyre::Result<super::PciIdDb> {
                             while let Some(line) = lines.next() {
                                 match line {
                                     Line::ProgrammingInterface(prog_if) => {
-                                        prog_ifs.insert(
-                                            prog_if.id,
-                                            ProgrammingInterface {
-                                                name: prog_if.name.to_string(),
-                                            },
-                                        );
+                                        prog_ifs.insert(prog_if.id, ProgrammingInterface {
+                                            name: prog_if.name.to_string(),
+                                        });
                                     }
                                     _ => {
                                         lines.put_back(line);
@@ -153,13 +150,10 @@ fn build_hierarchy(lines: &[Line<'_>]) -> eyre::Result<super::PciIdDb> {
                                     }
                                 }
                             }
-                            subclasses.insert(
-                                subclass.id,
-                                Subclass {
-                                    name: subclass.name.to_string(),
-                                    program_interfaces: prog_ifs,
-                                },
-                            );
+                            subclasses.insert(subclass.id, Subclass {
+                                name: subclass.name.to_string(),
+                                program_interfaces: prog_ifs,
+                            });
                         }
                         _ => {
                             lines.put_back(line);
@@ -167,13 +161,10 @@ fn build_hierarchy(lines: &[Line<'_>]) -> eyre::Result<super::PciIdDb> {
                         }
                     }
                 }
-                db.classes.insert(
-                    class.id,
-                    Class {
-                        name: class.name.to_string(),
-                        subclasses,
-                    },
-                );
+                db.classes.insert(class.id, Class {
+                    name: class.name.to_string(),
+                    subclasses,
+                });
             }
             Line::Vendor(vendor) => {
                 let mut devices = AHashMap::new();
@@ -197,13 +188,10 @@ fn build_hierarchy(lines: &[Line<'_>]) -> eyre::Result<super::PciIdDb> {
                                     }
                                 }
                             }
-                            devices.insert(
-                                device.id,
-                                super::Device {
-                                    name: device.name.to_string(),
-                                    subsystems,
-                                },
-                            );
+                            devices.insert(device.id, super::Device {
+                                name: device.name.to_string(),
+                                subsystems,
+                            });
                         }
                         _ => {
                             lines.put_back(line);
@@ -211,13 +199,10 @@ fn build_hierarchy(lines: &[Line<'_>]) -> eyre::Result<super::PciIdDb> {
                         }
                     }
                 }
-                db.vendors.insert(
-                    vendor.id,
-                    super::Vendor {
-                        name: vendor.name.to_string(),
-                        devices,
-                    },
-                );
+                db.vendors.insert(vendor.id, super::Vendor {
+                    name: vendor.name.to_string(),
+                    devices,
+                });
             }
             Line::Subclass(_)
             | Line::ProgrammingInterface(_)
@@ -417,124 +402,73 @@ mod tests {
 
         let db = build_hierarchy(&test_data).unwrap();
 
-        assert_eq!(
-            db,
-            PciIdDb {
-                classes: AHashMap::from([
-                    (
-                        0,
-                        Class {
-                            name: "CA".into(),
-                            subclasses: AHashMap::from([
-                                (
-                                    0,
-                                    Subclass {
-                                        name: "CA 0".into(),
-                                        program_interfaces: AHashMap::from([])
-                                    }
-                                ),
-                                (
-                                    1,
-                                    Subclass {
-                                        name: "CA 1".into(),
-                                        program_interfaces: AHashMap::from([])
-                                    }
-                                ),
-                                (
-                                    5,
-                                    Subclass {
-                                        name: "CA 5".into(),
-                                        program_interfaces: AHashMap::from([])
-                                    }
-                                ),
+        assert_eq!(db, PciIdDb {
+            classes: AHashMap::from([
+                (0, Class {
+                    name: "CA".into(),
+                    subclasses: AHashMap::from([
+                        (0, Subclass {
+                            name: "CA 0".into(),
+                            program_interfaces: AHashMap::from([])
+                        }),
+                        (1, Subclass {
+                            name: "CA 1".into(),
+                            program_interfaces: AHashMap::from([])
+                        }),
+                        (5, Subclass {
+                            name: "CA 5".into(),
+                            program_interfaces: AHashMap::from([])
+                        }),
+                    ])
+                }),
+                (6, Class {
+                    name: "CB".into(),
+                    subclasses: AHashMap::from([
+                        (0, Subclass {
+                            name: "CB 0".into(),
+                            program_interfaces: AHashMap::from([])
+                        }),
+                        (1, Subclass {
+                            name: "CB 1".into(),
+                            program_interfaces: AHashMap::from([
+                                (0, ProgrammingInterface {
+                                    name: "CB 1 0".into()
+                                }),
+                                (5, ProgrammingInterface {
+                                    name: "CB 1 5".into()
+                                }),
                             ])
-                        }
-                    ),
-                    (
-                        6,
-                        Class {
-                            name: "CB".into(),
-                            subclasses: AHashMap::from([
-                                (
-                                    0,
-                                    Subclass {
-                                        name: "CB 0".into(),
-                                        program_interfaces: AHashMap::from([])
-                                    }
-                                ),
-                                (
-                                    1,
-                                    Subclass {
-                                        name: "CB 1".into(),
-                                        program_interfaces: AHashMap::from([
-                                            (
-                                                0,
-                                                ProgrammingInterface {
-                                                    name: "CB 1 0".into()
-                                                }
-                                            ),
-                                            (
-                                                5,
-                                                ProgrammingInterface {
-                                                    name: "CB 1 5".into()
-                                                }
-                                            ),
-                                        ])
-                                    }
-                                ),
-                                (
-                                    2,
-                                    Subclass {
-                                        name: "CC".into(),
-                                        program_interfaces: AHashMap::from([])
-                                    }
-                                ),
-                            ])
-                        }
-                    ),
-                ]),
-                vendors: AHashMap::from([
-                    (
-                        0x0001,
-                        Vendor {
-                            name: "Some ID".into(),
-                            devices: AHashMap::from([])
-                        }
-                    ),
-                    (
-                        0x0010,
-                        Vendor {
-                            name: "Some other ID".into(),
-                            devices: AHashMap::from([(
-                                0x8139,
-                                Device {
-                                    name: "A device".into(),
-                                    subsystems: AHashMap::from([])
-                                }
-                            )])
-                        }
-                    ),
-                    (
-                        0x0014,
-                        Vendor {
-                            name: "Another ID".into(),
-                            devices: AHashMap::from([(
-                                0x0001,
-                                Device {
-                                    name: "ID ID ID".into(),
-                                    subsystems: AHashMap::from([(
-                                        (0x001c, 0x0004),
-                                        Subsystem {
-                                            name: "Sub device".into()
-                                        }
-                                    )])
-                                }
-                            )])
-                        }
-                    ),
-                ])
-            }
-        );
+                        }),
+                        (2, Subclass {
+                            name: "CC".into(),
+                            program_interfaces: AHashMap::from([])
+                        }),
+                    ])
+                }),
+            ]),
+            vendors: AHashMap::from([
+                (0x0001, Vendor {
+                    name: "Some ID".into(),
+                    devices: AHashMap::from([])
+                }),
+                (0x0010, Vendor {
+                    name: "Some other ID".into(),
+                    devices: AHashMap::from([(0x8139, Device {
+                        name: "A device".into(),
+                        subsystems: AHashMap::from([])
+                    })])
+                }),
+                (0x0014, Vendor {
+                    name: "Another ID".into(),
+                    devices: AHashMap::from([(0x0001, Device {
+                        name: "ID ID ID".into(),
+                        subsystems: AHashMap::from([((0x001c, 0x0004), Subsystem {
+                            name: "Sub device".into()
+                        })])
+                    })])
+                }),
+            ])
+        });
     }
 
     const TEST_DATA: &str = indoc! {
@@ -563,76 +497,73 @@ C 01  CB
     fn test_parse_file() {
         let parsed = parse_file.parse(TEST_DATA).unwrap();
 
-        assert_eq!(
-            parsed,
-            vec![
-                Line::Vendor(VendorLine {
-                    id: 0x0001,
-                    name: "Some ID"
-                }),
-                Line::Vendor(VendorLine {
-                    id: 0x0010,
-                    name: "Some other ID"
-                }),
-                Line::Device(DeviceLine {
-                    id: 0x8139,
-                    name: "A device"
-                }),
-                Line::Vendor(VendorLine {
-                    id: 0x0014,
-                    name: "Another ID"
-                }),
-                Line::Device(DeviceLine {
-                    id: 0x0001,
-                    name: "ID ID ID"
-                }),
-                Line::Subsystem(SubsystemLine {
-                    subvendor: 0x001c,
-                    subdevice: 0x0004,
-                    name: "Sub device"
-                }),
-                Line::Class(ClassLine {
-                    id: 0x00,
-                    name: "CA"
-                }),
-                Line::Subclass(SubclassLine {
-                    id: 0x00,
-                    name: "CA 0"
-                }),
-                Line::Subclass(SubclassLine {
-                    id: 0x01,
-                    name: "CA 1"
-                }),
-                Line::Subclass(SubclassLine {
-                    id: 0x05,
-                    name: "CA 5"
-                }),
-                Line::Class(ClassLine {
-                    id: 0x01,
-                    name: "CB"
-                }),
-                Line::Subclass(SubclassLine {
-                    id: 0x00,
-                    name: "CB 0"
-                }),
-                Line::Subclass(SubclassLine {
-                    id: 0x01,
-                    name: "CB 1"
-                }),
-                Line::ProgrammingInterface(ProgrammingInterfaceLine {
-                    id: 0x00,
-                    name: "CB 1 0"
-                }),
-                Line::ProgrammingInterface(ProgrammingInterfaceLine {
-                    id: 0x05,
-                    name: "CB 1 5"
-                }),
-                Line::Subclass(SubclassLine {
-                    id: 0x02,
-                    name: "CC"
-                }),
-            ]
-        );
+        assert_eq!(parsed, vec![
+            Line::Vendor(VendorLine {
+                id: 0x0001,
+                name: "Some ID"
+            }),
+            Line::Vendor(VendorLine {
+                id: 0x0010,
+                name: "Some other ID"
+            }),
+            Line::Device(DeviceLine {
+                id: 0x8139,
+                name: "A device"
+            }),
+            Line::Vendor(VendorLine {
+                id: 0x0014,
+                name: "Another ID"
+            }),
+            Line::Device(DeviceLine {
+                id: 0x0001,
+                name: "ID ID ID"
+            }),
+            Line::Subsystem(SubsystemLine {
+                subvendor: 0x001c,
+                subdevice: 0x0004,
+                name: "Sub device"
+            }),
+            Line::Class(ClassLine {
+                id: 0x00,
+                name: "CA"
+            }),
+            Line::Subclass(SubclassLine {
+                id: 0x00,
+                name: "CA 0"
+            }),
+            Line::Subclass(SubclassLine {
+                id: 0x01,
+                name: "CA 1"
+            }),
+            Line::Subclass(SubclassLine {
+                id: 0x05,
+                name: "CA 5"
+            }),
+            Line::Class(ClassLine {
+                id: 0x01,
+                name: "CB"
+            }),
+            Line::Subclass(SubclassLine {
+                id: 0x00,
+                name: "CB 0"
+            }),
+            Line::Subclass(SubclassLine {
+                id: 0x01,
+                name: "CB 1"
+            }),
+            Line::ProgrammingInterface(ProgrammingInterfaceLine {
+                id: 0x00,
+                name: "CB 1 0"
+            }),
+            Line::ProgrammingInterface(ProgrammingInterfaceLine {
+                id: 0x05,
+                name: "CB 1 5"
+            }),
+            Line::Subclass(SubclassLine {
+                id: 0x02,
+                name: "CC"
+            }),
+        ]);
     }
 
     #[test]
@@ -641,13 +572,10 @@ C 01  CB
             .parse("C 00  Something\n")
             .unwrap();
 
-        assert_eq!(
-            parsed,
-            ClassLine {
-                id: 0,
-                name: "Something"
-            }
-        );
+        assert_eq!(parsed, ClassLine {
+            id: 0,
+            name: "Something"
+        });
     }
 
     #[test]
@@ -655,12 +583,9 @@ C 01  CB
         let parsed = terminated(sub_class, newline)
             .parse("\t0f  Some string\n")
             .unwrap();
-        assert_eq!(
-            parsed,
-            SubclassLine {
-                id: 0x0f,
-                name: "Some string"
-            }
-        );
+        assert_eq!(parsed, SubclassLine {
+            id: 0x0f,
+            name: "Some string"
+        });
     }
 }

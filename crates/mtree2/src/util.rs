@@ -235,9 +235,9 @@ impl<'haystack> Iterator for MemchrSplitter<'haystack> {
 
 #[cfg(test)]
 mod tests {
+    use super::FromHex;
     use super::decode_escapes;
     use super::decode_escapes_path;
-    use super::FromHex;
     use std::path::PathBuf;
 
     #[test]

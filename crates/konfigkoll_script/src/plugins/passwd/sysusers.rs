@@ -1,6 +1,8 @@
 //! Parser for systemd sysusers.d files.
 
 use compact_str::CompactString;
+use winnow::PResult;
+use winnow::Parser;
 use winnow::ascii::dec_uint;
 use winnow::ascii::escaped_transform;
 use winnow::ascii::newline;
@@ -14,8 +16,6 @@ use winnow::error::ContextError;
 use winnow::error::StrContext;
 use winnow::stream::Accumulate;
 use winnow::token::take_till;
-use winnow::PResult;
-use winnow::Parser;
 
 /// Sub-error type for the first splitting layer
 #[derive(Debug, PartialEq)]

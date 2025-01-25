@@ -8,11 +8,11 @@ use ahash::AHashMap;
 use ahash::AHashSet;
 use eyre::WrapErr;
 use itertools::Itertools;
-use rune::runtime::Function;
 use rune::Any;
 use rune::ContextError;
 use rune::Module;
 use rune::Value;
+use rune::runtime::Function;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -368,7 +368,7 @@ impl Passwd {
                             (uid, Some(gid), group_name.into())
                         }
                         Some(UserId::FromPath(_)) => {
-                            return Err(eyre::eyre!("Cannot yet handle user IDs from path").into())
+                            return Err(eyre::eyre!("Cannot yet handle user IDs from path").into());
                         }
                         None => {
                             let uid = self.user_ids.get(user.name.as_str()).ok_or_else(|| {
@@ -410,7 +410,7 @@ impl Passwd {
                     let gid = match group.id {
                         Some(GroupId::Gid(gid)) => gid,
                         Some(GroupId::FromPath(_)) => {
-                            return Err(eyre::eyre!("Cannot yet handle group IDs from path").into())
+                            return Err(eyre::eyre!("Cannot yet handle group IDs from path").into());
                         }
                         None => self
                             .group_ids
