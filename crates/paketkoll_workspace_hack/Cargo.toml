@@ -28,7 +28,7 @@ crossbeam-epoch = { version = "0.9" }
 dashmap = { version = "6", default-features = false, features = ["raw-api", "rayon"] }
 either = { version = "1" }
 flate2 = { version = "1", features = ["zlib-ng"] }
-getrandom = { version = "0.2", default-features = false, features = ["std"] }
+getrandom = { version = "0.3", default-features = false, features = ["std"] }
 hashbrown = { version = "0.14", features = ["raw"] }
 log = { version = "0.4", default-features = false, features = ["std"] }
 memchr = { version = "2" }
@@ -56,7 +56,7 @@ zerocopy = { version = "0.7", features = ["derive", "simd"] }
 ahash = { version = "0.8", features = ["no-rng"] }
 byteorder = { version = "1" }
 cc = { version = "1", default-features = false, features = ["parallel"] }
-getrandom = { version = "0.2", default-features = false, features = ["std"] }
+getrandom = { version = "0.3", default-features = false, features = ["std"] }
 memchr = { version = "2" }
 musli = { version = "0.0.42", default-features = false, features = ["std"] }
 once_cell = { version = "1", features = ["critical-section"] }
