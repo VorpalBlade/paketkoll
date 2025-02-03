@@ -16,7 +16,7 @@ use winnow::error::StrContext;
 use winnow::stream::Accumulate;
 use winnow::token::take_till;
 use winnow::token::take_while;
-use winnow::PResult;
+use winnow::ModalResult;
 use winnow::Parser;
 
 /// Low level parser that doesn't make a difference between entry types
@@ -32,7 +32,7 @@ pub(super) struct Line {
 }
 
 /// Top level parser
-pub(super) fn parse_file(i: &mut &str) -> PResult<Vec<Option<Line>>> {
+pub(super) fn parse_file(i: &mut &str) -> ModalResult<Vec<Option<Line>>> {
     let alternatives = (
         comment.map(|()| None).context(StrContext::Label("comment")),
         directive.map(Some).context(StrContext::Label("directive")),
@@ -44,7 +44,7 @@ pub(super) fn parse_file(i: &mut &str) -> PResult<Vec<Option<Line>>> {
 }
 
 /// A comment
-fn comment(i: &mut &str) -> PResult<()> {
+fn comment(i: &mut &str) -> ModalResult<()> {
     ('#', take_till(0.., ['\n', '\r'])).void().parse_next(i)
 }
 
@@ -53,7 +53,7 @@ fn flattener<T>(e: Option<(&str, Option<T>)>) -> Option<T> {
     e.and_then(|(_, arg)| arg)
 }
 
-fn directive(i: &mut &str) -> PResult<Line> {
+fn directive(i: &mut &str) -> ModalResult<Line> {
     let entry_type = any_string.context(StrContext::Label("entry type"));
     let path = any_string.context(StrContext::Label("path"));
     let mode = mode_parser.context(StrContext::Label("mode"));
@@ -90,7 +90,7 @@ fn directive(i: &mut &str) -> PResult<Line> {
     parser.parse_next(i)
 }
 
-fn mode_parser(i: &mut &str) -> PResult<Option<Mode>> {
+fn mode_parser(i: &mut &str) -> ModalResult<Option<Mode>> {
     // - for not set, numeric otherwise
     // A prefix of : indicates new only
     // A prefix of ~ indicates a mask
@@ -113,18 +113,18 @@ fn mode_parser(i: &mut &str) -> PResult<Option<Mode>> {
 }
 
 /// Parse an octal number
-fn octal(i: &mut &str) -> PResult<u32> {
+fn octal(i: &mut &str) -> ModalResult<u32> {
     digit1.try_map(|e| u32::from_str_radix(e, 8)).parse_next(i)
 }
 
 /// Parse an octal number
-fn decimal(i: &mut &str) -> PResult<u32> {
+fn decimal(i: &mut &str) -> ModalResult<u32> {
     digit1
         .try_map(|e| libc::mode_t::from_str_radix(e, 10))
         .parse_next(i)
 }
 
-fn id_parser(i: &mut &str) -> PResult<Option<Id>> {
+fn id_parser(i: &mut &str) -> ModalResult<Option<Id>> {
     // - for not set, numeric or name
     // A prefix of : indicates new only
     alt((
@@ -155,12 +155,12 @@ fn id_parser(i: &mut &str) -> PResult<Option<Id>> {
     .parse_next(i)
 }
 
-fn optional_string(i: &mut &str) -> PResult<Option<CompactString>> {
+fn optional_string(i: &mut &str) -> ModalResult<Option<CompactString>> {
     // - is None, otherwise string
     alt(('-'.value(None), any_string.map(Some))).parse_next(i)
 }
 
-fn any_string(i: &mut &str) -> PResult<CompactString> {
+fn any_string(i: &mut &str) -> ModalResult<CompactString> {
     trace(
         "any_string",
         alt((quoted_string, unquoted_string_with_escapes)),
@@ -169,7 +169,7 @@ fn any_string(i: &mut &str) -> PResult<CompactString> {
 }
 
 /// Quoted string value
-fn quoted_string(i: &mut &str) -> PResult<CompactString> {
+fn quoted_string(i: &mut &str) -> ModalResult<CompactString> {
     delimited(
         '"',
         escaped_transform(take_till(1.., ['"', '\\']), '\\', escapes),
@@ -180,13 +180,13 @@ fn quoted_string(i: &mut &str) -> PResult<CompactString> {
 }
 
 /// Unquoted string value
-fn unquoted_string_with_escapes(i: &mut &str) -> PResult<CompactString> {
+fn unquoted_string_with_escapes(i: &mut &str) -> ModalResult<CompactString> {
     escaped_transform(take_till(1.., [' ', '\t', '\n', '\r', '\\']), '\\', escapes)
         .map(|s: CompactStringWrapper| s.0)
         .parse_next(i)
 }
 
-fn escapes<'input>(i: &mut &'input str) -> PResult<&'input str> {
+fn escapes<'input>(i: &mut &'input str) -> ModalResult<&'input str> {
     alt((
         "n".value("\n"),
         "r".value("\r"),

@@ -14,7 +14,7 @@ use winnow::error::ContextError;
 use winnow::error::StrContext;
 use winnow::stream::Accumulate;
 use winnow::token::take_till;
-use winnow::PResult;
+use winnow::ModalResult;
 use winnow::Parser;
 
 /// Sub-error type for the first splitting layer
@@ -104,7 +104,7 @@ pub(super) struct Group {
 }
 
 /// Top level parser
-pub(super) fn parse_file(i: &mut &str) -> PResult<Vec<Directive>> {
+pub(super) fn parse_file(i: &mut &str) -> ModalResult<Vec<Directive>> {
     let alternatives = (
         comment
             .map(|()| Directive::Comment)
@@ -126,7 +126,7 @@ fn flattener<T>(e: Option<(&str, Option<T>)>) -> Option<T> {
     e.and_then(|(_, arg)| arg)
 }
 
-fn user(i: &mut &str) -> PResult<Directive> {
+fn user(i: &mut &str) -> ModalResult<Directive> {
     let entry_type = 'u';
     let locked = opt('!').context(StrContext::Label("locked"));
     let user_name = any_string.context(StrContext::Label("user_name"));
@@ -158,7 +158,7 @@ fn user(i: &mut &str) -> PResult<Directive> {
     parser.parse_next(i)
 }
 
-fn group(i: &mut &str) -> PResult<Directive> {
+fn group(i: &mut &str) -> ModalResult<Directive> {
     let entry_type = 'g';
     let path = any_string.context(StrContext::Label("group_name"));
     let id = group_id_parser.context(StrContext::Label("id"));
@@ -175,7 +175,7 @@ fn group(i: &mut &str) -> PResult<Directive> {
     parser.parse_next(i)
 }
 
-fn add_to_group(i: &mut &str) -> PResult<Directive> {
+fn add_to_group(i: &mut &str) -> ModalResult<Directive> {
     let entry_type = 'm';
     let user = any_string.context(StrContext::Label("user_name"));
     let group = any_string.context(StrContext::Label("group_name"));
@@ -185,7 +185,7 @@ fn add_to_group(i: &mut &str) -> PResult<Directive> {
     parser.parse_next(i)
 }
 
-fn set_range(i: &mut &str) -> PResult<Directive> {
+fn set_range(i: &mut &str) -> ModalResult<Directive> {
     let entry_type = 'r';
     let name = '-';
     let range = range_parser.context(StrContext::Label("range"));
@@ -195,7 +195,7 @@ fn set_range(i: &mut &str) -> PResult<Directive> {
     parser.parse_next(i)
 }
 
-fn user_id_parser(i: &mut &str) -> PResult<Option<UserId>> {
+fn user_id_parser(i: &mut &str) -> ModalResult<Option<UserId>> {
     let mut parser = alt((
         ('-').map(|_| None),
         (dec_uint, ':', dec_uint).map(|(uid, _, gid)| Some(UserId::UidGid(uid, gid))),
@@ -205,7 +205,7 @@ fn user_id_parser(i: &mut &str) -> PResult<Option<UserId>> {
     ));
     parser.parse_next(i)
 }
-fn group_id_parser(i: &mut &str) -> PResult<Option<GroupId>> {
+fn group_id_parser(i: &mut &str) -> ModalResult<Option<GroupId>> {
     let mut parser = alt((
         ('-').map(|_| None),
         (dec_uint).map(|id| Some(GroupId::Gid(id))),
@@ -214,22 +214,22 @@ fn group_id_parser(i: &mut &str) -> PResult<Option<GroupId>> {
     parser.parse_next(i)
 }
 
-fn range_parser(i: &mut &str) -> PResult<(u32, u32)> {
+fn range_parser(i: &mut &str) -> ModalResult<(u32, u32)> {
     let mut parser = (dec_uint, '-', dec_uint).map(|(start, _, end)| (start, end));
     parser.parse_next(i)
 }
 
 /// A comment
-fn comment(i: &mut &str) -> PResult<()> {
+fn comment(i: &mut &str) -> ModalResult<()> {
     ('#', take_till(0.., ['\n', '\r'])).void().parse_next(i)
 }
 
-fn optional_string(i: &mut &str) -> PResult<Option<CompactString>> {
+fn optional_string(i: &mut &str) -> ModalResult<Option<CompactString>> {
     // - is None, otherwise string
     alt(('-'.value(None), any_string.map(Some))).parse_next(i)
 }
 
-fn any_string(i: &mut &str) -> PResult<CompactString> {
+fn any_string(i: &mut &str) -> ModalResult<CompactString> {
     trace(
         "any_string",
         alt((
@@ -242,7 +242,7 @@ fn any_string(i: &mut &str) -> PResult<CompactString> {
 }
 
 /// Quoted string value
-fn single_quoted_string(i: &mut &str) -> PResult<CompactString> {
+fn single_quoted_string(i: &mut &str) -> ModalResult<CompactString> {
     delimited(
         '\'',
         escaped_transform(take_till(1.., ['\'', '\\']), '\\', escapes),
@@ -253,7 +253,7 @@ fn single_quoted_string(i: &mut &str) -> PResult<CompactString> {
 }
 
 /// Quoted string value
-fn quoted_string(i: &mut &str) -> PResult<CompactString> {
+fn quoted_string(i: &mut &str) -> ModalResult<CompactString> {
     delimited(
         '"',
         escaped_transform(take_till(1.., ['"', '\\']), '\\', escapes),
@@ -264,20 +264,20 @@ fn quoted_string(i: &mut &str) -> PResult<CompactString> {
 }
 
 /// Unquoted string value
-fn unquoted_string_with_escapes(i: &mut &str) -> PResult<CompactString> {
+fn unquoted_string_with_escapes(i: &mut &str) -> ModalResult<CompactString> {
     escaped_transform(take_till(1.., [' ', '\t', '\n', '\r', '\\']), '\\', escapes)
         .map(|s: CompactStringWrapper| s.0)
         .parse_next(i)
 }
 
 /// A valid name
-fn name(i: &mut &str) -> PResult<CompactString> {
+fn name(i: &mut &str) -> ModalResult<CompactString> {
     take_till(1.., [' ', '\t', '\n', '\r'])
         .map(CompactString::from)
         .parse_next(i)
 }
 
-fn escapes<'input>(i: &mut &'input str) -> PResult<&'input str> {
+fn escapes<'input>(i: &mut &'input str) -> ModalResult<&'input str> {
     alt((
         "n".value("\n"),
         "r".value("\r"),

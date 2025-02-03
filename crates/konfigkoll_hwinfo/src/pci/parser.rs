@@ -16,7 +16,7 @@ use winnow::error::StrContext;
 use winnow::stream::AsChar;
 use winnow::token::take;
 use winnow::token::take_until;
-use winnow::PResult;
+use winnow::ModalResult;
 use winnow::Parser;
 
 #[derive(Debug, PartialEq, Eq)]
@@ -229,7 +229,7 @@ fn build_hierarchy(lines: &[Line<'_>]) -> eyre::Result<super::PciIdDb> {
     Ok(db)
 }
 
-fn parse_file<'input>(i: &mut &'input str) -> PResult<Vec<Line<'input>>> {
+fn parse_file<'input>(i: &mut &'input str) -> ModalResult<Vec<Line<'input>>> {
     let alternatives = (
         comment.map(|()| None).context(StrContext::Label("comment")),
         // Vendor hierarchy
@@ -263,21 +263,21 @@ fn parse_file<'input>(i: &mut &'input str) -> PResult<Vec<Line<'input>>> {
 }
 
 /// A comment
-fn comment(i: &mut &str) -> PResult<()> {
+fn comment(i: &mut &str) -> ModalResult<()> {
     ('#', take_until(0.., '\n')).void().parse_next(i)
 }
 
-fn device<'input>(i: &mut &'input str) -> PResult<DeviceLine<'input>> {
+fn device<'input>(i: &mut &'input str) -> ModalResult<DeviceLine<'input>> {
     let parser = ('\t', hex4, space1, string).map(|(_, id, _, name)| DeviceLine { id, name });
     trace("device", parser).parse_next(i)
 }
 
-fn vendor<'input>(i: &mut &'input str) -> PResult<VendorLine<'input>> {
+fn vendor<'input>(i: &mut &'input str) -> ModalResult<VendorLine<'input>> {
     let parser = (hex4, space1, string).map(|(id, _, name)| VendorLine { id, name });
     trace("vendor", parser).parse_next(i)
 }
 
-fn subsystem<'input>(i: &mut &'input str) -> PResult<SubsystemLine<'input>> {
+fn subsystem<'input>(i: &mut &'input str) -> ModalResult<SubsystemLine<'input>> {
     let parser = ("\t\t", hex4, space1, hex4, space1, string).map(
         |(_, subvendor, _, subdevice, _, name)| SubsystemLine {
             subvendor,
@@ -288,37 +288,37 @@ fn subsystem<'input>(i: &mut &'input str) -> PResult<SubsystemLine<'input>> {
     trace("subsystem", parser).parse_next(i)
 }
 
-fn prog_if<'input>(i: &mut &'input str) -> PResult<ProgrammingInterfaceLine<'input>> {
+fn prog_if<'input>(i: &mut &'input str) -> ModalResult<ProgrammingInterfaceLine<'input>> {
     let parser = ("\t\t", hex2, space1, string)
         .map(|(_, id, _, name)| ProgrammingInterfaceLine { id, name });
     trace("prog_if", parser).parse_next(i)
 }
 
-fn sub_class<'input>(i: &mut &'input str) -> PResult<SubclassLine<'input>> {
+fn sub_class<'input>(i: &mut &'input str) -> ModalResult<SubclassLine<'input>> {
     let parser = ('\t', hex2, space1, string).map(|(_, id, _, name)| SubclassLine { id, name });
     trace("sub_class", parser).parse_next(i)
 }
 
-fn class<'input>(i: &mut &'input str) -> PResult<ClassLine<'input>> {
+fn class<'input>(i: &mut &'input str) -> ModalResult<ClassLine<'input>> {
     let parser =
         ('C', space1, hex2, space1, string).map(|(_, _, id, _, name)| ClassLine { id, name });
     trace("class", parser).parse_next(i)
 }
 
 /// A string until the end of the line
-fn string<'input>(i: &mut &'input str) -> PResult<&'input str> {
+fn string<'input>(i: &mut &'input str) -> ModalResult<&'input str> {
     let parser = take_until(0.., '\n');
 
     trace("string", parser).parse_next(i)
 }
 
-pub fn hex2(i: &mut &str) -> PResult<u8> {
+pub fn hex2(i: &mut &str) -> ModalResult<u8> {
     trace("hex2", take(2usize).verify(is_hex))
         .and_then(hex_uint::<_, u8, _>)
         .parse_next(i)
 }
 
-pub fn hex4(i: &mut &str) -> PResult<u16> {
+pub fn hex4(i: &mut &str) -> ModalResult<u16> {
     trace("hex4", take(4usize).verify(is_hex))
         .and_then(hex_uint::<_, u16, _>)
         .parse_next(i)
