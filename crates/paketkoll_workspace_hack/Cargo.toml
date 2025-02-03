@@ -71,7 +71,7 @@ zerocopy = { version = "0.7", features = ["derive", "simd"] }
 [target.x86_64-unknown-linux-gnu.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
 libc = { version = "0.2", features = ["extra_traits"] }
-linux-raw-sys = { version = "0.4", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
+linux-raw-sys = { version = "0.7", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
 rustix = { version = "0.38", features = ["fs"] }
 spin = { version = "0.9" }
 stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
@@ -82,7 +82,7 @@ libc = { version = "0.2", features = ["extra_traits"] }
 [target.x86_64-unknown-linux-musl.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
 libc = { version = "0.2", features = ["extra_traits"] }
-linux-raw-sys = { version = "0.4", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
+linux-raw-sys = { version = "0.7", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
 rustix = { version = "0.38", features = ["fs"] }
 spin = { version = "0.9" }
 stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
@@ -93,7 +93,7 @@ libc = { version = "0.2", features = ["extra_traits"] }
 [target.aarch64-unknown-linux-musl.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
 libc = { version = "0.2", features = ["extra_traits"] }
-linux-raw-sys = { version = "0.4", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
+linux-raw-sys = { version = "0.7", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
 rustix = { version = "0.38", features = ["fs"] }
 spin = { version = "0.9" }
 stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
