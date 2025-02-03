@@ -2,7 +2,7 @@
 
 use compact_str::CompactString;
 use winnow::ascii::dec_uint;
-use winnow::ascii::escaped_transform;
+use winnow::ascii::escaped;
 use winnow::ascii::newline;
 use winnow::ascii::space1;
 use winnow::combinator::alt;
@@ -245,7 +245,7 @@ fn any_string(i: &mut &str) -> ModalResult<CompactString> {
 fn single_quoted_string(i: &mut &str) -> ModalResult<CompactString> {
     delimited(
         '\'',
-        escaped_transform(take_till(1.., ['\'', '\\']), '\\', escapes),
+        escaped(take_till(1.., ['\'', '\\']), '\\', escapes),
         '\'',
     )
     .map(|s: CompactStringWrapper| s.0)
@@ -256,7 +256,7 @@ fn single_quoted_string(i: &mut &str) -> ModalResult<CompactString> {
 fn quoted_string(i: &mut &str) -> ModalResult<CompactString> {
     delimited(
         '"',
-        escaped_transform(take_till(1.., ['"', '\\']), '\\', escapes),
+        escaped(take_till(1.., ['"', '\\']), '\\', escapes),
         '"',
     )
     .map(|s: CompactStringWrapper| s.0)
@@ -265,7 +265,7 @@ fn quoted_string(i: &mut &str) -> ModalResult<CompactString> {
 
 /// Unquoted string value
 fn unquoted_string_with_escapes(i: &mut &str) -> ModalResult<CompactString> {
-    escaped_transform(take_till(1.., [' ', '\t', '\n', '\r', '\\']), '\\', escapes)
+    escaped(take_till(1.., [' ', '\t', '\n', '\r', '\\']), '\\', escapes)
         .map(|s: CompactStringWrapper| s.0)
         .parse_next(i)
 }
