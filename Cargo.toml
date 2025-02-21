@@ -9,15 +9,15 @@ ar = "0.9.0"
 base64-simd = "0.8.0"
 bitflags = { version = "2.8.0", features = ["serde"] }
 bstr = "1.11.3"
-bzip2 = "0.5.0"
+bzip2 = "0.5.1"
 cached = { version = "0.54.0", features = [
     "disk_store",
     "ahash",
 ], default-features = false }
 camino = "1.1.9"
 cfg-if = "1.0.0"
-clap = { version = "4.5.27", features = ["derive"] }
-clap_complete = "4.5.44"
+clap = { version = "4.5.30", features = ["derive"] }
+clap_complete = "4.5.45"
 clap_mangen = "0.2.26"
 clru = "0.6.2"
 color-eyre = "0.6.3"
@@ -53,7 +53,7 @@ memchr = "2.7.4"
 mimalloc = "0.1.43"
 nix = { version = "0.29.0", default-features = false }
 num_cpus = "1.16.0"
-os_info = { version = "3.9.2", default-features = false }
+os_info = { version = "3.10.0", default-features = false }
 ouroboros = "0.18.5"
 parking_lot = "0.12.3"
 phf = { version = "0.11.3", features = ["macros"] }
@@ -61,7 +61,7 @@ pretty_assertions = "1.4.1"
 proc-exit = "2.0.2"
 rayon = "1.10.0"
 regex = "1.11.1"
-ring = "0.17.8"
+ring = "0.17.10"
 rune = "0.13.4"
 rune-modules = { version = "0.13.4", features = [
     "json",
@@ -71,22 +71,22 @@ rune-modules = { version = "0.13.4", features = [
 ] }
 rust-ini = "0.21.1"
 scopeguard = "1.2.0"
-serde = { version = "1.0.217", features = ["derive"] }
+serde = { version = "1.0.218", features = ["derive"] }
 serde_bytes = "0.11.15"
-serde_json = "1.0.138"
-smallvec = { version = "1.13.2", features = [
+serde_json = "1.0.139"
+smallvec = { version = "1.14.0", features = [
     "const_generics",
     "const_new",
     "serde",
     "union",
 ] }
-strum = { version = "0.26.3", features = ["derive"] }
+strum = { version = "0.27.1", features = ["derive"] }
 sysinfo = { version = "0.33.1", default-features = false, features = [
     "multithread",
     "system",
 ] }
 tar = "0.4.43"
-tempfile = "3.16.0"
+tempfile = "3.17.1"
 thiserror = "2.0.11"
 tokio = { version = "1.43.0", features = [
     "macros",
@@ -100,9 +100,9 @@ tracing-subscriber = { version = "0.3.19", features = [
     "env-filter",
     "parking_lot",
 ] }
-winnow = { version = "0.7.1", features = ["simd"] }
+winnow = { version = "0.7.3", features = ["simd"] }
 xz2 = "0.1.7"
-zstd = "0.13.2"
+zstd = "0.13.3"
 
 [workspace.lints.rust]
 elided_lifetimes_in_paths = "warn"

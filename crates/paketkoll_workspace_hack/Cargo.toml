@@ -73,7 +73,6 @@ bitflags = { version = "2", default-features = false, features = ["std"] }
 libc = { version = "0.2", features = ["extra_traits"] }
 linux-raw-sys = { version = "0.4", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
 rustix = { version = "0.38", features = ["fs"] }
-spin = { version = "0.9" }
 stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
 
 [target.x86_64-unknown-linux-gnu.build-dependencies]
@@ -84,7 +83,6 @@ bitflags = { version = "2", default-features = false, features = ["std"] }
 libc = { version = "0.2", features = ["extra_traits"] }
 linux-raw-sys = { version = "0.4", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
 rustix = { version = "0.38", features = ["fs"] }
-spin = { version = "0.9" }
 stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
 
 [target.x86_64-unknown-linux-musl.build-dependencies]
@@ -95,7 +93,6 @@ bitflags = { version = "2", default-features = false, features = ["std"] }
 libc = { version = "0.2", features = ["extra_traits"] }
 linux-raw-sys = { version = "0.4", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
 rustix = { version = "0.38", features = ["fs"] }
-spin = { version = "0.9" }
 stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
 
 [target.aarch64-unknown-linux-musl.build-dependencies]
