@@ -28,7 +28,7 @@ derive_builder = "0.20.2"
 directories = "6.0.0"
 dirs = "6.0.0"
 duct = "0.13.7"
-either = "1.13.0"
+either = "1.14.0"
 eyre = "0.6.12"
 faster-hex = { version = "0.10.0", default-features = false, features = [
     "std",
