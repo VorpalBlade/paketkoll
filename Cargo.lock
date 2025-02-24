@@ -1502,6 +1502,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d26c52dbd32dccf2d10cac7725f8eae5296885fb5703b261f7d0a0739ec807ab"
 
 [[package]]
+name = "linux-raw-sys"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8bbbb933f93c53df320d2bb19124961a8e91fad88d2dd6f4f40e85ab13d4bb5e"
+
+[[package]]
 name = "litemap"
 version = "0.7.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2057,7 +2063,7 @@ dependencies = [
  "getrandom 0.2.15",
  "hashbrown 0.14.5",
  "libc",
- "linux-raw-sys",
+ "linux-raw-sys 0.8.0",
  "log",
  "memchr",
  "musli",
@@ -2740,7 +2746,7 @@ dependencies = [
  "bitflags 2.8.0",
  "errno",
  "libc",
- "linux-raw-sys",
+ "linux-raw-sys 0.4.15",
  "windows-sys 0.59.0",
 ]
 
@@ -3905,7 +3911,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e105d177a3871454f754b33bb0ee637ecaaac997446375fd3e5d43a2ed00c909"
 dependencies = [
  "libc",
- "linux-raw-sys",
+ "linux-raw-sys 0.4.15",
  "rustix",
 ]
 
