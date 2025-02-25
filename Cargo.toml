@@ -16,12 +16,12 @@ cached = { version = "0.54.0", features = [
 ], default-features = false }
 camino = "1.1.9"
 cfg-if = "1.0.0"
-clap = { version = "4.5.30", features = ["derive"] }
-clap_complete = "4.5.45"
+clap = { version = "4.5.31", features = ["derive"] }
+clap_complete = "4.5.46"
 clap_mangen = "0.2.26"
 clru = "0.6.2"
 color-eyre = "0.6.3"
-compact_str = { version = "0.8.1", features = ["serde", "smallvec"] }
+compact_str = { version = "0.9.0", features = ["serde", "smallvec"] }
 console = "0.15.10"
 dashmap = "6.1.0"
 derive_builder = "0.20.2"
@@ -33,7 +33,7 @@ eyre = "0.6.12"
 faster-hex = { version = "0.10.0", default-features = false, features = [
     "std",
 ] }
-flate2 = { version = "1.0.35", default-features = false, features = [
+flate2 = { version = "1.1.0", default-features = false, features = [
     "zlib-ng",
 ] }
 flume = { version = "0.11.1", default-features = false }
@@ -47,7 +47,7 @@ lasso = { version = "0.7.3", features = [
     "inline-more",
     "multi-threaded",
 ] }
-libc = "0.2.169"
+libc = "0.2.170"
 md-5 = "0.10.6"
 memchr = "2.7.4"
 mimalloc = "0.1.43"
@@ -61,7 +61,7 @@ pretty_assertions = "1.4.1"
 proc-exit = "2.0.2"
 rayon = "1.10.0"
 regex = "1.11.1"
-ring = "0.17.10"
+ring = "0.17.11"
 rune = "0.13.4"
 rune-modules = { version = "0.13.4", features = [
     "json",
@@ -85,7 +85,7 @@ sysinfo = { version = "0.33.1", default-features = false, features = [
     "multithread",
     "system",
 ] }
-tar = "0.4.43"
+tar = "0.4.44"
 tempfile = "3.17.1"
 thiserror = "2.0.11"
 tokio = { version = "1.43.0", features = [
