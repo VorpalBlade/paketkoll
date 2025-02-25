@@ -11,8 +11,8 @@ bitflags = { version = "2.8.0", features = ["serde"] }
 bstr = "1.11.3"
 bzip2 = "0.5.1"
 cached = { version = "0.54.0", features = [
-    "disk_store",
     "ahash",
+    "disk_store",
 ], default-features = false }
 camino = "1.1.9"
 cfg-if = "1.0.0"
@@ -33,9 +33,7 @@ eyre = "0.6.12"
 faster-hex = { version = "0.10.0", default-features = false, features = [
     "std",
 ] }
-flate2 = { version = "1.1.0", default-features = false, features = [
-    "zlib-ng",
-] }
+flate2 = { version = "1.1.0", default-features = false, features = ["zlib-rs"] }
 flume = { version = "0.11.1", default-features = false }
 glob = "0.3.2"
 globset = "0.4.15"
@@ -164,7 +162,7 @@ lto = false
 [profile.dev.package]
 # Needed for reasonable performance
 flate2.opt-level = 2
-libz-ng-sys.opt-level = 2
+libz-rs-sys.opt-level = 2
 md-5.opt-level = 2
 proc-macro2.opt-level = 2
 quote.opt-level = 2
@@ -172,9 +170,10 @@ ring.opt-level = 2
 rune-macros.opt-level = 2
 serde_derive.opt-level = 2
 syn.opt-level = 2
+zlib-rs.opt-level = 2
+zstd.opt-level = 2
 zstd-safe.opt-level = 2
 zstd-sys.opt-level = 2
-zstd.opt-level = 2
 
 #[patch.crates-io]
 ## Rune

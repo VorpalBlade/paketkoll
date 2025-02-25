@@ -27,7 +27,7 @@ clap_builder = { version = "4", default-features = false, features = ["color", "
 crossbeam-epoch = { version = "0.9" }
 dashmap = { version = "6", default-features = false, features = ["raw-api", "rayon"] }
 either = { version = "1" }
-flate2 = { version = "1", features = ["zlib-ng"] }
+flate2 = { version = "1", features = ["zlib-rs"] }
 getrandom = { version = "0.2", default-features = false, features = ["std"] }
 hashbrown = { version = "0.14", features = ["raw"] }
 log = { version = "0.4", default-features = false, features = ["std"] }
