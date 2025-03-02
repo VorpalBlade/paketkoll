@@ -173,8 +173,8 @@ fn parse_flatpak_output(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use pretty_assertions::assert_eq;
     use Package;
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn test_parse_flatpak_output() {

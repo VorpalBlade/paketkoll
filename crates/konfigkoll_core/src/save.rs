@@ -1,8 +1,8 @@
 //! Generate a stream of commands that would create the current system state
 
 use camino::Utf8Path;
-use compact_str::format_compact;
 use compact_str::CompactString;
+use compact_str::format_compact;
 use eyre::WrapErr;
 use itertools::Itertools;
 use konfigkoll_types::FileContents;

@@ -2,9 +2,9 @@
 
 use crate::utils::format_package;
 use ahash::AHashMap;
-use cached::stores::DiskCacheBuilder;
 use cached::DiskCache;
 use cached::IOCached;
+use cached::stores::DiskCacheBuilder;
 use compact_str::CompactString;
 use eyre::WrapErr;
 use paketkoll_types::backend::ArchiveResult;

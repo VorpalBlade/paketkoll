@@ -5,13 +5,13 @@ use crate::engine::CFG_PATH;
 use camino::Utf8PathBuf;
 use eyre::WrapErr;
 use konfigkoll_utils::safe_path_join;
+use rune::Any;
+use rune::ContextError;
+use rune::Module;
 use rune::alloc::fmt::TryWrite;
 use rune::runtime::Bytes;
 use rune::runtime::Formatter;
 use rune::vm_write;
-use rune::Any;
-use rune::ContextError;
-use rune::Module;
 use std::io::ErrorKind;
 use std::io::Read;
 

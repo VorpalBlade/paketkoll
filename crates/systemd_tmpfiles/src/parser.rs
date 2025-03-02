@@ -7,8 +7,8 @@ use compact_str::CompactString;
 use compact_str::ToCompactString;
 use file::Line;
 use smallvec::SmallVec;
-use winnow::error::ContextError;
 use winnow::Parser;
+use winnow::error::ContextError;
 
 mod file;
 
@@ -251,7 +251,7 @@ fn parse_directive(line: Line) -> Result<Entry, ParseError> {
             return Err(ParseError::InvalidDirective(
                 line.path.clone(),
                 entry_type.clone(),
-            ))?
+            ))?;
         }
     };
     Ok(Entry {

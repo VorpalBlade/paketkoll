@@ -501,8 +501,7 @@ fn get_mtree_paths<'borrows>(
     db_path: &Path,
     interner: &'borrows Interner,
     package_filter: &'borrows PackageFilter,
-) -> eyre::Result<impl ParallelIterator<Item = eyre::Result<PackageData>> + use<'borrows>>
-{
+) -> eyre::Result<impl ParallelIterator<Item = eyre::Result<PackageData>> + use<'borrows>> {
     let db_root = db_path.join("local");
     Ok(std::fs::read_dir(db_root)
         .wrap_err("Failed to read pacman database directory")?

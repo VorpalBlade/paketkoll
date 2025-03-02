@@ -1,7 +1,7 @@
 //! Utility functions
 
-use compact_str::format_compact;
 use compact_str::CompactString;
+use compact_str::format_compact;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::package::PackageInterned;
 

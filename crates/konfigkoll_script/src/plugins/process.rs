@@ -44,8 +44,11 @@
 //! }
 //! ```
 
-use rune::alloc::fmt::TryWrite;
+use rune::Any;
+use rune::ContextError;
+use rune::Module;
 use rune::alloc::Vec;
+use rune::alloc::fmt::TryWrite;
 use rune::runtime::Bytes;
 use rune::runtime::Formatter;
 use rune::runtime::Mut;
@@ -54,9 +57,6 @@ use rune::runtime::Value;
 use rune::runtime::VmResult;
 use rune::vm_try;
 use rune::vm_write;
-use rune::Any;
-use rune::ContextError;
-use rune::Module;
 use std::io;
 use tokio::process;
 use tracing::instrument;

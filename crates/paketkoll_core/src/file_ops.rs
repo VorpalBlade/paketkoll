@@ -1,10 +1,10 @@
 //! Contain file checking functionality
 
 use eyre::WrapErr;
-use ignore::overrides::OverrideBuilder;
 use ignore::Match;
 use ignore::WalkBuilder;
 use ignore::WalkState;
+use ignore::overrides::OverrideBuilder;
 use paketkoll_types::backend::OriginalFileQuery;
 use paketkoll_types::backend::OriginalFilesResult;
 use paketkoll_types::files::FileEntry;

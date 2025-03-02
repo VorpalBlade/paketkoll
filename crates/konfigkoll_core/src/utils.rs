@@ -2,8 +2,8 @@
 
 use clru::CLruCache;
 use compact_str::CompactString;
-use eyre::eyre;
 use eyre::Context;
+use eyre::eyre;
 use konfigkoll_types::FsInstruction;
 use paketkoll_types::backend::Files;
 use paketkoll_types::backend::OriginalFileQuery;

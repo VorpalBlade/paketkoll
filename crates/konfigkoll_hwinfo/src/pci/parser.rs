@@ -4,6 +4,8 @@ use super::Class;
 use super::ProgrammingInterface;
 use super::Subclass;
 use ahash::AHashMap;
+use winnow::ModalResult;
+use winnow::Parser;
 use winnow::ascii::hex_uint;
 use winnow::ascii::newline;
 use winnow::ascii::space1;
@@ -16,8 +18,6 @@ use winnow::error::StrContext;
 use winnow::stream::AsChar;
 use winnow::token::take;
 use winnow::token::take_until;
-use winnow::ModalResult;
-use winnow::Parser;
 
 #[derive(Debug, PartialEq, Eq)]
 enum Line<'input> {

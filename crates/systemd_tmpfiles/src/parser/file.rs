@@ -3,6 +3,8 @@
 use crate::Id;
 use crate::Mode;
 use compact_str::CompactString;
+use winnow::ModalResult;
+use winnow::Parser;
 use winnow::ascii::digit1;
 use winnow::ascii::escaped;
 use winnow::ascii::newline;
@@ -16,8 +18,6 @@ use winnow::error::StrContext;
 use winnow::stream::Accumulate;
 use winnow::token::take_till;
 use winnow::token::take_while;
-use winnow::ModalResult;
-use winnow::Parser;
 
 /// Low level parser that doesn't make a difference between entry types
 #[derive(Debug, Default, PartialEq, Eq)]

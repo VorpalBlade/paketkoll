@@ -1,11 +1,11 @@
 //! Parsers for Debian package files.
 
-use bstr::io::BufReadExt;
 use bstr::ByteSlice;
 use bstr::ByteVec;
+use bstr::io::BufReadExt;
 use compact_str::format_compact;
-use eyre::bail;
 use eyre::WrapErr;
+use eyre::bail;
 use paketkoll_types::files::Checksum;
 use paketkoll_types::files::FileEntry;
 use paketkoll_types::files::FileFlags;

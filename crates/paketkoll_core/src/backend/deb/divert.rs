@@ -83,9 +83,9 @@ fn parse_diversions(mut input: impl BufRead, interner: &Interner) -> eyre::Resul
 
 #[cfg(test)]
 mod tests {
-    use super::parse_diversions;
     use super::Diversion;
     use super::Diversions;
+    use super::parse_diversions;
     use paketkoll_types::intern::Interner;
     use paketkoll_types::intern::PackageRef;
     use pretty_assertions::assert_eq;

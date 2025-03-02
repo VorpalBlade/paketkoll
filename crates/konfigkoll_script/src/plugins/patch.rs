@@ -3,11 +3,11 @@
 use super::error::KResult;
 use eyre::WrapErr;
 use regex::Regex;
-use rune::runtime::Shared;
-use rune::runtime::VmResult;
 use rune::Any;
 use rune::ContextError;
 use rune::Module;
+use rune::runtime::Shared;
+use rune::runtime::VmResult;
 use std::borrow::Cow;
 use std::cell::RefCell;
 use std::rc::Rc;
