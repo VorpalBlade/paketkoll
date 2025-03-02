@@ -88,7 +88,7 @@ macro_rules! fsnode_into_base_instruction {
 }
 
 impl FsNode {
-    fn into_instruction(self, path: &Utf8Path) -> impl Iterator<Item = FsInstruction> {
+    fn into_instruction(self, path: &Utf8Path) -> impl Iterator<Item = FsInstruction> + use<> {
         let mut results = vec![];
         let mut do_metadata = true;
         let mut was_symlink = false;
@@ -426,7 +426,7 @@ pub fn diff(
     goal: &DiffGoal<'_, '_>,
     before: FsEntries,
     after: FsEntries,
-) -> eyre::Result<impl Iterator<Item = FsInstruction>> {
+) -> eyre::Result<impl Iterator<Item = FsInstruction> + use<>> {
     let diff_iter = itertools::merge_join_by(before.fs, after.fs, |(k1, _), (k2, _)| k1.cmp(k2));
 
     let mut results = vec![];
@@ -532,7 +532,7 @@ pub fn diff(
                 tracing::debug!("{:?} -> ()", before);
                 let pkg = before.1.pkg;
                 match goal {
-                    DiffGoal::Apply(ref _backend_impl, path_map) => {
+                    &DiffGoal::Apply(ref _backend_impl, ref path_map) => {
                         // Figure out what the previous state of this file was:
                         match path_map.get(before.0.as_std_path()) {
                             Some(entry) => {

@@ -1,11 +1,11 @@
 [package]
 description = "Konfigkoll utilities"
-edition = "2021"
+edition = "2024"
 keywords = ["konfigkoll"]
 license = "MPL-2.0"
 name = "konfigkoll_utils"
 repository = "https://github.com/VorpalBlade/paketkoll"
-rust-version = "1.81.0"
+rust-version = "1.85.0"
 version = "0.1.7"
 
 [dependencies]

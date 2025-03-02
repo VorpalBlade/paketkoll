@@ -74,7 +74,9 @@ impl Settings {
     }
 
     /// Get enabled package backends
-    pub fn enabled_pkg_backends(&self) -> impl Iterator<Item = paketkoll_types::backend::Backend> {
+    pub fn enabled_pkg_backends(
+        &self,
+    ) -> impl Iterator<Item = paketkoll_types::backend::Backend> + use<> {
         let guard = self.enabled_pkg_backends.lock();
         let v: Vec<_> = guard.iter().copied().collect();
         v.into_iter()

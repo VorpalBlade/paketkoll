@@ -2,7 +2,7 @@
 authors = ["Richard Dodd <richard.o.dodd@gmail.com>", "Arvid Norlander"]
 categories = ["parsing", "os::unix-apis", "filesystem"]
 description = "A crate for iterating through the entries of an mtree record file."
-edition = "2021"
+edition = "2024"
 keywords = ["mtree", "checksum", "file", "manifest"]
 license = "Apache-2.0 OR MIT"
 name = "mtree2"
