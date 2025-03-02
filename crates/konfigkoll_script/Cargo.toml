@@ -2,7 +2,7 @@
 categories = ["os::unix-apis"]
 description = "Scripting language for Konfigkoll (not for direct public use)"
 edition = "2024"
-keywords = ["scripting-language", "rune", "konfigkoll"]
+keywords = ["konfigkoll", "rune", "scripting-language"]
 license = "MPL-2.0"
 name = "konfigkoll_script"
 repository = "https://github.com/VorpalBlade/paketkoll"
@@ -28,8 +28,8 @@ paketkoll_types = { version = "0.2.2", path = "../paketkoll_types" }
 paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 parking_lot.workspace = true
 regex.workspace = true
-rune-modules.workspace = true
 rune.workspace = true
+rune-modules.workspace = true
 rust-ini.workspace = true
 sysinfo.workspace = true
 tempfile.workspace = true

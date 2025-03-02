@@ -16,10 +16,10 @@ publish_features = ["arch_linux", "debian"]
 # We only want GH releases for the binaries
 [[package]]
 changelog_include = [
-    "konfigkoll_script",
-    "konfigkoll_core",
     "konfigkoll_cache",
+    "konfigkoll_core",
     "konfigkoll_hwinfo",
+    "konfigkoll_script",
 ]
 git_release_enable = true
 git_release_type = "auto"

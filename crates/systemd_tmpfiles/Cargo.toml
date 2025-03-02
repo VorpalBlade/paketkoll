@@ -2,18 +2,18 @@
 categories = ["os::linux-apis"]
 description = "A parser for systemd-tmpfiles configuration files"
 edition = "2024"
-keywords = ["systemd", "tmpfiles", "parser"]
+keywords = ["parser", "systemd", "tmpfiles"]
 license = "MPL-2.0"
 name = "systemd_tmpfiles"
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.85.0"
 version = "0.2.2"
 
-    [package.metadata.docs.rs]
-    default-target = "x86_64-unknown-linux-gnu"
-    features = ["user"]
-    # Other targets make no difference, and we only support Linux
-    targets = []
+[package.metadata.docs.rs]
+default-target = "x86_64-unknown-linux-gnu"
+features = ["user"]
+# Other targets make no difference, and we only support Linux
+targets = []
 
 [features]
 default = ["user"]

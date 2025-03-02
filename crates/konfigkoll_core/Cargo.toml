@@ -1,5 +1,5 @@
 [package]
-categories = ["os::unix-apis", "config"]
+categories = ["config", "os::unix-apis"]
 description = "Core functionality for Konfigkoll"
 edition = "2024"
 keywords = ["konfigkoll"]

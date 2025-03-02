@@ -1,13 +1,13 @@
 [package]
 categories = [
     "command-line-utilities",
+    "config",
     "filesystem",
     "os::linux-apis",
-    "config",
 ]
 description = "Konfigkoll is a configuration management tool for Arch Linux and Debian (and derivatives)"
 edition = "2024"
-keywords = ["apt", "arch-linux", "debian", "pacman", "config-management"]
+keywords = ["apt", "arch-linux", "config-management", "debian", "pacman"]
 license = "MPL-2.0"
 name = "konfigkoll"
 repository = "https://github.com/VorpalBlade/paketkoll"
@@ -58,9 +58,9 @@ paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hac
 rayon.workspace = true
 rune = { workspace = true, features = ["cli"] }
 tokio.workspace = true
+tracing.workspace = true
 tracing-error.workspace = true
 tracing-subscriber.workspace = true
-tracing.workspace = true
 
 [target.'cfg(target_env = "musl")'.dependencies]
 # The allocator on musl is attrociously slow, so we use a custom one.

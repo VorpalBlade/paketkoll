@@ -2,7 +2,7 @@
 categories = ["command-line-utilities", "filesystem", "os::linux-apis"]
 description = "Check installed distro files for changes"
 edition = "2024"
-keywords = ["apt", "arch-linux", "debian", "pacman", "package-management"]
+keywords = ["apt", "arch-linux", "debian", "package-management", "pacman"]
 license = "MPL-2.0"
 name = "paketkoll"
 readme = "README.md"
@@ -12,7 +12,7 @@ version = "0.3.8"
 
 [features]
 # Default features
-default = ["debian", "arch_linux", "json", "vendored"]
+default = ["arch_linux", "debian", "json", "vendored"]
 
 # Include the Arch Linux backend
 arch_linux = ["paketkoll_core/arch_linux"]
@@ -24,7 +24,7 @@ debian = ["paketkoll_core/debian"]
 systemd_tmpfiles = ["paketkoll_core/systemd_tmpfiles"]
 
 # Include support for exporting to JSON
-json = ["dep:serde_json", "dep:serde"]
+json = ["dep:serde", "dep:serde_json"]
 
 # Vendor C/C++ dependencies instead of linking them dynamically
 vendored = ["paketkoll_core/vendored"]
@@ -43,9 +43,9 @@ proc-exit.workspace = true
 rayon.workspace = true
 serde = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
+tracing.workspace = true
 tracing-error.workspace = true
 tracing-subscriber.workspace = true
-tracing.workspace = true
 
 [target.'cfg(target_env = "musl")'.dependencies]
 # The allocator on musl is attrociously slow, so we use a custom one.

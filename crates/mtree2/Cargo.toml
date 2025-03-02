@@ -1,9 +1,9 @@
 [package]
-authors = ["Richard Dodd <richard.o.dodd@gmail.com>", "Arvid Norlander"]
-categories = ["parsing", "os::unix-apis", "filesystem"]
+authors = ["Arvid Norlander", "Richard Dodd <richard.o.dodd@gmail.com>"]
+categories = ["filesystem", "os::unix-apis", "parsing"]
 description = "A crate for iterating through the entries of an mtree record file."
 edition = "2024"
-keywords = ["mtree", "checksum", "file", "manifest"]
+keywords = ["checksum", "file", "manifest", "mtree"]
 license = "Apache-2.0 OR MIT"
 name = "mtree2"
 readme = "README.md"

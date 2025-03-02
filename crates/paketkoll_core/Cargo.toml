@@ -2,18 +2,18 @@
 categories = ["filesystem", "os::linux-apis"]
 description = "Check installed distro files for changes (core library)"
 edition = "2024"
-keywords = ["apt", "arch-linux", "debian", "pacman", "package-management"]
+keywords = ["apt", "arch-linux", "debian", "package-management", "pacman"]
 license = "MPL-2.0"
 name = "paketkoll_core"
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.85.0"
 version = "0.5.8"
 
-    [package.metadata.docs.rs]
-    default-target = "x86_64-unknown-linux-gnu"
-    features = ["arch_linux", "debian"]
-    # Other targets make no difference, and we only support Linux
-    targets = []
+[package.metadata.docs.rs]
+default-target = "x86_64-unknown-linux-gnu"
+features = ["arch_linux", "debian"]
+# Other targets make no difference, and we only support Linux
+targets = []
 
 [features]
 # Default features
@@ -34,10 +34,10 @@ debian = [
 ]
 
 # Experimental systemd-tmpfiles backend
-systemd_tmpfiles = ["__sha256", "dep:systemd_tmpfiles", "dep:nix"]
+systemd_tmpfiles = ["__sha256", "dep:nix", "dep:systemd_tmpfiles"]
 
 # Vendor C/C++ dependencies instead of linking them dynamically
-vendored = ["xz2?/static", "bzip2?/static"]
+vendored = ["bzip2?/static", "xz2?/static"]
 
 # Internal feature: Enable MD5 support
 __md5 = ["dep:md-5"]
