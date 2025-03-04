@@ -48,7 +48,7 @@ INFO konfigkoll: Computing diff
 -systemd-resolve:x:975:975:systemd Resolver:/:/usr/bin/nologin
 -systemd-timesync:x:974:974:systemd Time Synchronization:/:/usr/bin/nologin
 -tss:x:973:973:tss user for tpm2:/:/usr/bin/nologin
--uuidd:x:68:68::/:/usr/bin/nologin
+-uuidd:x:68:68:uuid daemon:/:/usr/bin/nologin
 -avahi:x:972:972:Avahi mDNS/DNS-SD daemon:/:/usr/bin/nologin
 -flatpak:x:971:971:Flatpak system helper:/:/usr/bin/nologin
  git:x:970:970:git daemon user:/:/usr/bin/git-shell

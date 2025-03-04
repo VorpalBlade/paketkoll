@@ -1,9 +1,9 @@
-FROM docker.io/archlinux/archlinux:base-devel-20241216.0.289606 AS base_image
+FROM docker.io/archlinux/archlinux:base-devel-20250302.0.316047 AS base_image
 
 # Signatures expire, repos expire, and so on. Make this image reproducible
 # (update this once in a while)
 RUN sed -i "s/^SigLevel.*/SigLevel = Never/;/DisableSandbox/s/^#//" /etc/pacman.conf && \
-    echo 'Server=https://archive.archlinux.org/repos/2024/12/16/$repo/os/$arch' > /etc/pacman.d/mirrorlist
+    echo 'Server=https://archive.archlinux.org/repos/2025/03/02/$repo/os/$arch' > /etc/pacman.d/mirrorlist
 
 RUN pacman -Syyuu --noconfirm && \
     pacman -S --needed --noconfirm base-devel git flatpak

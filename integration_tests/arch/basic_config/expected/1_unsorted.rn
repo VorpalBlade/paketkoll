@@ -29,10 +29,12 @@ pub fn unsorted_additions(props, cmds) {
     ctx.cmds.chmod("/srv/ftp", 0o755)?; // [filesystem]
     ctx.cmds.chmod("/usr/bin/groupmems", 0o2750)?; // [shadow]
     ctx.cmds.chgrp("/usr/bin/groupmems", "groups")?; // [shadow]
+    ctx.cmds.chmod("/usr/lib/dbus-daemon-launch-helper", 0o4710)?; // [dbus]
     ctx.cmds.mkdir("/var")?;
     ctx.cmds.mkdir("/var/lib")?;
     ctx.cmds.mkdir("/var/lib/lastlog")?;
     ctx.cmds.mkdir("/var/lib/libuuid")?;
+    ctx.cmds.chmod("/var/lib/libuuid", 0o2775)?;
     ctx.cmds.chown("/var/lib/libuuid", "uuidd")?;
     ctx.cmds.chgrp("/var/lib/libuuid", "uuidd")?;
 }

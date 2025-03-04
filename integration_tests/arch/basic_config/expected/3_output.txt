@@ -65,14 +65,15 @@ INFO konfigkoll_core::apply:  /etc/group-: create file (with sha256:6341b6f97c7f
 INFO konfigkoll_core::apply:  /etc/gshadow-: create file (with sha256:dbdaa27be5b58d77675b38c1c9e03c80a3064022a73a59481d5ef1262e42a5a6)
 INFO konfigkoll_core::apply:  /etc/passwd-: create file (with sha256:82b0240478f72b5009c823c5cdad0b9f2cf8ada30b35594811125727f45eb9c6)
 INFO konfigkoll_core::apply:  /etc/shadow-: create file (with sha256:c4a9700370dc59fa9c6108d9b1c4bee38991823dd8f4aa557540d2a8905dfbfb)
-INFO konfigkoll_core::apply: Would apply 3 file instructions
+INFO konfigkoll_core::apply: Would apply 4 file instructions
 INFO konfigkoll_core::apply:  /: chmod 755
 INFO konfigkoll_core::apply:  /srv/ftp: chmod 555
 INFO konfigkoll_core::apply:  /usr/bin/groupmems: chmod 750
+INFO konfigkoll_core::apply:  /usr/lib/dbus-daemon-launch-helper: chmod 4110
 INFO konfigkoll_core::apply: Would apply 6 file instructions
 INFO konfigkoll_core::apply:  /srv/ftp: chgrp ftp
 INFO konfigkoll_core::apply:  /usr/bin/groupmems: chgrp root
 INFO konfigkoll_core::apply:  /usr/bin/wall: chgrp tty
 INFO konfigkoll_core::apply:  /usr/bin/write: chgrp tty
-INFO konfigkoll_core::apply:  /usr/lib/dbus-1.0/dbus-daemon-launch-helper: chgrp dbus
+INFO konfigkoll_core::apply:  /usr/lib/dbus-daemon-launch-helper: chgrp dbus
 INFO konfigkoll_core::apply:  /var/games: chgrp games
