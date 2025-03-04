@@ -70,10 +70,11 @@ jobs:
           ld -v
       - name: Install cross
         uses: taiki-e/install-action@cross
-      - name: Cache builds
-        uses: Swatinem/rust-cache@v2.7.7
-        with:
-          key: ${{ matrix.target }}-${{ matrix.rust }}
+      # Cache doesn't work when cross compiling anyway.
+      #- name: Cache builds
+      #  uses: Swatinem/rust-cache@v2.7.7
+      #  with:
+      #    key: ${{ matrix.target }}-${{ matrix.rust }}
       - name: Cross compile binary
         run: cross build --locked --target ${{ matrix.target }} --verbose
       - name: Cross compile tests
