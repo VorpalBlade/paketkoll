@@ -8,6 +8,15 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.6.10] - 2025-03-04
+
+### ⚙️ Other stuff
+
+- Format toml files
+- Rustfmt on edition 2024
+- Clean up mess from edition migration
+- Migrate to edition 2024
+
 ## [0.6.9] - 2024-12-16
 
 ### 🚀 Features
