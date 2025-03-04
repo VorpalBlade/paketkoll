@@ -170,6 +170,26 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y podman
           podman --version
+      - name: Cache podman image
+        id: cache-podman
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/podman_cache
+          key: integration_tests-${{ runner.os }}-${{ hashFiles('integration_tests/images/arch/Containerfile') }}
+      - name: Load cached image
+        if: steps.cache-podman.outputs.cache-hit == 'true'
+        run: |-
+          set +ex
+          podman load < ~/podman_cache/test_img.tar
+      - name: Build & cache image
+        if: steps.cache-podman.outputs.cache-hit != 'true'
+        run: |-
+          set +ex
+          cd integration_tests/images/arch
+          ./build_image.sh
+          mkdir -p ~/podman_cache
+          podman save localhost/test_img > ~/podman_cache/test_img.tar
       - name: Run integration tests
         run: |-
           cd integration_tests
