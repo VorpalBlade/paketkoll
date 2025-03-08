@@ -26,7 +26,7 @@ clap = { version = "4", features = ["derive", "env"] }
 clap_builder = { version = "4", default-features = false, features = ["color", "env", "help", "std", "suggestions", "usage"] }
 crossbeam-epoch = { version = "0.9" }
 dashmap = { version = "6", default-features = false, features = ["raw-api", "rayon"] }
-either = { version = "1" }
+either = { version = "1", features = ["use_std"] }
 flate2 = { version = "1", features = ["zlib-rs"] }
 getrandom = { version = "0.2", default-features = false, features = ["std"] }
 hashbrown = { version = "0.14", features = ["raw"] }
@@ -71,8 +71,7 @@ zerocopy = { version = "0.7", features = ["derive", "simd"] }
 [target.x86_64-unknown-linux-gnu.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
 libc = { version = "0.2", features = ["extra_traits"] }
-linux-raw-sys = { version = "0.4", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
-rustix = { version = "0.38", features = ["fs"] }
+rustix = { version = "1", features = ["fs"] }
 stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
 
 [target.x86_64-unknown-linux-gnu.build-dependencies]
@@ -81,8 +80,7 @@ libc = { version = "0.2", features = ["extra_traits"] }
 [target.x86_64-unknown-linux-musl.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
 libc = { version = "0.2", features = ["extra_traits"] }
-linux-raw-sys = { version = "0.4", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
-rustix = { version = "0.38", features = ["fs"] }
+rustix = { version = "1", features = ["fs"] }
 stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
 
 [target.x86_64-unknown-linux-musl.build-dependencies]
@@ -91,8 +89,7 @@ libc = { version = "0.2", features = ["extra_traits"] }
 [target.aarch64-unknown-linux-musl.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
 libc = { version = "0.2", features = ["extra_traits"] }
-linux-raw-sys = { version = "0.4", default-features = false, features = ["elf", "errno", "general", "ioctl", "no_std", "std"] }
-rustix = { version = "0.38", features = ["fs"] }
+rustix = { version = "1", features = ["fs"] }
 stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
 
 [target.aarch64-unknown-linux-musl.build-dependencies]
