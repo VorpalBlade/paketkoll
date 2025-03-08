@@ -84,6 +84,8 @@ ignore = [
     #{ crate = "a-crate-that-is-yanked@0.1.1", reason = "you can specify why you are ignoring the yanked crate" },
     { id = "RUSTSEC-2024-0320", reason = "yaml-rust is not actually used (given the feature flags that are in use)" },
     { id = "RUSTSEC-2024-0384", reason = "Only relevant to WASM, which this doesn't target" },
+    { id = "RUSTSEC-2024-0436", reason = "paste is unmaintained, but no option is available, indirect dependency" },
+    
 ]
 # If this is true, then cargo deny will use the git executable to fetch advisory database.
 # If this is false, then it uses a built-in git library.
