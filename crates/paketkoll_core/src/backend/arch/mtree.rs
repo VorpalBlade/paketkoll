@@ -28,12 +28,15 @@ use std::path::PathBuf;
 ///
 /// These don't exist in the file system but do in the binary packages
 /// themselves.
-const SPECIAL_FILES: phf::Set<&'static [u8]> = phf::phf_set! {
-    b"./.BUILDINFO",
-    b"./.CHANGELOG",
-    b"./.PKGINFO",
-    b"./.INSTALL",
-};
+fn special_file(fname: &[u8]) -> bool {
+    hashify::tiny_set!(
+        fname,
+        b"./.BUILDINFO",
+        b"./.CHANGELOG",
+        b"./.PKGINFO",
+        b"./.INSTALL",
+    )
+}
 
 /// Extract data from compressed mtree file
 pub(super) fn extract_mtree<'seen>(
@@ -64,8 +67,8 @@ fn parse_mtree<'input_data>(
     let results = mtree.into_iter().filter_map(move |item| match item {
         Ok(inner) => {
             let raw = inner.path().as_os_str().as_encoded_bytes();
-            // SPECIAL_FILES: These are files like .PKGINFO etc. Skip these.
-            if SPECIAL_FILES.contains(raw) {
+            // Skip files like .PKGINFO etc. Skip these.
+            if special_file(raw) {
                 None
             } else {
                 convert_mtree(pkg, &inner, seen_directories, &backup_files).transpose()

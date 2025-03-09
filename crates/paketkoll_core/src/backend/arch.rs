@@ -298,7 +298,7 @@ fn archive_to_entries(
     // Now, lets extract the requested files from the package
     convert_archive_entries(archive, pkg_ref, NAME, |path| {
         let path = path.as_os_str().as_encoded_bytes();
-        if SPECIAL_ARCHIVE_FILES.contains(path) {
+        if special_archive_file(path) {
             None
         } else {
             let path = path.trim_end_with(|ch| ch == '/');
@@ -315,13 +315,16 @@ fn archive_to_entries(
 }
 
 /// Files to ignore when reading archives
-const SPECIAL_ARCHIVE_FILES: phf::Set<&'static [u8]> = phf::phf_set! {
-    b".BUILDINFO",
-    b".CHANGELOG",
-    b".PKGINFO",
-    b".INSTALL",
-    b".MTREE",
-};
+fn special_archive_file(fname: &[u8]) -> bool {
+    hashify::tiny_set!(
+        fname,
+        b".BUILDINFO",
+        b".CHANGELOG",
+        b".PKGINFO",
+        b".INSTALL",
+        b".MTREE",
+    )
+}
 
 fn format_pkg_filename(interner: &Interner, package: &PackageInterned) -> String {
     format!(

@@ -77,7 +77,7 @@ paketkoll_types = { version = "0.2.2", path = "../paketkoll_types" }
 paketkoll_utils = { version = "0.1.7", path = "../paketkoll_utils" }
 paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 parking_lot.workspace = true
-phf.workspace = true
+hashify.workspace = true
 rayon.workspace = true
 regex.workspace = true
 ring = { workspace = true, optional = true }
