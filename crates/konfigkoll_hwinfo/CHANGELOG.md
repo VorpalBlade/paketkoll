@@ -8,6 +8,14 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.8] - 2025-03-17
+
+### ⚙️ Other stuff
+
+- Rustfmt on edition 2024
+- Migrate to edition 2024
+- Bump mimumum required Rust version to 1.81.0
+
 ## [0.1.7] - 2024-12-16
 
 ### 🚀 Features
