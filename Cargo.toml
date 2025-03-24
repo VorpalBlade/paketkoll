@@ -10,14 +10,14 @@ base64-simd = "0.8.0"
 bitflags = { version = "2.9.0", features = ["serde"] }
 bstr = "1.11.3"
 bzip2 = "0.5.2"
-cached = { version = "0.54.0", features = [
+cached = { version = "0.55.1", features = [
     "ahash",
     "disk_store",
 ], default-features = false }
 camino = "1.1.9"
 cfg-if = "1.0.0"
-clap = { version = "4.5.31", features = ["derive"] }
-clap_complete = "4.5.46"
+clap = { version = "4.5.32", features = ["derive"] }
+clap_complete = "4.5.47"
 clap_mangen = "0.2.26"
 clru = "0.6.2"
 color-eyre = "0.6.3"
@@ -59,7 +59,7 @@ pretty_assertions = "1.4.1"
 proc-exit = "2.0.2"
 rayon = "1.10.0"
 regex = "1.11.1"
-ring = "0.17.13"
+ring = "0.17.14"
 rune = "0.13.4"
 rune-modules = { version = "0.13.4", features = [
     "json",
@@ -84,9 +84,9 @@ sysinfo = { version = "0.33.1", default-features = false, features = [
     "system",
 ] }
 tar = "0.4.44"
-tempfile = "3.18.0"
+tempfile = "3.19.1"
 thiserror = "2.0.12"
-tokio = { version = "1.44.0", features = [
+tokio = { version = "1.44.1", features = [
     "macros",
     "parking_lot",
     "process",
@@ -98,7 +98,7 @@ tracing-subscriber = { version = "0.3.19", features = [
     "env-filter",
     "parking_lot",
 ] }
-winnow = { version = "0.7.3", features = ["simd"] }
+winnow = { version = "0.7.4", features = ["simd"] }
 xz2 = "0.1.7"
 zstd = "0.13.3"
 

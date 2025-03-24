@@ -47,7 +47,6 @@ tokio = { version = "1", features = ["fs", "io-std", "io-util", "macros", "parki
 tracing = { version = "0.1" }
 tracing-core = { version = "0.1" }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "parking_lot"] }
-zerocopy = { version = "0.7", features = ["derive", "simd"] }
 
 [build-dependencies]
 ahash = { version = "0.8", features = ["no-rng"] }
@@ -60,7 +59,6 @@ once_cell = { version = "1", features = ["critical-section"] }
 rune-core = { version = "0.13", features = ["doc", "musli", "std"] }
 serde = { version = "1", features = ["alloc", "derive", "rc"] }
 syn = { version = "2", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
-zerocopy = { version = "0.7", features = ["derive", "simd"] }
 
 [target.x86_64-unknown-linux-gnu.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
