@@ -49,7 +49,7 @@ lasso = { version = "0.7.3", features = [
 libc = "0.2.170"
 md-5 = "0.10.6"
 memchr = "2.7.4"
-mimalloc = "0.1.43"
+mimalloc = "0.1.44"
 nix = { version = "0.29.0", default-features = false }
 num_cpus = "1.16.0"
 os_info = { version = "3.10.0", default-features = false }
