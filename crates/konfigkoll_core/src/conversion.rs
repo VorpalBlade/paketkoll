@@ -254,9 +254,9 @@ fn from_fs(
             path: path.into(),
             op: FsOp::CreateBlockDevice {
                 // SAFETY: rdev is a valid device number
-                major: u64::from(unsafe { libc::major(rdev) }),
+                major: u64::from(libc::major(rdev)),
                 // SAFETY: rdev is a valid device number
-                minor: u64::from(unsafe { libc::minor(rdev) }),
+                minor: u64::from(libc::minor(rdev)),
             },
             comment: None,
             pkg,
@@ -267,9 +267,9 @@ fn from_fs(
             path: path.into(),
             op: FsOp::CreateCharDevice {
                 // SAFETY: rdev is a valid device number
-                major: u64::from(unsafe { libc::major(rdev) }),
+                major: u64::from(libc::major(rdev)),
                 // SAFETY: rdev is a valid device number
-                minor: u64::from(unsafe { libc::minor(rdev) }),
+                minor: u64::from(libc::minor(rdev)),
             },
             comment: None,
             pkg,
