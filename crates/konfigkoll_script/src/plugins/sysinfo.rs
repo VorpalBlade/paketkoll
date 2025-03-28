@@ -78,7 +78,7 @@ impl SysInfo {
     /// Number of physical CPU cores
     #[rune::function]
     fn cpu_cores(&self) -> Option<usize> {
-        self.inner.physical_core_count()
+        sysinfo::System::physical_core_count()
     }
 
     /// Get the CPU vendor

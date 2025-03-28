@@ -16,7 +16,7 @@ cached = { version = "0.55.1", features = [
 ], default-features = false }
 camino = "1.1.9"
 cfg-if = "1.0.0"
-clap = { version = "4.5.32", features = ["derive"] }
+clap = { version = "4.5.34", features = ["derive"] }
 clap_complete = "4.5.47"
 clap_mangen = "0.2.26"
 clru = "0.6.2"
@@ -79,7 +79,7 @@ smallvec = { version = "1.14.0", features = [
     "union",
 ] }
 strum = { version = "0.27.1", features = ["derive"] }
-sysinfo = { version = "0.33.1", default-features = false, features = [
+sysinfo = { version = "0.34.1", default-features = false, features = [
     "multithread",
     "system",
 ] }
