@@ -1,5 +1,6 @@
 //! Contain file checking functionality
 
+use compact_str::CompactString;
 use eyre::WrapErr;
 use ignore::Match;
 use ignore::WalkBuilder;
@@ -139,18 +140,7 @@ pub fn mismatching_and_unexpected_files<'a>(
 ) -> eyre::Result<Vec<(Option<PackageRef>, Issue)>> {
     tracing::debug!("Building ignores");
     // Build glob set of ignores
-    let overrides = {
-        let mut builder = OverrideBuilder::new("/");
-        // Add standard ignores
-        for pattern in BUILTIN_IGNORES {
-            builder.add(pattern).expect("Builtin ignore failed");
-        }
-        // Add user ignores
-        for pattern in &unexpected_cfg.ignored_paths {
-            builder.add(&("!".to_string() + pattern.as_str()))?;
-        }
-        builder.build()?
-    };
+    let overrides = build_ignore_overrides(&unexpected_cfg.ignored_paths)?;
 
     tracing::debug!("Walking file system");
     let walker = WalkBuilder::new("/")
@@ -263,6 +253,21 @@ pub fn mismatching_and_unexpected_files<'a>(
         mismatches.push(item);
     }
     Ok(mismatches)
+}
+
+#[doc(hidden)]
+/// Build the ignore overrides for the given configuration
+pub fn build_ignore_overrides(
+    ignored_paths: &Vec<CompactString>,
+) -> eyre::Result<ignore::overrides::Override> {
+    let mut builder = OverrideBuilder::new("/");
+    for pattern in BUILTIN_IGNORES {
+        builder.add(pattern).expect("Builtin ignore failed");
+    }
+    for pattern in ignored_paths {
+        builder.add(&("!".to_string() + pattern.as_str()))?;
+    }
+    Ok(builder.build()?)
 }
 
 /// Create a path map for a set of expected files

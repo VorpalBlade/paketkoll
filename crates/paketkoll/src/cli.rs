@@ -20,6 +20,10 @@ pub struct Cli {
     /// Output format to use
     #[arg(short, long, default_value_t = Format::Human)]
     pub format: Format,
+    /// Paths to ignore (apart from built in ones). Basic globs are
+    /// supported. Use ** to match any number of path components.
+    #[arg(long)]
+    pub ignore: Vec<CompactString>,
     /// Operation to perform
     #[command(subcommand)]
     pub command: Commands,
@@ -34,10 +38,6 @@ pub enum Commands {
     },
     /// Check package files and search for unexpected files
     CheckUnexpected {
-        /// Paths to ignore (apart from built in ones). Basic globs are
-        /// supported. Use ** to match any number of path components.
-        #[arg(long)]
-        ignore: Vec<CompactString>,
         /// Should paths be canonicalized before checking? If you get many false
         /// positives, try this. Required on Debian due to lack of /usr
         /// merge.

@@ -60,10 +60,7 @@ impl TryFrom<&Cli> for paketkoll_core::backend::BackendConfiguration {
             Commands::Check { ref packages } => {
                 builder.package_filter(convert_filter(packages.clone()));
             }
-            Commands::CheckUnexpected {
-                ignore: _,
-                canonicalize: _,
-            } => {}
+            Commands::CheckUnexpected { canonicalize: _ } => {}
             Commands::InstalledPackages => {}
             Commands::OriginalFile { .. } => {}
             Commands::Owns { .. } => {}

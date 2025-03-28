@@ -1911,6 +1911,7 @@ dependencies = [
  "color-eyre",
  "compact_str",
  "eyre",
+ "ignore",
  "mimalloc",
  "os_info",
  "paketkoll_core",

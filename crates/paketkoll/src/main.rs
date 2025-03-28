@@ -206,16 +206,13 @@ fn run_file_checks(cli: &Cli) -> eyre::Result<Exit> {
             &cli.try_into()?,
             &cli.try_into()?,
         )?,
-        Commands::CheckUnexpected {
-            ref ignore,
-            canonicalize,
-        } => file_ops::check_all_files(
+        Commands::CheckUnexpected { canonicalize } => file_ops::check_all_files(
             cli.backend.try_into()?,
             &cli.try_into()?,
             &cli.try_into()?,
             &{
                 let mut builder = CheckAllFilesConfiguration::builder();
-                builder.ignored_paths(ignore.clone());
+                builder.ignored_paths(cli.ignore.clone());
                 builder.canonicalize_paths(canonicalize);
                 builder.build()?
             },
@@ -234,6 +231,25 @@ fn run_file_checks(cli: &Cli) -> eyre::Result<Exit> {
         found_issues.par_sort_by_key(key_extractor);
     } else {
         found_issues.sort_by_key(key_extractor);
+    }
+
+    if let Commands::Check { .. } = cli.command {
+        if !cli.ignore.is_empty() {
+            // Do post-processing of ignores as the check command doesn't have that built
+            // in.
+            let ignores = file_ops::build_ignore_overrides(&cli.ignore)?;
+            found_issues.retain(|(_, issue)| {
+                let path = issue.path();
+                match ignores.matched(path, path.is_dir()) {
+                    ignore::Match::None => (),
+                    ignore::Match::Ignore(_) => {
+                        return false;
+                    }
+                    ignore::Match::Whitelist(_) => (),
+                }
+                true
+            });
+        }
     }
 
     let has_issues = !found_issues.is_empty();
