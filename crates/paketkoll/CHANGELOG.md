@@ -8,6 +8,18 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.3.9] - 2025-03-28
+
+### 🚀 Features
+
+- Ignore support for check command
+
+### ⚙️ Other stuff
+
+- Format toml files
+- Migrate to edition 2024
+- Bump mimumum required Rust version to 1.85.0
+
 ## [0.3.8] - 2024-12-16
 
 ### ⚙️ Other stuff
