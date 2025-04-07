@@ -8,6 +8,12 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.5.10] - 2025-04-07
+
+### ⚙️ Other stuff
+
+- Clippy fixes with 1.86
+
 ## [0.5.9] - 2025-03-28
 
 ### 🚀 Features
