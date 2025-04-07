@@ -79,7 +79,7 @@ smallvec = { version = "1.14.0", features = [
     "union",
 ] }
 strum = { version = "0.27.1", features = ["derive"] }
-sysinfo = { version = "0.34.1", default-features = false, features = [
+sysinfo = { version = "0.34.2", default-features = false, features = [
     "multithread",
     "system",
 ] }
