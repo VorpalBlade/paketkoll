@@ -117,7 +117,7 @@ impl Settings {
     /// Get preferred pager to use
     pub fn pager(&self) -> Vec<String> {
         let guard = self.pager.lock();
-        if guard.len() >= 1 {
+        if !guard.is_empty() {
             guard.clone()
         } else {
             vec![std::env::var("PAGER").ok().unwrap_or_else(|| "less".into())]

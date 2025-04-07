@@ -480,7 +480,7 @@ fn apply_specifiers<'input>(
     let mut buffer = Vec::with_capacity(input.len() + 32);
 
     loop {
-        buffer.extend(input[old_idx..index].as_bytes());
+        buffer.extend(&input.as_bytes()[old_idx..index]);
         old_idx = index + 2;
         let next_char = *input
             .as_bytes()
@@ -519,11 +519,11 @@ fn apply_specifiers<'input>(
             b'%' => buffer.push(b'%'),
             _ => return Err(SpecifierError::InvalidSpecifier(next_char.into())),
         }
-        let new_index = memchr::memchr(b'%', input[old_idx..].as_bytes());
+        let new_index = memchr::memchr(b'%', &input.as_bytes()[old_idx..]);
         if let Some(new_index) = new_index {
             index = old_idx + new_index;
         } else {
-            buffer.extend(input[old_idx..].as_bytes());
+            buffer.extend(&input.as_bytes()[old_idx..]);
             return Ok(Cow::Owned(
                 String::from_utf8(buffer).expect("Invalid UTF-8"),
             ));

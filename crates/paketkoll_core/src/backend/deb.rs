@@ -235,7 +235,7 @@ impl Files for Debian {
                     let extension: CompactString = std::str::from_utf8(entry.header().identifier())
                         .wrap_err("Failed to parse file entry (ar level) as UTF-8")?
                         .split('.')
-                        .last()
+                        .next_back()
                         .ok_or_else(|| eyre::eyre!("No file extension found"))?
                         .into();
                     let mut decompressed =
@@ -380,7 +380,7 @@ fn archive_to_entries(
         if entry.header().identifier().starts_with(b"data.tar") {
             let extension: CompactString = std::str::from_utf8(entry.header().identifier())?
                 .split('.')
-                .last()
+                .next_back()
                 .ok_or_else(|| eyre::eyre!("No file extension found"))?
                 .into();
             let mut decompressed = CompressionFormat::from_extension(&extension, &mut entry)?;

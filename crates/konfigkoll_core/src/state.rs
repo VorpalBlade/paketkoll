@@ -354,7 +354,7 @@ impl FsEntries {
                         });
                 }
                 FsOp::Comment => (),
-                FsOp::Restore { .. } => {
+                FsOp::Restore => {
                     tracing::error!(
                         "Restore operation not supported as *input* to state::apply_instructions"
                     );

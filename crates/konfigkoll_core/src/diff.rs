@@ -139,7 +139,7 @@ pub fn show_fs_instr_diff(
                 style(new_gid).green()
             );
         }
-        FsOp::Restore { .. } => {
+        FsOp::Restore => {
             println!(
                 "{}: Would restore to original package manager state",
                 style(&instr.path).color256(202)

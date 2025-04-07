@@ -114,7 +114,7 @@ pub fn save_fs_changes<'instruction>(
             konfigkoll_types::FsOp::Comment => {
                 writeln!(output, "    // {}: {}", instruction.path, comment)?;
             }
-            konfigkoll_types::FsOp::Restore { .. } => {
+            konfigkoll_types::FsOp::Restore => {
                 writeln!(
                     output,
                     "    restore({}) // Restore this file to original package manager state{}",
