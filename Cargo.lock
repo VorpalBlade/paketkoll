@@ -1355,7 +1355,7 @@ dependencies = [
  "paketkoll_workspace_hack",
  "pretty_assertions",
  "rune",
- "winnow 0.7.4",
+ "winnow 0.7.6",
 ]
 
 [[package]]
@@ -1388,7 +1388,7 @@ dependencies = [
  "thiserror 2.0.12",
  "tokio",
  "tracing",
- "winnow 0.7.4",
+ "winnow 0.7.6",
 ]
 
 [[package]]
@@ -2997,7 +2997,7 @@ dependencies = [
  "smallvec",
  "strum",
  "thiserror 2.0.12",
- "winnow 0.7.4",
+ "winnow 0.7.6",
 ]
 
 [[package]]
@@ -3735,9 +3735,9 @@ dependencies = [
 
 [[package]]
 name = "winnow"
-version = "0.7.4"
+version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e97b544156e9bebe1a0ffbc03484fc1ffe3100cbce3ffb17eac35f7cdd7ab36"
+checksum = "63d3fcd9bba44b03821e7d699eeee959f3126dcc4aa8e4ae18ec617c2a5cea10"
 dependencies = [
  "memchr",
 ]
