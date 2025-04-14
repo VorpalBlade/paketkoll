@@ -8,7 +8,7 @@ annotate-snippets = { version = "0.11.5", features = ["simd"] }
 ar = "0.9.0"
 base64-simd = "0.8.0"
 bitflags = { version = "2.9.0", features = ["serde"] }
-bstr = "1.11.3"
+bstr = "1.12.0"
 bzip2 = "0.5.2"
 cached = { version = "0.55.1", features = [
     "ahash",
