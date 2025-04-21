@@ -3,10 +3,12 @@ git_release_enable = false
 
 [[package]]
 name = "xtask"
+publish = false
 release = false
 
 [[package]]
 name = "paketkoll_workspace_hack"
+publish = false
 release = false
 
 [[package]]
