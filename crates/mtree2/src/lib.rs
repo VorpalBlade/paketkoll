@@ -119,10 +119,14 @@ where
                     self.cwd.file_name().is_some(),
                     "relative without a current working dir"
                 );
+                let filepath = decode_escapes_path(self.cwd.join(OsStr::from_bytes(path)))
+                    .ok_or_else(|| Error::Parser(ParserError("Failed to decode escapes".into())))?;
+                if let Some(FileType::Directory) = params.file_type {
+                    self.cwd.push(filepath.as_path());
+                }
+
                 Some(Entry {
-                    path: decode_escapes_path(self.cwd.join(OsStr::from_bytes(path))).ok_or_else(
-                        || Error::Parser(ParserError("Failed to decode escapes".into())),
-                    )?,
+                    path: filepath,
                     params,
                 })
             }
