@@ -41,7 +41,7 @@ once_cell = { version = "1", features = ["critical-section"] }
 regex = { version = "1" }
 regex-automata = { version = "0.4", default-features = false, features = ["dfa-onepass", "dfa-search", "hybrid", "meta", "nfa", "perf", "unicode"] }
 rune = { version = "0.13", features = ["cli"] }
-rune-core = { version = "0.13", features = ["doc", "musli", "std"] }
+rune-core = { version = "0.14", features = ["doc", "musli", "std"] }
 scopeguard = { version = "1" }
 serde = { version = "1", features = ["alloc", "derive", "rc"] }
 similar = { version = "2", features = ["bytes", "inline"] }
@@ -59,7 +59,7 @@ getrandom = { version = "0.2", default-features = false, features = ["std"] }
 memchr = { version = "2" }
 musli = { version = "0.0.42", default-features = false, features = ["std"] }
 once_cell = { version = "1", features = ["critical-section"] }
-rune-core = { version = "0.13", features = ["doc", "musli", "std"] }
+rune-core = { version = "0.14", features = ["doc", "musli", "std"] }
 serde = { version = "1", features = ["alloc", "derive", "rc"] }
 syn = { version = "2", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 
