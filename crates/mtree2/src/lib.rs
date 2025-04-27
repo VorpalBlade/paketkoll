@@ -129,7 +129,7 @@ where
                 let mut params = self.default_params.clone();
                 params.set_list(keywords.into_iter());
                 assert!(
-                    self.cwd.file_name().is_some(),
+                    !self.cwd.as_os_str().is_empty(),
                     "relative without a current working dir"
                 );
                 let filepath = decode_escapes_path(self.cwd.join(OsStr::from_bytes(path)))
