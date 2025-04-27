@@ -8,6 +8,13 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.12] - 2025-04-27
+
+### ⚙️ Other stuff
+
+- Update Cargo.toml dependencies
+- Clippy fixes with 1.86
+
 ## [0.1.11] - 2025-03-28
 
 ### ⚙️ Other stuff

@@ -1297,7 +1297,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll"
-version = "0.1.11"
+version = "0.1.12"
 dependencies = [
  "ahash",
  "camino",
@@ -1329,7 +1329,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_core"
-version = "0.5.2"
+version = "0.5.3"
 dependencies = [
  "ahash",
  "camino",
@@ -1357,7 +1357,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_hwinfo"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "ahash",
  "eyre",
@@ -1371,7 +1371,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_script"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "ahash",
  "annotate-snippets",
@@ -1404,7 +1404,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_types"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "camino",
  "compact_str",
@@ -1612,7 +1612,7 @@ dependencies = [
 
 [[package]]
 name = "mtree2"
-version = "0.6.10"
+version = "0.6.11"
 dependencies = [
  "bitflags 2.9.0",
  "faster-hex",
@@ -1926,7 +1926,7 @@ checksum = "c1b04fb49957986fdce4d6ee7a65027d55d4b6d2265e5848bbb507b58ccfdb6f"
 
 [[package]]
 name = "paketkoll"
-version = "0.3.9"
+version = "0.3.10"
 dependencies = [
  "ahash",
  "clap",
@@ -1950,7 +1950,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_cache"
-version = "0.2.8"
+version = "0.2.9"
 dependencies = [
  "ahash",
  "cached",
@@ -1966,7 +1966,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_core"
-version = "0.5.9"
+version = "0.5.10"
 dependencies = [
  "ahash",
  "ar",
@@ -2011,7 +2011,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_types"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "ahash",
  "bitflags 2.9.0",
@@ -2032,7 +2032,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_utils"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "eyre",
  "paketkoll_types",
@@ -2996,7 +2996,7 @@ dependencies = [
 
 [[package]]
 name = "systemd_tmpfiles"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "base64-simd",
  "bitflags 2.9.0",
