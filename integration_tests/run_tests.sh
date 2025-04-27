@@ -6,7 +6,11 @@ exit_code=0
 
 # Build image(s)
 echo "::group::Build image(s)"
-(cd images/arch && ./build_image.sh)
+if [[ "$SKIP_BUILD_IMAGES" == "true" ]]; then
+    echo "Skipping image build"
+else
+    (cd images/arch && ./build_image.sh)
+fi
 echo "::endgroup::"
 
 # Run tests

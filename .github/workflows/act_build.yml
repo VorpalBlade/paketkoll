@@ -193,4 +193,4 @@ jobs:
       - name: Run integration tests
         run: |-
           cd integration_tests
-          ./run_tests.sh
+          SKIP_BUILD_IMAGES=true ./run_tests.sh
