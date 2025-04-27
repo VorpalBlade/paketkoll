@@ -8,6 +8,22 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.6.11] - 2025-04-27
+
+### 🚀 Features
+
+- Add from_reader_with_cwd to set starting CWD
+
+### 🐛 Bug fixes
+
+- Fix handling of relative paths when cwd is /
+- Make relative dir change cwd in mtree format
+
+### 🧪 Testing
+
+- Add test for relative directory changes
+- Add snapshot testing using the `insta` crate for mtree2
+
 ## [0.6.10] - 2025-03-28
 
 ### ⚙️ Other stuff

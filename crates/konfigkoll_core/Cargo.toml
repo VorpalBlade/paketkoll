@@ -7,7 +7,7 @@ license = "MPL-2.0"
 name = "konfigkoll_core"
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.85.0"
-version = "0.5.2"
+version = "0.5.3"
 
 [dependencies]
 ahash.workspace = true
@@ -20,11 +20,11 @@ duct.workspace = true
 either.workspace = true
 eyre.workspace = true
 itertools.workspace = true
-konfigkoll_types = { version = "0.2.5", path = "../konfigkoll_types" }
+konfigkoll_types = { version = "0.2.6", path = "../konfigkoll_types" }
 libc.workspace = true
 nix = { workspace = true, features = ["user"] }
-paketkoll_types = { version = "0.2.3", path = "../paketkoll_types" }
-paketkoll_utils = { version = "0.1.8", path = "../paketkoll_utils" }
+paketkoll_types = { version = "0.2.4", path = "../paketkoll_types" }
+paketkoll_utils = { version = "0.1.9", path = "../paketkoll_utils" }
 paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 parking_lot.workspace = true
 rayon.workspace = true
