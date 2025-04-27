@@ -40,6 +40,7 @@ globset = "0.4.16"
 hashify = "0.2.6"
 ignore = { version = "0.4.23", features = ["simd-accel"] }
 indoc = "2.0.6"
+insta = "1.43.0"
 itertools = "0.14.0"
 lasso = { version = "0.7.3", features = [
     "ahasher",
@@ -162,6 +163,7 @@ lto = false
 [profile.dev.package]
 # Needed for reasonable performance
 flate2.opt-level = 2
+insta.opt-level = 3
 libz-rs-sys.opt-level = 2
 md-5.opt-level = 2
 proc-macro2.opt-level = 2
@@ -169,6 +171,7 @@ quote.opt-level = 2
 ring.opt-level = 2
 rune-macros.opt-level = 2
 serde_derive.opt-level = 2
+similar.opt-level = 3
 syn.opt-level = 2
 zlib-rs.opt-level = 2
 zstd.opt-level = 2
