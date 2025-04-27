@@ -63,7 +63,7 @@ fn parse_mtree<'input_data>(
     backup_files: BTreeSet<Vec<u8>>,
     seen_directories: &'input_data DashSet<(PathBuf, Directory)>,
 ) -> eyre::Result<impl Iterator<Item = eyre::Result<FileEntry>> + 'input_data> {
-    let mtree = MTree::from_reader(reader);
+    let mtree = MTree::from_reader_with_cwd(reader, PathBuf::from("/"));
     let results = mtree.into_iter().filter_map(move |item| match item {
         Ok(inner) => {
             let raw = inner.path().as_os_str().as_encoded_bytes();
