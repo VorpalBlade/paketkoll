@@ -1,0 +1,46 @@
+#mtree
+/set type=file uid=0 gid=0 mode=644
+./.BUILDINFO time=1745059978.0 size=6337 sha256digest=a9b3971059e0098ae12e30abe71b65beb4b38379fe2743f96694147898455592
+./.PKGINFO time=1745059978.0 size=679 sha256digest=582ea0f6e78c01879907982585d6ca15da1125500de7847069f2d3adee3a1d96
+/set mode=755
+./usr time=1745059978.0 type=dir
+./usr/bin time=1745059978.0 type=dir
+./usr/bin/koi8rxterm time=1745059978.0 size=3760 sha256digest=b8cdc9fca2ab0c41ffd43c9a30b921788cf689f088ec5a4eafd8fcb4126c5dd5
+./usr/bin/resize time=1745059978.0 size=18536 sha256digest=18f2e38e3481629a2b81821d38eeb1694296a521b67c6d486713343600b7f125
+./usr/bin/uxterm time=1745059978.0 size=4250 sha256digest=1dfca0613ad99c05d78f1aa255f2635d502607c3137d31f65a4e504403d0be0b
+./usr/bin/xterm time=1745059978.0 size=878392 sha256digest=c1fd6a6a1425c46acbae38f18ca9f9c6517a62580c94c3fff578f06e617c8fc9
+./usr/share time=1745059978.0 type=dir
+./usr/share/X11 time=1745059978.0 type=dir
+/set mode=644
+./usr/share/X11/app-defaults time=1745059978.0 mode=755 type=dir
+./usr/share/X11/app-defaults/KOI8RXTerm time=1745059978.0 size=2400 sha256digest=c885f62c1eb1716f0eb10b95ec67dfebb180eed78d9e0bb8192fedf1ec8cc570
+./usr/share/X11/app-defaults/KOI8RXTerm-color time=1745059978.0 size=5836 sha256digest=55d7fc29ea89cd88590159323a7ae51986666c071a3a539c130132e02447e6c7
+./usr/share/X11/app-defaults/UXTerm time=1745059978.0 size=3685 sha256digest=3929a06b08220eb118932a5054bdad0639c7bb94ba9d371b08bcb4882f7f5135
+./usr/share/X11/app-defaults/UXTerm-color time=1745059978.0 size=5828 sha256digest=3cb77d157485b8a74c93460596b57ee28c348c77579a1703839fa0458db93048
+./usr/share/X11/app-defaults/XTerm time=1745059978.0 size=10940 sha256digest=099f6eb6938f5842de4e2d61d7063a32145b2ca9f0992824c54dfd166c550eb8
+./usr/share/X11/app-defaults/XTerm-color time=1745059978.0 size=5826 sha256digest=b1fb7abddc10e88e4dc0c4e844d68315b258387b02bd67938f2e9c0dfdaba2a3
+./usr/share/applications time=1745059978.0 mode=755 type=dir
+./usr/share/applications/uxterm.desktop time=1745059978.0 size=1934 sha256digest=64ba682ecb55050787b4f099d1ef5c8fe186280d79baa081259cfc4399f1f45b
+./usr/share/applications/xterm.desktop time=1745059978.0 size=1942 sha256digest=1e474fda7f1ebdfd1c651b1e5d7a928958ccf79c7e7242ab887c97c63b7aa66e
+./usr/share/licenses time=1745059978.0 mode=755 type=dir
+./usr/share/licenses/xterm time=1745059978.0 mode=755 type=dir
+./usr/share/licenses/xterm/COPYING time=1745059978.0 size=3754 sha256digest=554b9dceb0c026f03b018014eaf1df4a7121b59b0a1916c1754546edd2fc440b
+./usr/share/man time=1745059978.0 mode=755 type=dir
+./usr/share/man/man1 time=1745059978.0 mode=755 type=dir
+./usr/share/man/man1/koi8rxterm.1.gz time=1745059978.0 size=1785 sha256digest=14ccefdaed2814ad5f2c5c5a419f8b8a6acfcfe371351a1606cefff68cc912c8
+./usr/share/man/man1/resize.1.gz time=1745059978.0 size=3388 sha256digest=6a3f50428324a9462abf0e75d90b3cc3bd55e9b6fc7be1817beeebf9e7d83e8f
+./usr/share/man/man1/uxterm.1.gz time=1745059978.0 size=1704 sha256digest=f7d6c4b4bdcfe979b6332faad6bd4227b04dba858f3e30558b0943f62256719e
+./usr/share/man/man1/xterm.1.gz time=1745059978.0 size=90260 sha256digest=2f784a87b1755e1ab5994e02a06992ebb405b9d4b575c44d7c85cc8b419f0813
+./usr/share/pixmaps time=1745059978.0 mode=755 type=dir
+./usr/share/pixmaps/filled-xterm_16x16.xpm time=1745059978.0 size=2402 sha256digest=d42b373b3ce957e62b69ce39098140838ffa8727cae0a749be4e1f3e23a690b3
+./usr/share/pixmaps/filled-xterm_32x32.xpm time=1745059978.0 size=5842 sha256digest=ef821f0dc27d61598c5a4e1af62794ab3ef9f3375c7234119555b9a73d6ac897
+./usr/share/pixmaps/filled-xterm_48x48.xpm time=1745059978.0 size=8802 sha256digest=ac30ad8b624ac52666a2cb903b2b914c1698f3ff9840247102870285a5509516
+./usr/share/pixmaps/mini.xterm_16x16.xpm time=1745059978.0 size=1643 sha256digest=823b6f7cdbaa9fd3b595a8beb21807d5050fbcc7fc58f680daed2141a2e5ba9d
+./usr/share/pixmaps/mini.xterm_32x32.xpm time=1745059978.0 size=4528 sha256digest=a35d8fcb924584b6c78e83f5f7b0fa49d332b2a6cf8fb04a5629d92c8ce23bfc
+./usr/share/pixmaps/mini.xterm_48x48.xpm time=1745059978.0 size=8272 sha256digest=0fee626d040447b2f71232f12d386bc6e6348eac67b031a79f34f62e45ebf147
+./usr/share/pixmaps/xterm-color_16x16.xpm time=1745059978.0 size=1584 sha256digest=a53d984ca4350e0cc41086d00028dc722e806d4626c40f097841f55a996423f4
+./usr/share/pixmaps/xterm-color_32x32.xpm time=1745059978.0 size=2116 sha256digest=3350a22913cc16479c84d40086ffbc567e0f9c3eefe10f9e37c687005a09f92e
+./usr/share/pixmaps/xterm-color_48x48.xpm time=1745059978.0 size=2710 sha256digest=0633ed17b1a1cbc1b2eb473e06b93dddd19444ad7ebced693dbd224cfd06042e
+./usr/share/pixmaps/xterm_16x16.xpm time=1745059978.0 size=407 sha256digest=69a5455e4170da09bc1e2137a7f8916f8790dd92a6949ac6ecfa9f18869e531f
+./usr/share/pixmaps/xterm_32x32.xpm time=1745059978.0 size=1239 sha256digest=439621ce118818bf0090750ee96bf80c3d6b111f36699d538bc1511ba32055e6
+./usr/share/pixmaps/xterm_48x48.xpm time=1745059978.0 size=2583 sha256digest=1fe1aff860b4758a2732d3d6a1594131940271495198151f5205f41862e3a395

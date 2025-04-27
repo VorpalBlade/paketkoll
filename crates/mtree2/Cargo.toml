@@ -17,5 +17,8 @@ memchr.workspace = true
 paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 smallvec.workspace = true
 
+[dev-dependencies]
+insta.workspace = true
+
 [lints]
 workspace = true
