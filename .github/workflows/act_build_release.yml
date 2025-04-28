@@ -100,7 +100,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - uses: taiki-e/install-action@cross
-      - uses: taiki-e/upload-rust-binary-action@v1.24.0
+      - uses: taiki-e/upload-rust-binary-action@v1.25.0
         id: upload-rust-binary-action
         name: Upload ${{ matrix.name }} (${{ inputs.project }})
         with:
