@@ -5,6 +5,7 @@ use crate::Params;
 use crate::util::FromDec;
 use crate::util::FromHex;
 use crate::util::parse_time;
+use core::str;
 use smallvec::SmallVec;
 use std::fmt;
 use std::time::Duration;

@@ -165,11 +165,8 @@ where
                 // Convert the partacc to a Vec<u8> by cloning each byte
                 let wrapped: Vec<u8> = partacc.into_iter().cloned().collect();
                 Some(Entry {
-                    path: decode_escapes_path(
-                        Path::new(OsStr::from_bytes(partacc.as_ref())).to_owned(),
-                    )
-                    .ok_or_else(|| Error::Parser(ParserError("Failed to decode escapes".into())))?,
-                    params: self.default_params.clone(),
+                    path: PathBuf::default(),
+                    params: Params::default(),
                     wrapped: Some(wrapped),
                 })
             }
@@ -200,7 +197,8 @@ where
 
             match self.next_entry(input) {
                 Ok(Some(entry)) => {
-                    if let Some(wrapped) = entry.wrapped {
+                    if let Some(mut wrapped) = entry.wrapped {
+                        wrapped.pop(); // remove backslash
                         acc = Some(wrapped);
                         continue;
                     }
