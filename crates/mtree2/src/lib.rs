@@ -229,7 +229,6 @@ pub struct Entry {
 impl fmt::Display for Entry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, r#"mtree entry for "{}""#, self.path.display())?;
-        writeln!(f, r#"acc:  "{:?}""#, self.wrapped)?;
         write!(f, "{}", self.params)
     }
 }
