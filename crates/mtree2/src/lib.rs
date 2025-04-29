@@ -48,6 +48,7 @@ use parser::Keyword;
 use parser::MTreeLine;
 pub use parser::ParserError;
 use parser::SpecialKind;
+use smallvec::SmallVec;
 use std::env;
 use std::ffi::OsStr;
 use std::fmt;
@@ -117,6 +118,7 @@ where
     fn next_entry(&mut self, line: io::Result<Vec<u8>>) -> Result<Option<Entry>, Error> {
         let line = line?;
         let line = MTreeLine::from_bytes(&line)?;
+
         Ok(match line {
             MTreeLine::Blank | MTreeLine::Comment => None,
             MTreeLine::Special(SpecialKind::Set, keywords) => {
@@ -141,6 +143,7 @@ where
                 Some(Entry {
                     path: filepath,
                     params,
+                    wrapped: None,
                 })
             }
             MTreeLine::DotDot => {
@@ -156,6 +159,19 @@ where
                             Error::Parser(ParserError("Failed to decode escapes".into()))
                         })?,
                     params,
+                    wrapped: None,
+                })
+            }
+            MTreeLine::Wrapped(partacc) => {
+                // Convert the partacc to a Vec<u8> by cloning each byte
+                let wrapped: Vec<u8> = partacc.into_iter().cloned().collect();
+                Some(Entry {
+                    path: decode_escapes_path(
+                        Path::new(OsStr::from_bytes(partacc.as_ref())).to_owned(),
+                    )
+                    .ok_or_else(|| Error::Parser(ParserError("Failed to decode escapes".into())))?,
+                    params: self.default_params.clone(),
+                    wrapped: Some(wrapped),
                 })
             }
         })
@@ -169,9 +185,28 @@ where
     type Item = Result<Entry, Error>;
 
     fn next(&mut self) -> Option<Result<Entry, Error>> {
+        let mut acc: Option<Vec<u8>> = None;
         while let Some(line) = self.inner.next() {
-            match self.next_entry(line) {
-                Ok(Some(entry)) => return Some(Ok(entry)),
+            let line = match line {
+                Ok(line) => line,
+                Err(e) => return Some(Err(Error::Io(e))),
+            };
+            
+            let input = if let Some(mut acc) = acc.take() {
+                acc.extend_from_slice(&line);
+                Ok(acc)
+            } else {
+                Ok(line)
+            };
+
+            match self.next_entry(input) {
+                Ok(Some(entry)) => {
+                    if let Some(wrapped) = entry.wrapped {
+                        acc = Some(wrapped);
+                        continue;
+                    }
+                    return Some(Ok(entry));
+                }
                 Ok(None) => (),
                 Err(e) => return Some(Err(e)),
             }
@@ -190,6 +225,8 @@ pub struct Entry {
     path: PathBuf,
     /// All parameters applicable to this entry
     params: Params,
+    /// The accumulated parts of a wrapped line.
+    wrapped: Option<Vec<u8>>,
 }
 
 impl fmt::Display for Entry {
@@ -465,6 +502,7 @@ impl Params {
             Keyword::Type(ty) => self.file_type = Some(ty),
             Keyword::Uid(uid) => self.uid = Some(uid),
             Keyword::Uname(uname) => self.uname = Some(uname.into()),
+            Keyword::Wrapped => (), // Wrapped keywords are handled separately
         }
     }
 

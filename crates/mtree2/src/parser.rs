@@ -1,5 +1,7 @@
 //! Stuff for parsing mtree files.
 use crate::Device;
+use crate::Error;
+use crate::Params;
 use crate::util::FromDec;
 use crate::util::FromHex;
 use crate::util::parse_time;
@@ -25,6 +27,8 @@ pub enum MTreeLine<'a> {
     /// If the first word does contain a '/', it is a file relative to the
     /// starting (not current) directory.
     Full(&'a [u8], SmallVec<[Keyword<'a>; 5]>),
+    /// Wrapped line, accumulated parts
+    Wrapped(&'a [u8]),
 }
 
 impl<'a> MTreeLine<'a> {
@@ -53,6 +57,15 @@ impl<'a> MTreeLine<'a> {
                 String::from_utf8_lossy(part)
             );
             if let Ok(keyword) = keyword {
+                if matches!(keyword, Keyword::Wrapped) {
+                    // Verify line ends with backslash
+                    debug_assert_eq!(
+                        input.last().copied(),
+                        Some(b'\\'),
+                        "Wrapped line must end with backslash"
+                    );
+                    return Ok(MTreeLine::Wrapped(input));
+                }
                 params.push(keyword);
             }
         }
@@ -166,6 +179,8 @@ pub enum Keyword<'a> {
     Uid(u32),
     /// The file owner as a symbolic name.
     Uname(&'a [u8]),
+    /// Handle backslash wrapped Lines
+    Wrapped,
 }
 impl<'a> Keyword<'a> {
     /// Parse a keyword with optional value.
@@ -222,6 +237,7 @@ impl<'a> Keyword<'a> {
             b"type" => Keyword::Type(FileType::from_bytes(next("type", iter.next())?)?),
             b"uid" => Keyword::Uid(u32::from_dec(next("uid", iter.next())?)?),
             b"uname" => Keyword::Uname(next("uname", iter.next())?),
+            b"\\" => Keyword::Wrapped,
             other => {
                 return Err(format!(
                     r#""{}" is not a valid parameter key (in "{}")"#,
