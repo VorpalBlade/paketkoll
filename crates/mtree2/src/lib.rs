@@ -48,7 +48,6 @@ use parser::Keyword;
 use parser::MTreeLine;
 pub use parser::ParserError;
 use parser::SpecialKind;
-use smallvec::SmallVec;
 use std::env;
 use std::ffi::OsStr;
 use std::fmt;
@@ -191,7 +190,7 @@ where
                 Ok(line) => line,
                 Err(e) => return Some(Err(Error::Io(e))),
             };
-            
+
             let input = if let Some(mut acc) = acc.take() {
                 acc.extend_from_slice(&line);
                 Ok(acc)
@@ -232,6 +231,7 @@ pub struct Entry {
 impl fmt::Display for Entry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, r#"mtree entry for "{}""#, self.path.display())?;
+        writeln!(f, r#"acc:  "{:?}""#, self.wrapped)?;
         write!(f, "{}", self.params)
     }
 }

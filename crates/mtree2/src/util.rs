@@ -165,7 +165,7 @@ pub fn decode_escapes(buf: &mut [u8]) -> Option<&mut [u8]> {
     // Hopefully there will be nothing to do in the majority of cases
     let mut read_idx = memchr::memchr(b'\\', buf).unwrap_or(buf.len());
     let mut write_idx = read_idx;
-    while read_idx < buf.len() {
+    while read_idx < buf.len() - 3 {
         if buf[read_idx] == b'\\' {
             let ch = (from_oct_ch(buf[read_idx + 1])? << 6)
                 | (from_oct_ch(buf[read_idx + 2])? << 3)
