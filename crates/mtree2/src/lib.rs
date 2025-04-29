@@ -163,7 +163,7 @@ where
             }
             MTreeLine::Wrapped(partacc) => {
                 // Convert the partacc to a Vec<u8> by cloning each byte
-                let wrapped: Vec<u8> = partacc.into_iter().cloned().collect();
+                let wrapped: Vec<u8> = partacc.to_vec();
                 Some(Entry {
                     path: PathBuf::default(),
                     params: Params::default(),

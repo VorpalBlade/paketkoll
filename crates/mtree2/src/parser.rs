@@ -1,7 +1,5 @@
 //! Stuff for parsing mtree files.
 use crate::Device;
-use crate::Error;
-use crate::Params;
 use crate::util::FromDec;
 use crate::util::FromHex;
 use crate::util::parse_time;
