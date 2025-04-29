@@ -162,7 +162,6 @@ where
                 })
             }
             MTreeLine::Wrapped(partacc) => {
-                // Convert the partacc to a Vec<u8> by cloning each byte
                 let wrapped: Vec<u8> = partacc.to_vec();
                 Some(Entry {
                     path: PathBuf::default(),
@@ -499,7 +498,7 @@ impl Params {
             Keyword::Type(ty) => self.file_type = Some(ty),
             Keyword::Uid(uid) => self.uid = Some(uid),
             Keyword::Uname(uname) => self.uname = Some(uname.into()),
-            Keyword::Wrapped => (), // Wrapped keywords are handled separately
+            Keyword::Wrapped => (), 
         }
     }
 
