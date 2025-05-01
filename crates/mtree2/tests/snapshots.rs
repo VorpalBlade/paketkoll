@@ -18,3 +18,4 @@ macro_rules! test_snapshot {
 test_snapshot!(test_gedit, "examples/gedit.mtree");
 test_snapshot!(test_xterm, "examples/xterm.mtree");
 test_snapshot!(test_relative_paths, "examples/relative_paths.mtree");
+test_snapshot!(test_wrapped_lines, "examples/relative_paths_wrapped.mtree");
