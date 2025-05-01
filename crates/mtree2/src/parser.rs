@@ -63,11 +63,7 @@ impl<'a> MTreeLine<'a> {
                         Some(b'\\'),
                         "Wrapped line must end with backslash"
                     );
-<<<<<<< HEAD
-                    return Ok(MTreeLine::Wrapped(input));
-=======
                     return Err(LineParseError::WrappedLine(input.to_owned()));
->>>>>>> backslash-parsing-using-error
                 }
                 params.push(keyword);
             }
