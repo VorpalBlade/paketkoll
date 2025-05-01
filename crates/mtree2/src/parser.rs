@@ -590,10 +590,9 @@ impl From<String> for LineParseError {
 impl fmt::Display for LineParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::ParserError(s) => f.write_str(s),
-            Self::WrappedLine(_) => Ok(()),
+            Self::ParserError(s) => write!(f, "{s}"),
+            Self::WrappedLine(_) => write!(f, "Line is wrapped and continues on next line"),
         }
     }
 }
-
 impl std::error::Error for LineParseError {}
