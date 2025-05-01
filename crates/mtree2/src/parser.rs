@@ -3,6 +3,7 @@ use crate::Device;
 use crate::util::FromDec;
 use crate::util::FromHex;
 use crate::util::parse_time;
+use core::str;
 use smallvec::SmallVec;
 use std::fmt;
 use std::time::Duration;
@@ -53,6 +54,15 @@ impl<'a> MTreeLine<'a> {
                 String::from_utf8_lossy(part)
             );
             if let Ok(keyword) = keyword {
+                if matches!(keyword, Keyword::Wrapped) {
+                    // Verify line ends with backslash
+                    debug_assert_eq!(
+                        input.last().copied(),
+                        Some(b'\\'),
+                        "Wrapped line must end with backslash"
+                    );
+                    return Err(LineParseError::WrappedLine(input.to_owned()));
+                }
                 params.push(keyword);
             }
         }
@@ -166,6 +176,8 @@ pub enum Keyword<'a> {
     Uid(u32),
     /// The file owner as a symbolic name.
     Uname(&'a [u8]),
+    /// Handle backslash wrapped Lines
+    Wrapped,
 }
 impl<'a> Keyword<'a> {
     /// Parse a keyword with optional value.
@@ -222,6 +234,7 @@ impl<'a> Keyword<'a> {
             b"type" => Keyword::Type(FileType::from_bytes(next("type", iter.next())?)?),
             b"uid" => Keyword::Uid(u32::from_dec(next("uid", iter.next())?)?),
             b"uname" => Keyword::Uname(next("uname", iter.next())?),
+            b"\\" => Keyword::Wrapped,
             other => {
                 return Err(format!(
                     r#""{}" is not a valid parameter key (in "{}")"#,
@@ -492,11 +505,14 @@ impl FileMode {
         }
         Ok(Self {
             mode: u32::from_str_radix(
-                std::str::from_utf8(input)
-                    .map_err(|err| ParserError(format!("failed to parse mode value: {err}")))?,
+                std::str::from_utf8(input).map_err(|err| {
+                    LineParseError::from(format!("failed to parse mode value: {err}"))
+                })?,
                 8,
             )
-            .map_err(|err| ParserError(format!("failed to parse mode as integer: {err}")))?,
+            .map_err(|err| {
+                LineParseError::from(format!("failed to parse mode as integer: {err}"))
+            })?,
         })
     }
 
@@ -555,24 +571,29 @@ impl fmt::Octal for FileMode {
     }
 }
 
-pub(crate) type ParserResult<T> = Result<T, ParserError>;
+pub(crate) type ParserResult<T> = Result<T, LineParseError>;
 
 /// An error occurred during parsing a record.
 ///
 /// This currently just gives an error report at the moment.
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct ParserError(pub String);
-
-impl From<String> for ParserError {
+pub enum LineParseError {
+    ParserError(String),
+    WrappedLine(Vec<u8>),
+}
+impl From<String> for LineParseError {
     fn from(s: String) -> Self {
-        Self(s)
+        Self::ParserError(s)
     }
 }
 
-impl fmt::Display for ParserError {
+impl fmt::Display for LineParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&self.0)
+        match self {
+            Self::ParserError(s) => f.write_str(s),
+            Self::WrappedLine(_) => Ok(()),
+        }
     }
 }
 
-impl std::error::Error for ParserError {}
+impl std::error::Error for LineParseError {}

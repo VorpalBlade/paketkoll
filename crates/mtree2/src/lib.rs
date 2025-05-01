@@ -45,8 +45,8 @@ pub use parser::FileMode;
 pub use parser::FileType;
 pub use parser::Format;
 use parser::Keyword;
+pub use parser::LineParseError;
 use parser::MTreeLine;
-pub use parser::ParserError;
 use parser::SpecialKind;
 use std::env;
 use std::ffi::OsStr;
@@ -133,7 +133,9 @@ where
                     "relative without a current working dir"
                 );
                 let filepath = decode_escapes_path(self.cwd.join(OsStr::from_bytes(path)))
-                    .ok_or_else(|| Error::Parser(ParserError("Failed to decode escapes".into())))?;
+                    .ok_or_else(|| {
+                        Error::Parser(LineParseError::from("Failed to decode escapes".to_string()))
+                    })?;
                 if params.file_type == Some(FileType::Directory) {
                     self.cwd.push(filepath.as_path());
                 }
@@ -153,7 +155,9 @@ where
                 Some(Entry {
                     path: decode_escapes_path(Path::new(OsStr::from_bytes(path)).to_owned())
                         .ok_or_else(|| {
-                            Error::Parser(ParserError("Failed to decode escapes".into()))
+                            Error::Parser(LineParseError::from(
+                                "Failed to decode escapes".to_string(),
+                            ))
                         })?,
                     params,
                 })
@@ -169,11 +173,31 @@ where
     type Item = Result<Entry, Error>;
 
     fn next(&mut self) -> Option<Result<Entry, Error>> {
+        let mut acc: Option<Vec<u8>> = None;
         while let Some(line) = self.inner.next() {
-            match self.next_entry(line) {
+            let line = match line {
+                Ok(line) => line,
+                Err(e) => return Some(Err(Error::Io(e))),
+            };
+
+            let input = if let Some(mut acc) = acc.take() {
+                acc.extend_from_slice(&line);
+                Ok(acc)
+            } else {
+                Ok(line)
+            };
+
+            match self.next_entry(input) {
                 Ok(Some(entry)) => return Some(Ok(entry)),
                 Ok(None) => (),
-                Err(e) => return Some(Err(e)),
+                Err(e) => match e {
+                    Error::Parser(LineParseError::WrappedLine(mut w)) => {
+                        w.pop(); // remove backslash
+                        acc = Some(w);
+                        continue;
+                    }
+                    _ => return Some(Err(e)),
+                },
             }
         }
         None
@@ -465,6 +489,7 @@ impl Params {
             Keyword::Type(ty) => self.file_type = Some(ty),
             Keyword::Uid(uid) => self.uid = Some(uid),
             Keyword::Uname(uname) => self.uname = Some(uname.into()),
+            Keyword::Wrapped => (),
         }
     }
 
@@ -629,7 +654,7 @@ pub enum Error {
     /// There was an i/o error reading data from the reader.
     Io(io::Error),
     /// There was a problem parsing the records.
-    Parser(ParserError),
+    Parser(LineParseError),
 }
 
 impl fmt::Display for Error {
@@ -656,8 +681,8 @@ impl From<io::Error> for Error {
     }
 }
 
-impl From<ParserError> for Error {
-    fn from(from: ParserError) -> Self {
+impl From<LineParseError> for Error {
+    fn from(from: LineParseError) -> Self {
         Self::Parser(from)
     }
 }

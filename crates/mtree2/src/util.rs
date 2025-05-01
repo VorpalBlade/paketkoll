@@ -1,5 +1,5 @@
 //! Utility misc stuff
-use crate::parser::ParserError;
+use crate::parser::LineParseError;
 use crate::parser::ParserResult;
 use std::ffi::OsStr;
 use std::os::unix::ffi::OsStrExt;
@@ -33,11 +33,11 @@ macro_rules! impl_from_dec_uint {
                     acc = acc
                         .checked_mul(10)
                         .ok_or_else(|| {
-                            ParserError::from("could not parse integer - shift overflow".to_owned())
+                            LineParseError::from("could not parse integer - shift overflow".to_owned())
                         })?
                         .checked_add(<$from>::from(val))
                         .ok_or_else(|| {
-                            ParserError::from(
+                            LineParseError::from(
                                 "could not parse integer - addition overflow".to_owned(),
                             )
                         })?;
@@ -75,7 +75,7 @@ impl_from_hex_arr!(48);
 impl_from_hex_arr!(64);
 
 #[cold]
-fn map_faster_hex_err(input: &[u8], err: faster_hex::Error) -> ParserError {
+fn map_faster_hex_err(input: &[u8], err: faster_hex::Error) -> LineParseError {
     match err {
         faster_hex::Error::InvalidChar => format!(
             r#"input "{}" is not a valid hex string"#,
@@ -126,7 +126,7 @@ const fn from_oct_ch(i: u8) -> Option<u8> {
 
 /// Convert a time of format `<seconds>.<nanos>` into a rust `Duration`.
 pub fn parse_time(input: &[u8]) -> ParserResult<Duration> {
-    let error = || -> ParserError {
+    let error = || -> LineParseError {
         format!(
             r#"couldn't parse time from "{}""#,
             String::from_utf8_lossy(input)
