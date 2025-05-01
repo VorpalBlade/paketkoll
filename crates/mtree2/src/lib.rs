@@ -681,6 +681,6 @@ impl From<io::Error> for Error {
 
 impl From<ParserError> for Error {
     fn from(from: ParserError) -> Self {
-        Self::Parser(ParserError::from(from))
+        Self::Parser(from)
     }
 }
