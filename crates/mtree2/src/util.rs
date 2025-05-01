@@ -33,9 +33,7 @@ macro_rules! impl_from_dec_uint {
                     acc = acc
                         .checked_mul(10)
                         .ok_or_else(|| {
-                            ParserError::from(
-                                "could not parse integer - shift overflow".to_owned(),
-                            )
+                            ParserError::from("could not parse integer - shift overflow".to_owned())
                         })?
                         .checked_add(<$from>::from(val))
                         .ok_or_else(|| {
@@ -237,9 +235,9 @@ impl<'haystack> Iterator for MemchrSplitter<'haystack> {
 
 #[cfg(test)]
 mod tests {
-    use super::FromHex;
     use super::decode_escapes;
     use super::decode_escapes_path;
+    use super::FromHex;
     use std::path::PathBuf;
 
     #[test]

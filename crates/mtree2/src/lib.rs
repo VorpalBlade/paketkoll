@@ -45,8 +45,8 @@ pub use parser::FileMode;
 pub use parser::FileType;
 pub use parser::Format;
 use parser::Keyword;
-pub use parser::ParserError;
 use parser::MTreeLine;
+pub use parser::ParserError;
 use parser::SpecialKind;
 use std::env;
 use std::ffi::OsStr;
@@ -155,9 +155,7 @@ where
                 Some(Entry {
                     path: decode_escapes_path(Path::new(OsStr::from_bytes(path)).to_owned())
                         .ok_or_else(|| {
-                            Error::Parser(ParserError::from(
-                                "Failed to decode escapes".to_string(),
-                            ))
+                            Error::Parser(ParserError::from("Failed to decode escapes".to_string()))
                         })?,
                     params,
                 })
@@ -683,6 +681,6 @@ impl From<io::Error> for Error {
 
 impl From<ParserError> for Error {
     fn from(from: ParserError) -> Self {
-        Self::Parser(from)
+        Self::Parser(ParserError::from(from))
     }
 }
