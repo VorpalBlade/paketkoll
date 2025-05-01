@@ -61,7 +61,7 @@ impl<'a> MTreeLine<'a> {
                         Some(b'\\'),
                         "Wrapped line must end with backslash"
                     );
-                    return Err(ParserError::WrappedLine(input.to_owned()));
+                    return Err(LineParseError::WrappedLine(input.to_owned()));
                 }
                 params.push(keyword);
             }
@@ -506,12 +506,12 @@ impl FileMode {
         Ok(Self {
             mode: u32::from_str_radix(
                 std::str::from_utf8(input).map_err(|err| {
-                    ParserError::from(format!("failed to parse mode value: {err}"))
+                    LineParseError::from(format!("failed to parse mode value: {err}"))
                 })?,
                 8,
             )
             .map_err(|err| {
-                ParserError::from(format!("failed to parse mode as integer: {err}"))
+                LineParseError::from(format!("failed to parse mode as integer: {err}"))
             })?,
         })
     }
@@ -571,28 +571,28 @@ impl fmt::Octal for FileMode {
     }
 }
 
-pub(crate) type ParserResult<T> = Result<T, ParserError>;
+pub(crate) type ParserResult<T> = Result<T, LineParseError>;
 
 /// An error occurred during parsing a record.
 ///
 /// This currently just gives an error report at the moment.
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub enum ParserError {
-    ParseError(String),
+pub enum LineParseError {
+    ParserError(String),
     WrappedLine(Vec<u8>),
 }
-impl From<String> for ParserError {
+impl From<String> for LineParseError {
     fn from(s: String) -> Self {
-        Self::ParseError(s)
+        Self::ParserError(s)
     }
 }
 
-impl fmt::Display for ParserError {
+impl fmt::Display for LineParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::ParseError(s) => write!(f, "{s}"),
+            Self::ParserError(s) => write!(f, "{s}"),
             Self::WrappedLine(_) => write!(f, "Line is wrapped and continues on next line"),
         }
     }
 }
-impl std::error::Error for ParserError {}
+impl std::error::Error for LineParseError {}

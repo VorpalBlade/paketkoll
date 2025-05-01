@@ -45,8 +45,8 @@ pub use parser::FileMode;
 pub use parser::FileType;
 pub use parser::Format;
 use parser::Keyword;
+pub use parser::LineParseError;
 use parser::MTreeLine;
-pub use parser::ParserError;
 use parser::SpecialKind;
 use std::env;
 use std::ffi::OsStr;
@@ -134,7 +134,7 @@ where
                 );
                 let filepath = decode_escapes_path(self.cwd.join(OsStr::from_bytes(path)))
                     .ok_or_else(|| {
-                        Error::Parser(ParserError::from("Failed to decode escapes".to_string()))
+                        Error::Parser(LineParseError::from("Failed to decode escapes".to_string()))
                     })?;
                 if params.file_type == Some(FileType::Directory) {
                     self.cwd.push(filepath.as_path());
@@ -155,7 +155,9 @@ where
                 Some(Entry {
                     path: decode_escapes_path(Path::new(OsStr::from_bytes(path)).to_owned())
                         .ok_or_else(|| {
-                            Error::Parser(ParserError::from("Failed to decode escapes".to_string()))
+                            Error::Parser(LineParseError::from(
+                                "Failed to decode escapes".to_string(),
+                            ))
                         })?,
                     params,
                 })
@@ -189,7 +191,7 @@ where
                 Ok(Some(entry)) => return Some(Ok(entry)),
                 Ok(None) => (),
                 Err(e) => match e {
-                    Error::Parser(ParserError::WrappedLine(mut w)) => {
+                    Error::Parser(LineParseError::WrappedLine(mut w)) => {
                         w.pop(); // remove backslash
                         acc = Some(w);
                         continue;
@@ -652,7 +654,7 @@ pub enum Error {
     /// There was an i/o error reading data from the reader.
     Io(io::Error),
     /// There was a problem parsing the records.
-    Parser(ParserError),
+    Parser(LineParseError),
 }
 
 impl fmt::Display for Error {
@@ -679,8 +681,8 @@ impl From<io::Error> for Error {
     }
 }
 
-impl From<ParserError> for Error {
-    fn from(from: ParserError) -> Self {
+impl From<LineParseError> for Error {
+    fn from(from: LineParseError) -> Self {
         Self::Parser(from)
     }
 }
