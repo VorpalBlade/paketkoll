@@ -3,7 +3,6 @@ use crate::Device;
 use crate::util::FromDec;
 use crate::util::FromHex;
 use crate::util::parse_time;
-use core::str;
 use smallvec::SmallVec;
 use std::fmt;
 use std::time::Duration;
@@ -29,7 +28,7 @@ pub enum MTreeLine<'a> {
 }
 
 impl<'a> MTreeLine<'a> {
-    pub fn from_bytes(input: &'a [u8]) -> ParserResult<Self> {
+    pub fn from_bytes(input: &'a [u8]) -> Result<Self, LineParseError> {
         let mut parts =
             crate::util::MemchrSplitter::new(b' ', input).filter(|word| !word.is_empty());
         // Blank
@@ -505,14 +504,11 @@ impl FileMode {
         }
         Ok(Self {
             mode: u32::from_str_radix(
-                std::str::from_utf8(input).map_err(|err| {
-                    LineParseError::from(format!("failed to parse mode value: {err}"))
-                })?,
+                std::str::from_utf8(input)
+                    .map_err(|err| ParserError(format!("failed to parse mode value: {err}")))?,
                 8,
             )
-            .map_err(|err| {
-                LineParseError::from(format!("failed to parse mode as integer: {err}"))
-            })?,
+            .map_err(|err| ParserError(format!("failed to parse mode as integer: {err}")))?,
         })
     }
 
@@ -571,28 +567,56 @@ impl fmt::Octal for FileMode {
     }
 }
 
-pub(crate) type ParserResult<T> = Result<T, LineParseError>;
+pub(crate) type ParserResult<T> = Result<T, ParserError>;
 
 /// An error occurred during parsing a record.
 ///
 /// This currently just gives an error report at the moment.
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub enum LineParseError {
-    ParserError(String),
-    WrappedLine(Vec<u8>),
-}
-impl From<String> for LineParseError {
+pub struct ParserError(pub String);
+
+impl From<String> for ParserError {
     fn from(s: String) -> Self {
-        Self::ParserError(s)
+        Self(s)
     }
 }
 
+impl fmt::Display for ParserError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.0)
+    }
+}
+
+impl std::error::Error for ParserError {}
+
+#[derive(Debug)]
+pub(crate) enum LineParseError {
+    ParserError(ParserError),
+    WrappedLine(Vec<u8>),
+    IoError(std::io::Error),
+}
 impl fmt::Display for LineParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::ParserError(s) => write!(f, "{s}"),
-            Self::WrappedLine(_) => write!(f, "Line is wrapped and continues on next line"),
+            Self::IoError(e) => write!(f, "{e}"),
+            Self::ParserError(e) => write!(f, "{e}"),
+            Self::WrappedLine(e) => {
+                let s = String::from_utf8_lossy(e);
+                write!(f, "Wrapped Line: {s}")
+            }
         }
+    }
+}
+
+impl From<std::io::Error> for LineParseError {
+    fn from(e: std::io::Error) -> Self {
+        Self::IoError(e)
+    }
+}
+
+impl From<ParserError> for LineParseError {
+    fn from(e: ParserError) -> Self {
+        Self::ParserError(e)
     }
 }
 impl std::error::Error for LineParseError {}

@@ -1,5 +1,5 @@
 //! Utility misc stuff
-use crate::parser::LineParseError;
+use crate::parser::ParserError;
 use crate::parser::ParserResult;
 use std::ffi::OsStr;
 use std::os::unix::ffi::OsStrExt;
@@ -24,22 +24,20 @@ macro_rules! impl_from_dec_uint {
                 let mut acc: Self = 0;
                 for (idx, i) in input.iter().enumerate() {
                     let val = from_dec_ch(*i).ok_or_else(|| {
-                        LineParseError::from(format!(
+                        format!(
                             r#"could not parse "{}" as a number, problem at char {}"#,
                             String::from_utf8_lossy(input),
                             idx
-                        ))
+                        )
                     })?;
                     acc = acc
                         .checked_mul(10)
                         .ok_or_else(|| {
-                            LineParseError::from(
-                                "could not parse integer - shift overflow".to_owned(),
-                            )
+                            ParserError::from("could not parse integer - shift overflow".to_owned())
                         })?
                         .checked_add(<$from>::from(val))
                         .ok_or_else(|| {
-                            LineParseError::from(
+                            ParserError::from(
                                 "could not parse integer - addition overflow".to_owned(),
                             )
                         })?;
@@ -77,7 +75,7 @@ impl_from_hex_arr!(48);
 impl_from_hex_arr!(64);
 
 #[cold]
-fn map_faster_hex_err(input: &[u8], err: faster_hex::Error) -> LineParseError {
+fn map_faster_hex_err(input: &[u8], err: faster_hex::Error) -> ParserError {
     match err {
         faster_hex::Error::InvalidChar => format!(
             r#"input "{}" is not a valid hex string"#,
@@ -128,7 +126,7 @@ const fn from_oct_ch(i: u8) -> Option<u8> {
 
 /// Convert a time of format `<seconds>.<nanos>` into a rust `Duration`.
 pub fn parse_time(input: &[u8]) -> ParserResult<Duration> {
-    let error = || -> LineParseError {
+    let error = || -> ParserError {
         format!(
             r#"couldn't parse time from "{}""#,
             String::from_utf8_lossy(input)

@@ -45,8 +45,9 @@ pub use parser::FileMode;
 pub use parser::FileType;
 pub use parser::Format;
 use parser::Keyword;
-pub use parser::LineParseError;
+use parser::LineParseError;
 use parser::MTreeLine;
+pub use parser::ParserError;
 use parser::SpecialKind;
 use std::env;
 use std::ffi::OsStr;
@@ -114,7 +115,7 @@ where
     }
 
     /// This is a helper function to make error handling easier.
-    fn next_entry(&mut self, line: io::Result<Vec<u8>>) -> Result<Option<Entry>, Error> {
+    fn next_entry(&mut self, line: io::Result<Vec<u8>>) -> Result<Option<Entry>, LineParseError> {
         let line = line?;
         let line = MTreeLine::from_bytes(&line)?;
         Ok(match line {
@@ -134,7 +135,7 @@ where
                 );
                 let filepath = decode_escapes_path(self.cwd.join(OsStr::from_bytes(path)))
                     .ok_or_else(|| {
-                        Error::Parser(LineParseError::from("Failed to decode escapes".to_string()))
+                        LineParseError::ParserError(ParserError("Failed to decode escapes".into()))
                     })?;
                 if params.file_type == Some(FileType::Directory) {
                     self.cwd.push(filepath.as_path());
@@ -155,8 +156,8 @@ where
                 Some(Entry {
                     path: decode_escapes_path(Path::new(OsStr::from_bytes(path)).to_owned())
                         .ok_or_else(|| {
-                            Error::Parser(LineParseError::from(
-                                "Failed to decode escapes".to_string(),
+                            LineParseError::ParserError(ParserError(
+                                "Failed to decode escapes".into(),
                             ))
                         })?,
                     params,
@@ -191,12 +192,12 @@ where
                 Ok(Some(entry)) => return Some(Ok(entry)),
                 Ok(None) => (),
                 Err(e) => match e {
-                    Error::Parser(LineParseError::WrappedLine(mut w)) => {
+                    LineParseError::WrappedLine(mut w) => {
                         w.pop(); // remove backslash
                         acc = Some(w);
                         continue;
                     }
-                    _ => return Some(Err(e)),
+                    _ => return Some(Err(e.into())),
                 },
             }
         }
@@ -654,7 +655,7 @@ pub enum Error {
     /// There was an i/o error reading data from the reader.
     Io(io::Error),
     /// There was a problem parsing the records.
-    Parser(LineParseError),
+    Parser(ParserError),
 }
 
 impl fmt::Display for Error {
@@ -683,6 +684,13 @@ impl From<io::Error> for Error {
 
 impl From<LineParseError> for Error {
     fn from(from: LineParseError) -> Self {
-        Self::Parser(from)
+        match from {
+            LineParseError::IoError(e) => Self::Io(e),
+            LineParseError::ParserError(e) => Self::Parser(e),
+            LineParseError::WrappedLine(e) => {
+                let s = String::from_utf8_lossy(e.as_slice()).to_string();
+                Self::Parser(ParserError::from("Wrapped Line: ".to_string() + s.as_str()))
+            }
+        }
     }
 }
