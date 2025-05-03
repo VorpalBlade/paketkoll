@@ -590,6 +590,7 @@ impl fmt::Display for ParserError {
 impl std::error::Error for ParserError {}
 
 #[derive(Debug)]
+#[non_exhaustive]
 pub(crate) enum LineParseError {
     Parser(ParserError),
     WrappedLine(Vec<u8>),
