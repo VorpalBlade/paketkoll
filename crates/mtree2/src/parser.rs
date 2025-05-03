@@ -53,7 +53,7 @@ impl<'a> MTreeLine<'a> {
                 String::from_utf8_lossy(part)
             );
             if let Ok(keyword) = keyword {
-                if matches!(keyword, Keyword::Wrapped) {
+                if keyword == Keyword::Wrapped {
                     // Verify line ends with backslash
                     debug_assert_eq!(
                         input.last().copied(),
