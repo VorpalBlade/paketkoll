@@ -135,7 +135,9 @@ where
                 );
                 let filepath = decode_escapes_path(self.cwd.join(OsStr::from_bytes(path)))
                     .ok_or_else(|| {
-                        LineParseError::Parser(ParserError::from(String::from("Failed to decode escapes")))
+                        LineParseError::Parser(ParserError::from(String::from(
+                            "Failed to decode escapes",
+                        )))
                     })?;
                 if params.file_type == Some(FileType::Directory) {
                     self.cwd.push(filepath.as_path());
