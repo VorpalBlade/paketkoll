@@ -197,7 +197,8 @@ where
                         acc = Some(w);
                         continue;
                     }
-                    _ => return Some(Err(e.into())),
+                    LineParseError::IoError(e) => return Some(Err(Error::Io(e))),
+                    LineParseError::ParserError(e) => return Some(Err(Error::Parser(e))),
                 },
             }
         }
@@ -679,18 +680,5 @@ impl std::error::Error for Error {
 impl From<io::Error> for Error {
     fn from(from: io::Error) -> Self {
         Self::Io(from)
-    }
-}
-
-impl From<LineParseError> for Error {
-    fn from(from: LineParseError) -> Self {
-        match from {
-            LineParseError::IoError(e) => Self::Io(e),
-            LineParseError::ParserError(e) => Self::Parser(e),
-            LineParseError::WrappedLine(e) => {
-                let s = String::from_utf8_lossy(e.as_slice()).to_string();
-                Self::Parser(ParserError::from("Wrapped Line: ".to_string() + s.as_str()))
-            }
-        }
     }
 }
