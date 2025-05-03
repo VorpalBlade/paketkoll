@@ -156,8 +156,8 @@ where
                 Some(Entry {
                     path: decode_escapes_path(Path::new(OsStr::from_bytes(path)).to_owned())
                         .ok_or_else(|| {
-                            LineParseError::Parser(ParserError(
-                                "Failed to decode escapes".into(),
+                            LineParseError::Parser(ParserError::from(
+                                "Failed to decode escapes".to_string(),
                             ))
                         })?,
                     params,
