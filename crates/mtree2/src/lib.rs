@@ -135,7 +135,7 @@ where
                 );
                 let filepath = decode_escapes_path(self.cwd.join(OsStr::from_bytes(path)))
                     .ok_or_else(|| {
-                        LineParseError::ParserError(ParserError("Failed to decode escapes".into()))
+                        LineParseError::Parser(ParserError("Failed to decode escapes".into()))
                     })?;
                 if params.file_type == Some(FileType::Directory) {
                     self.cwd.push(filepath.as_path());
@@ -156,7 +156,7 @@ where
                 Some(Entry {
                     path: decode_escapes_path(Path::new(OsStr::from_bytes(path)).to_owned())
                         .ok_or_else(|| {
-                            LineParseError::ParserError(ParserError(
+                            LineParseError::Parser(ParserError(
                                 "Failed to decode escapes".into(),
                             ))
                         })?,
@@ -197,8 +197,8 @@ where
                         acc = Some(w);
                         continue;
                     }
-                    LineParseError::IoError(e) => return Some(Err(Error::Io(e))),
-                    LineParseError::ParserError(e) => return Some(Err(Error::Parser(e))),
+                    LineParseError::Io(e) => return Some(Err(Error::Io(e))),
+                    LineParseError::Parser(e) => return Some(Err(Error::Parser(e))),
                 },
             }
         }

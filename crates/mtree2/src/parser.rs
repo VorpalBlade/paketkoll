@@ -591,15 +591,15 @@ impl std::error::Error for ParserError {}
 
 #[derive(Debug)]
 pub(crate) enum LineParseError {
-    ParserError(ParserError),
+    Parser(ParserError),
     WrappedLine(Vec<u8>),
-    IoError(std::io::Error),
+    Io(std::io::Error),
 }
 impl fmt::Display for LineParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::IoError(e) => write!(f, "{e}"),
-            Self::ParserError(e) => write!(f, "{e}"),
+            Self::Io(e) => write!(f, "{e}"),
+            Self::Parser(e) => write!(f, "{e}"),
             Self::WrappedLine(e) => {
                 let s = String::from_utf8_lossy(e);
                 write!(f, "Wrapped Line: {s}")
@@ -610,13 +610,13 @@ impl fmt::Display for LineParseError {
 
 impl From<std::io::Error> for LineParseError {
     fn from(e: std::io::Error) -> Self {
-        Self::IoError(e)
+        Self::Io(e)
     }
 }
 
 impl From<ParserError> for LineParseError {
     fn from(e: ParserError) -> Self {
-        Self::ParserError(e)
+        Self::Parser(e)
     }
 }
 impl std::error::Error for LineParseError {}
