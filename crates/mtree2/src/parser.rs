@@ -29,6 +29,10 @@ pub enum MTreeLine<'a> {
 
 impl<'a> MTreeLine<'a> {
     pub fn from_bytes(input: &'a [u8]) -> Result<Self, LineParseError> {
+        // a simple check to detect a wrapped line
+        if let Some(wrap) = input.strip_suffix(&[b'\\']) {
+            return Err(LineParseError::WrappedLine(wrap.to_owned()));
+        }
         let mut parts =
             crate::util::MemchrSplitter::new(b' ', input).filter(|word| !word.is_empty());
         // Blank
@@ -53,15 +57,6 @@ impl<'a> MTreeLine<'a> {
                 String::from_utf8_lossy(part)
             );
             if let Ok(keyword) = keyword {
-                if keyword == Keyword::Wrapped {
-                    // Verify line ends with backslash
-                    debug_assert_eq!(
-                        input.last().copied(),
-                        Some(b'\\'),
-                        "Wrapped line must end with backslash"
-                    );
-                    return Err(LineParseError::WrappedLine(input.to_owned()));
-                }
                 params.push(keyword);
             }
         }
@@ -175,8 +170,6 @@ pub enum Keyword<'a> {
     Uid(u32),
     /// The file owner as a symbolic name.
     Uname(&'a [u8]),
-    /// Handle backslash wrapped Lines
-    Wrapped,
 }
 impl<'a> Keyword<'a> {
     /// Parse a keyword with optional value.
@@ -233,7 +226,6 @@ impl<'a> Keyword<'a> {
             b"type" => Keyword::Type(FileType::from_bytes(next("type", iter.next())?)?),
             b"uid" => Keyword::Uid(u32::from_dec(next("uid", iter.next())?)?),
             b"uname" => Keyword::Uname(next("uname", iter.next())?),
-            b"\\" => Keyword::Wrapped,
             other => {
                 return Err(format!(
                     r#""{}" is not a valid parameter key (in "{}")"#,

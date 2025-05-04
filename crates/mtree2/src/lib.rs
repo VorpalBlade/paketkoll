@@ -194,8 +194,7 @@ where
                 Ok(Some(entry)) => return Some(Ok(entry)),
                 Ok(None) => (),
                 Err(e) => match e {
-                    LineParseError::WrappedLine(mut w) => {
-                        w.pop(); // remove backslash
+                    LineParseError::WrappedLine(w) => {
                         acc = Some(w);
                         continue;
                     }
@@ -493,7 +492,6 @@ impl Params {
             Keyword::Type(ty) => self.file_type = Some(ty),
             Keyword::Uid(uid) => self.uid = Some(uid),
             Keyword::Uname(uname) => self.uname = Some(uname.into()),
-            Keyword::Wrapped => (),
         }
     }
 
