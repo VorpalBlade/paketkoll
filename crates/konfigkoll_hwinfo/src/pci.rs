@@ -1,8 +1,15 @@
 //! Utilities similar to pciutils to read PCI devices on Linux
 
 use ahash::AHashMap;
+pub use types::Class;
+pub use types::Device;
+pub use types::ProgrammingInterface;
+pub use types::Subclass;
+pub use types::Subsystem;
+pub use types::Vendor;
 
 mod parser;
+mod types;
 
 /// A database of PCI devices IDs
 #[derive(Debug, PartialEq, Eq)]
@@ -24,40 +31,6 @@ impl PciIdDb {
         let s = std::fs::read_to_string(path)?;
         Self::parse(&s)
     }
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct Class {
-    pub name: String,
-    pub subclasses: AHashMap<u8, Subclass>,
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct Subclass {
-    pub name: String,
-    pub program_interfaces: AHashMap<u8, ProgrammingInterface>,
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct ProgrammingInterface {
-    pub name: String,
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct Vendor {
-    pub name: String,
-    pub devices: AHashMap<u16, Device>,
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct Device {
-    pub name: String,
-    pub subsystems: AHashMap<(u16, u16), Subsystem>,
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct Subsystem {
-    pub name: String,
 }
 
 /// Data about a PCI device

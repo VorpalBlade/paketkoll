@@ -3,6 +3,7 @@ use crate::plugins::error::KError;
 use crate::plugins::package_managers::PackageManagers;
 use crate::plugins::properties::Properties;
 use crate::plugins::settings::Settings;
+use crate::types::Phase;
 use camino::Utf8Path;
 use camino::Utf8PathBuf;
 use color_eyre::Section;
@@ -19,51 +20,10 @@ use rune::Vm;
 use rune::termcolor::Buffer;
 use rune::termcolor::ColorChoice;
 use rune::termcolor::StandardStream;
-use std::fmt::Display;
 use std::panic::AssertUnwindSafe;
 use std::panic::catch_unwind;
 use std::sync::Arc;
 use std::sync::OnceLock;
-
-/// Describe the phases of script evaluation.
-///
-/// Each phase is a separate function defined by the top level script.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Phase {
-    /// During this phase, the script can discover information about the system
-    /// and hardware, and set properties for later use.
-    #[default]
-    SystemDiscovery,
-    /// During this phase file system ignores should be set up. These are
-    /// needed by the file system scan code that will be started concurrently
-    /// after this.
-    Ignores,
-    /// Early package dependencies that are needed by the main phase should be
-    /// declared here. These packages will be installed before the main config
-    /// runs if they are missing.
-    ScriptDependencies,
-    /// During the main phase the config proper is generated.
-    Main,
-}
-
-impl Phase {
-    /// Convert to string
-    #[must_use]
-    pub const fn as_str(self) -> &'static str {
-        match self {
-            Self::SystemDiscovery => "phase_system_discovery",
-            Self::Ignores => "phase_ignores",
-            Self::ScriptDependencies => "phase_script_dependencies",
-            Self::Main => "phase_main",
-        }
-    }
-}
-
-impl Display for Phase {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
 
 /// State being built up by the scripts as it runs
 #[derive(Debug)]

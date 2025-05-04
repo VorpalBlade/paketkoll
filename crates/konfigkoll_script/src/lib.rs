@@ -11,10 +11,11 @@
 //! command line tool instead.
 
 pub use engine::EngineState;
-pub use engine::Phase;
 pub use engine::ScriptEngine;
 pub use plugins::command::Commands;
 pub use plugins::settings::Settings;
+pub use types::Phase;
 
 mod engine;
 mod plugins;
+mod types;

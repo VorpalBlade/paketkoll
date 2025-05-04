@@ -1,7 +1,7 @@
 //! The Arch Linux (and derivatives) backend
 
-use super::FullBackend;
-use super::PackageFilter;
+use super::common::FullBackend;
+use super::common::PackageFilter;
 use crate::utils::convert_archive_entries;
 use crate::utils::extract_files;
 use crate::utils::group_queries_by_pkg;

@@ -5,7 +5,7 @@
 
 use super::error::KResult;
 use super::settings::Settings;
-use crate::Phase;
+use crate::types::Phase;
 use ahash::AHashSet;
 use camino::Utf8PathBuf;
 use compact_str::CompactString;

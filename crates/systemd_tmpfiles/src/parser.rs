@@ -1,8 +1,8 @@
 //! Actual parser for file format
 
-use crate::DeviceNode;
-use crate::Directive;
-use crate::Entry;
+use crate::types::DeviceNode;
+use crate::types::Directive;
+use crate::types::Entry;
 use compact_str::CompactString;
 use compact_str::ToCompactString;
 use file::Line;

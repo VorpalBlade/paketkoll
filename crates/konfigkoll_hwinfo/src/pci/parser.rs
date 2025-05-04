@@ -1,8 +1,8 @@
 //! Parser for pci.ids
 
-use super::Class;
-use super::ProgrammingInterface;
-use super::Subclass;
+use super::types::Class;
+use super::types::ProgrammingInterface;
+use super::types::Subclass;
 use ahash::AHashMap;
 use winnow::ModalResult;
 use winnow::Parser;

@@ -1,5 +1,5 @@
 //! Backend for Debian and derivatives
-use super::FullBackend;
+use super::common::FullBackend;
 use crate::backend::PackageFilter;
 use crate::utils::CompressionFormat;
 use crate::utils::PackageQuery;
