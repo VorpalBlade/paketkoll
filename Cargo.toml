@@ -17,10 +17,10 @@ cached = { version = "0.55.1", features = [
 camino = "1.1.9"
 cfg-if = "1.0.0"
 clap = { version = "4.5.37", features = ["derive"] }
-clap_complete = "4.5.47"
+clap_complete = "4.5.48"
 clap_mangen = "0.2.26"
 clru = "0.6.2"
-color-eyre = "0.6.3"
+color-eyre = "0.6.4"
 compact_str = { version = "0.9.0", features = ["serde", "smallvec"] }
 console = "0.15.11"
 dashmap = "6.1.0"
@@ -40,7 +40,7 @@ globset = "0.4.16"
 hashify = "0.2.6"
 ignore = { version = "0.4.23", features = ["simd-accel"] }
 indoc = "2.0.6"
-insta = "1.43.0"
+insta = "1.43.1"
 itertools = "0.14.0"
 lasso = { version = "0.7.3", features = [
     "ahasher",
@@ -99,7 +99,7 @@ tracing-subscriber = { version = "0.3.19", features = [
     "env-filter",
     "parking_lot",
 ] }
-winnow = { version = "0.7.6", features = ["simd"] }
+winnow = { version = "0.7.9", features = ["simd"] }
 xz2 = "0.1.7"
 zstd = "0.13.3"
 
