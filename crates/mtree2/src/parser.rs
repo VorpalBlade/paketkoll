@@ -30,7 +30,7 @@ pub enum MTreeLine<'a> {
 impl<'a> MTreeLine<'a> {
     pub fn from_bytes(input: &'a [u8]) -> Result<Self, LineParseError> {
         // a simple check to detect a wrapped line
-        if let Some(wrap) = input.strip_suffix(&[b'\\']) {
+        if let Some(wrap) = input.strip_suffix(b"\\") {
             return Err(LineParseError::WrappedLine(wrap.to_owned()));
         }
         let mut parts =
