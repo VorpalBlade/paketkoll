@@ -8,7 +8,7 @@ name = "paketkoll"
 readme = "README.md"
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.85.0"
-version = "0.3.10"
+version = "0.3.11"
 
 [features]
 # Default features
@@ -37,8 +37,8 @@ compact_str.workspace = true
 eyre.workspace = true
 ignore.workspace = true
 os_info.workspace = true
-paketkoll_core = { version = "0.5.10", path = "../paketkoll_core" }
-paketkoll_types = { version = "0.2.4", path = "../paketkoll_types" }
+paketkoll_core = { version = "0.5.11", path = "../paketkoll_core" }
+paketkoll_types = { version = "0.2.5", path = "../paketkoll_types" }
 paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 proc-exit.workspace = true
 rayon.workspace = true
