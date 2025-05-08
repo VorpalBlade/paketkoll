@@ -164,19 +164,11 @@ lto = false
 # Needed for reasonable performance
 flate2.opt-level = 2
 insta.opt-level = 3
-libz-rs-sys.opt-level = 2
 md-5.opt-level = 2
-proc-macro2.opt-level = 2
-quote.opt-level = 2
 ring.opt-level = 2
-rune-macros.opt-level = 2
-serde_derive.opt-level = 2
 similar.opt-level = 3
 syn.opt-level = 2
-zlib-rs.opt-level = 2
 zstd.opt-level = 2
-zstd-safe.opt-level = 2
-zstd-sys.opt-level = 2
 
 #[patch.crates-io]
 ## Rune

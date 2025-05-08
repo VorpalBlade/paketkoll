@@ -291,6 +291,7 @@ pub fn decode_escapes(buf: &mut [u8]) -> Option<&mut [u8]> {
     Some(&mut buf[..write_idx])
 }
 
+#[cfg(feature = "netbsd6")]
 fn get_control_char_from_caret(i: u8) -> Option<u8> {
     match i {
         b'@'..=b'~' => Some(i - b'@'), // control char \000 to \037
@@ -298,12 +299,14 @@ fn get_control_char_from_caret(i: u8) -> Option<u8> {
         _ => None,
     }
 }
+#[cfg(feature = "netbsd6")]
 fn get_meta_char_from_printable(i: u8) -> Option<u8> {
     match i {
         b'!'..=b'_' => Some(i | 128), // set 8th bit, \241 to \376
         _ => None,
     }
 }
+#[cfg(feature = "netbsd6")]
 fn get_meta_char_from_caret(i: u8) -> Option<u8> {
     let char = get_control_char_from_caret(i)?;
     Some(char | 128)
