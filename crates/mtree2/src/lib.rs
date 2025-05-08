@@ -140,11 +140,7 @@ where
                 })
             }
             MTreeLine::DotDot => {
-                if !self.cwd.pop() {
-                    Err(ParserError::from(
-                        "relative without a current working dir".to_string(),
-                    ))?;
-                }
+                self.cwd.pop();
                 None
             }
             MTreeLine::Full(path, keywords) => {
