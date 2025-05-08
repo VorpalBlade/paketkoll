@@ -129,15 +129,10 @@ where
             MTreeLine::Relative(path, keywords) => {
                 let mut params = self.default_params.clone();
                 params.set_list(keywords.into_iter());
-                assert!(
-                    !self.cwd.as_os_str().is_empty(),
-                    "relative without a current working dir"
-                );
-
-                    let filepath = self.cwd.join(path);
-                    if params.file_type == Some(FileType::Directory) {
-                        self.cwd.push(filepath.as_path());
-                    }
+                let filepath = self.cwd.join(path.clone());
+                if params.file_type == Some(FileType::Directory) {
+                    self.cwd.push(path.as_path());
+                }
 
                 Some(Entry {
                     path: filepath,
@@ -145,7 +140,11 @@ where
                 })
             }
             MTreeLine::DotDot => {
-                self.cwd.pop();
+                if !self.cwd.pop() {
+                    Err(ParserError::from(
+                        "relative without a current working dir".to_string(),
+                    ))?;
+                }
                 None
             }
             MTreeLine::Full(path, keywords) => {
