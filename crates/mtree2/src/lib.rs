@@ -133,15 +133,11 @@ where
                     !self.cwd.as_os_str().is_empty(),
                     "relative without a current working dir"
                 );
-                let filepath = decode_escapes_path(self.cwd.join(OsStr::from_bytes(path)))
-                    .ok_or_else(|| {
-                        LineParseError::Parser(ParserError::from(String::from(
-                            "Failed to decode escapes",
-                        )))
-                    })?;
-                if params.file_type == Some(FileType::Directory) {
-                    self.cwd.push(filepath.as_path());
-                }
+
+                    let filepath = self.cwd.join(path);
+                    if params.file_type == Some(FileType::Directory) {
+                        self.cwd.push(filepath.as_path());
+                    }
 
                 Some(Entry {
                     path: filepath,
@@ -155,15 +151,7 @@ where
             MTreeLine::Full(path, keywords) => {
                 let mut params = self.default_params.clone();
                 params.set_list(keywords.into_iter());
-                Some(Entry {
-                    path: decode_escapes_path(Path::new(OsStr::from_bytes(path)).to_owned())
-                        .ok_or_else(|| {
-                            LineParseError::Parser(ParserError::from(
-                                "Failed to decode escapes".to_string(),
-                            ))
-                        })?,
-                    params,
-                })
+                Some(Entry { path, params })
             }
         })
     }
@@ -472,7 +460,7 @@ impl Params {
             Keyword::Ignore => self.ignore = true,
             Keyword::Inode(inode) => self.inode = Some(inode),
             Keyword::Link(link) => {
-                self.link = decode_escapes_path(Path::new(OsStr::from_bytes(link)).to_owned());
+                self.link = decode_escapes_path(&mut link.to_vec());
             }
             Keyword::Md5(md5) => self.md5 = Some(md5),
             Keyword::Mode(mode) => self.mode = Some(mode),

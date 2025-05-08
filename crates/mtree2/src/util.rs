@@ -3,6 +3,7 @@ use crate::parser::ParserError;
 use crate::parser::ParserResult;
 use std::ffi::OsStr;
 use std::os::unix::ffi::OsStrExt;
+use std::path::PathBuf;
 use std::time::Duration;
 
 /// Helper to parse a number from a slice of u8 in hexadecimal.
@@ -140,23 +141,23 @@ pub fn parse_time(input: &[u8]) -> ParserResult<Duration> {
     let nano = u32::from_dec(nano)?;
     Ok(Duration::new(sec, nano))
 }
+pub fn decode_escapes_path(buf: &mut [u8]) -> Option<PathBuf> {
+    let decoded = decode_escapes(buf)?;
 
-/// Spaces and other special characters are escaped, take care of that
-pub fn decode_escapes_path(path: std::path::PathBuf) -> Option<std::path::PathBuf> {
-    let path = path.into_os_string();
-    let mut path = path.into_encoded_bytes();
-    let path = decode_escapes(&mut path)?;
-
+    #[cfg(unix)]
+    {
+        Some(PathBuf::from(OsStr::from_bytes(decoded)))
+    }
+    #[cfg(not(unix))]
     // OsStr::from_bytes is Unix only. It is unlikely this will be used on Windows,
     // but provide a slower fallback implementation for that.
     //
     // We cannot use `OsStr::from_encoded_bytes_unchecked` safely here, since
     // it is possible the escape was not valid UTF-8, and we don't convert any
     // such string into valid WTF-8 (I wouldn't even know where to start).
-    #[cfg(unix)]
-    return Some(OsStr::from_bytes(path).into());
-    #[cfg(not(unix))]
-    return Some(String::from_utf8_lossy(path).into_owned().into());
+     {
+        Some(PathBuf::from(String::from_utf8_lossy(decoded).into_owned()))
+    }
 }
 
 /// Spaces and other special characters are escaped, take care of that
@@ -165,81 +166,63 @@ pub fn decode_escapes(buf: &mut [u8]) -> Option<&mut [u8]> {
     // Hopefully there will be nothing to do in the majority of cases
     let mut read_idx = memchr::memchr(b'\\', buf).unwrap_or(buf.len());
     let mut write_idx = read_idx;
+
     while read_idx < buf.len() {
-        /*if buf[read_idx] == b'\\' {
-            let ch = (from_oct_ch(buf[read_idx + 1])? << 6)
-                | (from_oct_ch(buf[read_idx + 2])? << 3)
-                | from_oct_ch(buf[read_idx + 3])?;
-            buf[write_idx] = ch;
-            read_idx += 3;
-        } else {
-            buf[write_idx] = buf[read_idx];
-        }
-        read_idx += 1;
-        write_idx += 1;*/
         match buf[read_idx] {
             b'\\' => {
-                let nextchar: &u8 = buf.get(read_idx + 1)?;
-                match nextchar {
+                let next_char = buf.get(read_idx + 1)?;
+
+                match next_char {
                     #[cfg(feature = "netbsd6")]
                     // implementation of netbsd6 flavor according: https://man.netbsd.org/mtree.8
                     // details on strsvis specification: https://man.netbsd.org/strsvis.3
-                    //
-                    #[cfg(feature = "netbsd6")]
                     &b'a' => {
-                        buf[write_idx] = 7;
+                        buf[write_idx] = 0x07;
                         read_idx += 2;
-                    }
-                    //
+                    } // bell
                     #[cfg(feature = "netbsd6")]
                     &b'b' => {
-                        buf[write_idx] = 8;
+                        buf[write_idx] = 0x08;
                         read_idx += 2;
-                    }
-                    //
+                    } // backspace
                     #[cfg(feature = "netbsd6")]
                     &b'f' => {
-                        buf[write_idx] = 12;
+                        buf[write_idx] = 0x0C;
                         read_idx += 2;
-                    }
-                    //
+                    } // form feed
                     #[cfg(feature = "netbsd6")]
                     &b'n' => {
-                        buf[write_idx] = 10;
+                        buf[write_idx] = 0x0A;
                         read_idx += 2;
-                    }
-                    //
+                    } // newline
                     #[cfg(feature = "netbsd6")]
                     &b'r' => {
-                        buf[write_idx] = 15;
+                        buf[write_idx] = 0x0F;
                         read_idx += 2;
-                    }
-                    //
+                    } // carriage return
                     #[cfg(feature = "netbsd6")]
                     &b's' => {
-                        buf[write_idx] = 32;
+                        buf[write_idx] = 0x20;
                         read_idx += 2;
-                    }
-                    //
+                    } // space
                     #[cfg(feature = "netbsd6")]
                     &b't' => {
-                        buf[write_idx] = 9;
+                        buf[write_idx] = 0x09;
                         read_idx += 2;
-                    }
-                    //
+                    } // tab
                     #[cfg(feature = "netbsd6")]
                     &b'v' => {
-                        buf[write_idx] = 11;
+                        buf[write_idx] = 0x0B;
                         read_idx += 2;
-                    }
-                    //
+                    } // vertical tab
                     #[cfg(feature = "netbsd6")]
                     &b'#' => {
-                        buf[write_idx] = 35;
+                        buf[write_idx] = 0x23;
                         read_idx += 2;
-                    }
-                    //
+                    } // hash
+
                     #[cfg(feature = "netbsd6")]
+                    // Handle caret notation (^X)
                     &b'^' => {
                         if let Some(&char) = buf.get(read_idx + 2) {
                             buf[write_idx] = get_control_char_from_caret(char)?;
@@ -248,39 +231,43 @@ pub fn decode_escapes(buf: &mut [u8]) -> Option<&mut [u8]> {
                             return None;
                         }
                     }
-                    #[cfg(feature = "netbsd6")]
-                    &b'M' if buf.get(read_idx + 2) == Some(&b'-') => {
-                        if let Some(&char) = buf.get(read_idx + 3) {
-                            buf[write_idx] = get_meta_char_from_printable(char)?;
-                            read_idx += 4;
-                        } else {
-                            return None;
-                        }
-                    }
 
                     #[cfg(feature = "netbsd6")]
-                    &b'M' if buf.get(read_idx + 2) == Some(&b'^') => {
-                        // parse caret notation for meta control char (8th bit set)
-                        if let Some(&char) = buf.get(read_idx + 3) {
-                            buf[write_idx] = get_meta_char_from_caret(char)?;
-                            read_idx += 4;
-                        } else {
-                            return None;
+                    // Handle meta characters (M-x and M-^x)
+                    &b'M' => match buf.get(read_idx + 2) {
+                        Some(&b'-') => {
+                            if let Some(&char) = buf.get(read_idx + 3) {
+                                buf[write_idx] = get_meta_char_from_printable(char)?;
+                                read_idx += 4;
+                            } else {
+                                return None;
+                            }
                         }
-                    }
-                    //
-                    // Handle octal escape sequence
-                    &b1 => {
-                        let b2: &u8 = buf.get(read_idx + 2)?;
-                        let b3: &u8 = buf.get(read_idx + 3)?;
+                        Some(&b'^') => {
+                            if let Some(&char) = buf.get(read_idx + 3) {
+                                buf[write_idx] = get_meta_char_from_caret(char)?;
+                                read_idx += 4;
+                            } else {
+                                return None;
+                            }
+                        }
+                        _ => return None,
+                    },
 
-                        let ch: u8 =
-                            (from_oct_ch(b1)? << 6) | (from_oct_ch(*b2)? << 3) | from_oct_ch(*b3)?;
+                    // Handle octal escape sequence (\ddd)
+                    _ => {
+                        let b2 = buf.get(read_idx + 2)?;
+                        let b3 = buf.get(read_idx + 3)?;
+
+                        let ch = (from_oct_ch(*next_char)? << 6)
+                            | (from_oct_ch(*b2)? << 3)
+                            | from_oct_ch(*b3)?;
                         buf[write_idx] = ch;
                         read_idx += 4;
                     }
                 }
             }
+            // Copy non-escaped characters directly
             b => {
                 buf[write_idx] = b;
                 read_idx += 1;
@@ -288,6 +275,7 @@ pub fn decode_escapes(buf: &mut [u8]) -> Option<&mut [u8]> {
         }
         write_idx += 1;
     }
+
     Some(&mut buf[..write_idx])
 }
 
@@ -296,7 +284,10 @@ fn get_control_char_from_caret(i: u8) -> Option<u8> {
     match i {
         b'@'..=b'~' => Some(i - b'@'), // control char \000 to \037
         b'?' => Some(127),
-        _ => None,
+        _ => {
+            eprintln!("got: {i}, returned None");
+            return None;
+        }
     }
 }
 #[cfg(feature = "netbsd6")]
@@ -383,11 +374,11 @@ mod tests {
     fn test_decode_escapes_path() {
         assert_eq!(
             PathBuf::from("test"),
-            decode_escapes_path(PathBuf::from("test")).unwrap()
+            decode_escapes_path(&mut "test".as_bytes().to_vec()).unwrap()
         );
         assert_eq!(
             PathBuf::from("test test2"),
-            decode_escapes_path(PathBuf::from("test\\040test2")).unwrap()
+            decode_escapes_path(&mut "test\\040test2".as_bytes().to_vec()).unwrap()
         );
     }
 

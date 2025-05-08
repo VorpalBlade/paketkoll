@@ -2,9 +2,11 @@
 use crate::Device;
 use crate::util::FromDec;
 use crate::util::FromHex;
+use crate::util::decode_escapes_path;
 use crate::util::parse_time;
 use smallvec::SmallVec;
 use std::fmt;
+use std::path::PathBuf;
 use std::time::Duration;
 
 /// An mtree file is a sequence of lines, each a semantic unit.
@@ -19,12 +21,12 @@ pub enum MTreeLine<'a> {
     Special(SpecialKind, SmallVec<[Keyword<'a>; 5]>),
     /// If the first word does not contain a '/', it is a file in the current
     /// directory.
-    Relative(&'a [u8], SmallVec<[Keyword<'a>; 5]>),
+    Relative(PathBuf, SmallVec<[Keyword<'a>; 5]>),
     /// Change the current directory to the parent of the current directory.
     DotDot,
     /// If the first word does contain a '/', it is a file relative to the
     /// starting (not current) directory.
-    Full(&'a [u8], SmallVec<[Keyword<'a>; 5]>),
+    Full(PathBuf, SmallVec<[Keyword<'a>; 5]>),
 }
 
 impl<'a> MTreeLine<'a> {
@@ -64,12 +66,18 @@ impl<'a> MTreeLine<'a> {
         // Special
         if first[0] == b'/' {
             let kind = SpecialKind::from_bytes(&first[1..])?;
-            Ok(MTreeLine::Special(kind, params))
-        // Full
-        } else if first.contains(&b'/') {
-            Ok(MTreeLine::Full(first, params))
+            return Ok(MTreeLine::Special(kind, params));
+        }
+        
+        let mut path_enc = first.to_vec();
+        let path_dec = decode_escapes_path(&mut path_enc).ok_or_else(|| {
+            LineParseError::Parser(ParserError::from(String::from("Failed to decode escapes")))
+        })?;
+
+        if path_dec.to_str().unwrap().contains("/") {
+            Ok(MTreeLine::Full(path_dec, params))
         } else {
-            Ok(MTreeLine::Relative(first, params))
+            Ok(MTreeLine::Relative(path_dec, params))
         }
     }
 }

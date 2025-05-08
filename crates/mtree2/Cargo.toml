@@ -24,5 +24,5 @@ insta.workspace = true
 workspace = true
 
 [features]
-default = []
+default = ["netbsd6"]
 netbsd6 = []
