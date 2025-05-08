@@ -166,7 +166,7 @@ pub fn decode_escapes(buf: &mut [u8]) -> Option<&mut [u8]> {
     let mut read_idx = memchr::memchr(b'\\', buf).unwrap_or(buf.len());
     let mut write_idx = read_idx;
     while read_idx < buf.len() {
-        if buf[read_idx] == b'\\' {
+        /*if buf[read_idx] == b'\\' {
             let ch = (from_oct_ch(buf[read_idx + 1])? << 6)
                 | (from_oct_ch(buf[read_idx + 2])? << 3)
                 | from_oct_ch(buf[read_idx + 3])?;
@@ -176,9 +176,137 @@ pub fn decode_escapes(buf: &mut [u8]) -> Option<&mut [u8]> {
             buf[write_idx] = buf[read_idx];
         }
         read_idx += 1;
+        write_idx += 1;*/
+        match buf[read_idx] {
+            b'\\' => {
+                let nextchar: &u8 = buf.get(read_idx + 1)?;
+                match nextchar {
+                    #[cfg(feature = "netbsd6")]
+                    // implementation of netbsd6 flavor according: https://man.netbsd.org/mtree.8
+                    // details on strsvis specification: https://man.netbsd.org/strsvis.3
+                    //
+                    #[cfg(feature = "netbsd6")]
+                    &b'a' => {
+                        buf[write_idx] = 7;
+                        read_idx += 2;
+                    }
+                    //
+                    #[cfg(feature = "netbsd6")]
+                    &b'b' => {
+                        buf[write_idx] = 8;
+                        read_idx += 2;
+                    }
+                    //
+                    #[cfg(feature = "netbsd6")]
+                    &b'f' => {
+                        buf[write_idx] = 12;
+                        read_idx += 2;
+                    }
+                    //
+                    #[cfg(feature = "netbsd6")]
+                    &b'n' => {
+                        buf[write_idx] = 10;
+                        read_idx += 2;
+                    }
+                    //
+                    #[cfg(feature = "netbsd6")]
+                    &b'r' => {
+                        buf[write_idx] = 15;
+                        read_idx += 2;
+                    }
+                    //
+                    #[cfg(feature = "netbsd6")]
+                    &b's' => {
+                        buf[write_idx] = 32;
+                        read_idx += 2;
+                    }
+                    //
+                    #[cfg(feature = "netbsd6")]
+                    &b't' => {
+                        buf[write_idx] = 9;
+                        read_idx += 2;
+                    }
+                    //
+                    #[cfg(feature = "netbsd6")]
+                    &b'v' => {
+                        buf[write_idx] = 11;
+                        read_idx += 2;
+                    }
+                    //
+                    #[cfg(feature = "netbsd6")]
+                    &b'#' => {
+                        buf[write_idx] = 35;
+                        read_idx += 2;
+                    }
+                    //
+                    #[cfg(feature = "netbsd6")]
+                    &b'^' => {
+                        if let Some(&char) = buf.get(read_idx + 2) {
+                            buf[write_idx] = get_control_char_from_caret(char)?;
+                            read_idx += 3;
+                        } else {
+                            return None;
+                        }
+                    }
+                    #[cfg(feature = "netbsd6")]
+                    &b'M' if buf.get(read_idx + 2) == Some(&b'-') => {
+                        if let Some(&char) = buf.get(read_idx + 3) {
+                            buf[write_idx] = get_meta_char_from_printable(char)?;
+                            read_idx += 4;
+                        } else {
+                            return None;
+                        }
+                    }
+
+                    #[cfg(feature = "netbsd6")]
+                    &b'M' if buf.get(read_idx + 2) == Some(&b'^') => {
+                        // parse caret notation for meta control char (8th bit set)
+                        if let Some(&char) = buf.get(read_idx + 3) {
+                            buf[write_idx] = get_meta_char_from_caret(char)?;
+                            read_idx += 4;
+                        } else {
+                            return None;
+                        }
+                    }
+                    //
+                    // Handle octal escape sequence
+                    &b1 => {
+                        let b2: &u8 = buf.get(read_idx + 2)?;
+                        let b3: &u8 = buf.get(read_idx + 3)?;
+
+                        let ch: u8 =
+                            (from_oct_ch(b1)? << 6) | (from_oct_ch(*b2)? << 3) | from_oct_ch(*b3)?;
+                        buf[write_idx] = ch;
+                        read_idx += 4;
+                    }
+                }
+            }
+            b => {
+                buf[write_idx] = b;
+                read_idx += 1;
+            }
+        }
         write_idx += 1;
     }
     Some(&mut buf[..write_idx])
+}
+
+fn get_control_char_from_caret(i: u8) -> Option<u8> {
+    match i {
+        b'@'..=b'~' => Some(i - b'@'), // control char \000 to \037
+        b'?' => Some(127),
+        _ => None,
+    }
+}
+fn get_meta_char_from_printable(i: u8) -> Option<u8> {
+    match i {
+        b'!'..=b'_' => Some(i | 128), // set 8th bit, \241 to \376
+        _ => None,
+    }
+}
+fn get_meta_char_from_caret(i: u8) -> Option<u8> {
+    let char = get_control_char_from_caret(i)?;
+    Some(char | 128)
 }
 
 /// A splitter using memchr to find the separators
@@ -261,18 +389,6 @@ mod tests {
     }
 
     #[test]
-    fn test_decode_escapes() {
-        assert_eq!(
-            b"test",
-            decode_escapes(b"test".to_owned().as_mut()).unwrap()
-        );
-        assert_eq!(
-            b"test test2",
-            decode_escapes(b"test\\040test2".to_owned().as_mut()).unwrap()
-        );
-    }
-
-    #[test]
     fn test_hex_decode_u128() {
         assert_eq!(
             0x112233445566778899aabbccddeeff00,
@@ -323,5 +439,132 @@ mod tests {
         assert_eq!(splitter.next(), Some(b"".as_slice()));
         assert_eq!(splitter.next(), Some(b"".as_slice()));
         assert_eq!(splitter.next(), None);
+    }
+
+    #[test]
+    fn test_basic() {
+        assert_eq!(
+            b"test",
+            decode_escapes(b"test".to_owned().as_mut()).unwrap()
+        );
+    }
+
+    #[test]
+    fn test_oct_ok() {
+        assert_eq!(
+            b"test test",
+            decode_escapes(b"test\\040test".to_owned().as_mut()).unwrap()
+        );
+    }
+
+    #[test]
+    fn test_oct_nok() {
+        let test_cases = [
+            "test\\800test", // first digit > 7
+            "test\\080test", // middle digit > 7
+            "test\\008test", // last digit > 7
+            "test\\07test",  // Incomplete octal sequence
+            "test\\7test",   // Incomplete octal sequence
+        ];
+
+        for test_case in test_cases {
+            let mut input = test_case.as_bytes().to_owned();
+            let result = decode_escapes(input.as_mut());
+            assert_eq!(None, result, "Expected None for input: {}", test_case);
+        }
+    }
+
+    #[test]
+    #[cfg(feature = "netbsd6")]
+    fn test_m_escapes() {
+        let expected = "test:  ä ö ü".as_bytes().to_owned();
+        let actual = decode_escapes(
+            b"test:\\s\\040\\M-C\\M-$\\s\\M-C\\M-6\\s\\M-C\\M-<"
+                .to_owned()
+                .as_mut(),
+        )
+        .unwrap()
+        .to_owned();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_m_escapes_nok() {
+        let test_cases = ["\\Mtest", "\\M", "\\M^", "\\M-"];
+
+        for test_case in test_cases {
+            let mut input = test_case.as_bytes().to_owned();
+            let result = decode_escapes(input.as_mut());
+            assert_eq!(None, result, "Expected None for input: {}", test_case);
+        }
+    }
+
+    #[test]
+    #[cfg(feature = "netbsd6")]
+    fn test_m_carret_escapes_strvis() {
+        let expected = "Latin capital Letter a with Breve: Ă".as_bytes().to_owned();
+        let actual = decode_escapes(
+            b"Latin capital Letter a with Breve: \\M-D\\M^B"
+                .to_owned()
+                .as_mut(),
+        )
+        .unwrap()
+        .to_owned();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn test_m_carret_escapes_octal() {
+        let expected = "Latin capital Letter a with Breve: Ă".as_bytes().to_owned();
+        let actual = decode_escapes(
+            b"Latin capital Letter a with Breve: \\304\\202"
+                .to_owned()
+                .as_mut(),
+        )
+        .unwrap()
+        .to_owned();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    #[cfg(feature = "netbsd6")]
+    fn test_meta_caret() {
+        assert_eq!(
+            b"test\x81test",
+            decode_escapes(b"test\\M^Atest".to_owned().as_mut()).unwrap()
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "netbsd6")]
+    fn test_meta_printable() {
+        assert!(decode_escapes(b"test\\M-atest".to_owned().as_mut()).is_none());
+    }
+
+    #[test]
+    fn test_invalid_escapes() {
+        let test_cases = [
+            "test\\xtest", // Invalid escape
+            "test\\M",     // Incomplete meta sequence
+            "test\\M^",    // Incomplete meta-control sequence
+            "test\\M-",    // Incomplete meta-printable sequence
+            "test\\^",     // Incomplete caret sequence
+            "test\\",
+        ];
+
+        for test_case in test_cases {
+            let mut input = test_case.as_bytes().to_owned();
+            let result = decode_escapes(input.as_mut());
+            assert_eq!(None, result, "Expected None for input: {}", test_case);
+        }
+    }
+
+    #[test]
+    #[cfg(feature = "netbsd6")]
+    fn test_consecutive_escapes() {
+        assert_eq!(
+            b"test\x20\x20test",
+            decode_escapes(b"test\\s\\stest".to_owned().as_mut()).unwrap()
+        );
     }
 }

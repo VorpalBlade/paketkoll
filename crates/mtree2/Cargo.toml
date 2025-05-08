@@ -11,6 +11,7 @@ repository = "https://github.com/VorpalBlade/paketkoll"
 version = "0.6.11"
 
 [dependencies]
+ascii = "1.1.0"
 bitflags.workspace = true
 faster-hex.workspace = true
 memchr.workspace = true
@@ -22,3 +23,7 @@ insta.workspace = true
 
 [lints]
 workspace = true
+
+[features]
+default = ["netbsd6"]
+netbsd6 = []
