@@ -21,8 +21,8 @@ pub enum MTreeLine<'a> {
     Special(SpecialKind, SmallVec<[Keyword<'a>; 5]>),
     /// Change the current directory to the parent of the current directory.
     DotDot,
-    // for Relative and Full, the owning data structure is now shifted to on lever deeper.
-    // before, the owning data structure was created in parsing MtreeLine::Relative and
+    // For Relative and Full, the owning data structure is now shifted to one level deeper.
+    // Before, the owning data structure was created in parsing MtreeLine::Relative and
     // MtreeLine::Full (even doubled code, and processing was done on full path).
     // Now, MtreeLine::Full and MtreeLine::Relative does own the path via PathBuf.
     /// If the path does not contain a '/', it is regarded as a relative entry
@@ -82,7 +82,8 @@ impl<'a> MTreeLine<'a> {
                 "Failed to decode escapes in path",
             )))
         })?;
-
+        // neeed to check for '/' in the decoded path, because netbsd6 flavor can
+        // contain lots of '/'.
         if path_dec
             .to_str()
             .ok_or_else(|| {
