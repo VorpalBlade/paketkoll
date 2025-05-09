@@ -16,5 +16,9 @@ macro_rules! test_snapshot {
 }
 
 test_snapshot!(test_gedit, "examples/gedit.mtree");
-test_snapshot!(test_xterm, "examples/xterm.mtree");
-test_snapshot!(test_relative_paths, "examples/relative_paths.mtree");
+test_snapshot!(test_xterm, "tests/data/xterm.mtree");
+test_snapshot!(test_relative_paths, "tests/data/relative_paths.mtree");
+test_snapshot!(
+    invalid_double_filename,
+    "tests/data/invalid_double_filename.mtree"
+);

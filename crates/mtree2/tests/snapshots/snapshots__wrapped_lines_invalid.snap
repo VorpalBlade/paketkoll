@@ -1,0 +1,5 @@
+---
+source: crates/mtree2/tests/snapshots.rs
+expression: entries
+---
+[]

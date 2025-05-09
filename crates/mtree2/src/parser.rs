@@ -47,13 +47,13 @@ impl<'a> MTreeLine<'a> {
         let mut params = SmallVec::new();
         for part in parts {
             let keyword = Keyword::from_bytes(part);
-            debug_assert!(
-                keyword.is_ok(),
-                "could not parse bytes: {}",
-                String::from_utf8_lossy(part)
-            );
             if let Ok(keyword) = keyword {
                 params.push(keyword);
+            } else {
+                return Err(ParserError(format!(
+                    r#"Could not parse "{}" as a valid mtree field"#,
+                    String::from_utf8_lossy(part)
+                )));
             }
         }
 

@@ -1,0 +1,13 @@
+---
+source: crates/mtree2/tests/snapshots.rs
+expression: entries
+---
+[
+    Err(
+        Parser(
+            ParserError(
+                "Could not parse \"filename2.txt\" as a valid mtree field",
+            ),
+        ),
+    ),
+]
