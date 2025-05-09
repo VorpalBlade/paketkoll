@@ -1,0 +1,67 @@
+# run on freebsd 13.1 on a directory containing 20 randomly generated filenames:
+# mtree -c -F nstbsd6
+#
+# íþȴɛɜɝɟūǶúÐīŻƩþŽŷǾǻû
+# ïɢȽƻſĿƿŻǻǯǅƸóŻÇǿǛææǾ
+# óƿÿŶſžɷŶßǿǟƾĻǵǴǻƽ÷ůŽ
+# öŞǏǔƣŖŻȷŞǻůɻìɆÿĮǵļúź
+# þſýɝüïžſÿ»ǿŷȳǻÿÿǳĿůý
+# ÿȽÿǟżóùūǯïǾŚůɳȿÖŹ½ǫŇ
+# ĿǡìßɿǯǽïüſÿÚǾşÿãǾûķ·
+# ŪÇýįÿŽȿŘǳǾūǱſɣǣ÷żŷůƶ
+# ǶĻÿŗɫŭǿǫɾįĿȿǷɏņɾƷſźſ
+# Ƿǿįýǿŝɷë÷Îÿɭɽŧį¢ÿǷéǿ
+# ƿɼâî÷ſŴýƾɽǜɞŝɷſǽÿƷĻŦ
+# ǧžÿşĻżŹſſǗǷǮħÞǻîȯōɓï
+# ǭÿŷŜŽȹɥƭþȿǪÿŷȾǮŽǽŜǿ÷
+# ǯŖɳǥǽŶķįǿúǺſîûɯůĪÿſÿ
+# ǻȼÏǟɷħǮȿǦŪǻžſ÷ɻǞƿŻȶǟ
+# ǿÿǍǿĿǾßǿüƿÿǛÿǶǮǿŽǻŏç
+# ǿɳŻýǯĪżşūǳǬ¾ŹžëɫǞźßŽ
+# ɊǖľŽɿçĽÿõŻſƿǾûũɫɦȿƮǿ
+# ɔ½ǼûŭťǹǶæžǺǞǯǷȷǳɓŧǞž
+# ȾǻǼɷǆǧçɿ¿ɷ¿ſǻǺŏǟǠŊǛǶ
+#
+# .
+/set type=file uid=1004 gid=1004 mode=0644 nlink=1 flags=uarch
+.               type=dir mode=0755 nlink=2 time=1746539656.534794895
+    \M-C\M--\M-C\M->\M-H\M-4\M-I\M^[\M-I\M^\\M-I\M^]\M-I\M^_\M-E\M-+\M-G\M-6\M-C\M-:\M-C\M^P\M-D\M-+\M-E\M-;\M-F\M-)\M-C\M->\M-E\M-=\M-E\M-7\M-G\M->\M-G\M-;\M-C\M-; \
+                size=10 time=1746539656.472401922
+    \M-C\M-/\M-I\M-"\M-H\M-=\M-F\M-;\M-E\M-?\M-D\M-?\M-F\M-?\M-E\M-;\M-G\M-;\M-G\M-/\M-G\M^E\M-F\M-8\M-C\M-3\M-E\M-;\M-C\M^G\M-G\M-?\M-G\M^[\M-C\M-&\M-C\M-&\M-G\M-> \
+                size=10 time=1746539656.469661871
+    \M-C\M-3\M-F\M-?\M-C\M-?\M-E\M-6\M-E\M-?\M-E\M->\M-I\M-7\M-E\M-6\M-C\M^_\M-G\M-?\M-G\M^_\M-F\M->\M-D\M-;\M-G\M-5\M-G\M-4\M-G\M-;\M-F\M-=\M-C\M-7\M-E\M-/\M-E\M-= \
+                size=10 time=1746539656.513217652
+    \M-C\M-6\M-E\M^^\M-G\M^O\M-G\M^T\M-F\M-#\M-E\M^V\M-E\M-;\M-H\M-7\M-E\M^^\M-G\M-;\M-E\M-/\M-I\M-;\M-C\M-,\M-I\M^F\M-C\M-?\M-D\M-.\M-G\M-5\M-D\M-<\M-C\M-:\M-E\M-: \
+                size=10 time=1746539656.504699519
+    \M-C\M->\M-E\M-?\M-C\M-=\M-I\M^]\M-C\M-<\M-C\M-/\M-E\M->\M-E\M-?\M-C\M-?\M-B\M-;\M-G\M-?\M-E\M-7\M-H\M-3\M-G\M-;\M-C\M-?\M-C\M-?\M-G\M-3\M-D\M-?\M-E\M-/\M-C\M-= \
+                size=10 time=1746539656.530779925
+    \M-C\M-?\M-H\M-=\M-C\M-?\M-G\M^_\M-E\M-<\M-C\M-3\M-C\M-9\M-E\M-+\M-G\M-/\M-C\M-/\M-G\M->\M-E\M^Z\M-E\M-/\M-I\M-3\M-H\M-?\M-C\M^V\M-E\M-9\M-B\M-=\M-G\M-+\M-E\M^G \
+                size=10 time=1746539656.525705316
+    \M-D\M-?\M-G\M-!\M-C\M-,\M-C\M^_\M-I\M-?\M-G\M-/\M-G\M-=\M-C\M-/\M-C\M-<\M-E\M-?\M-C\M-?\M-C\M^Z\M-G\M->\M-E\M^_\M-C\M-?\M-C\M-#\M-G\M->\M-C\M-;\M-D\M-7\M-B\M-7 \
+                size=10 time=1746539656.499493724
+    \M-E\M-*\M-C\M^G\M-C\M-=\M-D\M-/\M-C\M-?\M-E\M-=\M-H\M-?\M-E\M^X\M-G\M-3\M-G\M->\M-E\M-+\M-G\M-1\M-E\M-?\M-I\M-#\M-G\M-#\M-C\M-7\M-E\M-<\M-E\M-7\M-E\M-/\M-F\M-6 \
+                size=10 time=1746539656.523061056
+    \M-F\M-?\M-I\M-<\M-C\M-"\M-C\M-.\M-C\M-7\M-E\M-?\M-E\M-4\M-C\M-=\M-F\M->\M-I\M-=\M-G\M^\\M-I\M^^\M-E\M^]\M-I\M-7\M-E\M-?\M-G\M-=\M-C\M-?\M-F\M-7\M-D\M-;\M-E\M-& \
+                size=10 time=1746539656.535746522
+    \M-G\M-'\M-E\M->\M-C\M-?\M-E\M^_\M-D\M-;\M-E\M-<\M-E\M-9\M-E\M-?\M-E\M-?\M-G\M^W\M-G\M-7\M-G\M-.\M-D\M-'\M-C\M^^\M-G\M-;\M-C\M-.\M-H\M-/\M-E\M^M\M-I\M^S\M-C\M-/ \
+                size=10 time=1746539656.463253122
+    \M-G\M--\M-C\M-?\M-E\M-7\M-E\M^\\M-E\M-=\M-H\M-9\M-I\M-%\M-F\M--\M-C\M->\M-H\M-?\M-G\M-*\M-C\M-?\M-E\M-7\M-H\M->\M-G\M-.\M-E\M-=\M-G\M-=\M-E\M^\\M-G\M-?\M-C\M-7 \
+                size=10 time=1746539656.510596822
+    \M-G\M-/\M-E\M^V\M-I\M-3\M-G\M-%\M-G\M-=\M-E\M-6\M-D\M-7\M-D\M-/\M-G\M-?\M-C\M-:\M-G\M-:\M-E\M-?\M-C\M-.\M-C\M-;\M-I\M-/\M-E\M-/\M-D\M-*\M-C\M-?\M-E\M-?\M-C\M-? \
+                size=10 time=1746539656.528160319
+    \M-G\M-6\M-D\M-;\M-C\M-?\M-E\M^W\M-I\M-+\M-E\M--\M-G\M-?\M-G\M-+\M-I\M->\M-D\M-/\M-D\M-?\M-H\M-?\M-G\M-7\M-I\M^O\M-E\M^F\M-I\M->\M-F\M-7\M-E\M-?\M-E\M-:\M-E\M-? \
+                size=10 time=1746539656.466555735
+    \M-G\M-7\M-G\M-?\M-D\M-/\M-C\M-=\M-G\M-?\M-E\M^]\M-I\M-7\M-C\M-+\M-C\M-7\M-C\M^N\M-C\M-?\M-I\M--\M-I\M-=\M-E\M-'\M-D\M-/\M-B\M-"\M-C\M-?\M-G\M-7\M-C\M-)\M-G\M-? \
+                size=10 time=1746539656.533514646
+    \M-G\M-;\M-H\M-<\M-C\M^O\M-G\M^_\M-I\M-7\M-D\M-'\M-G\M-.\M-H\M-?\M-G\M-&\M-E\M-*\M-G\M-;\M-E\M->\M-E\M-?\M-C\M-7\M-I\M-;\M-G\M^^\M-F\M-?\M-E\M-;\M-H\M-6\M-G\M^_ \
+                size=10 time=1746539656.459967419
+    \M-G\M-?\M-C\M-?\M-G\M^M\M-G\M-?\M-D\M-?\M-G\M->\M-C\M^_\M-G\M-?\M-C\M-<\M-F\M-?\M-C\M-?\M-G\M^[\M-C\M-?\M-G\M-6\M-G\M-.\M-G\M-?\M-E\M-=\M-G\M-;\M-E\M^O\M-C\M-' \
+                size=10 time=1746539656.507827475
+    \M-G\M-?\M-I\M-3\M-E\M-;\M-C\M-=\M-G\M-/\M-D\M-*\M-E\M-<\M-E\M^_\M-E\M-+\M-G\M-3\M-G\M-,\M-B\M->\M-E\M-9\M-E\M->\M-C\M-+\M-I\M-+\M-G\M^^\M-E\M-:\M-C\M^_\M-E\M-= \
+                size=10 time=1746539656.502326657
+    \M-H\M->\M-G\M-;\M-G\M-<\M-I\M-7\M-G\M^F\M-G\M-'\M-C\M-'\M-I\M-?\M-B\M-?\M-I\M-7\M-B\M-?\M-E\M-?\M-G\M-;\M-G\M-:\M-E\M^O\M-G\M^_\M-G\240\M-E\M^J\M-G\M^[\M-G\M-6 \
+                size=10 time=1746539656.520626212
+    \M-I\M^J\M-G\M^V\M-D\M->\M-E\M-=\M-I\M-?\M-C\M-'\M-D\M-=\M-C\M-?\M-C\M-5\M-E\M-;\M-E\M-?\M-F\M-?\M-G\M->\M-C\M-;\M-E\M-)\M-I\M-+\M-I\M-&\M-H\M-?\M-F\M-.\M-G\M-? \
+                size=10 time=1746539656.517923597
+    \M-I\M^T\M-B\M-=\M-G\M-<\M-C\M-;\M-E\M--\M-E\M-%\M-G\M-9\M-G\M-6\M-C\M-&\M-E\M->\M-G\M-:\M-G\M^^\M-G\M-/\M-G\M-7\M-H\M-7\M-G\M-3\M-I\M^S\M-E\M-'\M-G\M^^\M-E\M-> \
+                size=10 time=1746539656.515568834

@@ -5,7 +5,7 @@ expression: entries
 [
     Ok(
         Entry {
-            path: "/.",
+            path: ".",
             params: Params {
                 checksum: None,
                 device: None,
@@ -63,7 +63,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.mtree.go.swp",
+            path: "./.mtree.go.swp",
             params: Params {
                 checksum: None,
                 device: None,
@@ -188,7 +188,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.mtree_test.go.swp",
+            path: "./.mtree_test.go.swp",
             params: Params {
                 checksum: None,
                 device: None,
@@ -313,7 +313,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./mtree.go",
+            path: "./mtree.go",
             params: Params {
                 checksum: None,
                 device: None,
@@ -438,7 +438,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./mtree.go~",
+            path: "./mtree.go~",
             params: Params {
                 checksum: None,
                 device: None,
@@ -563,7 +563,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./mtree_test.go",
+            path: "./mtree_test.go",
             params: Params {
                 checksum: None,
                 device: None,
@@ -688,7 +688,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./mtree_test.go~",
+            path: "./mtree_test.go~",
             params: Params {
                 checksum: None,
                 device: None,
@@ -813,7 +813,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git",
+            path: "./.git",
             params: Params {
                 checksum: None,
                 device: None,
@@ -871,7 +871,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/HEAD",
+            path: "./.git/HEAD",
             params: Params {
                 checksum: None,
                 device: None,
@@ -996,7 +996,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/config",
+            path: "./.git/config",
             params: Params {
                 checksum: None,
                 device: None,
@@ -1121,7 +1121,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/description",
+            path: "./.git/description",
             params: Params {
                 checksum: None,
                 device: None,
@@ -1246,7 +1246,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/index",
+            path: "./.git/index",
             params: Params {
                 checksum: None,
                 device: None,
@@ -1371,7 +1371,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/branches",
+            path: "./.git/branches",
             params: Params {
                 checksum: None,
                 device: None,
@@ -1429,7 +1429,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/hooks",
+            path: "./.git/hooks",
             params: Params {
                 checksum: None,
                 device: None,
@@ -1487,7 +1487,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/hooks/applypatch-msg.sample",
+            path: "./.git/hooks/applypatch-msg.sample",
             params: Params {
                 checksum: None,
                 device: None,
@@ -1612,7 +1612,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/hooks/commit-msg.sample",
+            path: "./.git/hooks/commit-msg.sample",
             params: Params {
                 checksum: None,
                 device: None,
@@ -1737,7 +1737,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/hooks/post-update.sample",
+            path: "./.git/hooks/post-update.sample",
             params: Params {
                 checksum: None,
                 device: None,
@@ -1862,7 +1862,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/hooks/pre-applypatch.sample",
+            path: "./.git/hooks/pre-applypatch.sample",
             params: Params {
                 checksum: None,
                 device: None,
@@ -1987,7 +1987,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/hooks/pre-commit.sample",
+            path: "./.git/hooks/pre-commit.sample",
             params: Params {
                 checksum: None,
                 device: None,
@@ -2112,7 +2112,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/hooks/pre-push.sample",
+            path: "./.git/hooks/pre-push.sample",
             params: Params {
                 checksum: None,
                 device: None,
@@ -2237,7 +2237,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/hooks/pre-rebase.sample",
+            path: "./.git/hooks/pre-rebase.sample",
             params: Params {
                 checksum: None,
                 device: None,
@@ -2362,7 +2362,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/hooks/prepare-commit-msg.sample",
+            path: "./.git/hooks/prepare-commit-msg.sample",
             params: Params {
                 checksum: None,
                 device: None,
@@ -2487,7 +2487,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/hooks/update.sample",
+            path: "./.git/hooks/update.sample",
             params: Params {
                 checksum: None,
                 device: None,
@@ -2612,7 +2612,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/info",
+            path: "./.git/info",
             params: Params {
                 checksum: None,
                 device: None,
@@ -2670,7 +2670,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/info/exclude",
+            path: "./.git/info/exclude",
             params: Params {
                 checksum: None,
                 device: None,
@@ -2795,7 +2795,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/objects",
+            path: "./.git/objects",
             params: Params {
                 checksum: None,
                 device: None,
@@ -2853,7 +2853,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/objects/35",
+            path: "./.git/objects/35",
             params: Params {
                 checksum: None,
                 device: None,
@@ -2911,7 +2911,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/objects/35/51bcca10021bb56f13dd57a84b97cdf7fda0cf",
+            path: "./.git/objects/35/51bcca10021bb56f13dd57a84b97cdf7fda0cf",
             params: Params {
                 checksum: None,
                 device: None,
@@ -3036,7 +3036,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/objects/45",
+            path: "./.git/objects/45",
             params: Params {
                 checksum: None,
                 device: None,
@@ -3094,7 +3094,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/objects/45/15ff8d078d5291b75e99cbaa3e6c5e83ffaa2e",
+            path: "./.git/objects/45/15ff8d078d5291b75e99cbaa3e6c5e83ffaa2e",
             params: Params {
                 checksum: None,
                 device: None,
@@ -3219,7 +3219,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/objects/88",
+            path: "./.git/objects/88",
             params: Params {
                 checksum: None,
                 device: None,
@@ -3277,7 +3277,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/objects/88/2ba9732d762797f0f338de29bf79a8c0b7a679",
+            path: "./.git/objects/88/2ba9732d762797f0f338de29bf79a8c0b7a679",
             params: Params {
                 checksum: None,
                 device: None,
@@ -3402,7 +3402,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/objects/info",
+            path: "./.git/objects/info",
             params: Params {
                 checksum: None,
                 device: None,
@@ -3460,7 +3460,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/objects/pack",
+            path: "./.git/objects/pack",
             params: Params {
                 checksum: None,
                 device: None,
@@ -3518,7 +3518,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/refs",
+            path: "./.git/refs",
             params: Params {
                 checksum: None,
                 device: None,
@@ -3576,7 +3576,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/refs/heads",
+            path: "./.git/refs/heads",
             params: Params {
                 checksum: None,
                 device: None,
@@ -3634,7 +3634,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.git/refs/tags",
+            path: "./.git/refs/tags",
             params: Params {
                 checksum: None,
                 device: None,
@@ -3692,7 +3692,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/cmd",
+            path: "./cmd",
             params: Params {
                 checksum: None,
                 device: None,
@@ -3750,7 +3750,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/cmd/gomtree",
+            path: "./cmd/gomtree",
             params: Params {
                 checksum: None,
                 device: None,
@@ -3808,7 +3808,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/cmd/gomtree/.main.go.swp",
+            path: "./cmd/gomtree/.main.go.swp",
             params: Params {
                 checksum: None,
                 device: None,
@@ -3933,7 +3933,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/cmd/gomtree/main.go",
+            path: "./cmd/gomtree/main.go",
             params: Params {
                 checksum: None,
                 device: None,
@@ -4058,7 +4058,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/cmd/gomtree/main.go~",
+            path: "./cmd/gomtree/main.go~",
             params: Params {
                 checksum: None,
                 device: None,
@@ -4183,7 +4183,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/testdata",
+            path: "./testdata",
             params: Params {
                 checksum: None,
                 device: None,
@@ -4241,7 +4241,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/testdata/Downloads.mtree",
+            path: "./testdata/Downloads.mtree",
             params: Params {
                 checksum: None,
                 device: None,
@@ -4366,7 +4366,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/testdata/source.mtree",
+            path: "./testdata/source.mtree",
             params: Params {
                 checksum: None,
                 device: None,

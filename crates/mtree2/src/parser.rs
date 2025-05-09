@@ -2,9 +2,11 @@
 use crate::Device;
 use crate::util::FromDec;
 use crate::util::FromHex;
+use crate::util::decode_escapes_path;
 use crate::util::parse_time;
 use smallvec::SmallVec;
 use std::fmt;
+use std::path::PathBuf;
 use std::time::Duration;
 
 /// An mtree file is a sequence of lines, each a semantic unit.
@@ -17,18 +19,26 @@ pub enum MTreeLine<'a> {
     /// Special commands (starting with '/') alter the behavior of later
     /// entries.
     Special(SpecialKind, SmallVec<[Keyword<'a>; 5]>),
-    /// If the first word does not contain a '/', it is a file in the current
-    /// directory.
-    Relative(&'a [u8], SmallVec<[Keyword<'a>; 5]>),
     /// Change the current directory to the parent of the current directory.
     DotDot,
-    /// If the first word does contain a '/', it is a file relative to the
-    /// starting (not current) directory.
-    Full(&'a [u8], SmallVec<[Keyword<'a>; 5]>),
+    // For Relative and Full, the owning data structure is now shifted to one level deeper.
+    // Before, the owning data structure was created in parsing MtreeLine::Relative and
+    // MtreeLine::Full (even doubled code, and processing was done on full path).
+    // Now, MtreeLine::Full and MtreeLine::Relative does own the path via PathBuf.
+    /// If the path does not contain a '/', it is regarded as a relative entry
+    /// and appended to the current directory in scope.
+    Relative(PathBuf, SmallVec<[Keyword<'a>; 5]>),
+    /// If the first word does contain a '/', it is regarded as a Full Path
+    /// specification and no further processing is done.
+    Full(PathBuf, SmallVec<[Keyword<'a>; 5]>),
 }
 
 impl<'a> MTreeLine<'a> {
-    pub fn from_bytes(input: &'a [u8]) -> ParserResult<Self> {
+    pub fn from_bytes(input: &'a [u8]) -> Result<Self, LineParseError> {
+        // a simple check to detect a wrapped line
+        if let Some(wrap) = input.strip_suffix(b"\\") {
+            return Err(LineParseError::WrappedLine(wrap.to_owned()));
+        }
         let mut parts =
             crate::util::MemchrSplitter::new(b' ', input).filter(|word| !word.is_empty());
         // Blank
@@ -60,12 +70,25 @@ impl<'a> MTreeLine<'a> {
         // Special
         if first[0] == b'/' {
             let kind = SpecialKind::from_bytes(&first[1..])?;
-            Ok(MTreeLine::Special(kind, params))
-        // Full
-        } else if first.contains(&b'/') {
-            Ok(MTreeLine::Full(first, params))
+            return Ok(MTreeLine::Special(kind, params));
+        }
+        // need to copy to an owning data structure, because Memchr cannot deal with
+        // both mutable and immutable references. In the former implementation,
+        // we have coverted to owned data (OsString) anyhow.
+        let mut path_enc = first.to_vec();
+
+        let path_dec = decode_escapes_path(&mut path_enc).ok_or_else(|| {
+            LineParseError::Parser(ParserError::from(String::from(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            )))
+        })?;
+
+        // neeed to check for '/' in the decoded path, because netbsd6 flavor can
+        // contain lots of '/'.
+        if path_dec.display().to_string().contains("/") {
+            Ok(MTreeLine::Full(path_dec, params))
         } else {
-            Ok(MTreeLine::Relative(first, params))
+            Ok(MTreeLine::Relative(path_dec, params))
         }
     }
 }
@@ -576,3 +599,36 @@ impl fmt::Display for ParserError {
 }
 
 impl std::error::Error for ParserError {}
+
+#[derive(Debug)]
+#[non_exhaustive]
+pub(crate) enum LineParseError {
+    Parser(ParserError),
+    WrappedLine(Vec<u8>),
+    Io(std::io::Error),
+}
+impl fmt::Display for LineParseError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Io(e) => write!(f, "{e}"),
+            Self::Parser(e) => write!(f, "{e}"),
+            Self::WrappedLine(e) => {
+                let s = String::from_utf8_lossy(e);
+                write!(f, "Wrapped Line: {s}")
+            }
+        }
+    }
+}
+
+impl From<std::io::Error> for LineParseError {
+    fn from(e: std::io::Error) -> Self {
+        Self::Io(e)
+    }
+}
+
+impl From<ParserError> for LineParseError {
+    fn from(e: ParserError) -> Self {
+        Self::Parser(e)
+    }
+}
+impl std::error::Error for LineParseError {}
