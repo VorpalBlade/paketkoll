@@ -113,17 +113,27 @@ where
 
     /// The constructor function for an `MTree` instance.
     ///
-    /// This uses the provided path (specified as 'Some' variant)
-    /// or an empty Pathbuf (if set to None) as the base for relative paths.
+    /// This uses the provided path  as the base for relative paths.
     /// Relative specifications are allowed to exceed the starting level but are truncated to the root.
-    pub fn from_reader_with_cwd(reader: R, cwd: Option<PathBuf>) -> Self {
+    pub fn from_reader_with_cwd(reader: R, cwd: PathBuf) -> Self {
         Self {
             inner: BufReader::new(reader).split(b'\n'),
-            cwd: cwd.unwrap_or_default(),
+            cwd,
             default_params: Params::default(),
         }
     }
 
+    /// The constructor function for an `MTree` instance.
+    ///
+    /// This uses an empty PathBuf as the base for relative paths.
+    /// Relative specifications are allowed to exceed the starting level but are truncated to the root.
+    pub fn from_reader_with_empty_cwd(reader: R) -> Self {
+        Self {
+            inner: BufReader::new(reader).split(b'\n'),
+            cwd: PathBuf::new(),
+            default_params: Params::default(),
+        }
+    }
     /// This is a helper function to make error handling easier.
     fn next_entry(&mut self, line: io::Result<Vec<u8>>) -> Result<Option<Entry>, LineParseError> {
         let line = line?;
