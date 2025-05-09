@@ -40,8 +40,8 @@
 //! ```
 //! # Crate features
 //!
-//! By default, pathnames are parsed as ASCII, with characters outside of the 95 printable ASCII characters
-//! encoded as backshlash followed by three octal digits according to [mtree(5)](https://www.freebsd.org/cgi/man.cgi?mtree(5)).
+//! By default, pathnames are parsed as ASCII, with characters outside of the 95
+//! printable ASCII characters encoded as backshlash followed by three octal digits according to [mtree(5)](https://www.freebsd.org/cgi/man.cgi?mtree(5)).
 //!
 //! **- netbsd6**
 //!
@@ -102,7 +102,8 @@ where
     /// The constructor function for an `MTree` instance.
     ///
     /// This uses the current working directory as the base for relative paths.
-    /// Relative specifications are allowed to exceed the starting level but are truncated to the root.
+    /// Relative specifications are allowed to exceed the starting level but are
+    /// truncated to the root.
     pub fn from_reader(reader: R) -> Self {
         Self {
             inner: BufReader::new(reader).split(b'\n'),
@@ -114,7 +115,8 @@ where
     /// The constructor function for an `MTree` instance.
     ///
     /// This uses the provided path  as the base for relative paths.
-    /// Relative specifications are allowed to exceed the starting level but are truncated to the root.
+    /// Relative specifications are allowed to exceed the starting level but are
+    /// truncated to the root.
     pub fn from_reader_with_cwd(reader: R, cwd: PathBuf) -> Self {
         Self {
             inner: BufReader::new(reader).split(b'\n'),
@@ -126,7 +128,8 @@ where
     /// The constructor function for an `MTree` instance.
     ///
     /// This uses an empty `PathBuf` as the base for relative paths.
-    /// Relative specifications are allowed to exceed the starting level but are truncated to the root.
+    /// Relative specifications are allowed to exceed the starting level but are
+    /// truncated to the root.
     pub fn from_reader_with_empty_cwd(reader: R) -> Self {
         Self {
             inner: BufReader::new(reader).split(b'\n'),
@@ -134,6 +137,7 @@ where
             default_params: Params::default(),
         }
     }
+
     /// This is a helper function to make error handling easier.
     fn next_entry(&mut self, line: io::Result<Vec<u8>>) -> Result<Option<Entry>, LineParseError> {
         let line = line?;

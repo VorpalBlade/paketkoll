@@ -25,10 +25,11 @@ pub enum MTreeLine<'a> {
     // before, the owning data structure was created in parsing MtreeLine::Relative and
     // MtreeLine::Full (even doubled code, and processing was done on full path).
     // Now, MtreeLine::Full and MtreeLine::Relative does own the path via PathBuf.
-    //
-    /// If the path does not contain a '/', it is regarded as a relative entry and appended to the current directory in scope.
+    /// If the path does not contain a '/', it is regarded as a relative entry
+    /// and appended to the current directory in scope.
     Relative(PathBuf, SmallVec<[Keyword<'a>; 5]>),
-    /// If the first word does contain a '/', it is regarded as a Full Path specification and no further processing is done.
+    /// If the first word does contain a '/', it is regarded as a Full Path
+    /// specification and no further processing is done.
     Full(PathBuf, SmallVec<[Keyword<'a>; 5]>),
 }
 
@@ -71,8 +72,9 @@ impl<'a> MTreeLine<'a> {
             let kind = SpecialKind::from_bytes(&first[1..])?;
             return Ok(MTreeLine::Special(kind, params));
         }
-        // need to copy to an owning data structure, because Memchr cannot deal with both mutable and immutable references.
-        // In the former implementation, we have coverted to owned data (OsString) anyhow.
+        // need to copy to an owning data structure, because Memchr cannot deal with
+        // both mutable and immutable references. In the former implementation,
+        // we have coverted to owned data (OsString) anyhow.
         let mut path_enc = first.to_vec();
 
         let path_dec = decode_escapes_path(&mut path_enc).ok_or_else(|| {
