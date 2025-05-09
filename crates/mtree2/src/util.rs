@@ -461,7 +461,7 @@ mod tests {
         for test_case in test_cases {
             let mut input = test_case.as_bytes().to_owned();
             let result = decode_escapes(input.as_mut());
-            assert_eq!(None, result, "Expected None for input: {}", test_case);
+            assert_eq!(None, result, "Expected None for input: {test_case}");
         }
     }
 
@@ -486,7 +486,7 @@ mod tests {
         for test_case in test_cases {
             let mut input = test_case.as_bytes().to_owned();
             let result = decode_escapes(input.as_mut());
-            assert_eq!(None, result, "Expected None for input: {}", test_case);
+            assert_eq!(None, result, "Expected None for input: {test_case}");
         }
     }
 
@@ -546,7 +546,7 @@ mod tests {
         for test_case in test_cases {
             let mut input = test_case.as_bytes().to_owned();
             let result = decode_escapes(input.as_mut());
-            assert_eq!(None, result, "Expected None for input: {}", test_case);
+            assert_eq!(None, result, "Expected None for input: {test_case}");
         }
     }
 
