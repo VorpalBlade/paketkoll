@@ -125,7 +125,7 @@ where
 
     /// The constructor function for an `MTree` instance.
     ///
-    /// This uses an empty PathBuf as the base for relative paths.
+    /// This uses an empty `PathBuf` as the base for relative paths.
     /// Relative specifications are allowed to exceed the starting level but are truncated to the root.
     pub fn from_reader_with_empty_cwd(reader: R) -> Self {
         Self {
