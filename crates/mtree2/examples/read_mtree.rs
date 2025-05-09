@@ -7,7 +7,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<_> = env::args().collect();
     let path = match args.get(1) {
         Some(p) => p.into(),
-        None => env::current_dir()?.join("examples/gedit.mtree"),
+        None => env::current_dir()?.join("examples/relative_paths_wrapped_exceeding_root.mtree"),
     };
     let mtree = MTree::from_reader(File::open(path)?);
     for entry in mtree {

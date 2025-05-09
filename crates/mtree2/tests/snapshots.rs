@@ -8,18 +8,29 @@ macro_rules! test_snapshot {
         #[test]
         fn $name() {
             let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join($path);
+            let mtree = MTree::from_reader(File::open(path).unwrap());
+            let entries: Vec<_> = mtree.collect();
+            assert_debug_snapshot!(entries);
+        }
+    };
+}
+macro_rules! test_snapshot_with_cwd {
+    ($name:ident, $path:expr) => {
+        #[test]
+        fn $name() {
+            let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join($path);
             let mtree = MTree::from_reader_with_cwd(File::open(path).unwrap(), None);
             let entries: Vec<_> = mtree.collect();
             assert_debug_snapshot!(entries);
         }
     };
 }
-
 test_snapshot!(test_gedit, "examples/gedit.mtree");
 test_snapshot!(test_xterm, "examples/xterm.mtree");
-test_snapshot!(test_relative_paths, "examples/relative_paths.mtree");
-test_snapshot!(test_wrapped_lines, "examples/relative_paths_wrapped.mtree");
-test_snapshot!(test_freebsd9_flavor, "examples/test_freebsd9.mtree");
-test_snapshot!(test_mtree_flavor, "examples/test_mtree.mtree");
+test_snapshot_with_cwd!(test_relative_paths, "examples/relative_paths.mtree");
+test_snapshot_with_cwd!(test_wrapped_lines, "examples/relative_paths_wrapped.mtree");
+test_snapshot_with_cwd!(test_wrapped_lines_exceeding_root, "examples/relative_paths_wrapped_exceeding_root.mtree");
+test_snapshot_with_cwd!(test_freebsd9_flavor, "examples/test_freebsd9.mtree");
+test_snapshot_with_cwd!(test_mtree_flavor, "examples/test_mtree.mtree");
 #[cfg(feature = "netbsd6")]
-test_snapshot!(test_netbsd6_flavor, "examples/test_netbsd6.mtree");
+test_snapshot_with_cwd!(test_netbsd6_flavor, "examples/test_netbsd6.mtree");
