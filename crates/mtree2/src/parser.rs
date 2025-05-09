@@ -85,7 +85,7 @@ impl<'a> MTreeLine<'a> {
 
         // neeed to check for '/' in the decoded path, because netbsd6 flavor can
         // contain lots of '/'.
-        if format!("{:?}", &path_dec).contains("/") {
+        if path_dec.display().to_string().contains("/") {
             Ok(MTreeLine::Full(path_dec, params))
         } else {
             Ok(MTreeLine::Relative(path_dec, params))
