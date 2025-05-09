@@ -79,7 +79,7 @@ impl<'a> MTreeLine<'a> {
 
         let path_dec = decode_escapes_path(&mut path_enc).ok_or_else(|| {
             LineParseError::Parser(ParserError::from(String::from(
-                "Failed to decode escapes in path",
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
             )))
         })?;
 
