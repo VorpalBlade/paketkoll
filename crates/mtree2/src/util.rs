@@ -197,7 +197,7 @@ pub fn decode_escapes(buf: &mut [u8]) -> Option<&mut [u8]> {
                     } // newline
                     #[cfg(feature = "netbsd6")]
                     &b'r' => {
-                        buf[write_idx] = 0x0F;
+                        buf[write_idx] = 0x0D;
                         read_idx += 2;
                     } // carriage return
                     #[cfg(feature = "netbsd6")]
