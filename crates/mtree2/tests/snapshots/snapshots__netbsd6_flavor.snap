@@ -5,7 +5,7 @@ expression: entries
 [
     Ok(
         Entry {
-            path: "/.",
+            path: ".",
             params: Params {
                 checksum: None,
                 device: None,
@@ -62,7 +62,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./íþȴɛɜɝɟūǶúÐīŻƩþŽŷǾǻû",
+            path: "./íþȴɛɜɝɟūǶúÐīŻƩþŽŷǾǻû",
             params: Params {
                 checksum: None,
                 device: None,
@@ -121,7 +121,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./ïɢȽƻſĿƿŻǻǯǅƸóŻÇǿǛææǾ",
+            path: "./ïɢȽƻſĿƿŻǻǯǅƸóŻÇǿǛææǾ",
             params: Params {
                 checksum: None,
                 device: None,
@@ -180,7 +180,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./óƿÿŶſžɷŶßǿǟƾĻǵǴǻƽ÷ůŽ",
+            path: "./óƿÿŶſžɷŶßǿǟƾĻǵǴǻƽ÷ůŽ",
             params: Params {
                 checksum: None,
                 device: None,
@@ -239,7 +239,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./öŞǏǔƣŖŻȷŞǻůɻìɆÿĮǵļúź",
+            path: "./öŞǏǔƣŖŻȷŞǻůɻìɆÿĮǵļúź",
             params: Params {
                 checksum: None,
                 device: None,
@@ -298,7 +298,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./þſýɝüïžſÿ»ǿŷȳǻÿÿǳĿůý",
+            path: "./þſýɝüïžſÿ»ǿŷȳǻÿÿǳĿůý",
             params: Params {
                 checksum: None,
                 device: None,
@@ -357,7 +357,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./ÿȽÿǟżóùūǯïǾŚůɳȿÖŹ½ǫŇ",
+            path: "./ÿȽÿǟżóùūǯïǾŚůɳȿÖŹ½ǫŇ",
             params: Params {
                 checksum: None,
                 device: None,
@@ -416,7 +416,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./ĿǡìßɿǯǽïüſÿÚǾşÿãǾûķ·",
+            path: "./ĿǡìßɿǯǽïüſÿÚǾşÿãǾûķ·",
             params: Params {
                 checksum: None,
                 device: None,
@@ -475,7 +475,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./ŪÇýįÿŽȿŘǳǾūǱſɣǣ÷żŷůƶ",
+            path: "./ŪÇýįÿŽȿŘǳǾūǱſɣǣ÷żŷůƶ",
             params: Params {
                 checksum: None,
                 device: None,
@@ -534,7 +534,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./ƿɼâî÷ſŴýƾɽǜɞŝɷſǽÿƷĻŦ",
+            path: "./ƿɼâî÷ſŴýƾɽǜɞŝɷſǽÿƷĻŦ",
             params: Params {
                 checksum: None,
                 device: None,
@@ -593,7 +593,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./ǧžÿşĻżŹſſǗǷǮħÞǻîȯōɓï",
+            path: "./ǧžÿşĻżŹſſǗǷǮħÞǻîȯōɓï",
             params: Params {
                 checksum: None,
                 device: None,
@@ -652,7 +652,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./ǭÿŷŜŽȹɥƭþȿǪÿŷȾǮŽǽŜǿ÷",
+            path: "./ǭÿŷŜŽȹɥƭþȿǪÿŷȾǮŽǽŜǿ÷",
             params: Params {
                 checksum: None,
                 device: None,
@@ -711,7 +711,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./ǯŖɳǥǽŶķįǿúǺſîûɯůĪÿſÿ",
+            path: "./ǯŖɳǥǽŶķįǿúǺſîûɯůĪÿſÿ",
             params: Params {
                 checksum: None,
                 device: None,
@@ -770,7 +770,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./ǶĻÿŗɫŭǿǫɾįĿȿǷɏņɾƷſźſ",
+            path: "./ǶĻÿŗɫŭǿǫɾįĿȿǷɏņɾƷſźſ",
             params: Params {
                 checksum: None,
                 device: None,
@@ -829,7 +829,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./Ƿǿįýǿŝɷë÷Îÿɭɽŧį¢ÿǷéǿ",
+            path: "./Ƿǿįýǿŝɷë÷Îÿɭɽŧį¢ÿǷéǿ",
             params: Params {
                 checksum: None,
                 device: None,
@@ -888,7 +888,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./ǻȼÏǟɷħǮȿǦŪǻžſ÷ɻǞƿŻȶǟ",
+            path: "./ǻȼÏǟɷħǮȿǦŪǻžſ÷ɻǞƿŻȶǟ",
             params: Params {
                 checksum: None,
                 device: None,
@@ -947,7 +947,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./ǿÿǍǿĿǾßǿüƿÿǛÿǶǮǿŽǻŏç",
+            path: "./ǿÿǍǿĿǾßǿüƿÿǛÿǶǮǿŽǻŏç",
             params: Params {
                 checksum: None,
                 device: None,
@@ -1006,7 +1006,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./ǿɳŻýǯĪżşūǳǬ¾ŹžëɫǞźßŽ",
+            path: "./ǿɳŻýǯĪżşūǳǬ¾ŹžëɫǞźßŽ",
             params: Params {
                 checksum: None,
                 device: None,
@@ -1065,7 +1065,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./ȾǻǼɷǆǧçɿ¿ɷ¿ſǻǺŏǟǠŊǛǶ",
+            path: "./ȾǻǼɷǆǧçɿ¿ɷ¿ſǻǺŏǟǠŊǛǶ",
             params: Params {
                 checksum: None,
                 device: None,
@@ -1124,7 +1124,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./ɊǖľŽɿçĽÿõŻſƿǾûũɫɦȿƮǿ",
+            path: "./ɊǖľŽɿçĽÿõŻſƿǾûũɫɦȿƮǿ",
             params: Params {
                 checksum: None,
                 device: None,
@@ -1183,7 +1183,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./ɔ½ǼûŭťǹǶæžǺǞǯǷȷǳɓŧǞž",
+            path: "./ɔ½ǼûŭťǹǶæžǺǞǯǷȷǳɓŧǞž",
             params: Params {
                 checksum: None,
                 device: None,

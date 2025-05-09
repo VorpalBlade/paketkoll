@@ -5,7 +5,7 @@ expression: entries
 [
     Ok(
         Entry {
-            path: "/.",
+            path: ".",
             params: Params {
                 checksum: None,
                 device: None,
@@ -63,7 +63,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.mtree.go.swp",
+            path: "./.mtree.go.swp",
             params: Params {
                 checksum: None,
                 device: None,
@@ -188,7 +188,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./.mtree_test.go.swp",
+            path: "./.mtree_test.go.swp",
             params: Params {
                 checksum: None,
                 device: None,
@@ -313,7 +313,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./mtree.go",
+            path: "./mtree.go",
             params: Params {
                 checksum: None,
                 device: None,
@@ -438,7 +438,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./mtree.go~",
+            path: "./mtree.go~",
             params: Params {
                 checksum: None,
                 device: None,
@@ -563,7 +563,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./mtree_test.go",
+            path: "./mtree_test.go",
             params: Params {
                 checksum: None,
                 device: None,
@@ -688,7 +688,7 @@ expression: entries
     ),
     Ok(
         Entry {
-            path: "/./mtree_test.go~",
+            path: "./mtree_test.go~",
             params: Params {
                 checksum: None,
                 device: None,

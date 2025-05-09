@@ -155,7 +155,7 @@ pub fn decode_escapes_path(buf: &mut [u8]) -> Option<PathBuf> {
     // We cannot use `OsStr::from_encoded_bytes_unchecked` safely here, since
     // it is possible the escape was not valid UTF-8, and we don't convert any
     // such string into valid WTF-8 (I wouldn't even know where to start).
-     {
+    {
         Some(PathBuf::from(String::from_utf8_lossy(decoded).into_owned()))
     }
 }
@@ -284,10 +284,7 @@ fn get_control_char_from_caret(i: u8) -> Option<u8> {
     match i {
         b'@'..=b'~' => Some(i - b'@'), // control char \000 to \037
         b'?' => Some(127),
-        _ => {
-            eprintln!("got: {i}, returned None");
-            return None;
-        }
+        _ => None,
     }
 }
 #[cfg(feature = "netbsd6")]

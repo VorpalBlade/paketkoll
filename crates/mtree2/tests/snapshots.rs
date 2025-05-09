@@ -8,7 +8,7 @@ macro_rules! test_snapshot {
         #[test]
         fn $name() {
             let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join($path);
-            let mtree = MTree::from_reader_with_cwd(File::open(path).unwrap(), PathBuf::from("/"));
+            let mtree = MTree::from_reader_with_cwd(File::open(path).unwrap(), None);
             let entries: Vec<_> = mtree.collect();
             assert_debug_snapshot!(entries);
         }

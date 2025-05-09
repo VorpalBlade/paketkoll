@@ -68,13 +68,23 @@ impl<'a> MTreeLine<'a> {
             let kind = SpecialKind::from_bytes(&first[1..])?;
             return Ok(MTreeLine::Special(kind, params));
         }
-        
+
         let mut path_enc = first.to_vec();
         let path_dec = decode_escapes_path(&mut path_enc).ok_or_else(|| {
-            LineParseError::Parser(ParserError::from(String::from("Failed to decode escapes")))
+            LineParseError::Parser(ParserError::from(String::from(
+                "Failed to decode escapes in path",
+            )))
         })?;
 
-        if path_dec.to_str().unwrap().contains("/") {
+        if path_dec
+            .to_str()
+            .ok_or_else(|| {
+                LineParseError::Parser(ParserError::from(String::from(
+                    "Failed to decode escapes in path",
+                )))
+            })?
+            .contains("/")
+        {
             Ok(MTreeLine::Full(path_dec, params))
         } else {
             Ok(MTreeLine::Relative(path_dec, params))
