@@ -545,7 +545,7 @@ mod tests {
             "test\\M^>", // Malformed meta-control sequence
             "test\\M^ ", // Malformed meta-control sequence
             "test\\M-`", // Malformed meta-printable sequence
-            "test\\^>", // Malformed caretsequence
+            "test\\^>",  // Malformed caret sequence
         ];
 
         for test_case in test_cases {
