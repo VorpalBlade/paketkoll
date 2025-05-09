@@ -35,5 +35,8 @@ test_snapshot_with_empty_cwd!(
 );
 test_snapshot_with_empty_cwd!(test_freebsd9_flavor, "examples/test_freebsd9.mtree");
 test_snapshot_with_empty_cwd!(test_mtree_flavor, "examples/test_mtree.mtree");
+test_snapshot_with_empty_cwd!(test_not_unicode, "examples/not_unicode.mtree");
 #[cfg(feature = "netbsd6")]
 test_snapshot_with_empty_cwd!(test_netbsd6_flavor, "examples/test_netbsd6.mtree");
+#[cfg(feature = "netbsd6")]
+test_snapshot_with_empty_cwd!(test_not_unicode_netbsd6_flavor, "examples/not_unicode.mtree");

@@ -82,17 +82,10 @@ impl<'a> MTreeLine<'a> {
                 "Failed to decode escapes in path",
             )))
         })?;
+
         // neeed to check for '/' in the decoded path, because netbsd6 flavor can
         // contain lots of '/'.
-        if path_dec
-            .to_str()
-            .ok_or_else(|| {
-                LineParseError::Parser(ParserError::from(String::from(
-                    "Failed to decode escapes in path",
-                )))
-            })?
-            .contains("/")
-        {
+        if format!("{:?}", &path_dec).contains("/") {
             Ok(MTreeLine::Full(path_dec, params))
         } else {
             Ok(MTreeLine::Relative(path_dec, params))
