@@ -33,7 +33,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           # Shallow checkouts don't work for merging, so pull in enough history to likely work
           fetch-depth: 75
@@ -46,7 +46,7 @@ jobs:
           git checkout main
           git pull origin main
           git merge --ff-only dev
-      - uses: ad-m/github-push-action@v0.8.0
+      - uses: ad-m/github-push-action@d91a481090679876dfc4178fef17f286781251df # v0.8.0
         name: Push to main
         with:
           github_token: ${{ secrets.GH_PAT }}
