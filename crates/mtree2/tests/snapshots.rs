@@ -22,3 +22,7 @@ test_snapshot!(
     invalid_double_filename,
     "tests/data/invalid_double_filename.mtree"
 );
+test_snapshot!(
+    test_wrapped_lines,
+    "tests/data/relative_paths_wrapped.mtree"
+);
