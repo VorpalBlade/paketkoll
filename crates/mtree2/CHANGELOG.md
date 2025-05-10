@@ -8,6 +8,12 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.6.13] - 2025-05-10
+
+### 🚀 Features
+
+- Turn parse errors of invalid fields into Err
+
 ## [0.6.12] - 2025-05-05
 
 ### ⚙️ Other stuff
