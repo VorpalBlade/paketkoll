@@ -28,7 +28,11 @@ pub enum MTreeLine<'a> {
 }
 
 impl<'a> MTreeLine<'a> {
-    pub fn from_bytes(input: &'a [u8]) -> ParserResult<Self> {
+    pub fn from_bytes(input: &'a [u8]) -> Result<Self, LineParseError> {
+        // a simple check to detect a wrapped line
+        if let Some(wrap) = input.strip_suffix(b"\\") {
+            return Err(LineParseError::WrappedLine(wrap.to_owned()));
+        }
         let mut parts =
             crate::util::MemchrSplitter::new(b' ', input).filter(|word| !word.is_empty());
         // Blank
@@ -50,10 +54,10 @@ impl<'a> MTreeLine<'a> {
             if let Ok(keyword) = keyword {
                 params.push(keyword);
             } else {
-                return Err(ParserError(format!(
+                return Err(LineParseError::Parser(ParserError(format!(
                     r#"Could not parse "{}" as a valid mtree field"#,
                     String::from_utf8_lossy(part)
-                )));
+                ))));
             }
         }
 
@@ -85,11 +89,10 @@ impl SpecialKind {
             b"set" => Self::Set,
             b"unset" => Self::Unset,
             _ => {
-                return Err(format!(
+                return Err(LineParseError::Parser(ParserError(format!(
                     r#""{}" is not a special command"#,
                     String::from_utf8_lossy(input)
-                )
-                .into());
+                ))));
             }
         })
     }
@@ -340,7 +343,7 @@ impl Format {
 }
 
 #[test]
-fn test_format_from_butes() {
+fn test_format_from_bytes() {
     for (input, res) in vec![
         (&b"native"[..], Format::Native),
         (&b"386bsd"[..], Format::Bsd386),
@@ -359,7 +362,7 @@ fn test_format_from_butes() {
         (&b"svr4"[..], Format::Svr4),
         (&b"ultrix"[..], Format::Ultrix),
     ] {
-        assert_eq!(Format::from_bytes(input), Ok(res));
+        assert_eq!(Format::from_bytes(input).unwrap(), res);
     }
 }
 
@@ -435,7 +438,7 @@ fn test_type_from_bytes() {
         (&b"link"[..], FileType::SymbolicLink),
         (&b"socket"[..], FileType::Socket),
     ] {
-        assert_eq!(FileType::from_bytes(input), Ok(res));
+        assert_eq!(FileType::from_bytes(input).unwrap(), res);
     }
     assert!(FileType::from_bytes(&b"other"[..]).is_err());
 }
@@ -492,11 +495,14 @@ impl FileMode {
         }
         Ok(Self {
             mode: u32::from_str_radix(
-                std::str::from_utf8(input)
-                    .map_err(|err| ParserError(format!("failed to parse mode value: {err}")))?,
+                std::str::from_utf8(input).map_err(|err| {
+                    LineParseError::from(format!("failed to parse mode value: {err}"))
+                })?,
                 8,
             )
-            .map_err(|err| ParserError(format!("failed to parse mode as integer: {err}")))?,
+            .map_err(|err| {
+                LineParseError::from(format!("failed to parse mode as integer: {err}"))
+            })?,
         })
     }
 
@@ -555,7 +561,7 @@ impl fmt::Octal for FileMode {
     }
 }
 
-pub(crate) type ParserResult<T> = Result<T, ParserError>;
+pub(crate) type ParserResult<T> = Result<T, LineParseError>;
 
 /// An error occurred during parsing a record.
 ///
@@ -576,3 +582,41 @@ impl fmt::Display for ParserError {
 }
 
 impl std::error::Error for ParserError {}
+
+#[derive(Debug)]
+#[non_exhaustive]
+pub(crate) enum LineParseError {
+    Parser(ParserError),
+    WrappedLine(Vec<u8>),
+    Io(std::io::Error),
+}
+impl fmt::Display for LineParseError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Io(e) => write!(f, "{e}"),
+            Self::Parser(e) => write!(f, "{e}"),
+            Self::WrappedLine(e) => {
+                let s = String::from_utf8_lossy(e);
+                write!(f, "Wrapped Line: {s}")
+            }
+        }
+    }
+}
+
+impl From<std::io::Error> for LineParseError {
+    fn from(e: std::io::Error) -> Self {
+        Self::Io(e)
+    }
+}
+
+impl From<ParserError> for LineParseError {
+    fn from(e: ParserError) -> Self {
+        Self::Parser(e)
+    }
+}
+impl From<String> for LineParseError {
+    fn from(s: String) -> Self {
+        Self::Parser(ParserError(s))
+    }
+}
+impl std::error::Error for LineParseError {}
