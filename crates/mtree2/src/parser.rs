@@ -89,10 +89,10 @@ impl SpecialKind {
             b"set" => Self::Set,
             b"unset" => Self::Unset,
             _ => {
-                return Err(LineParseError::Parser(ParserError(format!(
+                return Err(ParserError(format!(
                     r#""{}" is not a special command"#,
                     String::from_utf8_lossy(input)
-                ))));
+                )));
             }
         })
     }
@@ -496,12 +496,12 @@ impl FileMode {
         Ok(Self {
             mode: u32::from_str_radix(
                 std::str::from_utf8(input).map_err(|err| {
-                    LineParseError::from(format!("failed to parse mode value: {err}"))
+                    ParserError(format!("failed to parse mode value: {err}"))
                 })?,
                 8,
             )
             .map_err(|err| {
-                LineParseError::from(format!("failed to parse mode as integer: {err}"))
+                ParserError(format!("failed to parse mode as integer: {err}"))
             })?,
         })
     }
@@ -561,7 +561,7 @@ impl fmt::Octal for FileMode {
     }
 }
 
-pub(crate) type ParserResult<T> = Result<T, LineParseError>;
+pub(crate) type ParserResult<T> = Result<T, ParserError>;
 
 /// An error occurred during parsing a record.
 ///
