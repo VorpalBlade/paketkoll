@@ -682,9 +682,3 @@ impl From<io::Error> for Error {
         Self::Io(from)
     }
 }
-
-/*impl From<LineParseError> for Error {
-    fn from(from: LineParseError) -> Self {
-        Self::Parser(from)
-    }
-}*/
