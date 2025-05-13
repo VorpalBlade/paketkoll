@@ -4,7 +4,7 @@
 //! location is record, along with optional extra values like checksums, size,
 //! permissions etc.
 //!
-//! For details on the spec see [mtree(5)].
+//! For details on the spec see [mtree(5)](https://www.freebsd.org/cgi/man.cgi?mtree(5)).
 //!
 //! # Examples
 //!
@@ -38,8 +38,15 @@
 //!     // supplied by mtree, but this example doesn't have access to a filesystem.
 //! }
 //! ```
+//! # Crate features
 //!
-//! [mtree(5)]: https://www.freebsd.org/cgi/man.cgi?mtree(5)
+//! By default, pathnames are parsed as ASCII, with characters outside of the 95
+//! printable ASCII characters encoded as backshlash followed by three octal digits according to [mtree(5)](https://www.freebsd.org/cgi/man.cgi?mtree(5)).
+//!
+//! **- netbsd6**
+//!
+//! If the feature netbsd6 is enabled, a parsing of [strsvis VIS_CSTYLE](https://man.netbsd.org/strsvis.3)
+//! coded characters is added in addition as specified in [mtree(8)](https://man.netbsd.org/mtree.8) for the netbsd6 flavor.
 
 pub use parser::FileMode;
 pub use parser::FileType;
@@ -95,6 +102,8 @@ where
     /// The constructor function for an `MTree` instance.
     ///
     /// This uses the current working directory as the base for relative paths.
+    /// Relative specifications are allowed to exceed the starting level but are
+    /// truncated to the root.
     pub fn from_reader(reader: R) -> Self {
         Self {
             inner: BufReader::new(reader).split(b'\n'),
@@ -105,11 +114,26 @@ where
 
     /// The constructor function for an `MTree` instance.
     ///
-    /// This uses the provided path as the base for relative paths.
+    /// This uses the provided path  as the base for relative paths.
+    /// Relative specifications are allowed to exceed the starting level but are
+    /// truncated to the root.
     pub fn from_reader_with_cwd(reader: R, cwd: PathBuf) -> Self {
         Self {
             inner: BufReader::new(reader).split(b'\n'),
             cwd,
+            default_params: Params::default(),
+        }
+    }
+
+    /// The constructor function for an `MTree` instance.
+    ///
+    /// This uses an empty `PathBuf` as the base for relative paths.
+    /// Relative specifications are allowed to exceed the starting level but are
+    /// truncated to the root.
+    pub fn from_reader_with_empty_cwd(reader: R) -> Self {
+        Self {
+            inner: BufReader::new(reader).split(b'\n'),
+            cwd: PathBuf::new(),
             default_params: Params::default(),
         }
     }
@@ -129,18 +153,9 @@ where
             MTreeLine::Relative(path, keywords) => {
                 let mut params = self.default_params.clone();
                 params.set_list(keywords.into_iter());
-                assert!(
-                    !self.cwd.as_os_str().is_empty(),
-                    "relative without a current working dir"
-                );
-                let filepath = decode_escapes_path(self.cwd.join(OsStr::from_bytes(path)))
-                    .ok_or_else(|| {
-                        LineParseError::Parser(ParserError::from(String::from(
-                            "Failed to decode escapes",
-                        )))
-                    })?;
+                let filepath = self.cwd.join(&path);
                 if params.file_type == Some(FileType::Directory) {
-                    self.cwd.push(filepath.as_path());
+                    self.cwd.push(&path);
                 }
 
                 Some(Entry {
@@ -149,21 +164,16 @@ where
                 })
             }
             MTreeLine::DotDot => {
-                self.cwd.pop();
+                // Only pop if we're not at root or first level
+                if self.cwd.parent().and_then(|p| p.parent()).is_some() {
+                    self.cwd.pop();
+                }
                 None
             }
             MTreeLine::Full(path, keywords) => {
                 let mut params = self.default_params.clone();
                 params.set_list(keywords.into_iter());
-                Some(Entry {
-                    path: decode_escapes_path(Path::new(OsStr::from_bytes(path)).to_owned())
-                        .ok_or_else(|| {
-                            LineParseError::Parser(ParserError::from(
-                                "Failed to decode escapes".to_string(),
-                            ))
-                        })?,
-                    params,
-                })
+                Some(Entry { path, params })
             }
         })
     }
@@ -176,34 +186,43 @@ where
     type Item = Result<Entry, Error>;
 
     fn next(&mut self) -> Option<Result<Entry, Error>> {
-        let mut acc: Option<Vec<u8>> = None;
-        while let Some(line) = self.inner.next() {
-            let line = match line {
+        // Fast path - no accumulated line
+        loop {
+            let line = match self.inner.next()? {
                 Ok(line) => line,
                 Err(e) => return Some(Err(Error::Io(e))),
             };
 
-            let input = if let Some(mut acc) = acc.take() {
-                acc.extend_from_slice(&line);
-                Ok(acc)
-            } else {
-                Ok(line)
-            };
-
-            match self.next_entry(input) {
+            // Process single line directly without allocation
+            match self.next_entry(Ok(line)) {
                 Ok(Some(entry)) => return Some(Ok(entry)),
-                Ok(None) => (),
-                Err(e) => match e {
-                    LineParseError::WrappedLine(w) => {
-                        acc = Some(w);
-                        continue;
+                Ok(None) => continue,
+                Err(LineParseError::WrappedLine(mut acc)) => {
+                    // Handle wrapped lines by accumulating
+                    loop {
+                        let next_line = match self.inner.next() {
+                            Some(Ok(line)) => line,
+                            Some(Err(e)) => return Some(Err(Error::Io(e))),
+                            None => break,
+                        };
+                        acc.extend_from_slice(&next_line);
+
+                        match self.next_entry(Ok(acc)) {
+                            Ok(Some(entry)) => return Some(Ok(entry)),
+                            Ok(None) => break,
+                            Err(LineParseError::WrappedLine(w)) => {
+                                acc = w;
+                                continue;
+                            }
+                            Err(LineParseError::Io(e)) => return Some(Err(Error::Io(e))),
+                            Err(LineParseError::Parser(e)) => return Some(Err(Error::Parser(e))),
+                        }
                     }
-                    LineParseError::Io(e) => return Some(Err(Error::Io(e))),
-                    LineParseError::Parser(e) => return Some(Err(Error::Parser(e))),
-                },
+                }
+                Err(LineParseError::Io(e)) => return Some(Err(Error::Io(e))),
+                Err(LineParseError::Parser(e)) => return Some(Err(Error::Parser(e))),
             }
         }
-        None
     }
 }
 
@@ -472,7 +491,7 @@ impl Params {
             Keyword::Ignore => self.ignore = true,
             Keyword::Inode(inode) => self.inode = Some(inode),
             Keyword::Link(link) => {
-                self.link = decode_escapes_path(Path::new(OsStr::from_bytes(link)).to_owned());
+                self.link = decode_escapes_path(&mut link.to_vec());
             }
             Keyword::Md5(md5) => self.md5 = Some(md5),
             Keyword::Mode(mode) => self.mode = Some(mode),
@@ -682,9 +701,3 @@ impl From<io::Error> for Error {
         Self::Io(from)
     }
 }
-
-/*impl From<LineParseError> for Error {
-    fn from(from: LineParseError) -> Self {
-        Self::Parser(from)
-    }
-}*/

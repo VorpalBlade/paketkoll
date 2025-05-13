@@ -2,9 +2,11 @@
 use crate::Device;
 use crate::util::FromDec;
 use crate::util::FromHex;
+use crate::util::decode_escapes_path;
 use crate::util::parse_time;
 use smallvec::SmallVec;
 use std::fmt;
+use std::path::PathBuf;
 use std::time::Duration;
 
 /// An mtree file is a sequence of lines, each a semantic unit.
@@ -17,38 +19,54 @@ pub enum MTreeLine<'a> {
     /// Special commands (starting with '/') alter the behavior of later
     /// entries.
     Special(SpecialKind, SmallVec<[Keyword<'a>; 5]>),
-    /// If the first word does not contain a '/', it is a file in the current
-    /// directory.
-    Relative(&'a [u8], SmallVec<[Keyword<'a>; 5]>),
     /// Change the current directory to the parent of the current directory.
     DotDot,
-    /// If the first word does contain a '/', it is a file relative to the
-    /// starting (not current) directory.
-    Full(&'a [u8], SmallVec<[Keyword<'a>; 5]>),
+    // For Relative and Full, the owning data structure is now shifted to one level deeper.
+    // Before, the owning data structure was created in parsing MtreeLine::Relative and
+    // MtreeLine::Full (even doubled code, and processing was done on full path).
+    // Now, MtreeLine::Full and MtreeLine::Relative does own the path via PathBuf.
+    /// If the path does not contain a '/', it is regarded as a relative entry
+    /// and appended to the current directory in scope.
+    Relative(PathBuf, SmallVec<[Keyword<'a>; 5]>),
+    /// If the first word does contain a '/', it is regarded as a Full Path
+    /// specification and no further processing is done.
+    Full(PathBuf, SmallVec<[Keyword<'a>; 5]>),
 }
 
 impl<'a> MTreeLine<'a> {
     pub fn from_bytes(input: &'a [u8]) -> Result<Self, LineParseError> {
-        // a simple check to detect a wrapped line
-        if let Some(wrap) = input.strip_suffix(b"\\") {
-            return Err(LineParseError::WrappedLine(wrap.to_owned()));
+        // Fast path - empty line
+        if input.is_empty() {
+            return Ok(MTreeLine::Blank);
         }
+
+        // Fast path - check for wrapped line
+        if input[input.len() - 1] == b'\\' {
+            return Err(LineParseError::WrappedLine(
+                input[..input.len() - 1].to_owned(),
+            ));
+        }
+
+        // Fast path - comment
+        if input[0] == b'#' {
+            return Ok(MTreeLine::Comment);
+        }
+
+        // Split into parts, filtering empty words
         let mut parts =
             crate::util::MemchrSplitter::new(b' ', input).filter(|word| !word.is_empty());
-        // Blank
+
         let Some(first) = parts.next() else {
             return Ok(MTreeLine::Blank);
         };
-        // Comment
-        if first[0] == b'#' {
-            return Ok(MTreeLine::Comment);
-        }
-        // DotDot
+
+        // Fast path - dotdot
         if first == b".." {
             return Ok(MTreeLine::DotDot);
         }
-        // the rest need params
-        let mut params = SmallVec::new();
+
+        // Pre-allocate params with expected size
+        let mut params = SmallVec::with_capacity(5);
         for part in parts {
             let keyword = Keyword::from_bytes(part);
             if let Ok(keyword) = keyword {
@@ -61,19 +79,31 @@ impl<'a> MTreeLine<'a> {
             }
         }
 
-        // Special
+        // Fast path - special command
         if first[0] == b'/' {
             let kind = SpecialKind::from_bytes(&first[1..])?;
-            Ok(MTreeLine::Special(kind, params))
-        // Full
-        } else if first.contains(&b'/') {
-            Ok(MTreeLine::Full(first, params))
+            return Ok(MTreeLine::Special(kind, params));
+        }
+
+        // Handle path - allocate once
+        let mut path_enc = Vec::with_capacity(first.len());
+        path_enc.extend_from_slice(first);
+
+        let path_dec = decode_escapes_path(&mut path_enc).ok_or_else(|| {
+            LineParseError::Parser(ParserError(
+                "Failed to decode escapes in path - you might need to enable the netbsd6 feature"
+                    .to_owned(),
+            ))
+        })?;
+
+        // Check for full vs relative path
+        if path_dec.display().to_string().contains('/') {
+            Ok(MTreeLine::Full(path_dec, params))
         } else {
-            Ok(MTreeLine::Relative(first, params))
+            Ok(MTreeLine::Relative(path_dec, params))
         }
     }
 }
-
 /// A command that alters the behavior of later commands.
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum SpecialKind {
@@ -89,10 +119,11 @@ impl SpecialKind {
             b"set" => Self::Set,
             b"unset" => Self::Unset,
             _ => {
-                return Err(LineParseError::Parser(ParserError(format!(
+                return Err(format!(
                     r#""{}" is not a special command"#,
                     String::from_utf8_lossy(input)
-                ))));
+                )
+                .into());
             }
         })
     }
@@ -362,7 +393,7 @@ fn test_format_from_bytes() {
         (&b"svr4"[..], Format::Svr4),
         (&b"ultrix"[..], Format::Ultrix),
     ] {
-        assert_eq!(Format::from_bytes(input).unwrap(), res);
+        assert_eq!(Format::from_bytes(input), Ok(res));
     }
 }
 
@@ -438,7 +469,7 @@ fn test_type_from_bytes() {
         (&b"link"[..], FileType::SymbolicLink),
         (&b"socket"[..], FileType::Socket),
     ] {
-        assert_eq!(FileType::from_bytes(input).unwrap(), res);
+        assert_eq!(FileType::from_bytes(input), Ok(res));
     }
     assert!(FileType::from_bytes(&b"other"[..]).is_err());
 }
@@ -495,14 +526,11 @@ impl FileMode {
         }
         Ok(Self {
             mode: u32::from_str_radix(
-                std::str::from_utf8(input).map_err(|err| {
-                    LineParseError::from(format!("failed to parse mode value: {err}"))
-                })?,
+                std::str::from_utf8(input)
+                    .map_err(|err| ParserError(format!("failed to parse mode value: {err}")))?,
                 8,
             )
-            .map_err(|err| {
-                LineParseError::from(format!("failed to parse mode as integer: {err}"))
-            })?,
+            .map_err(|err| ParserError(format!("failed to parse mode as integer: {err}")))?,
         })
     }
 
@@ -561,7 +589,7 @@ impl fmt::Octal for FileMode {
     }
 }
 
-pub(crate) type ParserResult<T> = Result<T, LineParseError>;
+pub(crate) type ParserResult<T> = Result<T, ParserError>;
 
 /// An error occurred during parsing a record.
 ///
@@ -590,6 +618,7 @@ pub(crate) enum LineParseError {
     WrappedLine(Vec<u8>),
     Io(std::io::Error),
 }
+
 impl fmt::Display for LineParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -614,9 +643,5 @@ impl From<ParserError> for LineParseError {
         Self::Parser(e)
     }
 }
-impl From<String> for LineParseError {
-    fn from(s: String) -> Self {
-        Self::Parser(ParserError(s))
-    }
-}
+
 impl std::error::Error for LineParseError {}

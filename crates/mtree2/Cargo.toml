@@ -22,3 +22,7 @@ insta.workspace = true
 
 [lints]
 workspace = true
+
+[features]
+default = []
+netbsd6 = []
