@@ -1,0 +1,30 @@
+# ----------------------------------------------------------------------
+# testdata taken from: https://github.com/vbatts/go-mtree
+# in this link there is more information on the mtree format, in particular:
+# a Google Summer of Code project: https://wiki.freebsd.org/SummerOfCode2015/mtreeParsingLibrary
+# with a talk: https://papers.freebsd.org/2016/asiabsdcon/ratajsky-mtree-parsing/
+#
+# freebsd and macos do print out a mtree specification using relative paths.
+# freebsd actually does provide a tool to convert from relative paths to absolute path (the -C option),
+# see https://man.freebsd.org/cgi/man.cgi?mtree(8)
+#
+# -----------------------------------------------------------------------
+#	   user: vbatts
+#	machine: valse.usersys.redhat.com
+#	   tree: /home/vbatts/src/vb/go-mtree
+#	   date: Thu Mar 10 16:15:36 2016
+
+# .
+/set type=file uid=1000 gid=1000 mode=0664 nlink=1 flags=none
+.               type=dir mode=0775 nlink=5 size=4096 time=1457644509.817998120
+    .mtree.go.swp mode=0644 size=12288 \
+    time=1457644483.833957552 \
+sha512digest=7efd38cc957b53e3d5abd25e9df9bde715a5e18dc18abfa8f0c0eaa9bca0fda32faad4972bd4d9b555270fa3b3b92e6a1e97ad1e3bfff14fc933284004f7e8d3
+    .mtree_test.go.swp mode=0644 size=12288 time=1457644509.813998114 \
+\
+sha512digest=2aaeb1e5f03a563de86a4c1f722bde40312bbecbe4504d67fb441240c049e6ad11294ef834114a05e620a390ee9f42c1c77b43bf1a4f2d47f128226183968a33
+    mtree.go    size=1719 time=1457644447.020900074 sha512digest=2dee9f50ba167cd90d4f6e8494d4735c6b064c279ea4d26ed2c47552a5c0b82b0bdcadb214e0ca919a1768ce0e321e8d1bb71eacb9c5b4bb5fd4342967055a04
+    mtree.go~   size=1719 time=1457644447.012900062 sha512digest=2dee9f50ba167cd90d4f6e8494d4735c6b064c279ea4d26ed2c47552a5c0b82b0bdcadb214e0ca919a1768ce0e321e8d1bb71eacb9c5b4bb5fd4342967055a04
+    mtree_test.go size=581 time=1457644509.817998120 sha512digest=1b3ab2de2759df6e7d424d05ffd1d45101fd10ae86328abad1657e68044add69d83d6b3271225070f4f4154a7c0c995016077f8c7969890e068cd0a54b23f4b6
+    mtree_test.go~ \
+    size=581 time=1457644509.812998113 sha512digest=1b3ab2de2759df6e7d424d05ffd1d45101fd10ae86328abad1657e68044add69d83d6b3271225070f4f4154a7c0c995016077f8c7969890e068cd0a54b23f401 \

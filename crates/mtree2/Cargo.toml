@@ -12,6 +12,7 @@ version = "0.6.12"
 
 [dependencies]
 bitflags.workspace = true
+criterion = "0.5.1"
 faster-hex.workspace = true
 memchr.workspace = true
 paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }

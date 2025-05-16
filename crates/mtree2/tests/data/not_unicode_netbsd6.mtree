@@ -1,0 +1,22 @@
+# ----------------------------------------------------------------------
+# testdata taken from: https://github.com/vbatts/go-mtree
+# in this link there is more information on the mtree format, in particular:
+# a Google Summer of Code project: https://wiki.freebsd.org/SummerOfCode2015/mtreeParsingLibrary
+# with a talk: https://papers.freebsd.org/2016/asiabsdcon/ratajsky-mtree-parsing/
+#
+# freebsd and macos do print out a mtree specification using relative paths.
+# freebsd actually does provide a tool to convert from relative paths to absolute path (the -C option),
+# see https://man.freebsd.org/cgi/man.cgi?mtree(8)
+#
+# -----------------------------------------------------------------------
+#	   user: vbatts
+#	machine: valse.usersys.redhat.com
+#	   tree: /home/vbatts/src/vb/go-mtree
+#	   date: Thu Mar 10 16:15:36 2016
+
+# .
+/set type=file uid=1000 gid=1000 mode=0664 nlink=1 flags=none
+.               type=dir mode=0775 nlink=5 size=4096 time=1457644509.817998120
+    this_is_not_valid_unicode:_\146\157\M^@\157\040_ mode=0644 size=12288 \
+    time=1457644483.833957552 \
+sha512digest=7efd38cc957b53e3d5abd25e9df9bde715a5e18dc18abfa8f0c0eaa9bca0fda32faad4972bd4d9b555270fa3b3b92e6a1e97ad1e3bfff14fc933284004f7e8d3
