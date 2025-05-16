@@ -36,11 +36,10 @@ test_snapshot_with_empty_cwd!(
     test_wrapped_lines,
     "tests/data/relative_paths_wrapped.mtree"
 );
-// this needs to be investigated:
-/*test_snapshot_with_empty_cwd!(
+test_snapshot_with_empty_cwd!(
     test_wrapped_lines_eof,
     "tests/data/relative_paths_wrapped_at_EOF.mtree"
-);*/
+);
 test_snapshot_with_empty_cwd!(
     test_wrapped_lines_exceeding_root,
     "tests/data/relative_paths_wrapped_exceeding_root.mtree"
