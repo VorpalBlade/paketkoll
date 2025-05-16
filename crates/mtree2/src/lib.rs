@@ -190,7 +190,6 @@ where
     fn next(&mut self) -> Option<Result<Entry, Error>> {
         let mut accumulated_line: Option<Vec<u8>> = None;
 
-        // Process lines until we get a complete entry or reach EOF
         while let Some(line_result) = self.inner.next() {
             // Handle IO errors from reading the line
             let line = match line_result {
@@ -219,19 +218,23 @@ where
             }
         }
 
-        // Handle any remaining accumulated line at EOF
-        let last_line = accumulated_line.take();
-        match last_line {
-            None => None,
-            Some(final_line) => match self.next_entry(Ok(final_line)) {
+        // At EOF - handle any remaining accumulated line
+        if let Some(final_line) = accumulated_line {
+            // Try to parse the final accumulated line
+            match self.next_entry(Ok(final_line)) {
                 Ok(Some(entry)) => Some(Ok(entry)),
                 Ok(None) => None,
-                Err(LineParseError::WrappedLine(_)) => Some(Err(Error::Parser(ParserError(
-                    "wrapped line cannot happen at EOF".to_owned(),
-                )))),
+                Err(LineParseError::WrappedLine(_)) => {
+                    // This shouldn't happen since we checked for trailing backslash
+                    Some(Err(Error::Parser(ParserError(
+                        "unexpected wrapped line at end of file".to_owned(),
+                    ))))
+                }
                 Err(LineParseError::Io(e)) => Some(Err(Error::Io(e))),
                 Err(LineParseError::Parser(e)) => Some(Err(Error::Parser(e))),
-            },
+            }
+        } else {
+            None
         }
     }
 }
@@ -709,5 +712,50 @@ impl std::error::Error for Error {
 impl From<io::Error> for Error {
     fn from(from: io::Error) -> Self {
         Self::Io(from)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Cursor;
+    #[test]
+    fn test_wrapped_line_at_eof() {
+        let data = r"# .
+mtree_test \
+size=581  \";
+        let mtree = MTree::from_reader_with_empty_cwd(Cursor::new(data.as_bytes()));
+        let entry = mtree.into_iter().next().unwrap().unwrap();
+        let should = Entry {
+            path: PathBuf::from("mtree_test"),
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: None,
+                gid: None,
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: None,
+                nlink: None,
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(581),
+                time: None,
+                file_type: None,
+                uid: None,
+                uname: None,
+            },
+        };
+        assert_eq!(entry, should);
     }
 }
