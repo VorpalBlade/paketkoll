@@ -129,16 +129,10 @@ impl Files for ArchLinux {
                     mtree_path,
                     backup_files,
                 }) => {
-                    let result = match mtree::extract_mtree(
-                        pkg,
-                        &mtree_path,
-                        backup_files,
-                        &seen_directories,
-                    ) {
+                    match mtree::extract_mtree(pkg, &mtree_path, backup_files, &seen_directories) {
                         Ok(inner) => Either::Left(inner),
                         Err(err) => Either::Right(once(Err(err))),
-                    };
-                    result
+                    }
                 }
                 Err(err) => Either::Right(once(Err(err))),
             })
@@ -259,7 +253,7 @@ impl ArchLinux {
         packages: &'inputs PackageMap,
         interner: &'inputs Interner,
     ) -> impl Iterator<Item = Result<(PackageRef, PathBuf), ArchiveQueryError>> + 'inputs {
-        let package_paths = filter.iter().map(|pkg_ref| {
+        filter.iter().map(|pkg_ref| {
             let pkg = packages
                 .get(pkg_ref)
                 .ok_or_eyre("Failed to find package in package map")?;
@@ -278,9 +272,7 @@ impl ArchLinux {
                 alternates: smallvec::smallvec![*pkg_ref],
             })?;
             Ok((*pkg_ref, package_path))
-        });
-
-        package_paths
+        })
     }
 }
 
@@ -336,7 +328,7 @@ fn format_pkg_filename(interner: &Interner, package: &PackageInterned) -> String
 }
 
 fn guess_pkg_file_name(interner: &Interner, pkg: &str, packages: &PackageMap) -> String {
-    let package_match = if let Some(pkgref) = interner.get(pkg) {
+    if let Some(pkgref) = interner.get(pkg) {
         // Yay, it is probably installed, we know what to look for
         if let Some(package) = packages.get(&PackageRef::new(pkgref)) {
             format_pkg_filename(interner, package)
@@ -345,8 +337,7 @@ fn guess_pkg_file_name(interner: &Interner, pkg: &str, packages: &PackageMap) ->
         }
     } else {
         format!("{pkg}-*-*.pkg.tar.zst")
-    };
-    package_match
+    }
 }
 
 fn find_files(
