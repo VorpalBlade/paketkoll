@@ -138,7 +138,10 @@ where
     }
 
     /// This is a helper function to make error handling easier.
-    fn next_entry(&mut self, line: io::Result<Vec<u8>>) -> Result<Option<Entry>, LineParseError> {
+    fn next_entry(
+        &mut self,
+        line: Result<Vec<u8>, LineParseError>,
+    ) -> Result<Option<Entry>, LineParseError> {
         let line = line?;
         let line = MTreeLine::from_bytes(&line)?;
         Ok(match line {
