@@ -71,7 +71,7 @@ use std::time::UNIX_EPOCH;
 use util::decode_escapes_path;
 
 mod parser;
-pub mod util;
+mod util;
 
 #[cfg(not(unix))]
 compiler_error!("This library currently only supports unix, due to windows using utf-16 for paths");

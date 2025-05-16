@@ -118,7 +118,7 @@ const fn from_dec_ch(i: u8) -> Option<u8> {
 
 /// If possible, quickly convert a character of a hexadecimal number into a u8.
 #[inline(always)]
-pub const fn from_oct_ch(i: u8) -> Option<u8> {
+const fn from_oct_ch(i: u8) -> Option<u8> {
     // Avoid range check by using subtraction and comparison
     let val = i.wrapping_sub(b'0');
     if val <= 7 { Some(val) } else { None }
