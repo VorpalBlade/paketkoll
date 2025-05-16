@@ -217,7 +217,8 @@ where
         }
 
         // Handle any remaining accumulated line at EOF
-        match accumulated_line {
+        let last_line = accumulated_line.take();
+        match last_line {
             None => None,
             Some(final_line) => match self.next_entry(Ok(final_line)) {
                 Ok(Some(entry)) => Some(Ok(entry)),
