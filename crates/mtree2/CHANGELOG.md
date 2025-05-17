@@ -8,6 +8,13 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.6.13] - 2025-05-17
+
+### 🚀 Features
+
+- Properly handle NetBSD style mtrees and non-octal escapes
+- Turn parse errors of invalid fields into Err
+
 ## [0.6.12] - 2025-05-05
 
 ### ⚙️ Other stuff

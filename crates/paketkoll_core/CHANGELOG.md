@@ -8,6 +8,12 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.5.12] - 2025-05-17
+
+### 🚀 Features
+
+- Properly handle NetBSD style mtrees and non-octal escapes
+
 ## [0.5.11] - 2025-05-05
 
 ### 🚜 Refactoring
