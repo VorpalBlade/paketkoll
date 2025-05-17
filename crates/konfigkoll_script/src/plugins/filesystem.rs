@@ -63,7 +63,7 @@ impl TempDir {
     fn new() -> KResult<Self> {
         let dir = tempfile::TempDir::with_prefix("konfigkoll_")
             .wrap_err("Failed to create temporary directory")?
-            .into_path();
+            .keep();
         match Utf8PathBuf::from_path_buf(dir) {
             Ok(path) => Ok(Self { path }),
             Err(path) => {
