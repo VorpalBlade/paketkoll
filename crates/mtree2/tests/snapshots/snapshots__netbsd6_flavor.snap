@@ -1,0 +1,203 @@
+---
+source: crates/mtree2/tests/snapshots.rs
+expression: entries
+---
+[
+    Ok(
+        Entry {
+            path: ".",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 493,
+                    },
+                ),
+                nlink: Some(
+                    2,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: None,
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 534794895,
+                    },
+                ),
+                file_type: Some(
+                    Directory,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+    Err(
+        Parser(
+            ParserError(
+                "Failed to decode escapes in path - you might enable the netbsd6 feature",
+            ),
+        ),
+    ),
+]

@@ -1,0 +1,1245 @@
+---
+source: crates/mtree2/tests/snapshots.rs
+expression: entries
+---
+[
+    Ok(
+        Entry {
+            path: ".",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 493,
+                    },
+                ),
+                nlink: Some(
+                    2,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    22,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 534794895,
+                    },
+                ),
+                file_type: Some(
+                    Directory,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./íþȴɛɜɝɟūǶúÐīŻƩþŽŷǾǻû",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 472401922,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./ïɢȽƻſĿƿŻǻǯǅƸóŻÇǿǛææǾ",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 469661871,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./óƿÿŶſžɷŶßǿǟƾĻǵǴǻƽ÷ůŽ",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 513217652,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./öŞǏǔƣŖŻȷŞǻůɻìɆÿĮǵļúź",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 504699519,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./þſýɝüïžſÿ»ǿŷȳǻÿÿǳĿůý",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 530779925,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./ÿȽÿǟżóùūǯïǾŚůɳȿÖŹ½ǫŇ",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 525705316,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./ĿǡìßɿǯǽïüſÿÚǾşÿãǾûķ·",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 499493724,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./ŪÇýįÿŽȿŘǳǾūǱſɣǣ÷żŷůƶ",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 523061056,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./ƿɼâî÷ſŴýƾɽǜɞŝɷſǽÿƷĻŦ",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 535746522,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./ǧžÿşĻżŹſſǗǷǮħÞǻîȯōɓï",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 463253122,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./ǭÿŷŜŽȹɥƭþȿǪÿŷȾǮŽǽŜǿ÷",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 510596822,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./ǯŖɳǥǽŶķįǿúǺſîûɯůĪÿſÿ",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 528160319,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./ǶĻÿŗɫŭǿǫɾįĿȿǷɏņɾƷſźſ",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 466555735,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./Ƿǿįýǿŝɷë÷Îÿɭɽŧį¢ÿǷéǿ",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 533514646,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./ǻȼÏǟɷħǮȿǦŪǻžſ÷ɻǞƿŻȶǟ",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 459967419,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./ǿÿǍǿĿǾßǿüƿÿǛÿǶǮǿŽǻŏç",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 507827475,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./ǿɳŻýǯĪżşūǳǬ¾ŹžëɫǞźßŽ",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 502326657,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./ȾǻǼɷǆǧçɿ¿ɷ¿ſǻǺŏǟǠŊǛǶ",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 520626212,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./ɊǖľŽɿçĽÿõŻſƿǾûũɫɦȿƮǿ",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 517923597,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+    Ok(
+        Entry {
+            path: "./ɔ½ǼûŭťǹǶæžǺǞǯǷȷǳɓŧǞž",
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: Some(
+                    [
+                        117,
+                        97,
+                        114,
+                        99,
+                        104,
+                    ],
+                ),
+                gid: Some(
+                    1004,
+                ),
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: Some(
+                    FileMode {
+                        mode: 420,
+                    },
+                ),
+                nlink: Some(
+                    1,
+                ),
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(
+                    10,
+                ),
+                time: Some(
+                    SystemTime {
+                        tv_sec: 1746539656,
+                        tv_nsec: 515568834,
+                    },
+                ),
+                file_type: Some(
+                    File,
+                ),
+                uid: Some(
+                    1004,
+                ),
+                uname: None,
+            },
+        },
+    ),
+]

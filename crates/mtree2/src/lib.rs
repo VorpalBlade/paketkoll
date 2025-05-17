@@ -4,7 +4,7 @@
 //! location is record, along with optional extra values like checksums, size,
 //! permissions etc.
 //!
-//! For details on the spec see [mtree(5)].
+//! For details on the spec see [mtree(5)](https://www.freebsd.org/cgi/man.cgi?mtree(5)).
 //!
 //! # Examples
 //!
@@ -38,13 +38,20 @@
 //!     // supplied by mtree, but this example doesn't have access to a filesystem.
 //! }
 //! ```
+//! # Crate features
 //!
-//! [mtree(5)]: https://www.freebsd.org/cgi/man.cgi?mtree(5)
+//! By default, pathnames are parsed as ASCII, with characters outside of the 95
+//! printable ASCII characters encoded as backshlash followed by three octal digits according to [mtree(5)](https://www.freebsd.org/cgi/man.cgi?mtree(5)).
+//!
+//!
+//! Parsing of [strsvis VIS_CSTYLE](https://man.netbsd.org/strsvis.3)
+//! coded characters is added in addition as specified in [mtree(8)](https://man.netbsd.org/mtree.8) for the netbsd6 flavor.
 
 pub use parser::FileMode;
 pub use parser::FileType;
 pub use parser::Format;
 use parser::Keyword;
+use parser::LineParseError;
 use parser::MTreeLine;
 pub use parser::ParserError;
 use parser::SpecialKind;
@@ -94,6 +101,8 @@ where
     /// The constructor function for an `MTree` instance.
     ///
     /// This uses the current working directory as the base for relative paths.
+    /// Relative specifications are allowed to exceed the starting level but are
+    /// truncated to the root.
     pub fn from_reader(reader: R) -> Self {
         Self {
             inner: BufReader::new(reader).split(b'\n'),
@@ -104,7 +113,9 @@ where
 
     /// The constructor function for an `MTree` instance.
     ///
-    /// This uses the provided path as the base for relative paths.
+    /// This uses the provided path  as the base for relative paths.
+    /// Relative specifications are allowed to exceed the starting level but are
+    /// truncated to the root.
     pub fn from_reader_with_cwd(reader: R, cwd: PathBuf) -> Self {
         Self {
             inner: BufReader::new(reader).split(b'\n'),
@@ -113,8 +124,24 @@ where
         }
     }
 
+    /// The constructor function for an `MTree` instance.
+    ///
+    /// This uses an empty `PathBuf` as the base for relative paths.
+    /// Relative specifications are allowed to exceed the starting level but are
+    /// truncated to the root.
+    pub fn from_reader_with_empty_cwd(reader: R) -> Self {
+        Self {
+            inner: BufReader::new(reader).split(b'\n'),
+            cwd: PathBuf::new(),
+            default_params: Params::default(),
+        }
+    }
+
     /// This is a helper function to make error handling easier.
-    fn next_entry(&mut self, line: io::Result<Vec<u8>>) -> Result<Option<Entry>, Error> {
+    fn next_entry(
+        &mut self,
+        line: Result<Vec<u8>, LineParseError>,
+    ) -> Result<Option<Entry>, LineParseError> {
         let line = line?;
         let line = MTreeLine::from_bytes(&line)?;
         Ok(match line {
@@ -128,14 +155,9 @@ where
             MTreeLine::Relative(path, keywords) => {
                 let mut params = self.default_params.clone();
                 params.set_list(keywords.into_iter());
-                assert!(
-                    !self.cwd.as_os_str().is_empty(),
-                    "relative without a current working dir"
-                );
-                let filepath = decode_escapes_path(self.cwd.join(OsStr::from_bytes(path)))
-                    .ok_or_else(|| Error::Parser(ParserError("Failed to decode escapes".into())))?;
+                let filepath = self.cwd.join(&path);
                 if params.file_type == Some(FileType::Directory) {
-                    self.cwd.push(filepath.as_path());
+                    self.cwd.push(&path);
                 }
 
                 Some(Entry {
@@ -144,19 +166,16 @@ where
                 })
             }
             MTreeLine::DotDot => {
-                self.cwd.pop();
+                // Only pop if we're not at root or first level
+                if self.cwd.parent().and_then(|p| p.parent()).is_some() {
+                    self.cwd.pop();
+                }
                 None
             }
             MTreeLine::Full(path, keywords) => {
                 let mut params = self.default_params.clone();
                 params.set_list(keywords.into_iter());
-                Some(Entry {
-                    path: decode_escapes_path(Path::new(OsStr::from_bytes(path)).to_owned())
-                        .ok_or_else(|| {
-                            Error::Parser(ParserError("Failed to decode escapes".into()))
-                        })?,
-                    params,
-                })
+                Some(Entry { path, params })
             }
         })
     }
@@ -169,14 +188,54 @@ where
     type Item = Result<Entry, Error>;
 
     fn next(&mut self) -> Option<Result<Entry, Error>> {
-        while let Some(line) = self.inner.next() {
-            match self.next_entry(line) {
+        let mut accumulated_line: Option<Vec<u8>> = None;
+
+        while let Some(line_result) = self.inner.next() {
+            // Handle IO errors from reading the line
+            let line = match line_result {
+                Ok(line) => line,
+                Err(e) => return Some(Err(Error::Io(e))),
+            };
+
+            // If we have an accumulated line, append to it, otherwise use current line
+            let current_input = if let Some(mut acc) = accumulated_line.take() {
+                acc.extend_from_slice(&line);
+                Ok(acc)
+            } else {
+                Ok(line)
+            };
+
+            // Try to parse the current input into an entry
+            match self.next_entry(current_input) {
                 Ok(Some(entry)) => return Some(Ok(entry)),
-                Ok(None) => (),
-                Err(e) => return Some(Err(e)),
+                Ok(None) => continue, // Skip blank lines, comments etc
+                Err(LineParseError::WrappedLine(partial)) => {
+                    accumulated_line = Some(partial);
+                    continue;
+                }
+                Err(LineParseError::Io(e)) => return Some(Err(Error::Io(e))),
+                Err(LineParseError::Parser(e)) => return Some(Err(Error::Parser(e))),
             }
         }
-        None
+
+        // At EOF - handle any remaining accumulated line
+        if let Some(final_line) = accumulated_line {
+            // Try to parse the final accumulated line
+            match self.next_entry(Ok(final_line)) {
+                Ok(Some(entry)) => Some(Ok(entry)),
+                Ok(None) => None,
+                Err(LineParseError::WrappedLine(_)) => {
+                    // This shouldn't happen since we checked for trailing backslash
+                    Some(Err(Error::Parser(ParserError(
+                        "unexpected wrapped line at end of file".to_owned(),
+                    ))))
+                }
+                Err(LineParseError::Io(e)) => Some(Err(Error::Io(e))),
+                Err(LineParseError::Parser(e)) => Some(Err(Error::Parser(e))),
+            }
+        } else {
+            None
+        }
     }
 }
 
@@ -445,7 +504,7 @@ impl Params {
             Keyword::Ignore => self.ignore = true,
             Keyword::Inode(inode) => self.inode = Some(inode),
             Keyword::Link(link) => {
-                self.link = decode_escapes_path(Path::new(OsStr::from_bytes(link)).to_owned());
+                self.link = decode_escapes_path(&mut link.to_vec());
             }
             Keyword::Md5(md5) => self.md5 = Some(md5),
             Keyword::Mode(mode) => self.mode = Some(mode),
@@ -656,8 +715,47 @@ impl From<io::Error> for Error {
     }
 }
 
-impl From<ParserError> for Error {
-    fn from(from: ParserError) -> Self {
-        Self::Parser(from)
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Cursor;
+    #[test]
+    fn test_wrapped_line_at_eof() {
+        let data = r"# .
+mtree_test \
+size=581  \";
+        let mtree = MTree::from_reader_with_empty_cwd(Cursor::new(data.as_bytes()));
+        let entry = mtree.into_iter().next().unwrap().unwrap();
+        let should = Entry {
+            path: PathBuf::from("mtree_test"),
+            params: Params {
+                checksum: None,
+                device: None,
+                contents: None,
+                flags: None,
+                gid: None,
+                gname: None,
+                ignore: false,
+                inode: None,
+                link: None,
+                md5: None,
+                mode: None,
+                nlink: None,
+                no_change: false,
+                optional: false,
+                resident_device: None,
+                rmd160: None,
+                sha1: None,
+                sha256: None,
+                sha384: None,
+                sha512: None,
+                size: Some(581),
+                time: None,
+                file_type: None,
+                uid: None,
+                uname: None,
+            },
+        };
+        assert_eq!(entry, should);
     }
 }
