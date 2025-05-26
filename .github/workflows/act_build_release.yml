@@ -99,7 +99,7 @@ jobs:
           persist-credentials: false
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
-      - uses: taiki-e/install-action@941e8a4d9d7cdb696bd4f017cf54aca281f8ffff # v2.51.2
+      - uses: taiki-e/install-action@6c6479b49816fcc0975a31af977bdc1f847c2920 # v2.52.1
         with:
           tool: cross@0.2.5
       - uses: taiki-e/upload-rust-binary-action@db101489b509ad1c7acce163e118eb36a1650f98 # v1.26.0
