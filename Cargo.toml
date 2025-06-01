@@ -16,11 +16,11 @@ cached = { version = "0.55.1", features = [
 ], default-features = false }
 camino = "1.1.9"
 cfg-if = "1.0.0"
-clap = { version = "4.5.38", features = ["derive"] }
-clap_complete = "4.5.50"
+clap = { version = "4.5.39", features = ["derive"] }
+clap_complete = "4.5.52"
 clap_mangen = "0.2.26"
 clru = "0.6.2"
-color-eyre = "0.6.4"
+color-eyre = "0.6.5"
 compact_str = { version = "0.9.0", features = ["serde", "smallvec"] }
 console = "0.15.11"
 dashmap = "6.1.0"
@@ -52,10 +52,10 @@ md-5 = "0.10.6"
 memchr = "2.7.4"
 mimalloc = "0.1.46"
 nix = { version = "0.30.1", default-features = false }
-num_cpus = "1.16.0"
+num_cpus = "1.17.0"
 os_info = { version = "3.11.0", default-features = false }
 ouroboros = "0.18.5"
-parking_lot = "0.12.3"
+parking_lot = "0.12.4"
 pretty_assertions = "1.4.1"
 proc-exit = "2.0.2"
 rayon = "1.10.0"
