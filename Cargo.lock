@@ -1259,7 +1259,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll"
-version = "0.1.14"
+version = "0.1.15"
 dependencies = [
  "ahash",
  "camino",
@@ -1291,7 +1291,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_core"
-version = "0.5.5"
+version = "0.5.6"
 dependencies = [
  "ahash",
  "camino",
@@ -1333,7 +1333,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_script"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "ahash",
  "annotate-snippets",
@@ -1366,7 +1366,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_types"
-version = "0.2.8"
+version = "0.2.9"
 dependencies = [
  "camino",
  "compact_str",
@@ -1380,7 +1380,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_utils"
-version = "0.1.8"
+version = "0.1.9"
 dependencies = [
  "camino",
  "compact_str",
@@ -1896,7 +1896,7 @@ checksum = "26995317201fa17f3656c36716aed4a7c81743a9634ac4c99c0eeda495db0cec"
 
 [[package]]
 name = "paketkoll"
-version = "0.3.12"
+version = "0.3.13"
 dependencies = [
  "ahash",
  "clap",
@@ -1936,7 +1936,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_core"
-version = "0.5.12"
+version = "0.5.13"
 dependencies = [
  "ahash",
  "ar",
