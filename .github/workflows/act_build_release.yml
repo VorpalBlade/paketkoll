@@ -101,7 +101,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - uses: taiki-e/install-action@7b20dfd705618832f20d29066e34aa2f2f6194c2 # v2.52.8
         with:
-          tool: cross@0.2.5
+          tool: cross@latest
       - uses: taiki-e/upload-rust-binary-action@3962470d6e7f1993108411bc3f75a135ec67fc8c # v1.27.0
         id: upload-rust-binary-action
         name: Upload ${{ matrix.name }} (${{ inputs.project }})
