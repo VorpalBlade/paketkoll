@@ -12,6 +12,14 @@ updates:
     labels:
       - "A-dependencies"
       - "D-rust"
+    groups:
+      major:
+        update-types:
+          - "major"
+      minor:
+        update-types:
+          - "minor"
+          - "patch"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -19,3 +27,7 @@ updates:
     labels:
       - "A-dependencies"
       - "D-github_actions"
+    groups:
+      actions:
+        patterns:
+          - "*"
