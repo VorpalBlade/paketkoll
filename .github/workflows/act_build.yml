@@ -67,7 +67,7 @@ jobs:
           echo "# Ld"
           ld -v
       - name: Install cross
-        uses: taiki-e/install-action@7b20dfd705618832f20d29066e34aa2f2f6194c2 # v2.52.8
+        uses: taiki-e/install-action@cfe1303741c2e620e5f7daa667105e0da1316db9 # v2.53.0
         with:
           tool: cross@latest
       # Cache doesn't work when cross compiling anyway.
