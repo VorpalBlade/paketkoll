@@ -24,7 +24,7 @@ bstr = { version = "1" }
 byteorder = { version = "1" }
 clap = { version = "4", features = ["derive", "env"] }
 clap_builder = { version = "4", default-features = false, features = ["color", "env", "help", "std", "suggestions", "usage"] }
-console = { version = "0.15" }
+console = { version = "0.16" }
 crossbeam-epoch = { version = "0.9" }
 dashmap = { version = "6", default-features = false, features = ["raw-api", "rayon"] }
 either = { version = "1", features = ["use_std"] }
