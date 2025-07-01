@@ -85,7 +85,7 @@ ignore = [
     { id = "RUSTSEC-2024-0320", reason = "yaml-rust is not actually used (given the feature flags that are in use)" },
     { id = "RUSTSEC-2024-0384", reason = "Only relevant to WASM, which this doesn't target" },
     { id = "RUSTSEC-2024-0436", reason = "paste is unmaintained, but no option is available, indirect dependency" },
-    
+
 ]
 # If this is true, then cargo deny will use the git executable to fetch advisory database.
 # If this is false, then it uses a built-in git library.
@@ -110,6 +110,7 @@ allow = [
     "MPL-2.0",
     "Unicode-3.0",
     "Zlib",
+    "bzip2-1.0.6",
     #"Apache-2.0 WITH LLVM-exception",
     #"BSD-3-Clause",
     #"Unicode-DFS-2016",
