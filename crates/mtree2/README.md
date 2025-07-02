@@ -48,6 +48,12 @@ for entry in entries {
 }
 ```
 
+## MSRV (Minimum Supported Rust Version) policy
+
+The MSRV may be bumped as needed. It is guaranteed that this program will at
+least build on the current stable Rust release. An MSRV change is not considered
+a breaking change and as such may change even in a patch version.
+
 [mtree(5)]: https://www.freebsd.org/cgi/man.cgi?mtree(5)
 [crates.io]: https://crates.io/crates/mtree2
 [lib.rs]: https://lib.rs/crates/mtree2

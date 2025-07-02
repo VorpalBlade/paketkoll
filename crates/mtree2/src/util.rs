@@ -239,36 +239,36 @@ pub fn decode_escapes(buf: &mut [u8]) -> Option<&mut [u8]> {
                 continue;
             }
             b'^' => {
-                if let Some(&char) = buf.get(read_idx + 1) {
-                    if let Some(ctrl) = get_control_char_from_caret(char) {
-                        buf[write_idx] = ctrl;
-                        read_idx += 2;
-                        write_idx += 1;
-                        continue;
-                    }
+                if let Some(&char) = buf.get(read_idx + 1)
+                    && let Some(ctrl) = get_control_char_from_caret(char)
+                {
+                    buf[write_idx] = ctrl;
+                    read_idx += 2;
+                    write_idx += 1;
+                    continue;
                 }
                 return None;
             }
             b'M' => {
                 match buf.get(read_idx + 1) {
                     Some(b'-') => {
-                        if let Some(&char) = buf.get(read_idx + 2) {
-                            if let Some(meta) = get_meta_char_from_printable(char) {
-                                buf[write_idx] = meta;
-                                read_idx += 3;
-                                write_idx += 1;
-                                continue;
-                            }
+                        if let Some(&char) = buf.get(read_idx + 2)
+                            && let Some(meta) = get_meta_char_from_printable(char)
+                        {
+                            buf[write_idx] = meta;
+                            read_idx += 3;
+                            write_idx += 1;
+                            continue;
                         }
                     }
                     Some(b'^') => {
-                        if let Some(&char) = buf.get(read_idx + 2) {
-                            if let Some(meta) = get_meta_char_from_caret(char) {
-                                buf[write_idx] = meta;
-                                read_idx += 3;
-                                write_idx += 1;
-                                continue;
-                            }
+                        if let Some(&char) = buf.get(read_idx + 2)
+                            && let Some(meta) = get_meta_char_from_caret(char)
+                        {
+                            buf[write_idx] = meta;
+                            read_idx += 3;
+                            write_idx += 1;
+                            continue;
                         }
                     }
                     _ => {}

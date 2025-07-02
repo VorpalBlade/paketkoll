@@ -573,10 +573,10 @@ impl fmt::Display for Params {
         if let Some(ref v) = self.flags {
             writeln!(f, "flags: {v:?}")?;
         }
-        if let Some(v) = self.gid {
-            if v != 0 {
-                writeln!(f, "gid: {v}")?;
-            }
+        if let Some(v) = self.gid
+            && v != 0
+        {
+            writeln!(f, "gid: {v}")?;
         }
         if let Some(ref v) = self.gname {
             writeln!(f, "gname: {}", String::from_utf8_lossy(v))?;
@@ -652,10 +652,10 @@ impl fmt::Display for Params {
         if let Some(v) = self.file_type {
             writeln!(f, "file type: {v}")?;
         }
-        if let Some(v) = self.uid {
-            if v != 0 {
-                writeln!(f, "uid: {v}")?;
-            }
+        if let Some(v) = self.uid
+            && v != 0
+        {
+            writeln!(f, "uid: {v}")?;
         }
         if let Some(ref v) = self.uname {
             writeln!(f, "uname: {}", String::from_utf8_lossy(v))?;

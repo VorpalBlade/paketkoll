@@ -44,12 +44,12 @@ impl<'a> MTreeLine<'a> {
 
         // check for wrapped line and comment
         let first_byte = input[0];
-        if let Some(&last) = input.last() {
-            if last == b'\\' {
-                return Err(LineParseError::WrappedLine(
-                    input[..input.len() - 1].to_vec(),
-                ));
-            }
+        if let Some(&last) = input.last()
+            && last == b'\\'
+        {
+            return Err(LineParseError::WrappedLine(
+                input[..input.len() - 1].to_vec(),
+            ));
         }
         if first_byte == b'#' {
             return Ok(MTreeLine::Comment);
