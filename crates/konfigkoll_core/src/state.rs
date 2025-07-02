@@ -125,35 +125,36 @@ impl FsNode {
         }
 
         if do_metadata {
-            if !was_symlink && self.mode != default_mode {
-                if let Some(mode) = self.mode {
-                    results.push(FsInstruction {
-                        path: path.into(),
-                        op: FsOp::SetMode { mode },
-                        comment: None,
-                        pkg: self.pkg,
-                    });
-                }
+            if !was_symlink
+                && self.mode != default_mode
+                && let Some(mode) = self.mode
+            {
+                results.push(FsInstruction {
+                    path: path.into(),
+                    op: FsOp::SetMode { mode },
+                    comment: None,
+                    pkg: self.pkg,
+                });
             }
-            if let Some(owner) = self.owner {
-                if owner != ROOT {
-                    results.push(FsInstruction {
-                        path: path.into(),
-                        op: FsOp::SetOwner { owner },
-                        comment: None,
-                        pkg: self.pkg,
-                    });
-                }
+            if let Some(owner) = self.owner
+                && owner != ROOT
+            {
+                results.push(FsInstruction {
+                    path: path.into(),
+                    op: FsOp::SetOwner { owner },
+                    comment: None,
+                    pkg: self.pkg,
+                });
             }
-            if let Some(group) = self.group {
-                if group != ROOT {
-                    results.push(FsInstruction {
-                        path: path.into(),
-                        op: FsOp::SetGroup { group },
-                        comment: None,
-                        pkg: self.pkg,
-                    });
-                }
+            if let Some(group) = self.group
+                && group != ROOT
+            {
+                results.push(FsInstruction {
+                    path: path.into(),
+                    op: FsOp::SetGroup { group },
+                    comment: None,
+                    pkg: self.pkg,
+                });
             }
         }
 

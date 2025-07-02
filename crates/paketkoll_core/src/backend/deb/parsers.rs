@@ -360,22 +360,22 @@ pub(super) fn parse_extended_status(
                 let arch = ArchitectureRef::get_or_intern(interner, stripped);
                 state = ExtendedStatusParsingState::Architecture { pkg, arch };
             }
-        } else if let ExtendedStatusParsingState::Architecture { pkg, arch } = state {
-            if let Some(stripped) = line.strip_prefix("Auto-Installed: ") {
-                let reason = match stripped {
-                    "1" => Some(InstallReason::Dependency),
-                    "0" => Some(InstallReason::Explicit),
-                    _ => {
-                        tracing::warn!("Unknown auto-installed value: {}", stripped);
-                        None
-                    }
-                };
-                result.insert((pkg, arch), reason);
-                // Because this file is screwy it can say the primary architecture instead of
-                // all. Wtf Debian?
-                result.insert((pkg, all_arch), reason);
-                state = ExtendedStatusParsingState::Start;
-            }
+        } else if let ExtendedStatusParsingState::Architecture { pkg, arch } = state
+            && let Some(stripped) = line.strip_prefix("Auto-Installed: ")
+        {
+            let reason = match stripped {
+                "1" => Some(InstallReason::Dependency),
+                "0" => Some(InstallReason::Explicit),
+                _ => {
+                    tracing::warn!("Unknown auto-installed value: {}", stripped);
+                    None
+                }
+            };
+            result.insert((pkg, arch), reason);
+            // Because this file is screwy it can say the primary architecture instead of
+            // all. Wtf Debian?
+            result.insert((pkg, all_arch), reason);
+            state = ExtendedStatusParsingState::Start;
         }
         buffer.clear();
     }

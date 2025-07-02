@@ -233,23 +233,23 @@ fn run_file_checks(cli: &Cli) -> eyre::Result<Exit> {
         found_issues.sort_by_key(key_extractor);
     }
 
-    if let Commands::Check { .. } = cli.command {
-        if !cli.ignore.is_empty() {
-            // Do post-processing of ignores as the check command doesn't have that built
-            // in.
-            let ignores = file_ops::build_ignore_overrides(&cli.ignore)?;
-            found_issues.retain(|(_, issue)| {
-                let path = issue.path();
-                match ignores.matched(path, path.is_dir()) {
-                    ignore::Match::None => (),
-                    ignore::Match::Ignore(_) => {
-                        return false;
-                    }
-                    ignore::Match::Whitelist(_) => (),
+    if let Commands::Check { .. } = cli.command
+        && !cli.ignore.is_empty()
+    {
+        // Do post-processing of ignores as the check command doesn't have that built
+        // in.
+        let ignores = file_ops::build_ignore_overrides(&cli.ignore)?;
+        found_issues.retain(|(_, issue)| {
+            let path = issue.path();
+            match ignores.matched(path, path.is_dir()) {
+                ignore::Match::None => (),
+                ignore::Match::Ignore(_) => {
+                    return false;
                 }
-                true
-            });
-        }
+                ignore::Match::Whitelist(_) => (),
+            }
+            true
+        });
     }
 
     let has_issues = !found_issues.is_empty();

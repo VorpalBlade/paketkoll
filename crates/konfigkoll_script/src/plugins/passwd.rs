@@ -271,11 +271,11 @@ impl Passwd {
             let uid: u32 = parts[2]
                 .parse()
                 .wrap_err("Failed to parse /etc/passwd from host")?;
-            if let Some(user) = self.users.get_mut(name) {
-                if user.uid != uid {
-                    tracing::debug!("Updating UID for {} from {} to {}", name, user.uid, uid);
-                    user.uid = uid;
-                }
+            if let Some(user) = self.users.get_mut(name)
+                && user.uid != uid
+            {
+                tracing::debug!("Updating UID for {} from {} to {}", name, user.uid, uid);
+                user.uid = uid;
             }
         }
 
@@ -291,11 +291,11 @@ impl Passwd {
             let gid: u32 = parts[2]
                 .parse()
                 .wrap_err("Failed to parse /etc/group from host")?;
-            if let Some(group) = self.groups.get_mut(name) {
-                if group.gid != gid {
-                    tracing::debug!("Updating GID for {} from {} to {}", name, group.gid, gid);
-                    group.gid = gid;
-                }
+            if let Some(group) = self.groups.get_mut(name)
+                && group.gid != gid
+            {
+                tracing::debug!("Updating GID for {} from {} to {}", name, group.gid, gid);
+                group.gid = gid;
             }
         }
         Ok(())
@@ -317,10 +317,10 @@ impl Passwd {
             }
             let name = parts[0];
             let passwd = parts[1];
-            if users.contains(&name.to_string()) {
-                if let Some(user) = self.users.get_mut(name) {
-                    user.passwd = passwd.into();
-                }
+            if users.contains(&name.to_string())
+                && let Some(user) = self.users.get_mut(name)
+            {
+                user.passwd = passwd.into();
             }
         }
         Ok(())

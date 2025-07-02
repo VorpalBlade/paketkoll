@@ -185,14 +185,12 @@ impl Files for Debian {
             .wrap_err("Failed to read dpkg database directory")?
             .par_bridge()
             .for_each(|entry| {
-                if let Ok(entry) = entry {
-                    if entry.file_name().as_encoded_bytes().ends_with(b".list") {
-                        if let Err(e) =
-                            is_file_match(&entry.path(), interner, &re, paths, &file_to_package)
-                        {
-                            tracing::error!("Failed to parse package data: {e}");
-                        }
-                    }
+                if let Ok(entry) = entry
+                    && entry.file_name().as_encoded_bytes().ends_with(b".list")
+                    && let Err(e) =
+                        is_file_match(&entry.path(), interner, &re, paths, &file_to_package)
+                {
+                    tracing::error!("Failed to parse package data: {e}");
                 }
             });
 
@@ -401,19 +399,19 @@ fn archive_to_entries(
                 .expect("Failed to find package in package map");
             for entry in &mut entries {
                 // Apply diversions
-                if let Some(diversion) = diversions.get(&entry.path) {
-                    if !self_pkg.ids.contains(&diversion.by_package) {
-                        // This file is diverted
-                        tracing::debug!(
-                            "Diverted file: {opath} -> {npath} by {diverting_pkg} while \
-                             processing {pkg}",
-                            opath = entry.path.display(),
-                            npath = diversion.new_path.display(),
-                            diverting_pkg = diversion.by_package.as_str(interner),
-                            pkg = pkg_ref.as_str(interner),
-                        );
-                        entry.path.clone_from(&diversion.new_path);
-                    }
+                if let Some(diversion) = diversions.get(&entry.path)
+                    && !self_pkg.ids.contains(&diversion.by_package)
+                {
+                    // This file is diverted
+                    tracing::debug!(
+                        "Diverted file: {opath} -> {npath} by {diverting_pkg} while processing \
+                         {pkg}",
+                        opath = entry.path.display(),
+                        npath = diversion.new_path.display(),
+                        diverting_pkg = diversion.by_package.as_str(interner),
+                        pkg = pkg_ref.as_str(interner),
+                    );
+                    entry.path.clone_from(&diversion.new_path);
                 }
             }
             return Ok(entries);
@@ -506,11 +504,11 @@ fn merge_deb_fileentries(
 ) {
     for mut file in files {
         // Apply diversions
-        if let Some(diversion) = diversions.get(&file.path) {
-            if Some(diversion.by_package) != file.package {
-                // This file is diverted
-                file.path.clone_from(&diversion.new_path);
-            }
+        if let Some(diversion) = diversions.get(&file.path)
+            && Some(diversion.by_package) != file.package
+        {
+            // This file is diverted
+            file.path.clone_from(&diversion.new_path);
         }
         // Drop mutability
         let file = file;

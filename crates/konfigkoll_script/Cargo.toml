@@ -6,7 +6,7 @@ keywords = ["konfigkoll", "rune", "scripting-language"]
 license = "MPL-2.0"
 name = "konfigkoll_script"
 repository = "https://github.com/VorpalBlade/paketkoll"
-rust-version = "1.85.0"
+rust-version = "1.88.0"
 version = "0.1.12"
 
 [dependencies]

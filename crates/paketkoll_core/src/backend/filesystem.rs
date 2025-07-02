@@ -268,23 +268,22 @@ fn check_contents(
     expected_checksum: &Checksum,
 ) -> Result<()> {
     // Fast path with size
-    if let Some(size) = expected_size {
-        if size != actual_metadata.len() {
-            issues.push(IssueKind::SizeIncorrect {
-                actual: actual_metadata.len(),
-                expected: size,
-            });
-            return Ok(());
-        }
+    if let Some(size) = expected_size
+        && size != actual_metadata.len()
+    {
+        issues.push(IssueKind::SizeIncorrect {
+            actual: actual_metadata.len(),
+            expected: size,
+        });
+        return Ok(());
     }
 
     // Possibly fast path using mtime
-    if config.trust_mtime {
-        if let Some(mtime) = expected_mtime {
-            if *mtime == actual_metadata.modified()? {
-                return Ok(());
-            }
-        }
+    if config.trust_mtime
+        && let Some(mtime) = expected_mtime
+        && *mtime == actual_metadata.modified()?
+    {
+        return Ok(());
     }
     // Otherwise, check checksum
     let mut reader = match File::open(path) {

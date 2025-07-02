@@ -108,10 +108,11 @@ impl InProcessApplicator {
         pkg_map: &PackageMap,
     ) -> eyre::Result<()> {
         tracing::info!("Applying: {}: {}", instr.path, instr.op);
-        if instr.op != FsOp::Comment && instr.op != FsOp::Remove {
-            if let Some(parent) = instr.path.parent() {
-                std::fs::create_dir_all(parent).wrap_err("Failed to create parent directory")?;
-            }
+        if instr.op != FsOp::Comment
+            && instr.op != FsOp::Remove
+            && let Some(parent) = instr.path.parent()
+        {
+            std::fs::create_dir_all(parent).wrap_err("Failed to create parent directory")?;
         }
         match &instr.op {
             FsOp::Remove => {
@@ -494,7 +495,7 @@ impl<Inner: Applicator + std::fmt::Debug> InteractiveApplicator<Inner> {
             match self.interactive_confirmer.prompt()? {
                 InteractivePromptChoices::Yes => {
                     tracing::info!("Applying change to {}", instr.path);
-                    return self.inner.apply_files(&[instr.clone()]);
+                    return self.inner.apply_files(std::slice::from_ref(instr));
                 }
                 InteractivePromptChoices::Abort => {
                     tracing::info!("Aborting");

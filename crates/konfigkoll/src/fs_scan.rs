@@ -71,10 +71,10 @@ pub(crate) fn scan_fs(
             );
             let traditional_files = backend.files(interner)?;
             for file in traditional_files {
-                if let Some(pkg_ref) = file.package {
-                    if missing.contains(&pkg_ref) {
-                        extra_files.push(file);
-                    }
+                if let Some(pkg_ref) = file.package
+                    && missing.contains(&pkg_ref)
+                {
+                    extra_files.push(file);
                 }
             }
             if backend.may_need_canonicalization() {
@@ -101,10 +101,10 @@ pub(crate) fn scan_fs(
             });
         for entry in extra_files {
             let old = file_map.insert(entry.path.clone(), entry);
-            if let Some(old) = old {
-                if old.properties.is_dir() == Some(false) {
-                    tracing::warn!("Duplicate file entry for {}", old.path.display());
-                }
+            if let Some(old) = old
+                && old.properties.is_dir() == Some(false)
+            {
+                tracing::warn!("Duplicate file entry for {}", old.path.display());
             }
         }
         file_map.into_iter().map(|(_, v)| v).collect_vec()

@@ -165,10 +165,10 @@ impl Files for ArchLinux {
             .wrap_err("Failed to read pacman database directory")?
             .par_bridge()
             .for_each(|entry| {
-                if let Ok(entry) = entry {
-                    if let Err(e) = find_files(&entry, interner, &re, paths, &file_to_package) {
-                        tracing::error!("Failed to parse package data: {e}");
-                    }
+                if let Ok(entry) = entry
+                    && let Err(e) = find_files(&entry, interner, &re, paths, &file_to_package)
+                {
+                    tracing::error!("Failed to parse package data: {e}");
                 }
             });
 
