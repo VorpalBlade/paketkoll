@@ -9,7 +9,7 @@ name = "mtree2"
 readme = "README.md"
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.88.0"
-version = "0.6.13"
+version = "0.6.14"
 
 [dependencies]
 bitflags.workspace = true

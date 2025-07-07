@@ -7,7 +7,7 @@ license = "MPL-2.0"
 name = "paketkoll_core"
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.88.0"
-version = "0.5.12"
+version = "0.5.13"
 
 [package.metadata.docs.rs]
 default-target = "x86_64-unknown-linux-gnu"
@@ -70,11 +70,11 @@ glob.workspace = true
 ignore.workspace = true
 libc.workspace = true
 md-5 = { workspace = true, optional = true }
-mtree2 = { version = "0.6.13", path = "../mtree2", optional = true }
+mtree2 = { version = "0.6.14", path = "../mtree2", optional = true }
 nix = { workspace = true, features = ["user"], optional = true }
 num_cpus.workspace = true
-paketkoll_types = { version = "0.2.6", path = "../paketkoll_types" }
-paketkoll_utils = { version = "0.1.11", path = "../paketkoll_utils" }
+paketkoll_types = { version = "0.2.7", path = "../paketkoll_types" }
+paketkoll_utils = { version = "0.1.12", path = "../paketkoll_utils" }
 paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 parking_lot.workspace = true
 hashify.workspace = true
@@ -85,7 +85,7 @@ rust-ini = { workspace = true, optional = true }
 scopeguard.workspace = true
 smallvec.workspace = true
 strum.workspace = true
-systemd_tmpfiles = { version = "0.2.6", path = "../systemd_tmpfiles", optional = true }
+systemd_tmpfiles = { version = "0.2.7", path = "../systemd_tmpfiles", optional = true }
 tar.workspace = true
 tracing.workspace = true
 xz2 = { workspace = true, optional = true }
