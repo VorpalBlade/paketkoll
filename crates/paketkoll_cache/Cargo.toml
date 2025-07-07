@@ -7,7 +7,7 @@ license = "MPL-2.0"
 name = "paketkoll_cache"
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.88.0"
-version = "0.2.11"
+version = "0.2.12"
 
 [dependencies]
 ahash.workspace = true
@@ -15,7 +15,7 @@ cached.workspace = true
 compact_str.workspace = true
 dashmap.workspace = true
 eyre.workspace = true
-paketkoll_types = { version = "0.2.6", path = "../paketkoll_types" }
+paketkoll_types = { version = "0.2.7", path = "../paketkoll_types" }
 paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 serde.workspace = true
 smallvec.workspace = true
