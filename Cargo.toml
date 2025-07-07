@@ -68,7 +68,7 @@ rune-modules = { version = "0.13.4", features = [
     "tokio",
     "toml",
 ] }
-rust-ini = "0.21.1"
+rust-ini = "0.21.2"
 scopeguard = "1.2.0"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_bytes = "0.11.17"
@@ -87,7 +87,7 @@ sysinfo = { version = "0.35.2", default-features = false, features = [
 tar = "0.4.44"
 tempfile = "3.20.0"
 thiserror = "2.0.12"
-tokio = { version = "1.45.1", features = [
+tokio = { version = "1.46.1", features = [
     "macros",
     "parking_lot",
     "process",
