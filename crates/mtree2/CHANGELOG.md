@@ -8,6 +8,12 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.6.14] - 2025-07-14
+
+### 🚀 Features
+
+- Add missing MSRV to mtree2
+
 ## [0.6.13] - 2025-05-17
 
 ### 🚀 Features
