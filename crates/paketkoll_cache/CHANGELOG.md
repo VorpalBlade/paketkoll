@@ -8,6 +8,12 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.12] - 2025-07-14
+
+### ⚙️ Other stuff
+
+- Update to Rust 1.88.0
+
 ## [0.2.11] - 2025-05-17
 
 ### ⚙️ Other stuff
