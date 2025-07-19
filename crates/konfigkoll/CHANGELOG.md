@@ -8,6 +8,12 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.16] - 2025-07-19
+
+### ⚙️ Other stuff
+
+- Update Cargo.lock dependencies
+
 ## [0.1.15] - 2025-07-14
 
 ### ⚙️ Other stuff
