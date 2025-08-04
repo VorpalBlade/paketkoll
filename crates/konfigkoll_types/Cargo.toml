@@ -6,15 +6,15 @@ license = "MPL-2.0"
 name = "konfigkoll_types"
 repository = "https://github.com/VorpalBlade/paketkoll"
 rust-version = "1.88.0"
-version = "0.2.9"
+version = "0.2.10"
 
 [dependencies]
 camino.workspace = true
 compact_str.workspace = true
 either.workspace = true
 eyre.workspace = true
-paketkoll_types = { version = "0.2.7", path = "../paketkoll_types" }
-paketkoll_utils = { version = "0.1.12", path = "../paketkoll_utils" }
+paketkoll_types = { version = "0.2.8", path = "../paketkoll_types" }
+paketkoll_utils = { version = "0.1.13", path = "../paketkoll_utils" }
 paketkoll_workspace_hack = { version = "0.1", path = "../paketkoll_workspace_hack" }
 strum.workspace = true
 
