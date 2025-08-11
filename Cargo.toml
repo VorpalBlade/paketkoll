@@ -14,10 +14,10 @@ cached = { version = "0.55.1", features = [
     "ahash",
     "disk_store",
 ], default-features = false }
-camino = "1.1.10"
+camino = "1.1.11"
 cfg-if = "1.0.1"
-clap = { version = "4.5.42", features = ["derive"] }
-clap_complete = "4.5.55"
+clap = { version = "4.5.43", features = ["derive"] }
+clap_complete = "4.5.56"
 clap_mangen = "0.2.29"
 clru = "0.6.2"
 color-eyre = "0.6.5"
