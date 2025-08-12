@@ -22,6 +22,7 @@ use paketkoll_types::intern::PackageRef;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::path::Path;
+use std::time::Duration;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct CacheKey {
@@ -66,7 +67,7 @@ impl OriginalFilesCache {
     pub fn from_path(inner: Box<dyn Files>, path: &Path) -> eyre::Result<Self> {
         let cache = DiskCacheBuilder::new("original_files")
             .set_refresh(true)
-            .set_lifespan(60 * 60 * 24 * 30) // A month
+            .set_lifespan(Duration::from_secs(60 * 60 * 24 * 30)) // A month
             .set_disk_directory(path)
             .build()?;
         Ok(Self { inner, cache })
