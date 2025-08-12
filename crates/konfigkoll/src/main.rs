@@ -48,8 +48,7 @@ mod _musl {
     static GLOBAL: MiMalloc = MiMalloc;
 }
 
-#[tokio::main(flavor = "current_thread")]
-async fn main() -> eyre::Result<()> {
+fn main() -> eyre::Result<()> {
     color_eyre::install()?;
     // Set up logging with tracing
     let filter = tracing_subscriber::EnvFilter::builder()
@@ -63,6 +62,13 @@ async fn main() -> eyre::Result<()> {
 
     let cli = Cli::parse();
 
+    let mut builder = tokio::runtime::Builder::new_current_thread();
+    let rt = builder.enable_all().build()?;
+
+    rt.block_on(async { run_main(cli).await })
+}
+
+async fn run_main(cli: Cli) -> Result<(), eyre::Error> {
     let config_path = match cli.config_path {
         Some(v) => v,
         None => std::env::current_dir()?.try_into()?,
