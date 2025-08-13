@@ -155,10 +155,13 @@ impl Files for OriginalFilesCache {
             }
         }
         // Fetch uncached queries
-        // NOTE: Never wrap this error, we need to just carry it through to the caller.
-        let uncached_results = self
-            .inner
-            .original_files(&uncached_queries, packages, interner)?;
+        let uncached_results = if !uncached_queries.is_empty() {
+            // NOTE: Never wrap this error, we need to just carry it through to the caller.
+            self.inner
+                .original_files(&uncached_queries, packages, interner)?
+        } else {
+            Default::default()
+        };
 
         // Insert the uncached results into the cache and update the results
         for (query, result) in uncached_results {
