@@ -151,7 +151,7 @@ pub enum ArchiveQueryError {
 }
 
 /// A package manager backend (reading list of packages)
-pub trait Packages: Name {
+pub trait Packages: Name + std::fmt::Debug {
     /// Collect a list of all installed packages
     fn packages(&self, interner: &Interner) -> eyre::Result<Vec<PackageInterned>>;
 

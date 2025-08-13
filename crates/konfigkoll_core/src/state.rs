@@ -197,7 +197,7 @@ impl FsEntries {
         warn_redundant: bool,
     ) {
         for instr in instructions {
-            tracing::debug!("{:?}", instr);
+            tracing::trace!("{:?}", instr);
             match instr.op {
                 FsOp::Remove => {
                     self.fs.insert(
@@ -438,7 +438,7 @@ pub fn diff(
         match entry {
             itertools::EitherOrBoth::Both(before, after) if before.1 == after.1 => {}
             itertools::EitherOrBoth::Both(before, after) => {
-                tracing::debug!("{:?} -> {:?}", before, after);
+                tracing::trace!("{:?} -> {:?}", before, after);
                 // Compare the structs and generate a stream of instructions
                 let path = before.0;
                 let before = before.1;
@@ -530,7 +530,7 @@ pub fn diff(
                 }
             }
             itertools::EitherOrBoth::Left(before) => {
-                tracing::debug!("{:?} -> ()", before);
+                tracing::trace!("{:?} -> ()", before);
                 let pkg = before.1.pkg;
                 match goal {
                     &DiffGoal::Apply(ref _backend_impl, path_map) => {
@@ -679,7 +679,7 @@ pub fn diff(
                 }
             }
             itertools::EitherOrBoth::Right(after) => {
-                tracing::debug!("() -> {:?}", after);
+                tracing::trace!("() -> {:?}", after);
                 results.extend(after.1.into_instruction(&after.0));
             }
         }

@@ -68,6 +68,7 @@ fn main() -> eyre::Result<()> {
     rt.block_on(async { run_main(cli).await })
 }
 
+#[tracing::instrument(level = "debug", skip_all)]
 async fn run_main(cli: Cli) -> Result<(), eyre::Error> {
     let config_path = match cli.config_path {
         Some(v) => v,
@@ -345,6 +346,7 @@ async fn run_main(cli: Cli) -> Result<(), eyre::Error> {
 
 /// Implements the actual saving for the `save` command
 #[allow(clippy::too_many_arguments)]
+#[tracing::instrument(level = "debug", skip_all)]
 fn cmd_save_changes(
     confirmation: Paranoia,
     config_path: &Utf8Path,
@@ -424,6 +426,7 @@ fn cmd_save_changes(
 
 /// Implements the actual application for the `apply` command
 #[allow(clippy::too_many_arguments)]
+#[tracing::instrument(level = "debug", skip_all)]
 fn cmd_apply_changes(
     confirmation: Paranoia,
     debug_force_dry_run: bool,

@@ -113,6 +113,7 @@ impl Name for Debian {
 }
 
 impl Files for Debian {
+    #[tracing::instrument(level = "debug", skip_all)]
     fn files(&self, interner: &Interner) -> eyre::Result<Vec<FileEntry>> {
         tracing::debug!("Loading packages");
         let packages_files: Vec<_> = get_package_files(interner)?.collect();
@@ -160,6 +161,7 @@ impl Files for Debian {
         true
     }
 
+    #[tracing::instrument(level = "debug", skip_all)]
     fn owning_packages(
         &self,
         paths: &ahash::AHashSet<&Path>,
@@ -197,6 +199,7 @@ impl Files for Debian {
         Ok(file_to_package)
     }
 
+    #[tracing::instrument(level = "debug", skip_all)]
     fn original_files(
         &self,
         queries: &[OriginalFileQuery],
@@ -251,6 +254,7 @@ impl Files for Debian {
         Ok(results)
     }
 
+    #[tracing::instrument(level = "debug", skip_all)]
     fn files_from_archives(
         &self,
         filter: &[PackageRef],
@@ -673,6 +677,7 @@ impl Packages for Debian {
 
 impl FullBackend for Debian {}
 
+#[tracing::instrument(level = "info", skip_all)]
 fn download_debs(pkgs: &[&str]) -> eyre::Result<()> {
     let status = std::process::Command::new("apt-get")
         .args([
@@ -690,6 +695,7 @@ fn download_debs(pkgs: &[&str]) -> eyre::Result<()> {
     Ok(())
 }
 
+#[tracing::instrument(level = "info", skip_all)]
 fn download_deb(pkg: &str) -> eyre::Result<()> {
     let status = std::process::Command::new("apt-get")
         .args([

@@ -42,84 +42,9 @@ pub(crate) fn scan_fs(
     tracing::debug!("Scanning filesystem");
     let mut fs_instructions_sys = vec![];
     let files = if backend.prefer_files_from_archive() {
-        tracing::debug!("Using files from archives");
-        let all = package_map.keys().copied().collect::<Vec<_>>();
-        let mut files = backend.files_from_archives(&all, package_map, interner)?;
-        // For all the failures, attempt to resolve them with the traditional backend
-        let missing: AHashSet<PackageRef> = files
-            .iter()
-            .filter_map(|e| match e {
-                Ok(_) => None,
-                Err(ArchiveQueryError::PackageMissing {
-                    query: _,
-                    alternates,
-                }) => Some(alternates),
-                Err(err) => {
-                    tracing::error!("Unknown error: {err}");
-                    None
-                }
-            })
-            .flatten()
-            .copied()
-            .collect();
-        let mut extra_files = vec![];
-        if !missing.is_empty() {
-            files.retain(Result::is_ok);
-            tracing::warn!(
-                "Attempting to resolve missing files with traditional backend (going to take \
-                 extra time)"
-            );
-            let traditional_files = backend.files(interner)?;
-            for file in traditional_files {
-                if let Some(pkg_ref) = file.package
-                    && missing.contains(&pkg_ref)
-                {
-                    extra_files.push(file);
-                }
-            }
-            if backend.may_need_canonicalization() {
-                tracing::debug!("Canonicalizing file entries");
-                canonicalize_file_entries(&mut extra_files);
-            }
-        }
-        let mut files: Vec<_> = files
-            .into_iter()
-            .map(|e| e.expect("All errors should be filtered out by now"))
-            .collect();
-        if backend.may_need_canonicalization() {
-            tracing::debug!("Canonicalizing file entries");
-            files.par_iter_mut().for_each(|entry| {
-                canonicalize_file_entries(&mut entry.1);
-            });
-        }
-        let file_map = DashMap::new();
-        files
-            .into_par_iter()
-            .flat_map_iter(|(_pkg, files)| files)
-            .for_each(|entry| {
-                file_map.insert(entry.path.clone(), entry);
-            });
-        for entry in extra_files {
-            let old = file_map.insert(entry.path.clone(), entry);
-            if let Some(old) = old
-                && old.properties.is_dir() == Some(false)
-            {
-                tracing::warn!("Duplicate file entry for {}", old.path.display());
-            }
-        }
-        file_map.into_iter().map(|(_, v)| v).collect_vec()
+        file_vec_from_archive(interner, backend, package_map)?
     } else {
-        let mut files = backend.files(interner).wrap_err_with(|| {
-            format!(
-                "Failed to collect information from backend {}",
-                backend.name()
-            )
-        })?;
-        if backend.may_need_canonicalization() {
-            tracing::debug!("Canonicalizing file entries");
-            canonicalize_file_entries(&mut files);
-        }
-        files
+        file_vec_from_db(interner, backend)?
     };
 
     tracing::debug!("Building path map");
@@ -152,4 +77,95 @@ pub(crate) fn scan_fs(
     // Ensure instructions are sorted
     fs_instructions_sys.sort();
     Ok((scan_result, fs_instructions_sys))
+}
+
+#[tracing::instrument(level = "debug", skip_all)]
+fn file_vec_from_db(
+    interner: &Arc<Interner>,
+    backend: &Arc<dyn Files>,
+) -> Result<Vec<FileEntry>, eyre::Error> {
+    let mut files = backend.files(interner).wrap_err_with(|| {
+        format!(
+            "Failed to collect information from backend {}",
+            backend.name()
+        )
+    })?;
+    if backend.may_need_canonicalization() {
+        tracing::debug!("Canonicalizing file entries");
+        canonicalize_file_entries(&mut files);
+    }
+    Ok(files)
+}
+
+#[tracing::instrument(level = "debug", skip_all)]
+fn file_vec_from_archive(
+    interner: &Arc<Interner>,
+    backend: &Arc<dyn Files>,
+    package_map: &PackageMap,
+) -> Result<Vec<FileEntry>, eyre::Error> {
+    tracing::debug!("Using files from archives");
+    let all = package_map.keys().copied().collect::<Vec<_>>();
+    let mut files = backend.files_from_archives(&all, package_map, interner)?;
+    let missing: AHashSet<PackageRef> = files
+        .iter()
+        .filter_map(|e| match e {
+            Ok(_) => None,
+            Err(ArchiveQueryError::PackageMissing {
+                query: _,
+                alternates,
+            }) => Some(alternates),
+            Err(err) => {
+                tracing::error!("Unknown error: {err}");
+                None
+            }
+        })
+        .flatten()
+        .copied()
+        .collect();
+    let mut extra_files = vec![];
+    if !missing.is_empty() {
+        files.retain(Result::is_ok);
+        tracing::warn!(
+            "Attempting to resolve missing files with traditional backend (going to take extra \
+             time)"
+        );
+        let traditional_files = backend.files(interner)?;
+        for file in traditional_files {
+            if let Some(pkg_ref) = file.package
+                && missing.contains(&pkg_ref)
+            {
+                extra_files.push(file);
+            }
+        }
+        if backend.may_need_canonicalization() {
+            tracing::debug!("Canonicalizing file entries");
+            canonicalize_file_entries(&mut extra_files);
+        }
+    }
+    let mut files: Vec<_> = files
+        .into_iter()
+        .map(|e| e.expect("All errors should be filtered out by now"))
+        .collect();
+    if backend.may_need_canonicalization() {
+        tracing::debug!("Canonicalizing file entries");
+        files.par_iter_mut().for_each(|entry| {
+            canonicalize_file_entries(&mut entry.1);
+        });
+    }
+    let file_map = DashMap::new();
+    files
+        .into_par_iter()
+        .flat_map_iter(|(_pkg, files)| files)
+        .for_each(|entry| {
+            file_map.insert(entry.path.clone(), entry);
+        });
+    for entry in extra_files {
+        let old = file_map.insert(entry.path.clone(), entry);
+        if let Some(old) = old
+            && old.properties.is_dir() == Some(false)
+        {
+            tracing::warn!("Duplicate file entry for {}", old.path.display());
+        }
+    }
+    Ok(file_map.into_iter().map(|(_, v)| v).collect_vec())
 }

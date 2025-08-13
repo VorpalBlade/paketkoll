@@ -106,6 +106,7 @@ pub(crate) fn group_queries_by_pkg(
 
 /// Attempt to search a directory based cache and if not found, download the
 /// package
+#[tracing::instrument(level = "debug", skip_all)]
 pub(crate) fn locate_package_file(
     dir_candidates: &[&str],
     package_match: &str,
@@ -210,6 +211,7 @@ pub(crate) fn missing_packages<'strings>(
 }
 
 /// Extract files from a generic tar archive
+#[tracing::instrument(level = "debug", skip_all)]
 pub(crate) fn extract_files(
     mut archive: tar::Archive<impl Read>,
     queries: &AHashSet<&str>,

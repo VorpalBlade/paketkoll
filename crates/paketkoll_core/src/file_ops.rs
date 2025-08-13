@@ -21,6 +21,7 @@ use std::path::PathBuf;
 
 /// Perform a query of original files
 #[doc(hidden)]
+#[tracing::instrument(level = "debug", skip_all)]
 pub fn original_files(
     backend: crate::backend::ConcreteBackend,
     backend_config: &crate::backend::BackendConfiguration,
@@ -132,6 +133,7 @@ pub fn check_all_files(
 ///
 /// Returned will be a list of issues found (along with which package is
 /// associated with that file if known).
+#[tracing::instrument(level = "debug", skip_all)]
 pub fn mismatching_and_unexpected_files<'a>(
     expected_files: &'a Vec<FileEntry>,
     path_map: &PathMap<'a>,
@@ -158,6 +160,30 @@ pub fn mismatching_and_unexpected_files<'a>(
 
     let (collector, collected_issues) = flume::unbounded();
 
+    do_walk(path_map, filecheck_config, walker, collector.clone());
+
+    tracing::debug!("Identifying and processing missing files");
+    // Identify missing files (we should have seen them walking through the file
+    // system)
+    find_missing_files(expected_files, overrides, collector);
+
+    tracing::debug!("Collecting results");
+    // Collect all items from queue into vec
+    let mut mismatches = Vec::new();
+    for item in collected_issues.drain() {
+        mismatches.push(item);
+    }
+    Ok(mismatches)
+}
+
+#[tracing::instrument(level = "debug", name = "File system walk", skip_all)]
+#[allow(clippy::needless_pass_by_value)]
+fn do_walk<'a>(
+    path_map: &PathMap<'a>,
+    filecheck_config: &crate::config::CommonFileCheckConfiguration,
+    walker: ignore::WalkParallel,
+    collector: flume::Sender<(Option<PackageRef>, Issue)>,
+) {
     walker.run(|| {
         Box::new(|entry| {
             match entry {
@@ -212,10 +238,15 @@ pub fn mismatching_and_unexpected_files<'a>(
             WalkState::Continue
         })
     });
+}
 
-    tracing::debug!("Identifying and processing missing files");
-    // Identify missing files (we should have seen them walking through the file
-    // system)
+#[tracing::instrument(level = "debug", name = "Find missing files", skip_all)]
+#[allow(clippy::needless_pass_by_value)]
+fn find_missing_files(
+    expected_files: &Vec<FileEntry>,
+    overrides: ignore::overrides::Override,
+    collector: flume::Sender<(Option<PackageRef>, Issue)>,
+) {
     expected_files.par_iter().for_each(|file_entry| {
         if file_entry.seen.load(std::sync::atomic::Ordering::Relaxed) {
             return;
@@ -245,14 +276,6 @@ pub fn mismatching_and_unexpected_files<'a>(
             ))
             .expect("Unbounded queue");
     });
-
-    tracing::debug!("Collecting results");
-    // Collect all items from queue into vec
-    let mut mismatches = Vec::new();
-    for item in collected_issues.drain() {
-        mismatches.push(item);
-    }
-    Ok(mismatches)
 }
 
 #[doc(hidden)]
@@ -271,6 +294,7 @@ pub fn build_ignore_overrides(
 }
 
 /// Create a path map for a set of expected files
+#[tracing::instrument(level = "debug", skip_all)]
 pub fn create_path_map(expected_files: &[FileEntry]) -> PathMap<'_> {
     let mut path_map: PathMap<'_> =
         PathMap::with_capacity_and_hasher(expected_files.len(), ahash::RandomState::new());
@@ -283,6 +307,7 @@ pub fn create_path_map(expected_files: &[FileEntry]) -> PathMap<'_> {
 /// Canonicalize paths in file entries.
 ///
 /// This is needed for Debian as packages don't make sense wrt /usr-merge
+#[tracing::instrument(level = "debug", skip_all)]
 pub fn canonicalize_file_entries(results: &mut Vec<FileEntry>) {
     results.par_iter_mut().for_each(|file_entry| {
         if file_entry.path.as_os_str().as_bytes() == b"/" {

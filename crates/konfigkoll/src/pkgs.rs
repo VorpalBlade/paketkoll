@@ -4,7 +4,9 @@ use eyre::WrapErr;
 use itertools::Itertools;
 use konfigkoll_types::PkgInstructions;
 use paketkoll_types::backend::PackageBackendMap;
+use paketkoll_types::backend::PackageMap;
 use paketkoll_types::backend::PackageMapMap;
+use paketkoll_types::backend::Packages;
 use paketkoll_types::intern::Interner;
 use paketkoll_types::package::PackageInstallStatus;
 use rayon::prelude::*;
@@ -21,28 +23,7 @@ pub(crate) fn load_packages(
         .values()
         .par_bridge()
         .map(|backend| {
-            let backend_pkgs = backend
-                .packages(interner)
-                .wrap_err_with(|| {
-                    format!(
-                        "Failed to collect information from backend {}",
-                        backend.name()
-                    )
-                })
-                .map(|mut backend_pkgs| {
-                    // Because we can have partially installed packages on Debian...
-                    backend_pkgs.retain(|pkg| pkg.status == PackageInstallStatus::Installed);
-                    let pkg_map = Arc::new(paketkoll_types::backend::packages_to_package_map(
-                        backend_pkgs.iter(),
-                    ));
-                    let pkg_instructions =
-                        konfigkoll_core::conversion::convert_packages_to_pkg_instructions(
-                            backend_pkgs.into_iter(),
-                            backend.as_backend_enum(),
-                            interner,
-                        );
-                    (pkg_map, pkg_instructions)
-                });
+            let backend_pkgs = map_package_backend(interner, backend);
             (backend, backend_pkgs)
         })
         .collect();
@@ -53,6 +34,35 @@ pub(crate) fn load_packages(
     }
 
     Ok((pkgs_sys, package_maps))
+}
+
+#[tracing::instrument(level = "debug", skip(interner))]
+fn map_package_backend(
+    interner: &Arc<Interner>,
+    backend: &Arc<dyn Packages>,
+) -> Result<(Arc<PackageMap>, PkgInstructions), eyre::Error> {
+    backend
+        .packages(interner)
+        .wrap_err_with(|| {
+            format!(
+                "Failed to collect information from backend {}",
+                backend.name()
+            )
+        })
+        .map(|mut backend_pkgs| {
+            // Because we can have partially installed packages on Debian...
+            backend_pkgs.retain(|pkg| pkg.status == PackageInstallStatus::Installed);
+            let pkg_map = Arc::new(paketkoll_types::backend::packages_to_package_map(
+                backend_pkgs.iter(),
+            ));
+            let pkg_instructions =
+                konfigkoll_core::conversion::convert_packages_to_pkg_instructions(
+                    backend_pkgs.into_iter(),
+                    backend.as_backend_enum(),
+                    interner,
+                );
+            (pkg_map, pkg_instructions)
+        })
 }
 
 type PackagePair<'a> = (

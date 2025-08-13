@@ -106,6 +106,7 @@ impl Name for ArchLinux {
 }
 
 impl Files for ArchLinux {
+    #[tracing::instrument(level = "debug", skip_all)]
     fn files(&self, interner: &Interner) -> eyre::Result<Vec<FileEntry>> {
         let db_path: &Path = Path::new(&self.pacman_config.db_path);
 
@@ -140,6 +141,7 @@ impl Files for ArchLinux {
         results
     }
 
+    #[tracing::instrument(level = "debug", skip_all)]
     fn owning_packages(
         &self,
         paths: &AHashSet<&Path>,
@@ -175,6 +177,7 @@ impl Files for ArchLinux {
         Ok(file_to_package)
     }
 
+    #[tracing::instrument(level = "debug", skip_all)]
     fn original_files(
         &self,
         queries: &[OriginalFileQuery],
@@ -217,6 +220,7 @@ impl Files for ArchLinux {
         Ok(results)
     }
 
+    #[tracing::instrument(level = "debug", skip_all)]
     fn files_from_archives(
         &self,
         filter: &[PackageRef],
@@ -472,6 +476,7 @@ impl Packages for ArchLinux {
 // arch: any, x86_64
 // Epoch separator is :
 
+#[tracing::instrument(level = "info", skip_all)]
 fn download_arch_pkg(pkg: &str) -> eyre::Result<()> {
     let status = std::process::Command::new("pacman")
         .args(["-Sw", "--noconfirm", pkg])
