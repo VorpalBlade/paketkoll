@@ -39,7 +39,7 @@ nix = { version = "0.30", default-features = false, features = ["fs", "user"] }
 num-traits = { version = "0.2", default-features = false, features = ["i128", "std"] }
 once_cell = { version = "1", features = ["critical-section"] }
 regex = { version = "1" }
-regex-automata = { version = "0.4", default-features = false, features = ["dfa-onepass", "dfa-search", "hybrid", "meta", "nfa", "perf", "unicode"] }
+regex-automata = { version = "0.4", default-features = false, features = ["dfa-onepass", "dfa-search", "hybrid", "meta", "nfa", "perf", "std", "unicode"] }
 rune = { version = "0.13", features = ["cli"] }
 rune-core = { version = "0.13", features = ["doc", "musli", "std"] }
 scopeguard = { version = "1" }
