@@ -8,6 +8,12 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.5.7] - 2025-08-29
+
+### 🩺 Diagnostics & output formatting
+
+- Improve debug level diagnostics
+
 ## [0.5.6] - 2025-07-14
 
 ### ⚙️ Other stuff
