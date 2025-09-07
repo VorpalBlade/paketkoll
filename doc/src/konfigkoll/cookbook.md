@@ -3,6 +3,178 @@
 This contains a bunch of useful patterns and functions you can use in your own
 configuration.
 
+## Multiple files / modules
+
+It will quickly become useful to split your configuration into multiple files.
+With the Rune scripting language this is done using [modules](https://rune-rs.github.io/book/items_imports.html#modules),
+in a way very similar to how Rust does it (for those who are familiar with Rust).
+
+All modules form a tree, starting at `main.rn`. To specify that a file `foo.rn`
+is a submodule of main you use `mod foo;` in `main.rn`. Or `pub mod foo;` if you
+want to be able to access it from sibling modules / parent modules (this is not
+as useful in main, as it is the top module).
+
+For example, given this directory structure:
+
+```text
+myconfig/
+ - main.rn
+ - utils.rn
+ - ignores.rn
+```
+
+Your `main.rn` might look like this:
+
+```rune
+mod utils;
+mod ignores;
+
+pub async fn phase_system_discovery(props, settings) {
+    // ...
+    // Call some function from utils. :: is the separator between modules
+    // and their contents.
+    let root_fs = utils::figure_out_file_system("/")?;
+    // ...
+    Ok(())
+}
+
+pub fn phase_ignores(props, cmds) {
+    // All the ignores are defined in the ignores module!
+    ignores::apply_ignores(props, cmds)
+}
+
+// ...
+// phase_script_dependencies, phase_main, etc
+```
+
+For functions to be accessible outside their module they need to be declared `pub`.
+So in `utils.rn` and `ignores.rn` you would need to add `pub` to the functions you want to expose.
+E.g. for `utils.rn`:
+
+```rune
+pub fn figure_out_file_system(path) {
+    // ... do some fancy thing here
+}
+```
+
+## Nested modules
+
+If you want nested modules, you need to create a directory structure. For example:
+
+```text
+myconfig/
+ - main.rn
+ - utils.rn
+ - ignores.rn
+ - tasks/
+   - work.rn
+   - gaming.rn
+   - mod.rn
+```
+
+Note here that we have a `tasks/mod.rn`, which defines the "tasks" module itself.
+(`mod.rn` is a special reserved name for this purpose, and you cannot name a module `mod`.)
+
+In your `main.rn` you would have:
+
+```rune
+pub mod utils;
+pub mod ignores;
+pub mod tasks;
+
+// ...
+```
+
+In `tasks/mod.rn` you would have:
+
+```rune
+pub mod work;
+pub mod gaming;
+
+// You could also have normal code directly in here (that is, in the "tasks"
+// module itself), but you don't need to
+```
+
+The `pub` is needed here, or the sub-modules would not be visible from `main.rn`.
+Similarly, functions will need to be `pub` to be visible outside their own modules.
+
+## Importing from other modules
+
+Lets say you have the structure from the previous example:
+
+```text
+myconfig/
+ - main.rn
+ - utils.rn
+ - ignores.rn
+ - tasks/
+   - work.rn
+   - gaming.rn
+   - mod.rn
+```
+
+And now you want to use the following function from `utils.rn` in `tasks/work.rn`:
+
+```rune
+/// Join strings with separator
+///
+/// This function ensures that there isn't a leading
+/// or trailing separator.
+///
+/// Arguments:
+/// * separator (char or String)
+/// * list (Vec<String>)
+///
+/// Returns a String
+pub fn join(separator, list) {
+    if list.len() == 0 {
+        return "";
+    }
+    let joined = list[0].clone();
+    for i in 1..list.len() {
+        joined.push(separator);
+        joined.push_str(list[i]);
+    }
+    joined
+}
+```
+
+There are two ways of "reaching over" to a sibling/parent module like this:
+
+```rune
+pub fn configure_work_stuff(/* ... */) {
+    let example = Vec::new();
+    example.push("work");
+    example.push("stuff");
+    let example_str = crate::utils::join(", ", example);
+    // example_str is now "work, stuff"
+}
+```
+
+The name `crate` (taken from Rust) is a keyword that refers to the root, which
+is `main.rn` in this case. You can also `use` a function from a module. This
+avoids having to write out the full path every time:
+
+```rune
+use crate::utils::join;
+
+pub fn configure_work_stuff(/* ... */) {
+    let example = Vec::new();
+    example.push("work");
+    example.push("stuff");
+    let example_str = join(", ", example);
+    // example_str is now "work, stuff"
+}
+```
+
+You can also import everything public from another module using `*`:
+
+```rune
+use crate::utils::*;
+
+// ... use all the functions from utils directly here as needed
+```
+
 ## Using strong types
 
 While `props` is a generic key value store for passing info between the phases,
