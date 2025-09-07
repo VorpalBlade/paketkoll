@@ -85,6 +85,7 @@ ignore = [
     { id = "RUSTSEC-2024-0320", reason = "yaml-rust is not actually used (given the feature flags that are in use)" },
     { id = "RUSTSEC-2024-0384", reason = "Only relevant to WASM, which this doesn't target" },
     { id = "RUSTSEC-2024-0436", reason = "paste is unmaintained, but no option is available, indirect dependency" },
+    { id = "RUSTSEC-2025-0057", reason = "fxhash is unmaintained, but we need sled to to switch over, and then cached (indirect dependency)." },
 
 ]
 # If this is true, then cargo deny will use the git executable to fetch advisory database.
