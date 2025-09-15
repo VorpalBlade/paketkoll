@@ -43,6 +43,7 @@ rune = { version = "0.13", features = ["cli"] }
 rune-core = { version = "0.13", features = ["doc", "musli", "std"] }
 scopeguard = { version = "1" }
 serde = { version = "1", features = ["alloc", "derive", "rc"] }
+serde_core = { version = "1", default-features = false, features = ["alloc", "rc", "result", "std"] }
 similar = { version = "2", features = ["bytes", "inline"] }
 smallvec = { version = "1", default-features = false, features = ["const_new", "serde", "union"] }
 tokio = { version = "1", features = ["fs", "io-std", "io-util", "macros", "parking_lot", "process", "rt-multi-thread", "sync"] }
@@ -60,6 +61,7 @@ musli = { version = "0.0.42", default-features = false, features = ["std"] }
 once_cell = { version = "1", features = ["critical-section"] }
 rune-core = { version = "0.13", features = ["doc", "musli", "std"] }
 serde = { version = "1", features = ["alloc", "derive", "rc"] }
+serde_core = { version = "1", default-features = false, features = ["alloc", "rc", "result", "std"] }
 syn = { version = "2", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 
 [target.x86_64-unknown-linux-gnu.dependencies]
