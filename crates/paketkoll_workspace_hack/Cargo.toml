@@ -29,8 +29,7 @@ dashmap = { version = "6", default-features = false, features = ["raw-api", "ray
 either = { version = "1", features = ["use_std"] }
 flate2 = { version = "1", features = ["zlib-rs"] }
 getrandom = { version = "0.2", default-features = false, features = ["std"] }
-hashbrown-3575ec1268b04181 = { package = "hashbrown", version = "0.15" }
-hashbrown-582f2526e08bb6a0 = { package = "hashbrown", version = "0.14", features = ["raw"] }
+hashbrown = { version = "0.14", features = ["raw"] }
 libc = { version = "0.2", features = ["extra_traits"] }
 log = { version = "0.4", default-features = false, features = ["std"] }
 memchr = { version = "2" }
@@ -66,7 +65,7 @@ syn = { version = "2", features = ["extra-traits", "fold", "full", "visit", "vis
 
 [target.x86_64-unknown-linux-gnu.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
-miniz_oxide = { version = "0.8", default-features = false, features = ["with-alloc"] }
+miniz_oxide = { version = "0.8", default-features = false, features = ["simd", "with-alloc"] }
 rustix = { version = "1", features = ["fs"] }
 stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
 
@@ -75,7 +74,7 @@ libc = { version = "0.2", features = ["extra_traits"] }
 
 [target.x86_64-unknown-linux-musl.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
-miniz_oxide = { version = "0.8", default-features = false, features = ["with-alloc"] }
+miniz_oxide = { version = "0.8", default-features = false, features = ["simd", "with-alloc"] }
 rustix = { version = "1", features = ["fs"] }
 stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
 
@@ -84,7 +83,7 @@ libc = { version = "0.2", features = ["extra_traits"] }
 
 [target.aarch64-unknown-linux-musl.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
-miniz_oxide = { version = "0.8", default-features = false, features = ["with-alloc"] }
+miniz_oxide = { version = "0.8", default-features = false, features = ["simd", "with-alloc"] }
 rustix = { version = "1", features = ["fs"] }
 stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
 
