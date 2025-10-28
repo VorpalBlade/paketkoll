@@ -60,7 +60,7 @@ fn directive(i: &mut &str) -> ModalResult<Line> {
     let user = id_parser.context(StrContext::Label("user"));
     let group = id_parser.context(StrContext::Label("group"));
     let age = optional_string.context(StrContext::Label("age"));
-    let argument = optional_string.context(StrContext::Label("argument"));
+    let argument = optional_string_with_spaces.context(StrContext::Label("argument"));
 
     let mut parser = (
         entry_type,
@@ -160,10 +160,23 @@ fn optional_string(i: &mut &str) -> ModalResult<Option<CompactString>> {
     alt(('-'.value(None), any_string.map(Some))).parse_next(i)
 }
 
+fn optional_string_with_spaces(i: &mut &str) -> ModalResult<Option<CompactString>> {
+    // - is None, otherwise string
+    alt(('-'.value(None), any_string_with_spaces.map(Some))).parse_next(i)
+}
+
 fn any_string(i: &mut &str) -> ModalResult<CompactString> {
     trace(
         "any_string",
         alt((quoted_string, unquoted_string_with_escapes)),
+    )
+    .parse_next(i)
+}
+
+fn any_string_with_spaces(i: &mut &str) -> ModalResult<CompactString> {
+    trace(
+        "any_string",
+        alt((quoted_string, unquoted_string_with_escapes_and_spaces)),
     )
     .parse_next(i)
 }
@@ -182,6 +195,13 @@ fn quoted_string(i: &mut &str) -> ModalResult<CompactString> {
 /// Unquoted string value
 fn unquoted_string_with_escapes(i: &mut &str) -> ModalResult<CompactString> {
     escaped(take_till(1.., [' ', '\t', '\n', '\r', '\\']), '\\', escapes)
+        .map(|s: CompactStringWrapper| s.0)
+        .parse_next(i)
+}
+
+/// Unquoted string value with spaces
+fn unquoted_string_with_escapes_and_spaces(i: &mut &str) -> ModalResult<CompactString> {
+    escaped(take_till(1.., ['\t', '\n', '\r', '\\']), '\\', escapes)
         .map(|s: CompactStringWrapper| s.0)
         .parse_next(i)
 }
@@ -262,6 +282,21 @@ mod tests {
         assert_eq!(out, "foo".to_string());
 
         let (rem, out) = unquoted_string_with_escapes
+            .parse_peek("foo\\ bar\n")
+            .unwrap();
+        assert_eq!(rem, "\n");
+        assert_eq!(out, "foo bar".to_string());
+    }
+
+    #[test]
+    fn test_unquoted_string_with_spaces() {
+        let (rem, out) = unquoted_string_with_escapes_and_spaces
+            .parse_peek("foo bar\n")
+            .unwrap();
+        assert_eq!(rem, "\n");
+        assert_eq!(out, "foo bar".to_string());
+
+        let (rem, out) = unquoted_string_with_escapes_and_spaces
             .parse_peek("foo\\ bar\n")
             .unwrap();
         assert_eq!(rem, "\n");
@@ -397,6 +432,26 @@ mod tests {
                 group: Id::Caller { new_only: false },
                 age: None,
                 argument: Some("/tmp/target".into())
+            }
+        );
+
+        // Full line, last field with spaces
+        let (rest, line) = directive
+            .parse_peek(
+                "f /root/.nix-channels - - - - https://nixos.org/channels/nixos-25.05 nixos\n",
+            )
+            .unwrap();
+        assert_eq!(rest, "\n");
+        assert_eq!(
+            line,
+            Line {
+                entry_type: "f".into(),
+                path: "/root/.nix-channels".into(),
+                mode: None,
+                user: Id::Caller { new_only: false },
+                group: Id::Caller { new_only: false },
+                age: None,
+                argument: Some("https://nixos.org/channels/nixos-25.05 nixos".into())
             }
         );
 
