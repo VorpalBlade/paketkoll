@@ -60,7 +60,7 @@ fn directive(i: &mut &str) -> ModalResult<Line> {
     let user = id_parser.context(StrContext::Label("user"));
     let group = id_parser.context(StrContext::Label("group"));
     let age = optional_string.context(StrContext::Label("age"));
-    let argument = optional_string_with_spaces.context(StrContext::Label("argument"));
+    let argument = optional_unquoted_string_with_spaces.context(StrContext::Label("argument"));
 
     let mut parser = (
         entry_type,
@@ -160,23 +160,19 @@ fn optional_string(i: &mut &str) -> ModalResult<Option<CompactString>> {
     alt(('-'.value(None), any_string.map(Some))).parse_next(i)
 }
 
-fn optional_string_with_spaces(i: &mut &str) -> ModalResult<Option<CompactString>> {
+fn optional_unquoted_string_with_spaces(i: &mut &str) -> ModalResult<Option<CompactString>> {
     // - is None, otherwise string
-    alt(('-'.value(None), any_string_with_spaces.map(Some))).parse_next(i)
+    alt((
+        '-'.value(None),
+        unquoted_string_with_escapes_and_spaces.map(Some),
+    ))
+    .parse_next(i)
 }
 
 fn any_string(i: &mut &str) -> ModalResult<CompactString> {
     trace(
         "any_string",
         alt((quoted_string, unquoted_string_with_escapes)),
-    )
-    .parse_next(i)
-}
-
-fn any_string_with_spaces(i: &mut &str) -> ModalResult<CompactString> {
-    trace(
-        "any_string",
-        alt((quoted_string, unquoted_string_with_escapes_and_spaces)),
     )
     .parse_next(i)
 }
