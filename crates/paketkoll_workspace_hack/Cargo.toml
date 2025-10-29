@@ -67,7 +67,6 @@ syn = { version = "2", features = ["extra-traits", "fold", "full", "visit", "vis
 bitflags = { version = "2", default-features = false, features = ["std"] }
 miniz_oxide = { version = "0.8", default-features = false, features = ["simd", "with-alloc"] }
 rustix = { version = "1", features = ["fs"] }
-stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
 
 [target.x86_64-unknown-linux-gnu.build-dependencies]
 libc = { version = "0.2", features = ["extra_traits"] }
@@ -76,7 +75,6 @@ libc = { version = "0.2", features = ["extra_traits"] }
 bitflags = { version = "2", default-features = false, features = ["std"] }
 miniz_oxide = { version = "0.8", default-features = false, features = ["simd", "with-alloc"] }
 rustix = { version = "1", features = ["fs"] }
-stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
 
 [target.x86_64-unknown-linux-musl.build-dependencies]
 libc = { version = "0.2", features = ["extra_traits"] }
@@ -85,7 +83,6 @@ libc = { version = "0.2", features = ["extra_traits"] }
 bitflags = { version = "2", default-features = false, features = ["std"] }
 miniz_oxide = { version = "0.8", default-features = false, features = ["simd", "with-alloc"] }
 rustix = { version = "1", features = ["fs"] }
-stable_deref_trait = { version = "1", default-features = false, features = ["alloc"] }
 
 [target.aarch64-unknown-linux-musl.build-dependencies]
 libc = { version = "0.2", features = ["extra_traits"] }
