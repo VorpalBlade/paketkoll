@@ -172,17 +172,32 @@ fn optional_unquoted_string_with_spaces(i: &mut &str) -> ModalResult<Option<Comp
 fn any_string(i: &mut &str) -> ModalResult<CompactString> {
     trace(
         "any_string",
-        alt((quoted_string, unquoted_string_with_escapes)),
+        alt((
+            double_quoted_string,
+            single_quoted_string,
+            unquoted_string_with_escapes,
+        )),
     )
     .parse_next(i)
 }
 
-/// Quoted string value
-fn quoted_string(i: &mut &str) -> ModalResult<CompactString> {
+/// Double quoted string value
+fn double_quoted_string(i: &mut &str) -> ModalResult<CompactString> {
     delimited(
         '"',
         escaped(take_till(1.., ['"', '\\']), '\\', escapes),
         '"',
+    )
+    .map(|s: CompactStringWrapper| s.0)
+    .parse_next(i)
+}
+
+/// Single string value
+fn single_quoted_string(i: &mut &str) -> ModalResult<CompactString> {
+    delimited(
+        '\'',
+        escaped(take_till(1.., ['\'', '\\']), '\\', escapes),
+        '\'',
     )
     .map(|s: CompactStringWrapper| s.0)
     .parse_next(i)
@@ -209,6 +224,7 @@ fn escapes<'input>(i: &mut &'input str) -> ModalResult<&'input str> {
         "t".value("\t"),
         " ".value(" "),
         "\"".value("\""),
+        "\'".value("\'"),
         "\\".value("\\"),
     ))
     .parse_next(i)
@@ -256,17 +272,36 @@ mod tests {
         let (rem, out) = any_string.parse_peek("\"foo bar\"\n").unwrap();
         assert_eq!(rem, "\n");
         assert_eq!(out, "foo bar".to_string());
+
+        let (rem, out) = any_string.parse_peek("\'foo bar\'\n").unwrap();
+        assert_eq!(rem, "\n");
+        assert_eq!(out, "foo bar".to_string());
     }
 
     #[test]
-    fn test_quoted_string() {
-        let (rem, out) = quoted_string.parse_peek("\"foo bar\"\n").unwrap();
+    fn test_double_quoted_string() {
+        let (rem, out) = double_quoted_string.parse_peek("\"foo bar\"\n").unwrap();
         assert_eq!(rem, "\n");
         assert_eq!(out, "foo bar".to_string());
 
-        let (rem, out) = quoted_string.parse_peek("\"foo\\\"bar\"\n").unwrap();
+        let (rem, out) = double_quoted_string
+            .parse_peek("\"foo\\\"bar'qux\"\n")
+            .unwrap();
         assert_eq!(rem, "\n");
-        assert_eq!(out, "foo\"bar".to_string());
+        assert_eq!(out, "foo\"bar'qux".to_string());
+    }
+
+    #[test]
+    fn test_single_quoted_string() {
+        let (rem, out) = single_quoted_string.parse_peek("\'foo bar\'\n").unwrap();
+        assert_eq!(rem, "\n");
+        assert_eq!(out, "foo bar".to_string());
+
+        let (rem, out) = single_quoted_string
+            .parse_peek("\'foo\\\'bar\"qux\'\n")
+            .unwrap();
+        assert_eq!(rem, "\n");
+        assert_eq!(out, "foo\'bar\"qux".to_string());
     }
 
     #[test]
