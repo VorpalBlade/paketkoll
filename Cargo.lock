@@ -3036,7 +3036,7 @@ dependencies = [
 
 [[package]]
 name = "systemd_tmpfiles"
-version = "0.2.7"
+version = "0.2.8"
 dependencies = [
  "base64-simd",
  "bitflags 2.10.0",

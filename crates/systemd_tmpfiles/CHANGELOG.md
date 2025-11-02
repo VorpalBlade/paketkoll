@@ -8,6 +8,18 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.8] - 2025-11-02
+
+### 🐛 Bug fixes
+
+- Added single quoted strings
+- Allow argument field to contain unquoted spaces (and only allow unquoted)
+
+### 🧪 Testing
+
+- Add file level parser test for systemd_tmpfiles
+
+
 ## [0.2.7] - 2025-07-14
 
 ### ⚙️ Other stuff
