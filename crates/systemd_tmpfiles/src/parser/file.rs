@@ -512,4 +512,39 @@ mod tests {
             }
         );
     }
+
+    #[test]
+    fn test_parse_file() {
+        let input = "# This is a comment\nL /tmp/foo 0644 - - - /tmp/target\nC /var";
+        let (rest, lines) = parse_file.parse_peek(input).unwrap();
+        assert_eq!(rest, "");
+        assert_eq!(
+            lines,
+            vec![
+                None,
+                Some(Line {
+                    entry_type: "L".into(),
+                    path: "/tmp/foo".into(),
+                    mode: Some(Mode::Set {
+                        mode: 0o644,
+                        new_only: false,
+                        masked: false
+                    }),
+                    user: Id::Caller { new_only: false },
+                    group: Id::Caller { new_only: false },
+                    age: None,
+                    argument: Some("/tmp/target".into())
+                }),
+                Some(Line {
+                    entry_type: "C".into(),
+                    path: "/var".into(),
+                    mode: None,
+                    user: Id::Caller { new_only: false },
+                    group: Id::Caller { new_only: false },
+                    age: None,
+                    argument: None
+                })
+            ],
+        );
+    }
 }
