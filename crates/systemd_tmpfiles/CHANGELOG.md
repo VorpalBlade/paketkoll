@@ -19,6 +19,9 @@ releases.
 
 - Add file level parser test for systemd_tmpfiles
 
+### New contributors
+
+- @nullie
 
 ## [0.2.7] - 2025-07-14
 
