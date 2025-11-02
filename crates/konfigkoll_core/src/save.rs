@@ -195,7 +195,7 @@ mod tests {
 
         let interner = Interner::default();
 
-        let instructions = vec![
+        let instructions = [
             FsInstruction {
                 op: FsOp::CreateFile(FileContents::from_literal("hello".as_bytes().into())),
                 path: Utf8PathBuf::from("/hello/world"),
