@@ -1294,7 +1294,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll"
-version = "0.1.15"
+version = "0.1.16"
 dependencies = [
  "ahash",
  "camino",
@@ -1326,7 +1326,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_core"
-version = "0.5.6"
+version = "0.5.7"
 dependencies = [
  "ahash",
  "camino",
@@ -1354,7 +1354,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_hwinfo"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "ahash",
  "eyre",
@@ -1368,7 +1368,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_script"
-version = "0.1.13"
+version = "0.1.14"
 dependencies = [
  "ahash",
  "annotate-snippets",
@@ -1401,7 +1401,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_types"
-version = "0.2.9"
+version = "0.2.10"
 dependencies = [
  "camino",
  "compact_str",
@@ -1415,7 +1415,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_utils"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "camino",
  "compact_str",
@@ -1606,7 +1606,7 @@ dependencies = [
 
 [[package]]
 name = "mtree2"
-version = "0.6.14"
+version = "0.6.15"
 dependencies = [
  "bitflags 2.10.0",
  "faster-hex",
@@ -1930,7 +1930,7 @@ checksum = "9c6901729fa79e91a0913333229e9ca5dc725089d1c363b2f4b4760709dc4a52"
 
 [[package]]
 name = "paketkoll"
-version = "0.3.13"
+version = "0.3.14"
 dependencies = [
  "ahash",
  "clap",
@@ -1954,7 +1954,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_cache"
-version = "0.2.12"
+version = "0.2.13"
 dependencies = [
  "ahash",
  "cached",
@@ -1970,7 +1970,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_core"
-version = "0.5.13"
+version = "0.5.14"
 dependencies = [
  "ahash",
  "ar",
@@ -2015,7 +2015,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_types"
-version = "0.2.7"
+version = "0.2.8"
 dependencies = [
  "ahash",
  "bitflags 2.10.0",
@@ -2036,7 +2036,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_utils"
-version = "0.1.12"
+version = "0.1.13"
 dependencies = [
  "eyre",
  "paketkoll_types",
@@ -3036,7 +3036,7 @@ dependencies = [
 
 [[package]]
 name = "systemd_tmpfiles"
-version = "0.2.8"
+version = "0.2.9"
 dependencies = [
  "base64-simd",
  "bitflags 2.10.0",
