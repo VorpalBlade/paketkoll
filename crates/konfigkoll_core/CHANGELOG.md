@@ -8,6 +8,17 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.5.7] - 2025-12-08
+
+### 🐛 Bug fixes
+
+- Fix clippy warnings on rust 1.91
+
+### 🩺 Diagnostics & output formatting
+
+- Improve debug level diagnostics
+
+
 ## [0.5.6] - 2025-07-14
 
 ### ⚙️ Other stuff
