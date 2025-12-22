@@ -8,6 +8,25 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.16] - 2025-12-22
+
+### 🐛 Bug fixes
+
+- Fix clippy warnings on rust 1.91
+
+### 🩺 Diagnostics & output formatting
+
+- Improve debug level diagnostics
+
+### 🚜 Refactoring
+
+- Change tokio builder logic
+
+### ⚙️ Other stuff
+
+- Update Cargo.toml dependencies
+
+
 ## [0.1.15] - 2025-07-14
 
 ### ⚙️ Other stuff
