@@ -65,7 +65,7 @@ syn = { version = "2", features = ["extra-traits", "fold", "full", "visit", "vis
 
 [target.x86_64-unknown-linux-gnu.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
-miniz_oxide = { version = "0.8", default-features = false, features = ["simd", "with-alloc"] }
+miniz_oxide = { version = "0.9", default-features = false, features = ["simd", "with-alloc"] }
 nix = { version = "0.30" }
 rustix = { version = "1", features = ["fs"] }
 
@@ -74,7 +74,7 @@ libc = { version = "0.2", features = ["extra_traits"] }
 
 [target.x86_64-unknown-linux-musl.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
-miniz_oxide = { version = "0.8", default-features = false, features = ["simd", "with-alloc"] }
+miniz_oxide = { version = "0.9", default-features = false, features = ["simd", "with-alloc"] }
 nix = { version = "0.30" }
 rustix = { version = "1", features = ["fs"] }
 
@@ -83,7 +83,7 @@ libc = { version = "0.2", features = ["extra_traits"] }
 
 [target.aarch64-unknown-linux-musl.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
-miniz_oxide = { version = "0.8", default-features = false, features = ["simd", "with-alloc"] }
+miniz_oxide = { version = "0.9", default-features = false, features = ["simd", "with-alloc"] }
 nix = { version = "0.30" }
 rustix = { version = "1", features = ["fs"] }
 
