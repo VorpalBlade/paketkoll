@@ -509,8 +509,8 @@ impl Params {
             Keyword::Md5(md5) => self.md5 = Some(md5),
             Keyword::Mode(mode) => self.mode = Some(mode),
             Keyword::NLink(nlink) => self.nlink = Some(nlink),
-            Keyword::NoChange => self.no_change = false,
-            Keyword::Optional => self.optional = false,
+            Keyword::NoChange => self.no_change = true,
+            Keyword::Optional => self.optional = true,
             Keyword::ResidentDeviceRef(device) => {
                 self.resident_device = Some(Box::new(device.to_device()));
             }
@@ -757,5 +757,14 @@ size=581  \";
             },
         };
         assert_eq!(entry, should);
+    }
+
+    #[test]
+    fn test_nochange_optional_flags() {
+        let data = "foo nochange optional\n";
+        let mut mtree = MTree::from_reader_with_empty_cwd(Cursor::new(data.as_bytes()));
+        let entry = mtree.next().unwrap().unwrap();
+        assert!(entry.no_change());
+        assert!(entry.optional());
     }
 }
