@@ -8,6 +8,13 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.9] - 2026-01-24
+
+### ⚙️ Other stuff
+
+- Add contributor in changelog
+
+
 ## [0.2.8] - 2025-11-02
 
 ### 🐛 Bug fixes

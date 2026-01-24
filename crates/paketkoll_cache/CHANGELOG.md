@@ -8,6 +8,13 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.2.13] - 2026-01-24
+
+### ⚡ Performance improvements
+
+- Don't call the underlying original_files if everything was found in cache
+
+
 ## [0.2.12] - 2025-07-14
 
 ### ⚙️ Other stuff
