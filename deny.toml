@@ -84,7 +84,7 @@ ignore = [
     #{ crate = "a-crate-that-is-yanked@0.1.1", reason = "you can specify why you are ignoring the yanked crate" },
     { id = "RUSTSEC-2024-0320", reason = "yaml-rust is not actually used (given the feature flags that are in use)" },
     { id = "RUSTSEC-2024-0384", reason = "Only relevant to WASM, which this doesn't target" },
-    { id = "RUSTSEC-2024-0436", reason = "paste is unmaintained, but no option is available, indirect dependency" },
+    { id = "RUSTSEC-2025-0141", reason = "bincode is unmaintained, but this is an indirect dependency (and not actually used)" },
     { id = "RUSTSEC-2025-0057", reason = "fxhash is unmaintained, but we need sled to to switch over, and then cached (indirect dependency)." },
 
 ]

@@ -14,15 +14,15 @@ cached = { version = "0.56.0", features = [
     "ahash",
     "disk_store",
 ], default-features = false }
-camino = "1.2.1"
+camino = "1.2.2"
 cfg-if = "1.0.4"
-clap = { version = "4.5.53", features = ["derive"] }
-clap_complete = "4.5.61"
+clap = { version = "4.5.54", features = ["derive"] }
+clap_complete = "4.5.65"
 clap_mangen = "0.2.31"
 clru = "0.6.2"
 color-eyre = "0.6.5"
 compact_str = { version = "0.9.0", features = ["serde", "smallvec"] }
-console = "0.16.1"
+console = "0.16.2"
 dashmap = "6.1.0"
 derive_builder = "0.20.2"
 directories = "6.0.0"
@@ -33,27 +33,27 @@ eyre = "0.6.12"
 faster-hex = { version = "0.10.0", default-features = false, features = [
     "std",
 ] }
-flate2 = { version = "1.1.5", default-features = false, features = ["zlib-rs"] }
+flate2 = { version = "1.1.8", default-features = false, features = ["zlib-rs"] }
 flume = { version = "0.11.1", default-features = false }
 glob = "0.3.3"
 globset = "0.4.18"
 hashify = "0.2.7"
 ignore = { version = "0.4.25", features = ["simd-accel"] }
 indoc = "2.0.7"
-insta = "1.44.3"
+insta = "1.46.1"
 itertools = "0.14.0"
 lasso = { version = "0.7.3", features = [
     "ahasher",
     "inline-more",
     "multi-threaded",
 ] }
-libc = "0.2.177"
+libc = "0.2.180"
 md-5 = "0.10.6"
 memchr = "2.7.6"
 mimalloc = "0.1.48"
 nix = { version = "0.30.1", default-features = false }
 num_cpus = "1.17.0"
-os_info = { version = "3.13.0", default-features = false }
+os_info = { version = "3.14.0", default-features = false }
 ouroboros = "0.18.5"
 parking_lot = "0.12.5"
 pretty_assertions = "1.4.1"
@@ -72,7 +72,7 @@ rust-ini = "0.21.3"
 scopeguard = "1.2.0"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_bytes = "0.11.19"
-serde_json = "1.0.145"
+serde_json = "1.0.149"
 smallvec = { version = "1.15.1", features = [
     "const_generics",
     "const_new",
@@ -85,15 +85,15 @@ sysinfo = { version = "0.37.2", default-features = false, features = [
     "system",
 ] }
 tar = "0.4.44"
-tempfile = "3.23.0"
-thiserror = "2.0.17"
-tokio = { version = "1.48.0", features = [
+tempfile = "3.24.0"
+thiserror = "2.0.18"
+tokio = { version = "1.49.0", features = [
     "macros",
     "parking_lot",
     "process",
     "rt",
 ] }
-tracing = "0.1.43"
+tracing = "0.1.44"
 tracing-error = "0.2.1"
 tracing-subscriber = { version = "0.3.22", features = [
     "env-filter",
