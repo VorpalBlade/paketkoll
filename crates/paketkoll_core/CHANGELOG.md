@@ -8,6 +8,17 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.5.14] - 2026-01-24
+
+### 🩺 Diagnostics & output formatting
+
+- Improve debug level diagnostics
+
+### ⚙️ Other stuff
+
+- Release systemd_tmpfiles
+
+
 ## [0.5.13] - 2025-07-14
 
 ### ⚙️ Other stuff

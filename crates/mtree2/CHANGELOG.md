@@ -8,6 +8,13 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.6.15] - 2026-01-24
+
+### 🐛 Bug fixes
+
+- Honor nochange/optional keywords
+
+
 ## [0.6.14] - 2025-07-14
 
 ### 🚀 Features
