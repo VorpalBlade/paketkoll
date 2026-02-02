@@ -67,7 +67,7 @@ jobs:
           echo "# Ld"
           ld -v
       - name: Install cross
-        uses: taiki-e/install-action@887bc4e03483810873d617344dd5189cd82e7b8b # v2.67.11
+        uses: taiki-e/install-action@650c5ca14212efbbf3e580844b04bdccf68dac31 # v2.67.18
         with:
           tool: cross@latest
       # Cache doesn't work when cross compiling anyway.
@@ -174,7 +174,7 @@ jobs:
           podman --version
       - name: Cache podman image
         id: cache-podman
-        uses: actions/cache@8b402f58fbc84540c8b491a91e594a4576fec3d7 # v5.0.2
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
         with:
           path: |
             ~/podman_cache
