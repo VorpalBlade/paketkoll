@@ -1322,7 +1322,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll"
-version = "0.1.16"
+version = "0.1.17"
 dependencies = [
  "ahash",
  "camino",
@@ -2103,7 +2103,7 @@ checksum = "9c6901729fa79e91a0913333229e9ca5dc725089d1c363b2f4b4760709dc4a52"
 
 [[package]]
 name = "paketkoll"
-version = "0.3.14"
+version = "0.3.15"
 dependencies = [
  "ahash",
  "clap",
@@ -2143,7 +2143,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_core"
-version = "0.5.14"
+version = "0.5.15"
 dependencies = [
  "ahash",
  "ar",
