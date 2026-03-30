@@ -4,13 +4,13 @@ resolver = "2"
 
 [workspace.dependencies]
 ahash = "0.8.12"
-annotate-snippets = { version = "0.11.5", features = ["simd"] }
+annotate-snippets = { version = "0.12.12", features = ["simd"] }
 ar = "0.9.0"
 base64-simd = "0.8.0"
 bitflags = { version = "2.10.0", features = ["serde"] }
 bstr = "1.12.1"
 bzip2 = "0.6.1"
-cached = { version = "0.56.0", features = [
+cached = { version = "0.59.0", features = [
     "ahash",
     "disk_store",
 ], default-features = false }
@@ -18,7 +18,7 @@ camino = "1.2.2"
 cfg-if = "1.0.4"
 clap = { version = "4.5.54", features = ["derive"] }
 clap_complete = "4.5.65"
-clap_mangen = "0.2.31"
+clap_mangen = "0.3.0"
 clru = "0.6.2"
 color-eyre = "0.6.5"
 compact_str = { version = "0.9.0", features = ["serde", "smallvec"] }
@@ -34,7 +34,7 @@ faster-hex = { version = "0.10.0", default-features = false, features = [
     "std",
 ] }
 flate2 = { version = "1.1.8", default-features = false, features = ["zlib-rs"] }
-flume = { version = "0.11.1", default-features = false }
+flume = { version = "0.12.0", default-features = false }
 glob = "0.3.3"
 globset = "0.4.18"
 hashify = "0.2.7"
@@ -48,10 +48,10 @@ lasso = { version = "0.7.3", features = [
     "multi-threaded",
 ] }
 libc = "0.2.180"
-md-5 = "0.10.6"
+md-5 = "0.11.0"
 memchr = "2.7.6"
 mimalloc = "0.1.48"
-nix = { version = "0.30.1", default-features = false }
+nix = { version = "0.31.1", default-features = false }
 num_cpus = "1.17.0"
 os_info = { version = "3.14.0", default-features = false }
 ouroboros = "0.18.5"
@@ -62,7 +62,7 @@ rayon = "1.11.0"
 regex = "1.12.2"
 ring = "0.17.14"
 rune = "0.13.4"
-rune-modules = { version = "0.13.4", features = [
+rune-modules = { version = "0.14.1", features = [
     "json",
     "process",
     "tokio",
@@ -79,8 +79,8 @@ smallvec = { version = "1.15.1", features = [
     "serde",
     "union",
 ] }
-strum = { version = "0.27.2", features = ["derive"] }
-sysinfo = { version = "0.37.2", default-features = false, features = [
+strum = { version = "0.28.0", features = ["derive"] }
+sysinfo = { version = "0.38.4", default-features = false, features = [
     "multithread",
     "system",
 ] }
@@ -99,7 +99,7 @@ tracing-subscriber = { version = "0.3.22", features = [
     "env-filter",
     "parking_lot",
 ] }
-winnow = { version = "0.7.14", features = ["simd"] }
+winnow = { version = "1.0.0", features = ["simd"] }
 xz2 = "0.1.7"
 zstd = "0.13.3"
 
