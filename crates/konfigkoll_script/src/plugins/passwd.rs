@@ -100,8 +100,8 @@ impl Passwd {
                         "More than one user maps to UID: {} ({})",
                         user.uid,
                         self.users
-                            .iter()
-                            .filter_map(|(_, v)| if v.uid == user.uid {
+                            .values()
+                            .filter_map(|v| if v.uid == user.uid {
                                 Some(v.name.as_str())
                             } else {
                                 None
@@ -120,8 +120,8 @@ impl Passwd {
                         "More than one group maps to GID: {} ({})",
                         group.gid,
                         self.groups
-                            .iter()
-                            .filter_map(|(_, v)| if v.gid == group.gid {
+                            .values()
+                            .filter_map(|v| if v.gid == group.gid {
                                 Some(v.name.as_str())
                             } else {
                                 None
