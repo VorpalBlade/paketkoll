@@ -7,7 +7,7 @@ ahash = "0.8.12"
 annotate-snippets = { version = "0.11.5", features = ["simd"] }
 ar = "0.9.0"
 base64-simd = "0.8.0"
-bitflags = { version = "2.10.0", features = ["serde"] }
+bitflags = { version = "2.11.1", features = ["serde"] }
 bstr = "1.12.1"
 bzip2 = "0.6.1"
 cached = { version = "0.56.0", features = [
@@ -16,13 +16,13 @@ cached = { version = "0.56.0", features = [
 ], default-features = false }
 camino = "1.2.2"
 cfg-if = "1.0.4"
-clap = { version = "4.5.54", features = ["derive"] }
-clap_complete = "4.5.65"
-clap_mangen = "0.2.31"
-clru = "0.6.2"
+clap = { version = "4.6.1", features = ["derive"] }
+clap_complete = "4.6.3"
+clap_mangen = "0.2.33"
+clru = "0.6.3"
 color-eyre = "0.6.5"
 compact_str = { version = "0.9.0", features = ["serde", "smallvec"] }
-console = "0.16.2"
+console = "0.16.3"
 dashmap = "6.1.0"
 derive_builder = "0.20.2"
 directories = "6.0.0"
@@ -33,24 +33,24 @@ eyre = "0.6.12"
 faster-hex = { version = "0.10.0", default-features = false, features = [
     "std",
 ] }
-flate2 = { version = "1.1.8", default-features = false, features = ["zlib-rs"] }
+flate2 = { version = "1.1.9", default-features = false, features = ["zlib-rs"] }
 flume = { version = "0.11.1", default-features = false }
 glob = "0.3.3"
 globset = "0.4.18"
-hashify = "0.2.7"
+hashify = "0.2.9"
 ignore = { version = "0.4.25", features = ["simd-accel"] }
 indoc = "2.0.7"
-insta = "1.46.1"
+insta = "1.47.2"
 itertools = "0.14.0"
 lasso = { version = "0.7.3", features = [
     "ahasher",
     "inline-more",
     "multi-threaded",
 ] }
-libc = "0.2.180"
+libc = "0.2.186"
 md-5 = "0.10.6"
-memchr = "2.7.6"
-mimalloc = "0.1.48"
+memchr = "2.8.0"
+mimalloc = "0.1.50"
 nix = { version = "0.30.1", default-features = false }
 num_cpus = "1.17.0"
 os_info = { version = "3.14.0", default-features = false }
@@ -58,8 +58,8 @@ ouroboros = "0.18.5"
 parking_lot = "0.12.5"
 pretty_assertions = "1.4.1"
 proc-exit = "2.0.2"
-rayon = "1.11.0"
-regex = "1.12.2"
+rayon = "1.12.0"
+regex = "1.12.3"
 ring = "0.17.14"
 rune = "0.13.4"
 rune-modules = { version = "0.13.4", features = [
@@ -85,9 +85,9 @@ sysinfo = { version = "0.37.2", default-features = false, features = [
     "system",
 ] }
 tar = "0.4.45"
-tempfile = "3.24.0"
+tempfile = "3.27.0"
 thiserror = "2.0.18"
-tokio = { version = "1.49.0", features = [
+tokio = { version = "1.52.1", features = [
     "macros",
     "parking_lot",
     "process",
@@ -95,11 +95,11 @@ tokio = { version = "1.49.0", features = [
 ] }
 tracing = "0.1.44"
 tracing-error = "0.2.1"
-tracing-subscriber = { version = "0.3.22", features = [
+tracing-subscriber = { version = "0.3.23", features = [
     "env-filter",
     "parking_lot",
 ] }
-winnow = { version = "0.7.14", features = ["simd"] }
+winnow = { version = "0.7.15", features = ["simd"] }
 xz2 = "0.1.7"
 zstd = "0.13.3"
 
