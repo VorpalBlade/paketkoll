@@ -2289,6 +2289,7 @@ dependencies = [
  "cc",
  "clap",
  "clap_builder",
+ "console",
  "crossbeam-epoch",
  "dashmap",
  "either",
