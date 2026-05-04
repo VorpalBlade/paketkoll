@@ -67,7 +67,7 @@ jobs:
           echo "# Ld"
           ld -v
       - name: Install cross
-        uses: taiki-e/install-action@e9e8e031bcd90cdbe8ac6bb1d376f8596e587fbf # v2.70.2
+        uses: taiki-e/install-action@db5fb34fa772531a3ece57ca434f579eb334e0fb # v2.75.30
         with:
           tool: cross@latest
       # Cache doesn't work when cross compiling anyway.
@@ -97,7 +97,7 @@ jobs:
           fi
           tar cf paketkoll.tar paketkoll
           zstd -T0 -6 paketkoll.tar
-      - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: matrix.rust == 'stable' && contains(matrix.target, 'musl')
         with:
           name: paketkoll_${{ matrix.target }}.tar.zst
@@ -174,7 +174,7 @@ jobs:
           podman --version
       - name: Cache podman image
         id: cache-podman
-        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: |
             ~/podman_cache
