@@ -8,6 +8,15 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.17] - 2026-05-15
+
+### ⚙️ Other stuff
+
+- Update to Rust 1.95.0
+- Update to Rust 1.91.0
+- Fix clippy warning
+
+
 ## [0.1.16] - 2026-01-24
 
 ### 🐛 Bug fixes

@@ -8,6 +8,14 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.3.15] - 2026-05-15
+
+### ⚙️ Other stuff
+
+- Update to Rust 1.95.0
+- Update to Rust 1.91.0
+
+
 ## [0.3.14] - 2026-01-24
 
 ### ⚙️ Other stuff

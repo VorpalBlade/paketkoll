@@ -1418,7 +1418,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll"
-version = "0.1.16"
+version = "0.1.17"
 dependencies = [
  "ahash",
  "camino",
@@ -1450,7 +1450,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_core"
-version = "0.5.7"
+version = "0.5.8"
 dependencies = [
  "ahash",
  "camino",
@@ -1478,7 +1478,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_hwinfo"
-version = "0.1.13"
+version = "0.1.14"
 dependencies = [
  "ahash",
  "eyre",
@@ -1492,7 +1492,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_script"
-version = "0.1.14"
+version = "0.1.15"
 dependencies = [
  "ahash",
  "annotate-snippets",
@@ -1525,7 +1525,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_types"
-version = "0.2.10"
+version = "0.2.11"
 dependencies = [
  "camino",
  "compact_str",
@@ -1539,7 +1539,7 @@ dependencies = [
 
 [[package]]
 name = "konfigkoll_utils"
-version = "0.1.10"
+version = "0.1.11"
 dependencies = [
  "camino",
  "compact_str",
@@ -1724,7 +1724,7 @@ dependencies = [
 
 [[package]]
 name = "mtree2"
-version = "0.6.15"
+version = "0.6.16"
 dependencies = [
  "bitflags 2.11.1",
  "faster-hex",
@@ -2214,7 +2214,7 @@ checksum = "d211803b9b6b570f68772237e415a029d5a50c65d382910b879fb19d3271f94d"
 
 [[package]]
 name = "paketkoll"
-version = "0.3.14"
+version = "0.3.15"
 dependencies = [
  "ahash",
  "clap",
@@ -2238,7 +2238,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_cache"
-version = "0.2.13"
+version = "0.2.14"
 dependencies = [
  "ahash",
  "cached",
@@ -2254,7 +2254,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_core"
-version = "0.5.14"
+version = "0.5.15"
 dependencies = [
  "ahash",
  "ar",
@@ -2299,7 +2299,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_types"
-version = "0.2.8"
+version = "0.2.9"
 dependencies = [
  "ahash",
  "bitflags 2.11.1",
@@ -2320,7 +2320,7 @@ dependencies = [
 
 [[package]]
 name = "paketkoll_utils"
-version = "0.1.13"
+version = "0.1.14"
 dependencies = [
  "eyre",
  "paketkoll_types",
@@ -3329,7 +3329,7 @@ dependencies = [
 
 [[package]]
 name = "systemd_tmpfiles"
-version = "0.2.9"
+version = "0.2.10"
 dependencies = [
  "base64-simd",
  "bitflags 2.11.1",
