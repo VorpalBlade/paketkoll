@@ -19,6 +19,7 @@ publish = false
 [dependencies]
 ahash = { version = "0.8", features = ["no-rng"] }
 aho-corasick = { version = "1" }
+anstyle = { version = "1" }
 bitflags = { version = "2", default-features = false, features = ["serde"] }
 bstr = { version = "1" }
 byteorder = { version = "1" }

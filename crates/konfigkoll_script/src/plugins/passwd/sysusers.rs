@@ -1,5 +1,6 @@
 //! Parser for systemd sysusers.d files.
 
+use annotate_snippets::AnnotationKind;
 use compact_str::CompactString;
 use winnow::ModalResult;
 use winnow::Parser;
@@ -46,15 +47,15 @@ impl SysusersParseError {
 
 impl std::fmt::Display for SysusersParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let message = annotate_snippets::Level::Error
-            .title(&self.message)
-            .snippet(
-                annotate_snippets::Snippet::source(&self.input)
-                    .fold(true)
-                    .annotation(annotate_snippets::Level::Error.span(self.span.clone())),
-            );
+        let level = annotate_snippets::Level::ERROR;
+        let title = level.primary_title(&self.message);
+        let group = title.element(
+            annotate_snippets::Snippet::source(&self.input)
+                .fold(true)
+                .annotation(AnnotationKind::Primary.span(self.span.clone())),
+        );
         let renderer = annotate_snippets::Renderer::plain();
-        let rendered = renderer.render(message);
+        let rendered = renderer.render(&[group]);
         rendered.fmt(f)
     }
 }
