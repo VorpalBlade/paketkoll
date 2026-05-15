@@ -22,8 +22,6 @@ aho-corasick = { version = "1" }
 bitflags = { version = "2", default-features = false, features = ["serde"] }
 bstr = { version = "1" }
 byteorder = { version = "1" }
-clap = { version = "4", features = ["derive", "env"] }
-clap_builder = { version = "4", default-features = false, features = ["color", "env", "help", "std", "suggestions", "usage"] }
 console = { version = "0.16" }
 crossbeam-epoch = { version = "0.9" }
 dashmap = { version = "6", default-features = false, features = ["raw-api", "rayon"] }
@@ -35,7 +33,7 @@ libc = { version = "0.2", features = ["extra_traits"] }
 log = { version = "0.4", default-features = false, features = ["std"] }
 memchr = { version = "2" }
 musli = { version = "0.0.42", default-features = false, features = ["std"] }
-nix = { version = "0.30", default-features = false, features = ["fs", "user"] }
+nix = { version = "0.31", default-features = false, features = ["fs", "user"] }
 num-traits = { version = "0.2", default-features = false, features = ["i128", "std"] }
 once_cell = { version = "1", features = ["critical-section"] }
 regex-automata = { version = "0.4", default-features = false, features = ["dfa-build", "dfa-onepass", "hybrid", "meta", "nfa", "perf", "std", "unicode"] }
@@ -50,6 +48,7 @@ tokio = { version = "1", features = ["fs", "io-std", "io-util", "macros", "parki
 tracing = { version = "0.1" }
 tracing-core = { version = "0.1" }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "parking_lot"] }
+typenum = { version = "1", default-features = false, features = ["const-generics"] }
 
 [build-dependencies]
 ahash = { version = "0.8", features = ["no-rng"] }
@@ -63,11 +62,11 @@ rune-core = { version = "0.13", features = ["doc", "musli", "std"] }
 serde = { version = "1", features = ["alloc", "derive", "rc"] }
 serde_core = { version = "1", default-features = false, features = ["alloc", "rc", "result", "std"] }
 syn = { version = "2", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
+typenum = { version = "1", default-features = false, features = ["const-generics"] }
 
 [target.x86_64-unknown-linux-gnu.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
 miniz_oxide = { version = "0.8", default-features = false, features = ["simd", "with-alloc"] }
-nix = { version = "0.30" }
 rustix = { version = "1", features = ["fs"] }
 
 [target.x86_64-unknown-linux-gnu.build-dependencies]
@@ -76,7 +75,6 @@ libc = { version = "0.2", features = ["extra_traits"] }
 [target.x86_64-unknown-linux-musl.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
 miniz_oxide = { version = "0.8", default-features = false, features = ["simd", "with-alloc"] }
-nix = { version = "0.30" }
 rustix = { version = "1", features = ["fs"] }
 
 [target.x86_64-unknown-linux-musl.build-dependencies]
@@ -85,7 +83,6 @@ libc = { version = "0.2", features = ["extra_traits"] }
 [target.aarch64-unknown-linux-musl.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
 miniz_oxide = { version = "0.8", default-features = false, features = ["simd", "with-alloc"] }
-nix = { version = "0.30" }
 rustix = { version = "1", features = ["fs"] }
 
 [target.aarch64-unknown-linux-musl.build-dependencies]
