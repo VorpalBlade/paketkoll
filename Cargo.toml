@@ -84,7 +84,7 @@ sysinfo = { version = "0.39.1", default-features = false, features = [
     "multithread",
     "system",
 ] }
-tar = "0.4.45"
+tar = "0.4.46"
 tempfile = "3.27.0"
 thiserror = "2.0.18"
 tokio = { version = "1.52.3", features = [
