@@ -50,4 +50,21 @@ install-konfigkoll: target/release/konfigkoll target/release/konfigkoll-rune tar
 install-dirs:
 	install -d $(DESTDIR)$(BINDIR) $(DESTDIR)$(BASHDIR) $(DESTDIR)$(ZSHDIR) $(DESTDIR)$(FISHDIR) $(DESTDIR)$(MANDIR)
 
-.PHONY: all build-cargo test install install-paketkoll install-konfigkoll install-dirs $(PROGS)
+uninstall-paketkoll:
+	rm -f \
+		$(DESTDIR)$(BINDIR)/paketkoll \
+		$(DESTDIR)$(MANDIR)/paketkoll.1 \
+		$(DESTDIR)$(BASHDIR)/paketkoll \
+		$(DESTDIR)$(FISHDIR)/paketkoll.fish \
+		$(DESTDIR)$(ZSHDIR)/_paketkoll
+
+uninstall-konfigkoll:
+	rm -f \
+		$(DESTDIR)$(BINDIR)/konfigkoll \
+		$(DESTDIR)$(BINDIR)/konfigkoll-rune \
+		$(DESTDIR)$(MANDIR)/konfigkoll.1 \
+		$(DESTDIR)$(BASHDIR)/konfigkoll \
+		$(DESTDIR)$(FISHDIR)/konfigkoll.fish \
+		$(DESTDIR)$(ZSHDIR)/_konfigkoll
+
+.PHONY: all build-cargo test install install-paketkoll install-konfigkoll install-dirs uninstall-paketkoll uninstall-konfigkoll $(PROGS)
