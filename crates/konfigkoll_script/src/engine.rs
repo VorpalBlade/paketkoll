@@ -191,7 +191,7 @@ impl ScriptEngine {
         let output = match output {
             Ok(output) => output,
             Err(e) => {
-                let err_str = format!("Rune error while executing {phase}: {}", e);
+                let err_str = format!("Rune error while executing {phase}: {e}");
                 tracing::error!("{}", err_str);
                 let mut writer = Buffer::ansi();
                 e.emit(&mut writer, &self.sources)?;
