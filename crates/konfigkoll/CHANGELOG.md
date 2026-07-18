@@ -8,6 +8,22 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.18] - 2026-07-18
+
+### 🚀 Features
+
+- Add Makefile uninstallation support
+
+### 🐛 Bug fixes
+
+- Roll back deny-by-default for future_incompatible in nightly rust until eyre is fixed.
+
+### ⚙️ Other stuff
+
+- Update Cargo.toml dependencies
+- Syntax fix according to cargo clippy
+
+
 ## [0.1.17] - 2026-05-15
 
 ### ⚙️ Other stuff
