@@ -8,6 +8,13 @@ edited).
 For a possibly more edited message focused on the binary please see the github
 releases.
 
+## [0.1.15] - 2026-07-18
+
+### 🐛 Bug fixes
+
+- Roll back deny-by-default for future_incompatible in nightly rust until eyre is fixed.
+
+
 ## [0.1.14] - 2026-05-15
 
 ### ⚙️ Other stuff
