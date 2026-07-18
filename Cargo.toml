@@ -7,28 +7,28 @@ ahash = "0.8.12"
 annotate-snippets = { version = "0.12.16", features = ["simd"] }
 ar = "0.9.0"
 base64-simd = "0.8.0"
-bitflags = { version = "2.11.1", features = ["serde"] }
-bstr = "1.12.1"
+bitflags = { version = "2.13.1", features = ["serde"] }
+bstr = "1.13.0"
 bzip2 = "0.6.1"
 cached = { version = "0.59.0", features = [
     "ahash",
     "disk_store",
 ], default-features = false }
-camino = "1.2.2"
+camino = "1.2.4"
 cfg-if = "1.0.4"
-clap = { version = "4.6.1", features = ["derive"] }
-clap_complete = "4.6.5"
+clap = { version = "4.6.2", features = ["derive"] }
+clap_complete = "4.6.7"
 clap_mangen = "0.3.0"
 clru = "0.6.3"
 color-eyre = "0.6.5"
-compact_str = { version = "0.9.0", features = ["serde", "smallvec"] }
-console = "0.16.3"
-dashmap = "6.1.0"
+compact_str = { version = "0.9.1", features = ["serde", "smallvec"] }
+console = "0.16.4"
+dashmap = "6.2.1"
 derive_builder = "0.20.2"
 directories = "6.0.0"
 dirs = "6.0.0"
 duct = "1.1.1"
-either = "1.15.0"
+either = "1.16.0"
 eyre = "0.6.12"
 faster-hex = { version = "0.10.0", default-features = false, features = [
     "std",
@@ -36,11 +36,11 @@ faster-hex = { version = "0.10.0", default-features = false, features = [
 flate2 = { version = "1.1.9", default-features = false, features = ["zlib-rs"] }
 flume = { version = "0.12.0", default-features = false }
 glob = "0.3.3"
-globset = "0.4.18"
+globset = "0.4.19"
 hashify = "0.2.9"
-ignore = { version = "0.4.25", features = ["simd-accel"] }
+ignore = { version = "0.4.30", features = ["simd-accel"] }
 indoc = "2.0.7"
-insta = "1.47.2"
+insta = "1.48.0"
 itertools = "0.14.0"
 lasso = { version = "0.7.3", features = [
     "ahasher",
@@ -49,17 +49,17 @@ lasso = { version = "0.7.3", features = [
 ] }
 libc = "0.2.186"
 md-5 = "0.11.0"
-memchr = "2.8.0"
-mimalloc = "0.1.50"
+memchr = "2.8.3"
+mimalloc = "0.1.52"
 nix = { version = "0.31.3", default-features = false }
 num_cpus = "1.17.0"
-os_info = { version = "3.14.0", default-features = false }
+os_info = { version = "3.15.0", default-features = false }
 ouroboros = "0.18.5"
 parking_lot = "0.12.5"
 pretty_assertions = "1.4.1"
 proc-exit = "2.0.2"
 rayon = "1.12.0"
-regex = "1.12.3"
+regex = "1.13.1"
 ring = "0.17.14"
 rune = "0.13.4"
 rune-modules = { version = "0.13.4", features = [
@@ -72,22 +72,22 @@ rust-ini = "0.21.3"
 scopeguard = "1.2.0"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_bytes = "0.11.19"
-serde_json = "1.0.149"
-smallvec = { version = "1.15.1", features = [
+serde_json = "1.0.150"
+smallvec = { version = "1.15.2", features = [
     "const_generics",
     "const_new",
     "serde",
     "union",
 ] }
 strum = { version = "0.28.0", features = ["derive"] }
-sysinfo = { version = "0.39.1", default-features = false, features = [
+sysinfo = { version = "0.39.6", default-features = false, features = [
     "multithread",
     "system",
 ] }
 tar = "0.4.46"
 tempfile = "3.27.0"
 thiserror = "2.0.18"
-tokio = { version = "1.52.3", features = [
+tokio = { version = "1.53.0", features = [
     "macros",
     "parking_lot",
     "process",
@@ -99,7 +99,7 @@ tracing-subscriber = { version = "0.3.23", features = [
     "env-filter",
     "parking_lot",
 ] }
-winnow = { version = "1.0.3", features = ["simd", "ascii"] }
+winnow = { version = "1.0.4", features = ["simd", "ascii"] }
 xz2 = "0.1.7"
 zstd = "0.13.3"
 
