@@ -10,6 +10,8 @@
 //! You should use [`konfigkoll`](https://crates.io/crates/konfigkoll) the
 //! command line tool instead.
 
+#![allow(semicolon_in_expressions_from_macros)]
+
 pub use engine::EngineState;
 pub use engine::ScriptEngine;
 pub use plugins::command::Commands;

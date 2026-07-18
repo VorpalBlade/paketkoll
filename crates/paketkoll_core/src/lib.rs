@@ -5,6 +5,8 @@
 //! differences. The plan is detailed in the README.md in the crate directory in
 //! the repository.
 
+#![allow(semicolon_in_expressions_from_macros)]
+
 /// Re-export for downstream to get the correct version
 pub use paketkoll_types;
 

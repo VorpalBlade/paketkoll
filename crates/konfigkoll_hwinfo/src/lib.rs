@@ -6,4 +6,6 @@
 //!
 //! Everything here is Linux only and should work without root access.
 
+#![allow(semicolon_in_expressions_from_macros)]
+
 pub mod pci;
