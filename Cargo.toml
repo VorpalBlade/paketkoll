@@ -10,7 +10,7 @@ base64-simd = "0.8.0"
 bitflags = { version = "2.13.1", features = ["serde"] }
 bstr = "1.13.0"
 bzip2 = "0.6.1"
-cached = { version = "0.59.0", features = [
+cached = { version = "2.0.2", features = [
     "ahash",
     "disk_store",
 ], default-features = false }
@@ -21,7 +21,7 @@ clap_complete = "4.6.7"
 clap_mangen = "0.3.0"
 clru = "0.6.3"
 color-eyre = "0.6.5"
-compact_str = { version = "0.9.1", features = ["serde", "smallvec"] }
+compact_str = { version = "0.10.0", features = ["serde", "smallvec"] }
 console = "0.16.4"
 dashmap = "6.2.1"
 derive_builder = "0.20.2"
@@ -41,7 +41,7 @@ hashify = "0.2.9"
 ignore = { version = "0.4.30", features = ["simd-accel"] }
 indoc = "2.0.7"
 insta = "1.48.0"
-itertools = "0.14.0"
+itertools = "0.15.0"
 lasso = { version = "0.7.3", features = [
     "ahasher",
     "inline-more",
@@ -62,7 +62,7 @@ rayon = "1.12.0"
 regex = "1.13.1"
 ring = "0.17.14"
 rune = "0.13.4"
-rune-modules = { version = "0.13.4", features = [
+rune-modules = { version = "0.14.2", features = [
     "json",
     "process",
     "tokio",
