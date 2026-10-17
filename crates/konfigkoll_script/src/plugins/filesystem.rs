@@ -11,8 +11,8 @@ use rune::Module;
 use rune::alloc::fmt::TryWrite;
 use rune::runtime::Bytes;
 use rune::runtime::Formatter;
-use rune::vm_write;
 use rune::vm_try;
+use rune::vm_write;
 use std::io::ErrorKind;
 use std::io::Read;
 
