@@ -48,14 +48,13 @@ use rune::Any;
 use rune::ContextError;
 use rune::Module;
 use rune::alloc::Vec;
+use rune::alloc::clone::TryClone;
 use rune::alloc::fmt::TryWrite;
 use rune::runtime::Bytes;
 use rune::runtime::Formatter;
 use rune::runtime::Mut;
-use rune::runtime::Shared;
 use rune::runtime::Value;
 use rune::runtime::VmResult;
-use rune::vm_try;
 use rune::vm_write;
 use std::io;
 use tokio::process;
@@ -128,7 +127,7 @@ struct Command {
 }
 
 impl Command {
-    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn string_debug(&self, f: &mut Formatter) {
         vm_write!(f, "{:?}", self);
     }
@@ -145,14 +144,12 @@ impl Command {
     #[rune::function(instance)]
     fn args(&mut self, args: &[Value]) -> VmResult<()> {
         for arg in args {
-            match arg {
-                Value::String(s) => {
-                    self.inner.arg(&*vm_try!(s.borrow_ref()));
-                }
-                actual => {
-                    return VmResult::expected::<String>(vm_try!(actual.type_info()));
-                }
-            }
+            let arg = match arg.borrow_string_ref() {
+                Ok(s) => s,
+                Err(_) => return VmResult::expected::<String>(arg.type_info()),
+            };
+
+            self.inner.arg(&*arg);
         }
 
         VmResult::Ok(())
@@ -214,7 +211,7 @@ struct Child {
 }
 
 impl Child {
-    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn string_debug(&self, f: &mut Formatter) {
         vm_write!(f, "{:?}", self);
     }
@@ -316,8 +313,8 @@ impl Child {
             status: ExitStatus {
                 status: output.status,
             },
-            stdout: Shared::new(Bytes::from_vec(Vec::try_from(output.stdout).vm?)).vm?,
-            stderr: Shared::new(Bytes::from_vec(Vec::try_from(output.stderr).vm?)).vm?,
+            stdout: Value::new(Bytes::from_vec(Vec::try_from(output.stdout).vm?)).vm?,
+            stderr: Value::new(Bytes::from_vec(Vec::try_from(output.stderr).vm?)).vm?,
         })
     }
 }
@@ -329,32 +326,32 @@ struct Output {
     #[rune(get)]
     status: ExitStatus,
     #[rune(get)]
-    stdout: Shared<Bytes>,
+    stdout: Value,
     #[rune(get)]
-    stderr: Shared<Bytes>,
+    stderr: Value,
 }
 
 impl Output {
-    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn string_debug(&self, f: &mut Formatter) {
         vm_write!(f, "{:?}", self);
     }
 }
 
 /// The exit status from a completed child process
-#[derive(Debug, Clone, Copy, Any)]
+#[derive(Debug, TryClone, Clone, Copy, Any)]
 #[rune(item = ::process)]
 struct ExitStatus {
     status: std::process::ExitStatus,
 }
 
 impl ExitStatus {
-    #[rune::function(vm_result, protocol = STRING_DISPLAY)]
+    #[rune::function(vm_result, protocol = DISPLAY_FMT)]
     fn string_display(&self, f: &mut Formatter) {
         vm_write!(f, "{}", self.status);
     }
 
-    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn string_debug(&self, f: &mut Formatter) {
         vm_write!(f, "{:?}", self);
     }
@@ -379,7 +376,7 @@ struct Stdio {
 }
 
 impl Stdio {
-    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn string_debug(&self, f: &mut Formatter) {
         vm_write!(f, "{:?}", self);
     }
@@ -421,7 +418,7 @@ macro_rules! stdio_stream {
         }
 
         impl $name {
-            #[rune::function(vm_result, protocol = STRING_DEBUG)]
+            #[rune::function(vm_result, protocol = DEBUG_FMT)]
             fn string_debug(&self, f: &mut Formatter) {
                 vm_write!(f, "{:?}", self);
             }

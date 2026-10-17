@@ -72,12 +72,12 @@ impl From<KError> for eyre::Error {
 }
 
 impl KError {
-    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn string_debug(&self, f: &mut Formatter) {
         vm_write!(f, "{:?}", self);
     }
 
-    #[rune::function(vm_result, protocol = STRING_DISPLAY)]
+    #[rune::function(vm_result, protocol = DISPLAY_FMT)]
     fn string_display(&self, f: &mut Formatter) {
         vm_write!(f, "{}", self);
     }

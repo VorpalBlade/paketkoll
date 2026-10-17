@@ -209,12 +209,12 @@ impl ScriptEngine {
         };
         tracing::info!("Returned from script");
         // Do error handling on the returned result
-        match output {
-            rune::Value::Result(result) => match result.borrow_ref()?.as_ref() {
-                Ok(_) => (),
-                Err(e) => vm.with(|| try_format_error(phase, e))?,
-            },
-            _ => eyre::bail!("Got non-result from {phase}: {output:?}"),
+        let result = rune::from_value::<Result<rune::Value, rune::Value>>(output)
+            .wrap_err_with(|| format!("Expected a Result from {phase}"))?;
+
+        match result {
+            Ok(_) => (),
+            Err(e) => vm.with(|| try_format_error(phase, &e))?,
         }
         Ok(())
     }
@@ -235,14 +235,14 @@ impl ScriptEngine {
 ///
 /// Unfortunately this is awkward with dynamic Rune values.
 fn try_format_error(phase: Phase, value: &rune::Value) -> eyre::Result<()> {
-    match value.clone().into_any() {
-        rune::runtime::VmResult::Ok(any) => {
-            if let Ok(mut err) = any.downcast_borrow_mut::<KError>() {
+    match value.clone().into_any_obj() {
+        Ok(any) => {
+            if let Ok(mut err) = any.borrow_mut::<KError>() {
                 tracing::error!("Got error result from {phase}: {}", *err.inner());
                 let err: eyre::Error = err.take_inner();
                 return Err(err);
             }
-            if let Ok(err) = any.downcast_borrow_ref::<std::io::Error>() {
+            if let Ok(err) = any.borrow_ref::<std::io::Error>() {
                 eyre::bail!("Got IO error result from {phase}: {:?}", *err);
             }
             let ty = try_get_type_info(value, "error");
@@ -252,7 +252,7 @@ fn try_format_error(phase: Phase, value: &rune::Value) -> eyre::Result<()> {
                  formats as: {formatted:?}",
             );
         }
-        rune::runtime::VmResult::Err(not_any) => {
+        Err(not_any) => {
             tracing::error!(
                 "Got error result from {phase}, it was not an Any: {not_any:?}. Trying other \
                  approaches at printing the error."
@@ -277,10 +277,5 @@ fn try_format_error(phase: Phase, value: &rune::Value) -> eyre::Result<()> {
 
 /// Best effort attempt at gettint the type info and printing it
 fn try_get_type_info(e: &rune::Value, what: &str) -> String {
-    match e.type_info() {
-        rune::runtime::VmResult::Ok(ty) => format!("type info for {what}: {ty:?}"),
-        rune::runtime::VmResult::Err(err) => {
-            format!("failed getting type info for {what}: {err:?}")
-        }
-    }
+    format!("type info for {what}: {:?}", e.type_info())
 }

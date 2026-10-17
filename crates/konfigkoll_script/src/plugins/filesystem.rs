@@ -26,12 +26,12 @@ enum FileError {
 }
 
 impl FileError {
-    #[rune::function(vm_result, protocol = STRING_DISPLAY)]
+    #[rune::function(vm_result, protocol = DISPLAY_FMT)]
     pub(crate) fn display(&self, f: &mut Formatter) {
         vm_write!(f, "{}", self);
     }
 
-    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    #[rune::function(vm_result, protocol = DEBUG_FMT)]
     pub(crate) fn debug(&self, f: &mut Formatter) {
         vm_write!(f, "{:?}", self);
     }
@@ -53,7 +53,7 @@ impl Drop for TempDir {
 }
 
 impl TempDir {
-    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn debug(&self, f: &mut Formatter) {
         vm_write!(f, "{:?}", self);
     }
@@ -112,7 +112,7 @@ struct File {
 
 /// Rune API
 impl File {
-    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    #[rune::function(vm_result, protocol = DEBUG_FMT)]
     pub(crate) fn debug(&self, f: &mut Formatter) {
         vm_write!(f, "{:?}", self);
     }

@@ -11,7 +11,6 @@ use itertools::Itertools;
 use rune::Any;
 use rune::ContextError;
 use rune::Module;
-use rune::Value;
 use rune::runtime::Function;
 use std::borrow::Cow;
 use std::collections::BTreeMap;
@@ -236,7 +235,7 @@ impl Passwd {
         // TODO: Get rid of expect
         let user = self.users.get_mut(user).expect("User not found");
         *user = func
-            .call::<_, User>((user.clone(),))
+            .call::<User>((user.clone(),))
             .expect("User update call failed");
     }
 
@@ -244,7 +243,7 @@ impl Passwd {
     fn update_group(&mut self, group: &str, func: &Function) {
         let group = self.groups.get_mut(group).expect("Group not found");
         *group = func
-            .call::<_, Group>((group.clone(),))
+            .call::<Group>((group.clone(),))
             .expect("Group update call failed");
     }
 
@@ -471,8 +470,17 @@ impl Passwd {
             cmds.write(&gshadow_file, gshadow.as_bytes())?;
             if suffix == "-" {
                 // This is already set by package management for the main files
-                cmds.chmod(&shadow_file, Value::Integer(0o600))?;
-                cmds.chmod(&gshadow_file, Value::Integer(0o600))?;
+                cmds.chmod(
+                    &shadow_file,
+                    rune::to_value(0o600u32)
+                        .map_err(|e| eyre::eyre!("Failed to convert file mode: {e}"))?,
+                )?;
+
+                cmds.chmod(
+                    &gshadow_file,
+                    rune::to_value(0o600u32)
+                        .map_err(|e| eyre::eyre!("Failed to convert file mode: {e}"))?,
+                )?;
             }
         }
         Ok(())

@@ -463,14 +463,13 @@ impl Commands {
             );
         }
         Self::verify_path(path)?;
-        let numeric_mode = match mode {
-            Value::Integer(m) => Mode::new(m as u32),
-            Value::String(str) => {
-                let guard = str.borrow_ref().wrap_err("Borrow guard failed")?;
-                // Convert text mode (u+rx,g+rw,o+r, etc) to numeric mode
-                Mode::parse(&guard)?
-            }
-            _ => return Err(eyre::eyre!("Invalid mode value").into()),
+        let numeric_mode = if let Ok(m) = mode.as_integer::<u32>() {
+            Mode::new(m)
+        } else if let Ok(mode_str) = mode.borrow_string_ref() {
+            // Parse symbolic modes such as "u+rx,g+rw,o+r".
+            Mode::parse(&*mode_str)?
+        } else {
+            return Err(eyre::eyre!("Invalid mode value").into());
         };
 
         self.fs_actions.push(FsInstruction {

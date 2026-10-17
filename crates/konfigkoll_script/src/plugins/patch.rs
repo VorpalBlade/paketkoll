@@ -6,7 +6,7 @@ use regex::Regex;
 use rune::Any;
 use rune::ContextError;
 use rune::Module;
-use rune::runtime::Shared;
+use rune::alloc::clone::TryClone;
 use rune::runtime::VmResult;
 use std::borrow::Cow;
 use std::cell::RefCell;
@@ -89,7 +89,7 @@ enum Selector {
     /// A custom function, passed the line number and current line, returning a
     /// bool
     #[rune(constructor)]
-    Function(#[rune(get)] Shared<rune::runtime::Function>),
+    Function(#[rune(get)] rune::runtime::Function),
 }
 
 impl TryFrom<&Selector> for konfigkoll_utils::line_edit::Selector {
@@ -103,17 +103,15 @@ impl TryFrom<&Selector> for konfigkoll_utils::line_edit::Selector {
             Selector::Range(a, b) => Ok(Self::Range(*a, *b)),
             Selector::Regex(r) => Ok(Self::Regex(Regex::new(r).wrap_err("invalid regex")?)),
             Selector::Function(f) => {
-                let f = f.clone();
+                let f = f
+                    .try_clone()
+                    .map_err(|e| eyre::eyre!("Failed to clone Rune function: {e}"))?;
+
                 Ok(Self::Function(Rc::new(move |lineno, s| {
-                    let guard = f.borrow_mut().expect("Failed to borrow function object");
-                    match guard.call::<_, bool>((lineno, s)) {
+                    match f.call::<bool>((lineno, s)) {
                         VmResult::Ok(v) => v,
                         VmResult::Err(e) => {
-                            tracing::error!(
-                                "Error in custom selector function {:?}: {:?}",
-                                *guard,
-                                e
-                            );
+                            tracing::error!("Error in custom selector function {:?}: {:?}", f, e);
                             false
                         }
                     }
@@ -172,7 +170,7 @@ enum Action {
     /// A custom function passed the current pattern buffer, returning a new
     /// pattern buffer
     #[rune(constructor)]
-    Function(#[rune(get)] Shared<rune::runtime::Function>),
+    Function(#[rune(get)] rune::runtime::Function),
 }
 
 impl Action {
@@ -206,17 +204,15 @@ impl TryFrom<&Action> for konfigkoll_utils::line_edit::Action {
                 replace_all: true,
             }),
             Action::Function(f) => {
-                let f = f.clone();
+                let f = f
+                    .try_clone()
+                    .map_err(|e| eyre::eyre!("Failed to clone Rune function: {e}"))?;
+
                 Ok(Self::Function(Rc::new(move |s| {
-                    let guard = f.borrow_mut().expect("Failed to borrow function object");
-                    match guard.call::<_, String>((s,)) {
+                    match f.call::<String>((s,)) {
                         VmResult::Ok(v) => Cow::Owned(v),
                         VmResult::Err(e) => {
-                            tracing::error!(
-                                "Error in custom action function {:?}: {:?}",
-                                *guard,
-                                e
-                            );
+                            tracing::error!("Error in custom action function {:?}: {:?}", f, e);
                             Cow::Borrowed(s)
                         }
                     }
