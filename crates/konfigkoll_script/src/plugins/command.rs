@@ -456,6 +456,7 @@ impl Commands {
 
     /// Change file mode
     #[rune::function(keep)]
+    #[allow(clippy::needless_pass_by_value)]
     pub fn chmod(&mut self, path: &str, mode: Value) -> KResult<()> {
         if self.phase != Phase::Main {
             return Err(

@@ -144,9 +144,8 @@ impl Command {
     #[rune::function(instance)]
     fn args(&mut self, args: &[Value]) -> VmResult<()> {
         for arg in args {
-            let arg = match arg.borrow_string_ref() {
-                Ok(s) => s,
-                Err(_) => return VmResult::expected::<String>(arg.type_info()),
+            let Ok(arg) = arg.borrow_string_ref() else {
+                return VmResult::expected::<String>(arg.type_info());
             };
 
             self.inner.arg(&*arg);

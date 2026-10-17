@@ -5,6 +5,7 @@ use rune::Module;
 use rune::alloc::fmt::TryWrite;
 use rune::runtime::Formatter;
 use rune::vm_write;
+use rune::vm_try;
 use std::fmt::Display;
 
 /// Result alias using `KError`
@@ -74,12 +75,12 @@ impl From<KError> for eyre::Error {
 impl KError {
     #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn string_debug(&self, f: &mut Formatter) {
-        vm_write!(f, "{:?}", self);
+        vm_try!(vm_write!(f, "{:?}", self));
     }
 
     #[rune::function(vm_result, protocol = DISPLAY_FMT)]
     fn string_display(&self, f: &mut Formatter) {
-        vm_write!(f, "{}", self);
+        vm_try!(vm_write!(f, "{}", self));
     }
 }
 
