@@ -55,6 +55,7 @@ use rune::runtime::Formatter;
 use rune::runtime::Mut;
 use rune::runtime::Value;
 use rune::runtime::VmResult;
+use rune::vm_try;
 use rune::vm_write;
 use std::io;
 use tokio::process;
@@ -129,7 +130,7 @@ struct Command {
 impl Command {
     #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn string_debug(&self, f: &mut Formatter) {
-        vm_write!(f, "{:?}", self);
+        vm_try!(vm_write!(f, "{:?}", self));
     }
 
     /// Construct a new command.
@@ -212,7 +213,7 @@ struct Child {
 impl Child {
     #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn string_debug(&self, f: &mut Formatter) {
-        vm_write!(f, "{:?}", self);
+        vm_try!(vm_write!(f, "{:?}", self));
     }
 
     /// Attempt to take the stdin of the child process.
@@ -333,7 +334,7 @@ struct Output {
 impl Output {
     #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn string_debug(&self, f: &mut Formatter) {
-        vm_write!(f, "{:?}", self);
+        vm_try!(vm_write!(f, "{:?}", self));
     }
 }
 
@@ -347,12 +348,12 @@ struct ExitStatus {
 impl ExitStatus {
     #[rune::function(vm_result, protocol = DISPLAY_FMT)]
     fn string_display(&self, f: &mut Formatter) {
-        vm_write!(f, "{}", self.status);
+        vm_try!(vm_write!(f, "{}", self.status));
     }
 
     #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn string_debug(&self, f: &mut Formatter) {
-        vm_write!(f, "{:?}", self);
+        vm_try!(vm_write!(f, "{:?}", self));
     }
 
     #[rune::function]
@@ -377,7 +378,7 @@ struct Stdio {
 impl Stdio {
     #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn string_debug(&self, f: &mut Formatter) {
-        vm_write!(f, "{:?}", self);
+        vm_try!(vm_write!(f, "{:?}", self));
     }
 
     /// This stream will be ignored. This is the equivalent of attaching the
@@ -419,7 +420,7 @@ macro_rules! stdio_stream {
         impl $name {
             #[rune::function(vm_result, protocol = DEBUG_FMT)]
             fn string_debug(&self, f: &mut Formatter) {
-                vm_write!(f, "{:?}", self);
+                vm_try!(vm_write!(f, "{:?}", self));
             }
 
             /// Try to convert into a `Stdio`, which allows creating a pipeline between

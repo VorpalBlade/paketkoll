@@ -12,6 +12,7 @@ use rune::alloc::fmt::TryWrite;
 use rune::runtime::Bytes;
 use rune::runtime::Formatter;
 use rune::vm_write;
+use rune::vm_try;
 use std::io::ErrorKind;
 use std::io::Read;
 
@@ -28,12 +29,12 @@ enum FileError {
 impl FileError {
     #[rune::function(vm_result, protocol = DISPLAY_FMT)]
     pub(crate) fn display(&self, f: &mut Formatter) {
-        vm_write!(f, "{}", self);
+        vm_try!(vm_write!(f, "{}", self));
     }
 
     #[rune::function(vm_result, protocol = DEBUG_FMT)]
     pub(crate) fn debug(&self, f: &mut Formatter) {
-        vm_write!(f, "{:?}", self);
+        vm_try!(vm_write!(f, "{:?}", self));
     }
 }
 
@@ -55,7 +56,7 @@ impl Drop for TempDir {
 impl TempDir {
     #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn debug(&self, f: &mut Formatter) {
-        vm_write!(f, "{:?}", self);
+        vm_try!(vm_write!(f, "{:?}", self));
     }
 
     /// Create a new temporary directory
@@ -114,7 +115,7 @@ struct File {
 impl File {
     #[rune::function(vm_result, protocol = DEBUG_FMT)]
     pub(crate) fn debug(&self, f: &mut Formatter) {
-        vm_write!(f, "{:?}", self);
+        vm_try!(vm_write!(f, "{:?}", self));
     }
 
     /// Open a file (with normal user permissions)

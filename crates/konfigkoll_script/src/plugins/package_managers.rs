@@ -15,6 +15,7 @@ use rune::ContextError;
 use rune::Module;
 use rune::alloc::fmt::TryWrite;
 use rune::runtime::Bytes;
+use rune::vm_try;
 use rune::vm_write;
 use std::collections::BTreeMap;
 use std::str::FromStr;
@@ -206,7 +207,7 @@ pub enum OriginalFilesError {
 impl OriginalFilesError {
     #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn string_debug(&self, f: &mut rune::runtime::Formatter) {
-        vm_write!(f, "{:?}", self);
+        vm_try!(vm_write!(f, "{:?}", self));
     }
 
     fn from_inner(value: paketkoll_types::backend::OriginalFileError, path: &str) -> Self {
