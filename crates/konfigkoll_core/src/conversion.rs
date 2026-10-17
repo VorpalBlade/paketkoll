@@ -336,8 +336,8 @@ fn fs_load_contents(path: &Utf8Path, checksum: Option<&Checksum>) -> eyre::Resul
         Some(_) | None => sha256_readable(&mut reader)?,
     };
     let size = path.metadata()?.size();
-    // I don't like this, but I don't see much of a better option to avoid running
-    // out of memory
+    // I don't like this, but I don't see much of a better option to avoid
+    // running out of memory
     if size > 512 {
         Ok(FileContents::FromFile {
             checksum,

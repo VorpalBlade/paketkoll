@@ -48,6 +48,20 @@ pub async fn phase_ignores(props, cmds) {
     cmds.ignore_path("/var/lib/pacman")?;
     cmds.ignore_path("/var/lib/apt")?;
     cmds.ignore_path("/var/lib/dpkg")?;
+
+    // Or you can ignore everything under a directory except for a whitelist
+    cmds.ignore_paths_except(
+        "/",
+        [
+            "etc/**", // This will include /etc and its children
+            "etc/*",  // This does the same thing as the line above
+            "nix" // This will include only /nix as an empty dir
+        ]
+    );
+
+    // Uncomment the line below to print out the ignores list at runtime for debugging
+    //cmds.debug_print_ignores();
+
     // Add more paths to ignore here
     Ok(())
 }

@@ -153,8 +153,9 @@ impl InProcessApplicator {
                         std::fs::write(&instr.path, data).wrap_err("Failed to write file data")?;
                     }
                     konfigkoll_types::FileContents::FromFile { checksum: _, path } => {
-                        // std::fs::copy copies permissions, which we don't want (we want the
-                        // file to be owned by root with default permissions until an
+                        // std::fs::copy copies permissions, which we don't want
+                        // (we want the file to be owned
+                        // by root with default permissions until an
                         // instruction says otherwise), so we can't use it.
                         let mut target_file = std::fs::OpenOptions::new()
                             .write(true)
@@ -175,8 +176,8 @@ impl InProcessApplicator {
                     Ok(()) => Ok(()),
                     Err(err) => {
                         if err.kind() == std::io::ErrorKind::AlreadyExists {
-                            // If the symlink already exists, we can just remove it and try
-                            // again
+                            // If the symlink already exists, we can just remove
+                            // it and try again
                             std::fs::remove_file(&instr.path)
                                 .wrap_err("Failed to remove old file before creating symlink")?;
                             std::os::unix::fs::symlink(target, &instr.path)
@@ -188,8 +189,9 @@ impl InProcessApplicator {
                 .wrap_err("Failed to create symlink")?;
             }
             FsOp::CreateFifo => {
-                // Since we split out mode in general, we don't know what to put here.
-                // Use empty, and let later instructions set it correctly.
+                // Since we split out mode in general, we don't know what to put
+                // here. Use empty, and let later instructions
+                // set it correctly.
                 nix::unistd::mkfifo(instr.path.as_std_path(), nix::sys::stat::Mode::empty())?;
             }
             FsOp::CreateBlockDevice { major, minor } => {
@@ -575,8 +577,8 @@ pub fn apply_files(
         .chunk_by_mut(|a, b| FsOpDiscriminants::from(&a.op) == FsOpDiscriminants::from(&b.op));
     // Process each chunk separately
     for chunk in chunked_instructions {
-        // Removing things has to be sorted reverse, so we remove contents before the
-        // directory they are containers of
+        // Removing things has to be sorted reverse, so we remove contents
+        // before the directory they are containers of
         if chunk[0].op == FsOp::Remove {
             chunk.reverse();
         };
@@ -621,8 +623,8 @@ pub fn apply_packages<'instructions>(
         let sub_map = package_maps
             .get(&backend)
             .ok_or_else(|| eyre::eyre!("No package map for backend {:?}", backend))?;
-        // Deal with the case where a package is installed as a dependency and we want
-        // it explicit
+        // Deal with the case where a package is installed as a dependency and
+        // we want it explicit
         let pkg_ref = PackageRef::get_or_intern(interner, pkg.identifier.as_str());
         let has_pkg = sub_map.get(&pkg_ref).is_some();
         match (instr.op, has_pkg) {

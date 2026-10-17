@@ -10,6 +10,7 @@ use ahash::AHashSet;
 use camino::Utf8PathBuf;
 use compact_str::CompactString;
 use eyre::WrapErr;
+use glob::Pattern;
 use konfigkoll_types::FileContents;
 use konfigkoll_types::FsInstruction;
 use konfigkoll_types::FsOp;
@@ -24,6 +25,9 @@ use paketkoll_types::files::Mode;
 use rune::ContextError;
 use rune::Module;
 use rune::Value;
+use std::collections::HashSet;
+use std::path::Path;
+use std::path::PathBuf;
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -73,12 +77,45 @@ impl Commands {
             })
     }
 
+    fn collect_ignored(
+        dir: &Path,
+        literals: &HashSet<PathBuf>,
+        globs: &[Pattern],
+        ancestors: &HashSet<PathBuf>,
+        out: &mut Vec<PathBuf>,
+    ) -> std::io::Result<()> {
+        let entries: Vec<_> = std::fs::read_dir(dir)?.collect::<Result<Vec<_>, _>>()?;
+
+        for entry in entries {
+            let path = entry.path();
+            let ft = entry.file_type()?;
+
+            let whitelisted =
+                literals.contains(&path) || globs.iter().any(|g| g.matches_path(&path));
+            let ancestor = ancestors.contains(&path);
+
+            if whitelisted || ancestor {
+                if ft.is_dir() {
+                    Self::collect_ignored(&path, literals, globs, ancestors, out)?;
+                }
+            } else {
+                if ft.is_dir() {
+                    let mut child = path.clone().into_os_string();
+                    child.push("/*");
+                    out.push(PathBuf::from(child));
+                }
+                out.push(path);
+            }
+        }
+        Ok(())
+    }
+
     fn verify_path(path: &str) -> eyre::Result<()> {
         if path.contains("..") {
-            return Err(eyre::eyre!("Path {} contains '..'", path));
+            return Err(eyre::eyre!("Path {path} contains '..'"));
         }
         if !path.starts_with('/') {
-            return Err(eyre::eyre!("Path {} is not absolute", path));
+            return Err(eyre::eyre!("Path {path} is not absolute"));
         }
         Ok(())
     }
@@ -93,9 +130,101 @@ impl Commands {
             return Err(eyre::eyre!("Can only ignore paths during the 'ignores' phase").into());
         }
         if !self.fs_ignores.insert(ignore.into()) {
-            tracing::warn!("Ignoring path '{}' multiple times", ignore);
+            tracing::warn!("Ignoring path '{ignore}' multiple times");
         }
         Ok(())
+    }
+
+    /// Ignore every path under `search_dir` except those matching one of
+    /// the given whitelist entries. Whitelist entries are relative to
+    /// `search_dir`; globs are supported in the last path segment.
+    /// Ancestors of whitelisted paths are traversed but not ignored.
+    /// The search directory itself is never ignored.
+    #[rune::function(keep)]
+    pub fn ignore_paths_except(&mut self, search_dir: &str, whitelist: Vec<String>) -> KResult<()> {
+        if self.phase != Phase::Ignores {
+            return Err(eyre::eyre!("Can only ignore paths during the 'ignores' phase").into());
+        }
+
+        // Normalize trailing slash (preserve "/").
+        let search_dir = if search_dir != "/" {
+            search_dir.trim_end_matches('/')
+        } else {
+            search_dir
+        };
+
+        let search_path = PathBuf::from(search_dir);
+        if !search_path.is_dir() {
+            return Err(eyre::eyre!("The path {search_dir} must be an existing directory").into());
+        }
+
+        // Build whitelist matchers.
+        let mut literals: HashSet<PathBuf> = HashSet::new();
+        let mut globs: Vec<Pattern> = Vec::new();
+        let mut ancestors: HashSet<PathBuf> = HashSet::new();
+
+        for w in whitelist {
+            let w = w.trim_end_matches('/');
+            if w.is_empty() {
+                continue;
+            }
+            if w.starts_with('/') {
+                return Err(eyre::eyre!(
+                    "The path {w} in the whitelist is not relative to {search_dir}"
+                )
+                .into());
+            }
+            if w.contains("..") {
+                return Err(eyre::eyre!("The path {w} in the whitelist contains '..'").into());
+            }
+
+            let abs = search_path.join(w);
+
+            // Strict ancestors, excluding search_dir itself.
+            let mut p = abs.parent();
+            while let Some(dir) = p {
+                if dir == search_path || !dir.starts_with(&search_path) {
+                    break;
+                }
+                ancestors.insert(dir.to_path_buf());
+                p = dir.parent();
+            }
+
+            if w.contains(['*', '?', '[']) {
+                let pat = Pattern::new(
+                    abs.to_str()
+                        .expect("path derived from &str is always valid UTF-8"),
+                )
+                .wrap_err("Invalid glob pattern in whitelist")?;
+                globs.push(pat);
+            } else {
+                literals.insert(abs);
+            }
+        }
+
+        // Walk and collect paths to ignore.
+        let mut to_ignore: Vec<PathBuf> = Vec::new();
+        Self::collect_ignored(&search_path, &literals, &globs, &ancestors, &mut to_ignore)
+            .wrap_err("Failed to walk directory tree")?;
+
+        for path in to_ignore {
+            let s: CompactString = path.to_string_lossy().into();
+            if !self.fs_ignores.insert(s) {
+                tracing::warn!("Ignoring path '{}' multiple times", path.display());
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Debug helper: print every path currently in the ignore set.
+    #[rune::function(keep)]
+    pub fn debug_print_ignores(&self) {
+        let mut v: Vec<_> = self.fs_ignores.iter().collect();
+        v.sort();
+        for ig in v {
+            println!("IGNORE: {ig}");
+        }
     }
 
     /// Install a package with the given package manager.
@@ -111,7 +240,7 @@ impl Commands {
         }
         let backend = Backend::from_str(package_manager).wrap_err("Invalid backend")?;
         if !self.settings.is_pkg_backend_enabled(backend) {
-            tracing::debug!("Skipping disabled package manager {}", package_manager);
+            tracing::debug!("Skipping disabled package manager {package_manager}");
             return Ok(());
         }
         if self
@@ -146,7 +275,7 @@ impl Commands {
         }
         let backend = Backend::from_str(package_manager).wrap_err("Invalid backend")?;
         if !self.settings.is_file_backend_enabled(backend) {
-            tracing::debug!("Skipping disabled package manager {}", package_manager);
+            tracing::debug!("Skipping disabled package manager {package_manager}");
             return Ok(());
         }
         if self
@@ -216,10 +345,8 @@ impl Commands {
         let contents = match contents {
             Ok(v) => v,
             Err(e) => {
-                tracing::error!("Failed to read file contents for '{}': {}", path, e);
-                return Err(
-                    eyre::eyre!("Failed to read file contents for '{}': {}", path, e).into(),
-                );
+                tracing::error!("Failed to read file contents for '{path}': {e}");
+                return Err(eyre::eyre!("Failed to read file contents for '{path}': {e}").into());
             }
         };
         self.fs_actions.push(FsInstruction {
@@ -329,6 +456,7 @@ impl Commands {
 
     /// Change file mode
     #[rune::function(keep)]
+    #[allow(clippy::needless_pass_by_value)]
     pub fn chmod(&mut self, path: &str, mode: Value) -> KResult<()> {
         if self.phase != Phase::Main {
             return Err(
@@ -336,14 +464,13 @@ impl Commands {
             );
         }
         Self::verify_path(path)?;
-        let numeric_mode = match mode {
-            Value::Integer(m) => Mode::new(m as u32),
-            Value::String(str) => {
-                let guard = str.borrow_ref().wrap_err("Borrow guard failed")?;
-                // Convert text mode (u+rx,g+rw,o+r, etc) to numeric mode
-                Mode::parse(&guard)?
-            }
-            _ => return Err(eyre::eyre!("Invalid mode value").into()),
+        let numeric_mode = if let Ok(m) = mode.as_integer::<u32>() {
+            Mode::new(m)
+        } else if let Ok(mode_str) = mode.borrow_string_ref() {
+            // Parse symbolic modes such as "u+rx,g+rw,o+r".
+            Mode::parse(&mode_str)?
+        } else {
+            return Err(eyre::eyre!("Invalid mode value").into());
         };
 
         self.fs_actions.push(FsInstruction {
@@ -371,6 +498,8 @@ pub(crate) fn module() -> Result<Module, ContextError> {
     let mut m = Module::from_meta(module_meta)?;
     m.ty::<Commands>()?;
     m.function_meta(Commands::ignore_path__meta)?;
+    m.function_meta(Commands::ignore_paths_except__meta)?;
+    m.function_meta(Commands::debug_print_ignores__meta)?;
     m.function_meta(Commands::add_pkg__meta)?;
     m.function_meta(Commands::remove_pkg__meta)?;
     m.function_meta(Commands::rm__meta)?;

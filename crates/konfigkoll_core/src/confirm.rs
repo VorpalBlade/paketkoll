@@ -219,8 +219,9 @@ impl<T: Choices + 'static> MultiOptionConfirmBuilder<T> {
         let options: AHashMap<char, T> = T::options()
             .iter()
             .inspect(|(key, _, val)| {
-                // Using inspect for side effects, not sure if it is overly clever or just plain
-                // stupid. But it means we only have to iterate over the options once.
+                // Using inspect for side effects, not sure if it is overly
+                // clever or just plain stupid. But it means we
+                // only have to iterate over the options once.
                 if Some(*val) == default {
                     default_char = Some(*key);
                 }

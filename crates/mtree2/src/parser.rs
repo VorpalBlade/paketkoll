@@ -68,7 +68,8 @@ impl<'a> MTreeLine<'a> {
             return Ok(MTreeLine::DotDot);
         }
 
-        // Fast path - special command -- this way we have an speed increase by 3%
+        // Fast path - special command -- this way we have an speed increase by
+        // 3%
         if first_byte == b'/' {
             let kind = SpecialKind::from_bytes(&first[1..])?;
             // Pre-allocate params with expected size
@@ -243,7 +244,8 @@ impl<'a> Keyword<'a> {
         }
         debug_assert!(!input.len() > 0, "Input must be non-empty");
         let mut iter = input.splitn(2, |ch| *ch == b'=');
-        // Unwrap cannot fail, as long as input is non-empty, guaranteed by the caller.
+        // Unwrap cannot fail, as long as input is non-empty, guaranteed by the
+        // caller.
         let key = iter.next().expect("cannot fail");
         Ok(match key {
             b"cksum" => Keyword::Checksum(u64::from_dec(next("cksum", iter.next())?)?),
@@ -548,7 +550,8 @@ pub struct FileMode {
 
 impl FileMode {
     fn from_bytes(input: &[u8]) -> ParserResult<Self> {
-        // file mode can either be symbolic, or octal. For now only support octal
+        // file mode can either be symbolic, or octal. For now only support
+        // octal
         if input.len() > 4 {
             return Err(format!(
                 r#"mode value must be 4 or less octal chars, found "{}""#,

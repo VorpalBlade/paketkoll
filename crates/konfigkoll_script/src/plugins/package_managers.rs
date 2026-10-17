@@ -15,7 +15,7 @@ use rune::ContextError;
 use rune::Module;
 use rune::alloc::fmt::TryWrite;
 use rune::runtime::Bytes;
-use rune::runtime::Shared;
+use rune::vm_try;
 use rune::vm_write;
 use std::collections::BTreeMap;
 use std::str::FromStr;
@@ -46,8 +46,8 @@ impl PackageManagers {
         // Use itertools::merge_join_by for this.
         let merged =
             itertools::merge_join_by(package_backends, files_backends, |l, r| l.0.cmp(&r.0));
-        // We now know that all keys are present (everything is a package, file or both
-        // backend)
+        // We now know that all keys are present (everything is a package, file
+        // or both backend)
         let mut package_managers = PackageManagerMap::new();
         for entry in merged {
             let (backend, packages, files) = match entry {
@@ -106,7 +106,7 @@ struct PackageManagerInner {
 #[repr(transparent)]
 /// A package manager
 pub struct PackageManager {
-    inner: Shared<PackageManagerInner>,
+    inner: Arc<PackageManagerInner>,
 }
 
 // Rust API
@@ -120,23 +120,22 @@ impl PackageManager {
         interner: Arc<Interner>,
     ) -> Self {
         Self {
-            inner: Shared::new(PackageManagerInner {
+            inner: Arc::new(PackageManagerInner {
                 backend,
                 files,
                 packages,
                 package_map,
                 interner,
-            })
-            .expect("Failed to create shared package manager"),
+            }),
         }
     }
 
     pub fn files(&self) -> Option<Arc<dyn Files>> {
-        self.inner.borrow_ref().ok()?.files.clone()
+        self.inner.files.clone()
     }
 
     pub fn packages(&self) -> Option<Arc<dyn Packages>> {
-        self.inner.borrow_ref().ok()?.packages.clone()
+        self.inner.packages.clone()
     }
 
     /// Get the original file contents of a package from Rust code
@@ -145,20 +144,19 @@ impl PackageManager {
             package: package.into(),
             path: path.into(),
         }];
-        let guard = self
-            .inner
-            .borrow_ref()
-            .wrap_err("Failed to get inner object")?;
-        let files = guard
+        let inner = self.inner.as_ref();
+        let files = inner
             .files
             .as_ref()
-            .ok_or_else(|| eyre::eyre!("No files backend for {}", guard.backend))?;
-        let package_map = guard
+            .ok_or_else(|| eyre::eyre!("No files backend for {}", inner.backend))?;
+
+        let package_map = inner
             .package_map
             .as_ref()
-            .ok_or_else(|| eyre::eyre!("No package map for {}", guard.backend))?;
+            .ok_or_else(|| eyre::eyre!("No package map for {}", inner.backend))?;
+
         let results = files
-            .original_files(&queries, package_map, &guard.interner)
+            .original_files(&queries, package_map, &inner.interner)
             .map_err(|e| OriginalFilesError::from_inner(e, path))?;
         if results.len() != 1 {
             Err(eyre::eyre!(
@@ -207,9 +205,9 @@ pub enum OriginalFilesError {
 }
 
 impl OriginalFilesError {
-    #[rune::function(vm_result, protocol = STRING_DEBUG)]
+    #[rune::function(vm_result, protocol = DEBUG_FMT)]
     fn string_debug(&self, f: &mut rune::runtime::Formatter) {
-        vm_write!(f, "{:?}", self);
+        vm_try!(vm_write!(f, "{:?}", self));
     }
 
     fn from_inner(value: paketkoll_types::backend::OriginalFileError, path: &str) -> Self {

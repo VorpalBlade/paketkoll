@@ -351,8 +351,8 @@ impl<'haystack> Iterator for MemchrSplitter<'haystack> {
 
     #[inline(always)]
     fn next(&mut self) -> Option<Self::Item> {
-        // Code here is based on bstr::ByteSlice::split_str, but thanks to using memchr
-        // instead of memmem this is much faster.
+        // Code here is based on bstr::ByteSlice::split_str, but thanks to using
+        // memchr instead of memmem this is much faster.
 
         // Early return if we're done
         if self.done {

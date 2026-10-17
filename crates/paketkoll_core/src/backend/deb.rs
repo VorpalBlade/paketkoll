@@ -167,8 +167,8 @@ impl Files for Debian {
         paths: &ahash::AHashSet<&Path>,
         interner: &Interner,
     ) -> eyre::Result<OwningPackagesResult> {
-        // Optimise for speed, go directly into package cache and look for files that
-        // contain the given string
+        // Optimise for speed, go directly into package cache and look for files
+        // that contain the given string
         let file_to_package = DashMap::with_hasher(ahash::RandomState::new());
         let db_root = PathBuf::from(DB_PATH);
 
@@ -317,8 +317,8 @@ impl Debian {
                 let pkg = packages
                     .get(pkg_ref)
                     .expect("Failed to find package in package map");
-                // For deb ids[0] always exist and may contain the architecture if it is not the
-                // primary
+                // For deb ids[0] always exist and may contain the architecture
+                // if it is not the primary
                 let name = pkg.ids[0].as_str(interner);
                 // Get the full deb file name
                 let deb_filename = format_deb_filename(interner, pkg);
@@ -431,14 +431,15 @@ fn convert_deb_archive_path(path: &Path) -> Option<Cow<'_, Path>> {
         .as_os_str()
         .as_encoded_bytes()
         .trim_start_with(|ch| ch == '.');
-    // If this is the root path, do not process it further (to prevent empty path)
+    // If this is the root path, do not process it further (to prevent empty
+    // path)
     if p == b"/" {
         return Some(Cow::Borrowed(p.to_path().expect("Invalid path")));
     }
     // Otherwise strip any trailing slashes
     let p = p.trim_end_with(|ch| ch == '/');
-    // Normally we don't need to add a leading / but some third party packages are
-    // broken in this respect
+    // Normally we don't need to add a leading / but some third party packages
+    // are broken in this respect
     if p.starts_with(b"/") {
         return Some(Cow::Borrowed(p.to_path().expect("Invalid path")));
     }

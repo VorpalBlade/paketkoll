@@ -161,8 +161,8 @@ pub(super) fn parse_status(
     // This file is UTF-8 at least
     let mut buffer = String::new();
     while input.read_line(&mut buffer)? > 0 {
-        // Ensure that the buffer is cleared on every iteration regardless of where we
-        // exit the loop.
+        // Ensure that the buffer is cleared on every iteration regardless of
+        // where we exit the loop.
         let guard = scopeguard::guard(&mut buffer, |buf| {
             buf.clear();
         });
@@ -180,8 +180,8 @@ pub(super) fn parse_status(
                 packages.push(package);
             }
             package_builder = Some(PackageInterned::builder());
-            // This will be updated later with the correct reason when we parse extended
-            // status
+            // This will be updated later with the correct reason when we parse
+            // extended status
             package_builder
                 .as_mut()
                 .expect("Invalid internal state")
@@ -232,8 +232,8 @@ pub(super) fn parse_status(
                 state = StatusParsingState::InPackage(pkg);
             }
         }
-        // Separate if statement, so we process the next line when exiting parsing conf
-        // files
+        // Separate if statement, so we process the next line when exiting
+        // parsing conf files
         if let Some(stripped) = line.strip_prefix("Version: ") {
             package_builder
                 .as_mut()
@@ -372,8 +372,8 @@ pub(super) fn parse_extended_status(
                 }
             };
             result.insert((pkg, arch), reason);
-            // Because this file is screwy it can say the primary architecture instead of
-            // all. Wtf Debian?
+            // Because this file is screwy it can say the primary architecture
+            // instead of all. Wtf Debian?
             result.insert((pkg, all_arch), reason);
             state = ExtendedStatusParsingState::Start;
         }

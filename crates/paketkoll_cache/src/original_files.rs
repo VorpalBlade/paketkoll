@@ -156,7 +156,8 @@ impl Files for OriginalFilesCache {
         }
         // Fetch uncached queries
         let uncached_results = if !uncached_queries.is_empty() {
-            // NOTE: Never wrap this error, we need to just carry it through to the caller.
+            // NOTE: Never wrap this error, we need to just carry it through to
+            // the caller.
             self.inner
                 .original_files(&uncached_queries, packages, interner)?
         } else {

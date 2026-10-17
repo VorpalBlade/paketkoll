@@ -451,7 +451,8 @@ pub fn diff(
                     let after_discr = FsEntryDiscriminants::from(&after.entry);
 
                     if before.removed_before_added || before_discr != after_discr {
-                        // The entry was removed before being added back, generate a removal
+                        // The entry was removed before being added back,
+                        // generate a removal
                         results.push(FsInstruction {
                             path: path.clone(),
                             op: FsOp::Remove,
