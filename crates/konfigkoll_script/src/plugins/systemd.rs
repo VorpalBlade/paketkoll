@@ -110,7 +110,8 @@ impl Unit {
                 match package_manager.file_contents(package, path) {
                     Ok(v) => Ok(v),
                     Err(OriginalFilesError::FileNotFound(_, _)) => {
-                        // Try again with/without /usr, because Debian hasn't finished the /usr
+                        // Try again with/without /usr, because Debian hasn't
+                        // finished the /usr
                         // merge. Still.
                         let alt_path = if path.starts_with("/usr") {
                             self.unit_file_path().replacen("/usr", "", 1)

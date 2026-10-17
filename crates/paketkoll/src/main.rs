@@ -236,8 +236,8 @@ fn run_file_checks(cli: &Cli) -> eyre::Result<Exit> {
     if let Commands::Check { .. } = cli.command
         && !cli.ignore.is_empty()
     {
-        // Do post-processing of ignores as the check command doesn't have that built
-        // in.
+        // Do post-processing of ignores as the check command doesn't have that
+        // built in.
         let ignores = file_ops::build_ignore_overrides(&cli.ignore)?;
         found_issues.retain(|(_, issue)| {
             let path = issue.path();
@@ -263,8 +263,8 @@ fn run_file_checks(cli: &Cli) -> eyre::Result<Exit> {
                     if let Some(pkg) = pkg {
                         write!(stdout, "{pkg}: ")?;
                     }
-                    // Prefer to not do any escaping. This doesn't assume unicode.
-                    // Also, it is faster.
+                    // Prefer to not do any escaping. This doesn't assume
+                    // unicode. Also, it is faster.
                     stdout.write_all(issue.path().as_os_str().as_bytes())?;
                     writeln!(stdout, " {kind}")?;
                 }

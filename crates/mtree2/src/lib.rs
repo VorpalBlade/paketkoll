@@ -197,7 +197,8 @@ where
                 Err(e) => return Some(Err(Error::Io(e))),
             };
 
-            // If we have an accumulated line, append to it, otherwise use current line
+            // If we have an accumulated line, append to it, otherwise use
+            // current line
             let current_input = if let Some(mut acc) = accumulated_line.take() {
                 acc.extend_from_slice(&line);
                 Ok(acc)
@@ -225,7 +226,8 @@ where
                 Ok(Some(entry)) => Some(Ok(entry)),
                 Ok(None) => None,
                 Err(LineParseError::WrappedLine(_)) => {
-                    // This shouldn't happen since we checked for trailing backslash
+                    // This shouldn't happen since we checked for trailing
+                    // backslash
                     Some(Err(Error::Parser(ParserError(
                         "unexpected wrapped line at end of file".to_owned(),
                     ))))

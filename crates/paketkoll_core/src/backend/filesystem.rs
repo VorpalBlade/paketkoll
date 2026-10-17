@@ -193,8 +193,8 @@ pub(crate) fn check_file(
                     // Only check major/minor if we have a device node
                     let rdev = metadata.rdev();
                     // SAFETY: As far as I can find out, these do not actually
-                    // have any safety invariants, as they just perform some simple bitwise
-                    // arithmetics.
+                    // have any safety invariants, as they just perform some
+                    // simple bitwise arithmetics.
                     let major_actual = u64::from(libc::major(rdev));
                     // SAFETY: Same as for major
                     let minor_actual = u64::from(libc::minor(rdev));
@@ -221,7 +221,8 @@ pub(crate) fn check_file(
                 issues.push(IssueKind::Exists);
             }
             Properties::Unknown => {
-                // Should be something other than a file (but Debian doesn't tell us what)
+                // Should be something other than a file (but Debian doesn't
+                // tell us what)
                 if metadata.is_file() {
                     issues.push(IssueKind::TypeIncorrect {
                         actual: metadata.file_type().into(),
@@ -367,8 +368,9 @@ fn check_permissions(
     expected_mode: Mode,
 ) {
     check_ownership(issues, actual_metadata, expected_owner, expected_group);
-    // There are some extra bits further up in the mode mask that we need to mask
-    // out here. They indicate things like file/directory/fifo/device-node
+    // There are some extra bits further up in the mode mask that we need to
+    // mask out here. They indicate things like
+    // file/directory/fifo/device-node
     let actual_mode = actual_metadata.mode() & MODE_MASK;
     if actual_mode != expected_mode.as_raw() {
         issues.push(IssueKind::WrongMode {

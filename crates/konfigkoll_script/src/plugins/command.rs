@@ -26,7 +26,8 @@ use rune::ContextError;
 use rune::Module;
 use rune::Value;
 use std::collections::HashSet;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::path::PathBuf;
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -215,6 +216,7 @@ impl Commands {
 
         Ok(())
     }
+
     /// Debug helper: print every path currently in the ignore set.
     #[rune::function(keep)]
     pub fn debug_print_ignores(&self) {

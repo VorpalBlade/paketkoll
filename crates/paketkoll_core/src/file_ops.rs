@@ -322,7 +322,8 @@ pub fn canonicalize_file_entries(results: &mut Vec<FileEntry>) {
             (Some(parent), Some(filename)) => {
                 match parent.canonicalize() {
                     Ok(canonical_parent) => {
-                        // We only need to do work here if the parent path actually changed (saves
+                        // We only need to do work here if the parent path
+                        // actually changed (saves
                         // ~10 ms).
                         if canonical_parent != parent {
                             file_entry.path = canonical_parent.join(filename);

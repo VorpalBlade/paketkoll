@@ -58,7 +58,8 @@ pub(super) fn from_arch_linux_desc(
         } else if line == "%REASON%\n" {
             line.clear();
             readable.read_line(&mut line)?;
-            // Reverse engineering note: 1 means dependency, not set means explicit
+            // Reverse engineering note: 1 means dependency, not set means
+            // explicit
             reason = match line.trim_end() {
                 "1" => Some(InstallReason::Dependency),
                 _ => None,

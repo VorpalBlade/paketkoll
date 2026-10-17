@@ -330,8 +330,8 @@ async fn run_main(cli: Cli) -> Result<(), eyre::Error> {
         Commands::Check {} | Commands::Init {} => unreachable!(),
     }
 
-    // Let the OS clean these up, freeing in the program is slower (~35 ms on Intel
-    // Skylake)
+    // Let the OS clean these up, freeing in the program is slower (~35 ms on
+    // Intel Skylake)
     std::mem::forget(backend_files);
     std::mem::forget(backends_pkg);
     std::mem::forget(fs_scan_result);
