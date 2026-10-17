@@ -22,8 +22,8 @@ aho-corasick = { version = "1" }
 anstyle = { version = "1" }
 bitflags = { version = "2", default-features = false, features = ["serde"] }
 bstr = { version = "1" }
-byteorder = { version = "1" }
 console = { version = "0.16" }
+crc32fast = { version = "1" }
 crossbeam-epoch = { version = "0.9" }
 dashmap = { version = "6", default-features = false, features = ["raw-api", "rayon"] }
 either = { version = "1", features = ["use_std"] }
@@ -33,13 +33,14 @@ hashbrown = { version = "0.14", features = ["raw"] }
 libc = { version = "0.2", features = ["extra_traits"] }
 log = { version = "0.4", default-features = false, features = ["std"] }
 memchr = { version = "2" }
-musli = { version = "0.0.42", default-features = false, features = ["std"] }
+musli = { version = "0.0.124", default-features = false, features = ["alloc", "std"] }
+musli-core = { version = "0.0.124", default-features = false, features = ["alloc", "std"] }
 nix = { version = "0.31", default-features = false, features = ["fs", "user"] }
 num-traits = { version = "0.2", default-features = false, features = ["i128", "std"] }
 once_cell = { version = "1", features = ["critical-section"] }
 regex-automata = { version = "0.4", default-features = false, features = ["dfa-build", "dfa-onepass", "hybrid", "meta", "nfa", "perf", "std", "unicode"] }
-rune = { version = "0.13", features = ["cli"] }
-rune-core = { version = "0.13", features = ["doc", "musli", "std"] }
+rune = { version = "0.14", features = ["cli"] }
+rune-core = { version = "0.14", features = ["doc", "musli", "std"] }
 scopeguard = { version = "1" }
 serde = { version = "1", features = ["alloc", "derive", "rc"] }
 serde_core = { version = "1", default-features = false, features = ["alloc", "rc", "result", "std"] }
@@ -50,46 +51,40 @@ tracing = { version = "0.1" }
 tracing-core = { version = "0.1" }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "parking_lot"] }
 typenum = { version = "1", default-features = false, features = ["const-generics"] }
+zlib-rs = { version = "0.6", default-features = false, features = ["std"] }
 
 [build-dependencies]
 ahash = { version = "0.8", features = ["no-rng"] }
-byteorder = { version = "1" }
 cc = { version = "1", default-features = false, features = ["parallel"] }
 getrandom = { version = "0.2", default-features = false, features = ["std"] }
+libc = { version = "0.2", features = ["extra_traits"] }
 memchr = { version = "2" }
-musli = { version = "0.0.42", default-features = false, features = ["std"] }
+musli = { version = "0.0.124", default-features = false, features = ["alloc", "std"] }
+musli-core = { version = "0.0.124", default-features = false, features = ["alloc", "std"] }
 once_cell = { version = "1", features = ["critical-section"] }
-rune-core = { version = "0.13", features = ["doc", "musli", "std"] }
+rune-core = { version = "0.14", features = ["doc", "musli", "std"] }
 serde = { version = "1", features = ["alloc", "derive", "rc"] }
 serde_core = { version = "1", default-features = false, features = ["alloc", "rc", "result", "std"] }
-syn = { version = "2", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
+syn-7b89eefb6aaa9bf3 = { package = "syn", version = "3", features = ["extra-traits", "fold", "full", "visit"] }
+syn-f595c2ba2a3f28df = { package = "syn", version = "2", features = ["extra-traits", "full", "visit-mut"] }
 typenum = { version = "1", default-features = false, features = ["const-generics"] }
 
 [target.x86_64-unknown-linux-gnu.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
-miniz_oxide = { version = "0.8", default-features = false, features = ["simd", "with-alloc"] }
+byteorder = { version = "1" }
 nix = { version = "0.31" }
 rustix = { version = "1", features = ["fs"] }
-
-[target.x86_64-unknown-linux-gnu.build-dependencies]
-libc = { version = "0.2", features = ["extra_traits"] }
 
 [target.x86_64-unknown-linux-musl.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
-miniz_oxide = { version = "0.8", default-features = false, features = ["simd", "with-alloc"] }
+byteorder = { version = "1" }
 nix = { version = "0.31" }
 rustix = { version = "1", features = ["fs"] }
-
-[target.x86_64-unknown-linux-musl.build-dependencies]
-libc = { version = "0.2", features = ["extra_traits"] }
 
 [target.aarch64-unknown-linux-musl.dependencies]
 bitflags = { version = "2", default-features = false, features = ["std"] }
-miniz_oxide = { version = "0.8", default-features = false, features = ["simd", "with-alloc"] }
+byteorder = { version = "1" }
 nix = { version = "0.31" }
 rustix = { version = "1", features = ["fs"] }
-
-[target.aarch64-unknown-linux-musl.build-dependencies]
-libc = { version = "0.2", features = ["extra_traits"] }
 
 ### END HAKARI SECTION

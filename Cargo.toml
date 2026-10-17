@@ -61,8 +61,8 @@ proc-exit = "2.0.2"
 rayon = "1.12.0"
 regex = "1.13.1"
 ring = "0.17.14"
-rune = "0.13.4"
-rune-modules = { version = "0.13.4", features = [
+rune = "0.14.2"
+rune-modules = { version = "0.14.2", features = [
     "json",
     "process",
     "tokio",
