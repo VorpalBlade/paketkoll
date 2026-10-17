@@ -467,7 +467,7 @@ impl Commands {
             Mode::new(m)
         } else if let Ok(mode_str) = mode.borrow_string_ref() {
             // Parse symbolic modes such as "u+rx,g+rw,o+r".
-            Mode::parse(&*mode_str)?
+            Mode::parse(&mode_str)?
         } else {
             return Err(eyre::eyre!("Invalid mode value").into());
         };

@@ -612,14 +612,14 @@ impl fmt::Display for Params {
         }
         if let Some(ref v) = self.rmd160 {
             write!(f, "rmd160: ")?;
-            for ch in v.iter() {
+            for ch in v {
                 write!(f, "{ch:x}")?;
             }
             writeln!(f)?;
         }
         if let Some(ref v) = self.sha1 {
             write!(f, "sha1: ")?;
-            for ch in v.iter() {
+            for ch in v {
                 write!(f, "{ch:x}")?;
             }
             writeln!(f)?;
@@ -633,14 +633,14 @@ impl fmt::Display for Params {
         }
         if let Some(ref v) = self.sha384 {
             write!(f, "sha384: ")?;
-            for ch in v.iter() {
+            for ch in v {
                 write!(f, "{ch:x}")?;
             }
             writeln!(f)?;
         }
         if let Some(ref v) = self.sha512 {
             write!(f, "sha512: ")?;
-            for ch in v.iter() {
+            for ch in v {
                 write!(f, "{ch:x}")?;
             }
             writeln!(f)?;
